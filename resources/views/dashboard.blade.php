@@ -9,7 +9,9 @@
             <h1 class="h3 mb-1">Dashboard de controle</h1>
             <p class="text-secondary mb-0">Acompanhe a execução das emendas parlamentares em tempo real.</p>
         </div>
-        <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
+        @if ($canEdit)
+            <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
+        @endif
     </div>
 
     <section class="metric-grid mb-4" aria-label="Indicadores">
@@ -82,7 +84,9 @@
                     @empty
                         <div class="empty-state">
                             <p class="mb-3">Nenhuma emenda cadastrada.</p>
-                            <a class="btn btn-primary" href="{{ route('emendas.create') }}">Cadastrar primeira emenda</a>
+                            @if ($canEdit)
+                                <a class="btn btn-primary" href="{{ route('emendas.create') }}">Cadastrar primeira emenda</a>
+                            @endif
                         </div>
                     @endforelse
                 </div>

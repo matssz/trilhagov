@@ -14,6 +14,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const ROLE_MANAGER = 'manager';
+
+    public const ROLE_EDITOR = 'editor';
+
+    public const ROLE_VIEWER = 'viewer';
+
+    public const ROLE_AUDITOR = 'auditor';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -53,5 +61,36 @@ class User extends Authenticatable
         return $this->belongsToMany(Municipality::class)
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /** @return array<string, string> */
+    public static function municipalityRoles(): array
+    {
+        return [
+            self::ROLE_MANAGER => 'Gestor',
+            self::ROLE_EDITOR => 'Editor',
+            self::ROLE_VIEWER => 'Consulta',
+            self::ROLE_AUDITOR => 'Auditoria',
+        ];
+    }
+
+    public function roleForMunicipality(int $municipalityId): ?string
+    {
+        if ($municipalityId <= 0) {
+            return null;
+        }
+
+        return $this->municipalities()
+            ->whereKey($municipalityId)
+            ->value('municipality_user.role');
+    }
+
+    public function canEditMunicipality(int $municipalityId): bool
+    {
+        return in_array(
+            $this->roleForMunicipality($municipalityId),
+            [self::ROLE_MANAGER, self::ROLE_EDITOR],
+            true,
+        );
     }
 }

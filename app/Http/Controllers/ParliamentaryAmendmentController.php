@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ParliamentaryAmendmentRequest;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
+use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ParliamentaryAmendmentController extends Controller
@@ -17,6 +19,7 @@ class ParliamentaryAmendmentController extends Controller
     public function __construct(
         private readonly CurrentMunicipality $currentMunicipality,
         private readonly FormSubmission $formSubmission,
+        private readonly AuditTrail $auditTrail,
     ) {}
 
     public function index(Request $request): View
@@ -49,6 +52,7 @@ class ParliamentaryAmendmentController extends Controller
             'selectedStatus' => $status,
             'selectedYear' => $year,
             'statuses' => ParliamentaryAmendment::statuses(),
+            'canEdit' => $request->user()->canEditMunicipality($municipality->id),
         ]);
     }
 
@@ -77,10 +81,15 @@ class ParliamentaryAmendmentController extends Controller
         $municipality = $this->municipalityForUser($request);
 
         try {
-            $amendment = $municipality->amendments()->create([
-                ...$request->safe()->except('_submission_token'),
-                'created_by' => $request->user()->id,
-            ]);
+            $amendment = DB::transaction(function () use ($request, $municipality): ParliamentaryAmendment {
+                $amendment = $municipality->amendments()->create([
+                    ...$request->safe()->except('_submission_token'),
+                    'created_by' => $request->user()->id,
+                ]);
+                $this->auditTrail->recordCreation($request, $amendment);
+
+                return $amendment;
+            });
         } catch (QueryException $exception) {
             if ((string) $exception->getCode() !== '23000') {
                 throw $exception;
@@ -101,8 +110,12 @@ class ParliamentaryAmendmentController extends Controller
      */
     public function show(Request $request, int $emenda): View
     {
+        $amendment = $this->amendmentForUser($request, $emenda)
+            ->load(['municipality', 'creator', 'auditLogs']);
+
         return view('amendments.show', [
-            'amendment' => $this->amendmentForUser($request, $emenda)->load(['municipality', 'creator']),
+            'amendment' => $amendment,
+            'canEdit' => $request->user()->canEditMunicipality($amendment->municipality_id),
         ]);
     }
 
@@ -130,7 +143,17 @@ class ParliamentaryAmendmentController extends Controller
         }
 
         $amendment = $this->amendmentForUser($request, $emenda);
-        $amendment->update($request->safe()->except('_submission_token'));
+        DB::transaction(function () use ($request, $amendment): void {
+            $amendment->fill($request->safe()->except('_submission_token'));
+            $oldValues = $amendment->getOriginal();
+            $amendment->save();
+            $this->auditTrail->recordUpdate(
+                $request,
+                $amendment,
+                $oldValues,
+                $amendment->getChanges(),
+            );
+        });
 
         return redirect()
             ->route('emendas.show', $amendment)

@@ -657,6 +657,86 @@ h6 {
     margin-bottom: 1rem;
 }
 
+.audit-timeline {
+    position: relative;
+}
+
+.audit-entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: .8rem;
+    padding-bottom: 1.15rem;
+}
+
+.audit-entry:not(:last-child)::before {
+    position: absolute;
+    top: 12px;
+    bottom: 0;
+    left: 5px;
+    width: 2px;
+    background: var(--line);
+    content: "";
+}
+
+.audit-entry:last-child {
+    padding-bottom: 0;
+}
+
+.audit-marker {
+    position: relative;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    margin-top: .3rem;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    background: var(--gold-500);
+    box-shadow: 0 0 0 1px var(--gold-600);
+}
+
+.audit-entry-content {
+    min-width: 0;
+}
+
+.audit-details summary {
+    color: var(--navy-800);
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.audit-changes > div {
+    display: grid;
+    grid-template-columns: minmax(130px, .8fr) minmax(0, 1.6fr);
+    gap: .75rem;
+    padding: .55rem 0;
+    border-top: 1px solid var(--line);
+}
+
+.audit-changes dt {
+    color: #566276;
+    font-size: .78rem;
+}
+
+.audit-changes dd {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 0;
+    font-size: .78rem;
+}
+
+.audit-changes dd span {
+    overflow-wrap: anywhere;
+}
+
+.audit-changes dd strong {
+    color: var(--muted);
+    font-weight: 500;
+}
+
 .object-text {
     max-width: 460px;
     white-space: normal;
@@ -753,5 +833,10 @@ h6 {
 
     .auth-panel {
         padding: 1.15rem;
+    }
+
+    .audit-changes > div {
+        grid-template-columns: 1fr;
+        gap: .2rem;
     }
 }

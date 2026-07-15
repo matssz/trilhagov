@@ -8,7 +8,9 @@
             <p class="page-kicker mb-2">{{ $municipality->name }} / {{ $municipality->state }}</p>
             <h1 class="h3 mb-1">Emendas parlamentares</h1>
         </div>
-        <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
+        @if ($canEdit)
+            <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
+        @endif
     </div>
 
     <form class="filters-grid mb-4" method="GET" action="{{ route('emendas.index') }}">
@@ -27,7 +29,9 @@
         @if ($amendments->isEmpty())
             <div class="empty-state">
                 <p class="mb-3">Nenhuma emenda encontrada.</p>
-                <a class="btn btn-primary" href="{{ route('emendas.create') }}">Cadastrar emenda</a>
+                @if ($canEdit)
+                    <a class="btn btn-primary" href="{{ route('emendas.create') }}">Cadastrar emenda</a>
+                @endif
             </div>
         @else
             <div class="table-responsive">

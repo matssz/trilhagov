@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Municipality;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -97,6 +98,21 @@ class AuthenticationTest extends TestCase
 
         $this->post(route('logout'))->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_remember_option_creates_persistent_login_cookie(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+        $municipality = Municipality::factory()->create();
+        $municipality->users()->attach($user, ['role' => 'manager']);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+            'remember' => '1',
+        ])->assertCookie(Auth::guard()->getRecallerName());
+
+        $this->assertNotNull($user->fresh()->remember_token);
     }
 
     public function test_user_without_complete_municipality_cannot_login(): void

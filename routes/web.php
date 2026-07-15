@@ -29,9 +29,16 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
-    Route::get('/emendas/create', [ParliamentaryAmendmentController::class, 'create'])->name('emendas.create');
-    Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
+
+    Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::get('/emendas/create', [ParliamentaryAmendmentController::class, 'create'])->name('emendas.create');
+        Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
+    });
+
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
-    Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
-    Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
+
+    Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
+        Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
+    });
 });

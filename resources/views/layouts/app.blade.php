@@ -1,4 +1,11 @@
-@php($workspaceLayout = auth()->check() && ! request()->routeIs('municipalities.*'))
+@php
+    $workspaceLayout = auth()->check() && ! request()->routeIs('municipalities.*');
+    $activeRole = $workspaceLayout
+        ? auth()->user()->roleForMunicipality((int) session('active_municipality_id'))
+        : null;
+    $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
+    $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
@@ -35,19 +42,23 @@
                         </a>
                     </nav>
 
-                    <div class="sidebar-actions">
-                        <a class="btn btn-primary w-100" href="{{ route('emendas.create') }}">
-                            <i data-lucide="plus" aria-hidden="true"></i>
-                            <span>Nova emenda</span>
-                        </a>
-                    </div>
+                    @if ($canEditAmendments)
+                        <div class="sidebar-actions">
+                            <a class="btn btn-primary w-100" href="{{ route('emendas.create') }}">
+                                <i data-lucide="plus" aria-hidden="true"></i>
+                                <span>Nova emenda</span>
+                            </a>
+                        </div>
+                    @else
+                        <div class="sidebar-actions"></div>
+                    @endif
 
                     <div class="sidebar-footer">
                         <div class="user-summary">
                             <span class="user-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                             <span class="user-summary-copy">
                                 <strong>{{ auth()->user()->name }}</strong>
-                                <small>Usuário municipal</small>
+                                <small>{{ $activeRoleLabel }}</small>
                             </span>
                         </div>
                         <form method="POST" action="{{ route('logout') }}">

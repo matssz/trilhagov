@@ -21,7 +21,20 @@ mais de um vínculo precisam escolher o município antes de entrar no painel.
 ## municipality_user
 
 Tabela intermediária que define quais usuários podem acessar cada município.
-O campo `role` prepara a futura separação entre gestor, consulta e auditoria.
+O campo `role` aceita `manager`, `editor`, `viewer` e `auditor`. Gestores e
+editores podem alterar emendas; consulta e auditoria possuem acesso somente de
+leitura.
+
+## audit_logs
+
+- município e usuário responsável;
+- nome do responsável preservado;
+- ação realizada;
+- tipo e identificação do registro alterado;
+- valores anteriores e novos;
+- IP, agente do navegador e data.
+
+A aplicação não oferece alteração ou exclusão dos registros de auditoria.
 
 ## parliamentary_amendments
 
@@ -68,7 +81,6 @@ O campo `role` prepara a futura separação entre gestor, consulta e auditoria.
 Somente depois da validação do fluxo atual:
 
 - documentos e evidências;
-- histórico de alterações;
 - responsáveis por etapa;
 - fontes normativas e cronogramas;
 - relatório público de transparência;

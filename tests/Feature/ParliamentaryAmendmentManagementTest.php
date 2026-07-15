@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuditLog;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -31,12 +32,40 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         $this->assertSame($user->id, $amendment->created_by);
         $this->assertSame('EM-2026-001', $amendment->reference);
         $this->assertSame('500000.00', $amendment->expected_amount);
+        $this->assertDatabaseHas('audit_logs', [
+            'municipality_id' => $municipality->id,
+            'user_id' => $user->id,
+            'actor_name' => $user->name,
+            'action' => 'created',
+            'auditable_type' => ParliamentaryAmendment::class,
+            'auditable_id' => $amendment->id,
+        ]);
 
         $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('EM-2026-001')
             ->assertSee('R$ 500.000,00');
+    }
+
+    public function test_viewer_can_consult_but_cannot_create_or_edit_amendments(): void
+    {
+        $user = User::factory()->create();
+        $municipality = Municipality::factory()->create();
+        $municipality->users()->attach($user, ['role' => User::ROLE_VIEWER]);
+        $amendment = $this->createAmendment($municipality, $user);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.index'))
+            ->assertOk()
+            ->assertSee($amendment->reference)
+            ->assertDontSee('Nova emenda');
+
+        $this->get(route('emendas.create'))->assertForbidden();
+        $this->get(route('emendas.edit', $amendment))->assertForbidden();
+        $this->post(route('emendas.store'), [])->assertForbidden();
+        $this->put(route('emendas.update', $amendment), [])->assertForbidden();
     }
 
     public function test_user_sees_only_amendments_from_their_municipality(): void
@@ -153,6 +182,52 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             'status' => ParliamentaryAmendment::STATUS_EXECUTING,
             'received_amount' => 450000,
         ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'municipality_id' => $municipality->id,
+            'user_id' => $user->id,
+            'action' => 'updated',
+            'auditable_type' => ParliamentaryAmendment::class,
+            'auditable_id' => $amendment->id,
+        ]);
+    }
+
+    public function test_audit_log_records_old_and_new_values_and_is_visible(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality();
+        $createPayload = $this->payloadWithToken('amendment-create');
+        $this->actingAs($user)->post(route('emendas.store'), $createPayload);
+        $amendment = $municipality->amendments()->firstOrFail();
+        $originalObject = $amendment->object;
+        $newObject = 'Aquisição de duas ambulâncias para atendimento rural';
+        $updatePayload = $this->payloadWithToken("amendment-update-{$amendment->id}", [
+            'object' => $newObject,
+        ]);
+
+        $this->actingAs($user)->put(route('emendas.update', $amendment), $updatePayload);
+
+        $auditLog = AuditLog::query()->where('action', 'updated')->firstOrFail();
+        $this->assertSame($originalObject, $auditLog->old_values['object']);
+        $this->assertSame($newObject, $auditLog->new_values['object']);
+        $this->assertArrayNotHasKey('updated_at', $auditLog->new_values);
+
+        $this->actingAs($user)
+            ->get(route('emendas.show', $amendment))
+            ->assertOk()
+            ->assertSee('Histórico de alterações')
+            ->assertSee('Emenda atualizada')
+            ->assertSee($user->name)
+            ->assertSee('Objeto');
+    }
+
+    public function test_audit_log_cannot_be_changed_through_the_model(): void
+    {
+        [$user] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create');
+        $this->actingAs($user)->post(route('emendas.store'), $payload);
+        $auditLog = AuditLog::firstOrFail();
+
+        $this->expectException(\LogicException::class);
+        $auditLog->update(['actor_name' => 'Nome adulterado']);
     }
 
     public function test_repeated_update_request_does_not_apply_a_second_change(): void

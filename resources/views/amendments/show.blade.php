@@ -24,7 +24,9 @@
             <h1 class="h3 mb-1">{{ $amendment->reference }}</h1>
             <p class="text-secondary mb-0">{{ $amendment->municipality->name }} / {{ $amendment->municipality->state }}</p>
         </div>
-        <a class="btn btn-primary" href="{{ route('emendas.edit', $amendment) }}">Editar emenda</a>
+        @if ($canEdit)
+            <a class="btn btn-primary" href="{{ route('emendas.edit', $amendment) }}">Editar emenda</a>
+        @endif
     </div>
 
     <div class="row g-4">
@@ -47,7 +49,7 @@
                 </div>
             </section>
 
-            <section class="content-panel">
+            <section class="content-panel mb-4">
                 <div class="content-panel-header"><h2 class="h5 mb-0">Objeto</h2></div>
                 <div class="content-panel-body">
                     <p class="mb-0" style="white-space: pre-line">{{ $amendment->object }}</p>
@@ -58,6 +60,7 @@
                     @endif
                 </div>
             </section>
+
         </div>
 
         <div class="col-lg-4">
@@ -82,6 +85,48 @@
                             @endif
                         </div>
                     @endforeach
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12">
+            <section class="content-panel">
+                <div class="content-panel-header d-flex align-items-center gap-2">
+                    <i data-lucide="history" aria-hidden="true"></i>
+                    <h2 class="h5 mb-0">Histórico de alterações</h2>
+                </div>
+                <div class="content-panel-body audit-timeline">
+                    @forelse ($amendment->auditLogs as $auditLog)
+                        @php($changes = $auditLog->changesForDisplay())
+                        <article class="audit-entry">
+                            <span class="audit-marker" aria-hidden="true"></span>
+                            <div class="audit-entry-content">
+                                <div class="d-flex flex-column flex-sm-row justify-content-between gap-1">
+                                    <strong>{{ $auditLog->actionLabel() }}</strong>
+                                    <time class="text-secondary small" datetime="{{ $auditLog->created_at->toIso8601String() }}">
+                                        {{ $auditLog->created_at->format('d/m/Y') }} às {{ $auditLog->created_at->format('H:i') }}
+                                    </time>
+                                </div>
+                                <div class="text-secondary small">{{ $auditLog->actor_name }}</div>
+
+                                @if ($changes !== [])
+                                    <details class="audit-details mt-2">
+                                        <summary>{{ count($changes) }} {{ count($changes) === 1 ? 'campo alterado' : 'campos alterados' }}</summary>
+                                        <dl class="audit-changes mb-0 mt-2">
+                                            @foreach ($changes as $change)
+                                                <div>
+                                                    <dt>{{ $change['label'] }}</dt>
+                                                    <dd><span>{{ $change['old'] }}</span><strong>para</strong><span>{{ $change['new'] }}</span></dd>
+                                                </div>
+                                            @endforeach
+                                        </dl>
+                                    </details>
+                                @endif
+                            </div>
+                        </article>
+                    @empty
+                        <div class="empty-state">O histórico começará na próxima alteração desta emenda.</div>
+                    @endforelse
                 </div>
             </section>
         </div>

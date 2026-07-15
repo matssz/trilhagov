@@ -32,6 +32,7 @@ class DashboardController extends Controller
             'overdueCount' => $amendments->filter->hasOverdueDeadline()->count(),
             'deadlines' => $deadlines,
             'recentAmendments' => (clone $query)->latest()->limit(5)->get(),
+            'canEdit' => $request->user()->canEditMunicipality($municipality->id),
         ]);
     }
 }

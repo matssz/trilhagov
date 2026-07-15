@@ -1,5 +1,7 @@
 # TrilhaGov
 
+[![Testes](https://github.com/matssz/trilhagov/actions/workflows/tests.yml/badge.svg)](https://github.com/matssz/trilhagov/actions/workflows/tests.yml)
+
 Plataforma para municípios controlarem emendas parlamentares, valores, situação,
 responsáveis e prazos de comunicação, execução e prestação de contas.
 
@@ -23,6 +25,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Registro da conclusão de cada marco.
 - Painel com totais, atrasos e próximos prazos.
 - Isolamento dos dados entre municípios.
+- Perfis municipais de gestão, edição, consulta e auditoria.
+- Histórico de criação e alteração das emendas.
 
 ## Stack
 
@@ -41,10 +45,15 @@ npm install
 php artisan key:generate
 php artisan migrate
 npm run build
-php artisan serve --port=8001
+composer serve
 ```
 
 Abra `http://127.0.0.1:8001`.
+
+Use sempre esse endereço, inclusive depois de reiniciar o servidor. Alternar entre
+`localhost` e `127.0.0.1` cria cookies diferentes no navegador e exige um novo login.
+Marque **Manter conectado** na tela de login quando estiver usando um computador
+particular.
 
 ## Testes
 

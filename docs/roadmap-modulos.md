@@ -41,6 +41,11 @@ todos os termos usados no formulário.
 
 Prioridade: próxima implementação estrutural.
 
+Situação: fundação implementada. O backend já reconhece os perfis `gestor`,
+`editor`, `consulta` e `auditoria`; criação e alteração de emendas geram um
+histórico imutável exibido na tela. Convites e administração dos usuários ainda
+serão construídos.
+
 Necessidades:
 
 - convite de usuários pelo gestor;
