@@ -59,6 +59,7 @@ class AuditLog extends Model
         return match ($this->action) {
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
+            'role_updated' => 'Perfil de acesso atualizado',
             default => 'Alteração registrada',
         };
     }
@@ -84,6 +85,7 @@ class AuditLog extends Model
     private static function fieldLabels(): array
     {
         return [
+            'role' => 'Perfil de acesso',
             'reference' => 'Identificação',
             'fiscal_year' => 'Exercício',
             'government_sphere' => 'Esfera',
@@ -113,6 +115,10 @@ class AuditLog extends Model
     {
         if ($value === null || $value === '') {
             return 'Não informado';
+        }
+
+        if ($field === 'role') {
+            return User::municipalityRoles()[$value] ?? (string) $value;
         }
 
         if (in_array($field, ['expected_amount', 'received_amount'], true)) {

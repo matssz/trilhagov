@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\AuditLog;
+use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -48,6 +50,25 @@ class AuditTrail
             Arr::only($oldValues, array_keys($newValues)),
             $newValues,
         );
+    }
+
+    public function recordRoleUpdate(
+        Request $request,
+        Municipality $municipality,
+        User $member,
+        string $oldRole,
+        string $newRole,
+    ): AuditLog {
+        return $member->auditLogs()->create([
+            'municipality_id' => $municipality->id,
+            'user_id' => $request->user()->id,
+            'actor_name' => $request->user()->name,
+            'action' => 'role_updated',
+            'old_values' => ['role' => $oldRole],
+            'new_values' => ['role' => $newRole],
+            'ip_address' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
+        ]);
     }
 
     /** @param array<string, mixed>|null $oldValues @param array<string, mixed> $newValues */

@@ -15,7 +15,8 @@ Necessidades:
 - isolamento entre municípios;
 - proteção de formulários contra reenvio;
 - sessão e CSRF;
-- futura recuperação de senha e convite de servidores.
+- futura recuperação de senha;
+- convite seguro de servidores concluído no módulo de usuários.
 
 Critério de conclusão: nenhuma área interna pode ser aberta sem usuário,
 município completo e contexto municipal ativo.
@@ -39,12 +40,12 @@ todos os termos usados no formulário.
 
 ## Módulo 2 - Usuários, perfis e trilha de auditoria
 
-Prioridade: próxima implementação estrutural.
+Situação: primeira versão concluída.
 
-Situação: fundação implementada. O backend já reconhece os perfis `gestor`,
-`editor`, `consulta` e `auditoria`; criação e alteração de emendas geram um
-histórico imutável exibido na tela. Convites e administração dos usuários ainda
-serão construídos.
+O gestor convida usuários por e-mail ou link temporário, altera perfis e revoga
+convites pendentes. O aceite funciona para contas novas e existentes, sempre
+limitado ao município do convite. Criação e alteração de emendas e mudanças de
+perfil geram histórico imutável.
 
 Necessidades:
 
@@ -144,7 +145,7 @@ Dependências: modelo estabilizado e dados reais suficientes para mapear os camp
 
 1. Concluir identidade municipal e robustez.
 2. Validar o inventário com usuários reais.
-3. Construir perfis e trilha de auditoria.
+3. Concluir perfis, convites e trilha de auditoria.
 4. Construir documentos e checklists.
 5. Construir execução física e financeira.
 6. Gerar transparência e prestação de contas.

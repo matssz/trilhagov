@@ -1,9 +1,12 @@
 @php
-    $workspaceLayout = auth()->check() && ! request()->routeIs('municipalities.*');
+    $workspaceLayout = auth()->check()
+        && ! request()->routeIs('municipalities.*')
+        && ! request()->routeIs('invitations.*');
     $activeRole = $workspaceLayout
         ? auth()->user()->roleForMunicipality((int) session('active_municipality_id'))
         : null;
     $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
+    $canManageUsers = $activeRole === 'manager';
     $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
 @endphp
 <!DOCTYPE html>
@@ -40,6 +43,12 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        @if ($canManageUsers)
+                            <a class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                                <i data-lucide="users" aria-hidden="true"></i>
+                                <span>Usuários</span>
+                            </a>
+                        @endif
                     </nav>
 
                     @if ($canEditAmendments)
@@ -125,6 +134,18 @@
             </header>
             <main class="public-main">
                 <div class="container">
+                    @if (session('status'))
+                        <div class="alert alert-success app-alert" role="status">
+                            <i data-lucide="circle-check" aria-hidden="true"></i>
+                            <span>{{ session('status') }}</span>
+                        </div>
+                    @endif
+                    @if (session('warning'))
+                        <div class="alert alert-warning app-alert" role="alert">
+                            <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                            <span>{{ session('warning') }}</span>
+                        </div>
+                    @endif
                     @yield('content')
                 </div>
             </main>

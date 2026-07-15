@@ -44,6 +44,7 @@ return [
         'cnpj' => 'o CNPJ',
         'ibge_code' => 'o código IBGE',
         'municipality_id' => 'o município',
+        'role' => 'o perfil de acesso',
         'reference' => 'a identificação da emenda',
         'fiscal_year' => 'o exercício',
         'government_sphere' => 'a esfera',

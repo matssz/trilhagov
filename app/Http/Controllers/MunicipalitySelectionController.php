@@ -17,7 +17,7 @@ class MunicipalitySelectionController extends Controller
         if ($municipalities->count() === 1) {
             $currentMunicipality->activate($request, $municipalities->first());
 
-            return redirect()->route('dashboard');
+            return redirect()->intended(route('dashboard'));
         }
 
         return view('municipalities.select', ['municipalities' => $municipalities]);
@@ -40,6 +40,6 @@ class MunicipalitySelectionController extends Controller
             ->findOrFail($request->integer('municipality_id'));
         $currentMunicipality->activate($request, $municipality);
 
-        return redirect()->route('dashboard');
+        return redirect()->intended(route('dashboard'));
     }
 }

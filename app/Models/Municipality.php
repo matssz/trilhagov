@@ -42,6 +42,11 @@ class Municipality extends Model
         return $this->hasMany(ParliamentaryAmendment::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(MunicipalityInvitation::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

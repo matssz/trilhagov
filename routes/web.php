@@ -3,7 +3,9 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalitySelectionController;
+use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +14,9 @@ Route::get('/', function () {
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
+
+Route::get('/convites/{token}', [InvitationAcceptanceController::class, 'show'])->name('invitations.show');
+Route::post('/convites/{token}', [InvitationAcceptanceController::class, 'accept'])->name('invitations.accept')->block(10, 10);
 
 Route::middleware('guest')->group(function () {
     Route::get('/cadastro', [RegisteredUserController::class, 'create'])->name('register');
@@ -36,6 +41,13 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+
+    Route::middleware('municipality.role:manager')->group(function () {
+        Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
+        Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
+        Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);
+        Route::patch('/usuarios/{user}/perfil', [MunicipalUserController::class, 'updateRole'])->name('users.role.update')->block(10, 10);
+    });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');

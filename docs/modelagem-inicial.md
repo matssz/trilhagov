@@ -25,6 +25,17 @@ O campo `role` aceita `manager`, `editor`, `viewer` e `auditor`. Gestores e
 editores podem alterar emendas; consulta e auditoria possuem acesso somente de
 leitura.
 
+## municipality_invitations
+
+- município e gestor que emitiu o convite;
+- e-mail e perfil de acesso concedido;
+- validade, aceite e revogação;
+- somente o hash SHA-256 do token é armazenado no banco.
+
+O link expira em sete dias e só pode ser aceito uma vez. O aceite cria uma conta
+quando o e-mail ainda não existe ou adiciona o novo município a uma conta
+autenticada com o mesmo e-mail.
+
 ## audit_logs
 
 - município e usuário responsável;
@@ -72,6 +83,8 @@ A aplicação não oferece alteração ou exclusão dos registros de auditoria.
 - Contas sem município completo não entram na área interna.
 - CNPJ e código IBGE são obrigatórios e únicos.
 - Formulários de escrita usam token de submissão de uso único.
+- Convites usam token aleatório, expiração, revogação e consumo transacional.
+- Somente gestores administram usuários e não podem alterar o próprio perfil.
 - Consultas de detalhe e edição filtram primeiro os municípios do usuário.
 - Emendas não podem ser apagadas pela interface nesta etapa.
 - A referência não pode se repetir no mesmo município, esfera e exercício.

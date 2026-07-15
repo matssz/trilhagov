@@ -26,6 +26,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Painel com totais, atrasos e próximos prazos.
 - Isolamento dos dados entre municípios.
 - Perfis municipais de gestão, edição, consulta e auditoria.
+- Convites seguros e expiráveis para novos usuários municipais.
+- Administração de perfis restrita ao gestor.
 - Histórico de criação e alteração das emendas.
 
 ## Stack

@@ -5,6 +5,7 @@ import {
     CalendarClock,
     CircleCheck,
     CircleDollarSign,
+    Copy,
     FileText,
     History,
     LayoutDashboard,
@@ -13,6 +14,9 @@ import {
     Plus,
     Search,
     TriangleAlert,
+    Trash2,
+    UserPlus,
+    Users,
     createIcons,
 } from 'lucide';
 
@@ -22,6 +26,7 @@ createIcons({
         CalendarClock,
         CircleCheck,
         CircleDollarSign,
+        Copy,
         FileText,
         History,
         LayoutDashboard,
@@ -30,6 +35,9 @@ createIcons({
         Plus,
         Search,
         TriangleAlert,
+        Trash2,
+        UserPlus,
+        Users,
     },
 });
 
@@ -77,6 +85,33 @@ const ibgeInput = document.querySelector('#ibge_code');
 
 ibgeInput?.addEventListener('input', () => {
     ibgeInput.value = ibgeInput.value.replace(/\D/g, '').slice(0, 7);
+});
+
+document.querySelectorAll('[data-copy-target]').forEach((button) => {
+    button.addEventListener('click', async () => {
+        const target = document.querySelector(button.dataset.copyTarget);
+
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(target.value);
+        } catch {
+            target.select();
+            document.execCommand('copy');
+        }
+        const previousLabel = button.getAttribute('aria-label');
+        button.setAttribute('aria-label', 'Link copiado');
+        button.setAttribute('title', 'Link copiado');
+        button.classList.add('copy-success');
+
+        window.setTimeout(() => {
+            button.setAttribute('aria-label', previousLabel ?? 'Copiar link');
+            button.setAttribute('title', previousLabel ?? 'Copiar link');
+            button.classList.remove('copy-success');
+        }, 2000);
+    });
 });
 
 document.addEventListener('submit', (event) => {
