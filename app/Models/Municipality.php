@@ -47,6 +47,16 @@ class Municipality extends Model
         return $this->hasMany(MunicipalityInvitation::class);
     }
 
+    public function documentTypes(): HasMany
+    {
+        return $this->hasMany(DocumentType::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(AmendmentDocument::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

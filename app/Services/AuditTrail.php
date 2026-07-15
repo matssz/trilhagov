@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AmendmentDocument;
 use App\Models\AuditLog;
+use App\Models\DocumentType;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -66,6 +68,71 @@ class AuditTrail
             'action' => 'role_updated',
             'old_values' => ['role' => $oldRole],
             'new_values' => ['role' => $newRole],
+            'ip_address' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
+        ]);
+    }
+
+    public function recordDocumentUpload(
+        Request $request,
+        ParliamentaryAmendment $amendment,
+        AmendmentDocument $document,
+    ): AuditLog {
+        return $amendment->auditLogs()->create([
+            'municipality_id' => $amendment->municipality_id,
+            'user_id' => $request->user()->id,
+            'actor_name' => $request->user()->name,
+            'action' => 'document_uploaded',
+            'old_values' => null,
+            'new_values' => [
+                'document_type' => $document->documentType->name,
+                'document_name' => $document->original_name,
+                'document_version' => $document->version,
+                'document_size' => $document->formattedSize(),
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
+        ]);
+    }
+
+    public function recordDocumentTypeCreation(
+        Request $request,
+        Municipality $municipality,
+        DocumentType $documentType,
+    ): AuditLog {
+        return $documentType->auditLogs()->create([
+            'municipality_id' => $municipality->id,
+            'user_id' => $request->user()->id,
+            'actor_name' => $request->user()->name,
+            'action' => 'document_type_created',
+            'old_values' => null,
+            'new_values' => $documentType->only([
+                'name',
+                'description',
+                'is_required',
+                'is_active',
+                'sort_order',
+            ]),
+            'ip_address' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
+        ]);
+    }
+
+    /** @param array<string, mixed> $oldValues @param array<string, mixed> $newValues */
+    public function recordDocumentTypeUpdate(
+        Request $request,
+        Municipality $municipality,
+        DocumentType $documentType,
+        array $oldValues,
+        array $newValues,
+    ): AuditLog {
+        return $documentType->auditLogs()->create([
+            'municipality_id' => $municipality->id,
+            'user_id' => $request->user()->id,
+            'actor_name' => $request->user()->name,
+            'action' => 'document_type_updated',
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
             'ip_address' => $request->ip(),
             'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
         ]);

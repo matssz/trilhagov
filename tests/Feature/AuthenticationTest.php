@@ -42,6 +42,7 @@ class AuthenticationTest extends TestCase
             'user_id' => auth()->id(),
             'role' => 'manager',
         ]);
+        $this->assertDatabaseCount('document_types', 5);
         $this->assertSame($municipality->id, session('active_municipality_id'));
     }
 

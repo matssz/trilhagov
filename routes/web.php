@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
@@ -41,16 +43,21 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+    Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
         Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);
         Route::patch('/usuarios/{user}/perfil', [MunicipalUserController::class, 'updateRole'])->name('users.role.update')->block(10, 10);
+        Route::get('/configuracoes/tipos-documento', [DocumentTypeController::class, 'index'])->name('document-types.index');
+        Route::post('/configuracoes/tipos-documento', [DocumentTypeController::class, 'store'])->name('document-types.store')->block(10, 10);
+        Route::patch('/configuracoes/tipos-documento/{documentType}', [DocumentTypeController::class, 'update'])->name('document-types.update')->block(10, 10);
     });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
         Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/documentos', [AmendmentDocumentController::class, 'store'])->name('emendas.documents.store')->block(10, 10);
     });
 });

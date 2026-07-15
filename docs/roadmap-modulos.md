@@ -63,6 +63,13 @@ identificar quem alterou cada informação.
 
 ## Módulo 3 - Documentos e checklists
 
+Situação: primeira versão concluída.
+
+O gestor configura tipos ativos e obrigatórios para o município. Gestores e
+editores podem anexar arquivos privados e versionados; consulta e auditoria podem
+baixá-los após autorização municipal. Uploads e alterações do checklist geram
+registros de auditoria.
+
 Necessidades:
 
 - arquivos privados por emenda;
@@ -75,6 +82,9 @@ Necessidades:
 - política de tamanho, formato, retenção e backup.
 
 Dependências: perfis e auditoria.
+
+Próxima validação: comparar os tipos sugeridos com checklists reais de pelo menos
+dois municípios e confirmar política de retenção, tamanho e formatos permitidos.
 
 Validação necessária: obter checklists reais de pelo menos dois municípios ou
 órgãos de controle antes de automatizar documentos obrigatórios.
@@ -146,7 +156,7 @@ Dependências: modelo estabilizado e dados reais suficientes para mapear os camp
 1. Concluir identidade municipal e robustez.
 2. Validar o inventário com usuários reais.
 3. Concluir perfis, convites e trilha de auditoria.
-4. Construir documentos e checklists.
+4. Concluir a primeira versão de documentos e checklists.
 5. Construir execução física e financeira.
 6. Gerar transparência e prestação de contas.
 7. Adicionar alertas.

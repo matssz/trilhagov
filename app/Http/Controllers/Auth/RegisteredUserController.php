@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\DocumentType;
 use App\Models\Municipality;
 use App\Models\User;
 use App\Rules\ValidCnpj;
@@ -71,6 +72,7 @@ class RegisteredUserController extends Controller
                 ]);
 
                 $municipality->users()->attach($user, ['role' => 'manager']);
+                DocumentType::createDefaultsFor($municipality);
 
                 return [$user, $municipality];
             });

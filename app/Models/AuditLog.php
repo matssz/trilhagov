@@ -60,6 +60,9 @@ class AuditLog extends Model
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
+            'document_uploaded' => 'Documento anexado',
+            'document_type_created' => 'Tipo de documento criado',
+            'document_type_updated' => 'Tipo de documento atualizado',
             default => 'Alteração registrada',
         };
     }
@@ -86,6 +89,15 @@ class AuditLog extends Model
     {
         return [
             'role' => 'Perfil de acesso',
+            'document_type' => 'Tipo de documento',
+            'document_name' => 'Arquivo',
+            'document_version' => 'Versão',
+            'document_size' => 'Tamanho',
+            'name' => 'Nome',
+            'description' => 'Descrição',
+            'is_required' => 'Obrigatório',
+            'is_active' => 'Ativo',
+            'sort_order' => 'Ordem',
             'reference' => 'Identificação',
             'fiscal_year' => 'Exercício',
             'government_sphere' => 'Esfera',
@@ -119,6 +131,10 @@ class AuditLog extends Model
 
         if ($field === 'role') {
             return User::municipalityRoles()[$value] ?? (string) $value;
+        }
+
+        if (in_array($field, ['is_required', 'is_active'], true)) {
+            return $value ? 'Sim' : 'Não';
         }
 
         if (in_array($field, ['expected_amount', 'received_amount'], true)) {

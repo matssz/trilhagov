@@ -29,6 +29,9 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Convites seguros e expiráveis para novos usuários municipais.
 - Administração de perfis restrita ao gestor.
 - Histórico de criação e alteração das emendas.
+- Checklist documental configurável por município.
+- Arquivos privados, versionados e vinculados às emendas.
+- Download autorizado e auditoria dos documentos anexados.
 
 ## Stack
 
@@ -51,6 +54,10 @@ composer serve
 ```
 
 Abra `http://127.0.0.1:8001`.
+
+O comando `composer serve` prepara o PHP local para uploads de até 12 MB. A
+aplicação aceita arquivos de até 10 MB; em produção, os limites do PHP e do
+servidor web também precisam ser configurados.
 
 Use sempre esse endereço, inclusive depois de reiniciar o servidor. Alternar entre
 `localhost` e `127.0.0.1` cria cookies diferentes no navegador e exige um novo login.

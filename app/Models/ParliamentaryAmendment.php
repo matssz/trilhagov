@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
@@ -153,6 +154,13 @@ class ParliamentaryAmendment extends Model
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable')
+            ->latest('created_at')
+            ->latest('id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(AmendmentDocument::class)
             ->latest('created_at')
             ->latest('id');
     }

@@ -47,6 +47,24 @@ autenticada com o mesmo e-mail.
 
 A aplicação não oferece alteração ou exclusão dos registros de auditoria.
 
+## document_types
+
+Checklist configurável por município. Cada tipo possui nome, descrição, ordem,
+estado ativo e indicação de obrigatoriedade. Os cinco tipos iniciais são apenas
+sugestões operacionais e podem ser ajustados pelo gestor.
+
+## amendment_documents
+
+- município, emenda e tipo de documento;
+- usuário responsável e nome preservado;
+- nome original, formato, tamanho e caminho privado;
+- versão incremental por emenda e tipo;
+- observação e data do envio.
+
+Arquivos ficam em `storage/app/private` e não possuem URL pública. O download
+passa pelo município ativo e pela emenda autorizada. Um novo envio cria outra
+versão; registros anteriores não podem ser alterados ou excluídos pela aplicação.
+
 ## parliamentary_amendments
 
 ### Identificação
@@ -87,6 +105,9 @@ A aplicação não oferece alteração ou exclusão dos registros de auditoria.
 - Somente gestores administram usuários e não podem alterar o próprio perfil.
 - Consultas de detalhe e edição filtram primeiro os municípios do usuário.
 - Emendas não podem ser apagadas pela interface nesta etapa.
+- Arquivos não são expostos pela pasta pública e cada download valida o vínculo municipal.
+- Tipos, tamanho e extensão são validados antes do armazenamento.
+- Metadados de documentos são imutáveis; correções usam uma nova versão.
 - A referência não pode se repetir no mesmo município, esfera e exercício.
 
 ## Próximas entidades candidatas

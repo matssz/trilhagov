@@ -15,10 +15,13 @@ return [
     'exists' => 'A opção selecionada em :attribute não é válida.',
     'in' => 'A opção selecionada em :attribute não é válida.',
     'integer' => ':attribute deve ser um número inteiro.',
+    'file' => ':attribute deve ser um arquivo válido.',
+    'mimes' => ':attribute deve ser um arquivo do tipo: :values.',
     'lte' => [
         'numeric' => ':attribute não pode ser maior que :value.',
     ],
     'max' => [
+        'file' => ':attribute não pode ser maior que :max quilobytes.',
         'numeric' => ':attribute não pode ser maior que :max.',
         'string' => ':attribute não pode ter mais de :max caracteres.',
     ],
@@ -45,6 +48,9 @@ return [
         'ibge_code' => 'o código IBGE',
         'municipality_id' => 'o município',
         'role' => 'o perfil de acesso',
+        'document_type_id' => 'o tipo de documento',
+        'document' => 'o arquivo',
+        'sort_order' => 'a ordem',
         'reference' => 'a identificação da emenda',
         'fiscal_year' => 'o exercício',
         'government_sphere' => 'a esfera',
@@ -66,6 +72,6 @@ return [
         'execution_completed_at' => 'a conclusão da execução',
         'accountability_deadline' => 'o prazo de prestação de contas',
         'accountability_completed_at' => 'a conclusão da prestação de contas',
-        'notes' => 'as observações internas',
+        'notes' => 'as observações',
     ],
 ];

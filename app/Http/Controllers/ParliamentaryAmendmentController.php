@@ -111,11 +111,36 @@ class ParliamentaryAmendmentController extends Controller
     public function show(Request $request, int $emenda): View
     {
         $amendment = $this->amendmentForUser($request, $emenda)
-            ->load(['municipality', 'creator', 'auditLogs']);
+            ->load(['municipality', 'creator', 'auditLogs', 'documents.documentType']);
+        $documentTypes = $amendment->municipality->documentTypes()
+            ->active()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        $latestDocumentsByType = $amendment->documents
+            ->groupBy('document_type_id')
+            ->map(fn ($documents) => $documents->sortByDesc('version')->first());
+        $completedTypes = $documentTypes
+            ->filter(fn ($type) => $latestDocumentsByType->has($type->id));
+        $requiredPending = $documentTypes
+            ->where('is_required', true)
+            ->reject(fn ($type) => $latestDocumentsByType->has($type->id))
+            ->count();
+        $canEdit = $request->user()->canEditMunicipality($amendment->municipality_id);
 
         return view('amendments.show', [
             'amendment' => $amendment,
-            'canEdit' => $request->user()->canEditMunicipality($amendment->municipality_id),
+            'canEdit' => $canEdit,
+            'canManageChecklist' => $request->user()->roleForMunicipality($amendment->municipality_id) === 'manager',
+            'documentTypes' => $documentTypes,
+            'documents' => $amendment->documents,
+            'latestDocumentsByType' => $latestDocumentsByType,
+            'checklistCompleted' => $completedTypes->count(),
+            'checklistTotal' => $documentTypes->count(),
+            'requiredPending' => $requiredPending,
+            'documentSubmissionToken' => $canEdit
+                ? $this->formSubmission->issue($request, "amendment-document-upload-{$amendment->id}")
+                : null,
         ]);
     }
 
