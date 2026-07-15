@@ -165,6 +165,11 @@ class ParliamentaryAmendment extends Model
             ->latest('id');
     }
 
+    public function integrityAlerts(): HasMany
+    {
+        return $this->hasMany(IntegrityAlert::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

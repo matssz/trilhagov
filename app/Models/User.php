@@ -60,7 +60,13 @@ class User extends Authenticatable
     public function municipalities(): BelongsToMany
     {
         return $this->belongsToMany(Municipality::class)
-            ->withPivot('role')
+            ->withPivot([
+                'role',
+                'notify_in_app',
+                'notify_email',
+                'notify_deadlines',
+                'notify_integrity',
+            ])
             ->withTimestamps();
     }
 

@@ -8,6 +8,11 @@
     $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
     $canManageUsers = $activeRole === 'manager';
     $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
+    $unreadNotificationCount = $workspaceLayout
+        ? auth()->user()->unreadNotifications
+            ->filter(fn ($notification) => (int) ($notification->data['municipality_id'] ?? 0) === (int) session('active_municipality_id'))
+            ->count()
+        : 0;
 @endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -42,6 +47,13 @@
                         <a class="sidebar-link {{ request()->routeIs('emendas.*') ? 'active' : '' }}" href="{{ route('emendas.index') }}">
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
+                        </a>
+                        <a class="sidebar-link {{ request()->routeIs('alerts.*') ? 'active' : '' }}" href="{{ route('alerts.index') }}">
+                            <i data-lucide="shield-alert" aria-hidden="true"></i>
+                            <span>Integridade</span>
+                            @if ($unreadNotificationCount > 0)
+                                <span class="sidebar-count">{{ min($unreadNotificationCount, 99) }}</span>
+                            @endif
                         </a>
                         @if ($canManageUsers)
                             <a class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
@@ -98,6 +110,12 @@
                             <i data-lucide="search" aria-hidden="true"></i>
                             <input name="search" type="search" value="{{ request('search') }}" placeholder="Pesquisar emendas, autores ou objetos" aria-label="Pesquisar emendas">
                         </form>
+                        <a class="notification-button" href="{{ route('notifications.index') }}" title="Notificações" aria-label="Notificações{{ $unreadNotificationCount > 0 ? ': '.$unreadNotificationCount.' não lidas' : '' }}">
+                            <i data-lucide="bell" aria-hidden="true"></i>
+                            @if ($unreadNotificationCount > 0)
+                                <span>{{ min($unreadNotificationCount, 99) }}</span>
+                            @endif
+                        </a>
                         <div class="topbar-user">
                             <span>
                                 <strong>{{ auth()->user()->name }}</strong>

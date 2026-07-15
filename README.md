@@ -33,6 +33,10 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Arquivos privados, versionados e vinculados às emendas.
 - Download autorizado e auditoria dos documentos anexados.
 - Atualização segura da sessão e do cache do navegador sem perder o login.
+- Central de Integridade para prazos, documentos obrigatórios e divergências.
+- Notificações internas com leitura, preferências individuais e proteção contra duplicidade.
+- Alertas por e-mail preparados para provedor de produção e ativados por opção do usuário.
+- Regras municipais configuráveis para antecedência e repetição de prazos vencidos.
 
 ## Stack
 
@@ -71,6 +75,17 @@ particular.
 php artisan test
 ```
 
+## Alertas automáticos
+
+```bash
+php artisan alerts:process
+php artisan schedule:list
+```
+
+No servidor de produção, configure o Laravel Scheduler para executar
+`php artisan schedule:run` a cada minuto. O TrilhaGov processará os alertas a cada
+hora sem repetir o mesmo envio.
+
 ## Documentação
 
 - [Evidência e hipótese](docs/evidencia-e-hipotese.md)
@@ -79,6 +94,7 @@ php artisan test
 - [Roadmap de módulos](docs/roadmap-modulos.md)
 - [Identidade visual](docs/identidade-visual.md)
 - [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)
+- [Alertas e notificações](docs/alertas-e-notificacoes.md)
 
 ## Limite atual
 

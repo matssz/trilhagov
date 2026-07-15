@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertCenterController;
 use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
+use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\RefreshApplicationStateController;
 use Illuminate\Support\Facades\Route;
@@ -38,8 +40,14 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
+    Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
+    Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
+    Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
+    Route::patch('/notificacoes/{notification}/ler', [NotificationCenterController::class, 'markAsRead'])->name('notifications.read')->block(10, 10);
+    Route::post('/notificacoes/ler-todas', [NotificationCenterController::class, 'markAllAsRead'])->name('notifications.read-all')->block(10, 10);
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/alertas/verificar', [AlertCenterController::class, 'process'])->name('alerts.process')->block(10, 10);
         Route::get('/emendas/create', [ParliamentaryAmendmentController::class, 'create'])->name('emendas.create');
         Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
     });
@@ -48,6 +56,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
+        Route::patch('/alertas/configuracoes', [AlertCenterController::class, 'updateSettings'])->name('alerts.settings.update')->block(10, 10);
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
         Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);

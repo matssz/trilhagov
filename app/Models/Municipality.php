@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Municipality extends Model
 {
@@ -33,8 +34,24 @@ class Municipality extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('role')
+            ->withPivot([
+                'role',
+                'notify_in_app',
+                'notify_email',
+                'notify_deadlines',
+                'notify_integrity',
+            ])
             ->withTimestamps();
+    }
+
+    public function alertSetting(): HasOne
+    {
+        return $this->hasOne(MunicipalityAlertSetting::class);
+    }
+
+    public function integrityAlerts(): HasMany
+    {
+        return $this->hasMany(IntegrityAlert::class);
     }
 
     public function amendments(): HasMany
