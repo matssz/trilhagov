@@ -11,6 +11,7 @@
 
         <form method="POST" action="{{ route('municipalities.activate') }}">
             @csrf
+            <x-validation-summary />
             <div class="d-grid gap-3 mb-3">
                 @foreach ($municipalities as $municipality)
                     <label class="municipality-option">

@@ -8,7 +8,7 @@
             <p class="page-kicker mb-2">{{ $municipality->name }} / {{ $municipality->state }}</p>
             <h1 class="h3 mb-1">Emendas parlamentares</h1>
         </div>
-        <a class="btn btn-primary" href="{{ route('emendas.create') }}">Nova emenda</a>
+        <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
     </div>
 
     <form class="filters-grid mb-4" method="GET" action="{{ route('emendas.index') }}">
@@ -20,7 +20,7 @@
             @endforeach
         </select>
         <input class="form-control" name="year" type="number" value="{{ $selectedYear }}" min="2000" max="{{ now()->year + 1 }}" placeholder="Exercício" aria-label="Filtrar por exercício">
-        <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+        <button class="btn btn-outline-primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Filtrar</button>
     </form>
 
     <div class="content-panel">

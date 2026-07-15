@@ -1,52 +1,122 @@
+@php($workspaceLayout = auth()->check() && ! request()->routeIs('municipalities.*'))
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#0a2f5a">
         <title>@yield('title', 'TrilhaGov')</title>
+        <link rel="icon" href="{{ asset('images/trilhagov-symbol.svg') }}" type="image/svg+xml">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body>
-        <nav class="navbar navbar-expand-lg app-navbar" data-bs-theme="dark">
-            <div class="container">
-                <a class="navbar-brand fw-bold" href="{{ auth()->check() ? route('dashboard') : route('login') }}">
-                    <span class="brand-mark">TG</span>TrilhaGov <span class="brand-module">Emendas</span>
+    <body class="{{ $workspaceLayout ? 'has-workspace' : 'has-public-layout' }}">
+        @if ($workspaceLayout)
+            <div class="app-shell">
+                <aside class="offcanvas-lg offcanvas-start app-sidebar" id="appSidebar" tabindex="-1" aria-labelledby="appSidebarLabel">
+                    <div class="sidebar-header">
+                        <a class="brand-lockup" href="{{ route('dashboard') }}" aria-label="TrilhaGov - Painel">
+                            <img class="brand-symbol" src="{{ asset('images/trilhagov-symbol.svg') }}" alt="">
+                            <span class="brand-copy" id="appSidebarLabel">
+                                <span class="brand-name">Trilha<span>Gov</span></span>
+                                <small>Portal de Emendas</small>
+                            </span>
+                        </a>
+                        <button class="btn-close d-lg-none" type="button" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Fechar menu"></button>
+                    </div>
+
+                    <nav class="sidebar-nav" aria-label="Navegação principal">
+                        <a class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+                            <span>Painel</span>
+                        </a>
+                        <a class="sidebar-link {{ request()->routeIs('emendas.*') ? 'active' : '' }}" href="{{ route('emendas.index') }}">
+                            <i data-lucide="file-text" aria-hidden="true"></i>
+                            <span>Emendas</span>
+                        </a>
+                    </nav>
+
+                    <div class="sidebar-actions">
+                        <a class="btn btn-primary w-100" href="{{ route('emendas.create') }}">
+                            <i data-lucide="plus" aria-hidden="true"></i>
+                            <span>Nova emenda</span>
+                        </a>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="user-summary">
+                            <span class="user-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                            <span class="user-summary-copy">
+                                <strong>{{ auth()->user()->name }}</strong>
+                                <small>Usuário municipal</small>
+                            </span>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="icon-button" type="submit" title="Sair" aria-label="Sair">
+                                <i data-lucide="log-out" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </div>
+                </aside>
+
+                <div class="app-workspace">
+                    <header class="app-topbar">
+                        <button class="icon-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Abrir menu" title="Abrir menu">
+                            <i data-lucide="menu" aria-hidden="true"></i>
+                        </button>
+                        <form class="topbar-search" method="GET" action="{{ route('emendas.index') }}" role="search">
+                            <i data-lucide="search" aria-hidden="true"></i>
+                            <input name="search" type="search" value="{{ request('search') }}" placeholder="Pesquisar emendas, autores ou objetos" aria-label="Pesquisar emendas">
+                        </form>
+                        <div class="topbar-user">
+                            <span>
+                                <strong>{{ auth()->user()->name }}</strong>
+                                <small>TrilhaGov Emendas</small>
+                            </span>
+                            <span class="user-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                        </div>
+                    </header>
+
+                    <main class="app-main">
+                        <div class="content-container">
+                            @if (session('status'))
+                                <div class="alert alert-success app-alert" role="status">
+                                    <i data-lucide="circle-check" aria-hidden="true"></i>
+                                    <span>{{ session('status') }}</span>
+                                </div>
+                            @endif
+                            @if (session('warning'))
+                                <div class="alert alert-warning app-alert" role="alert">
+                                    <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                                    <span>{{ session('warning') }}</span>
+                                </div>
+                            @endif
+                            @yield('content')
+                        </div>
+                    </main>
+                </div>
+            </div>
+        @else
+            <header class="public-header">
+                <a class="brand-lockup" href="{{ auth()->check() ? route('municipalities.select') : route('login') }}" aria-label="TrilhaGov">
+                    <img class="brand-symbol" src="{{ asset('images/trilhagov-symbol.svg') }}" alt="">
+                    <span class="brand-copy">
+                        <span class="brand-name">Trilha<span>Gov</span></span>
+                        <small>Portal de Emendas</small>
+                    </span>
                 </a>
                 @auth
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appNavigation" aria-controls="appNavigation" aria-expanded="false" aria-label="Abrir navegação">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="appNavigation">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Painel</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('emendas.*') ? 'active' : '' }}" href="{{ route('emendas.index') }}">Emendas</a>
-                            </li>
-                        </ul>
-                        <div class="d-lg-flex align-items-lg-center gap-3 mt-3 mt-lg-0">
-                            <span class="navbar-text small">{{ auth()->user()->name }}</span>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button class="btn btn-sm btn-outline-light" type="submit">Sair</button>
-                            </form>
-                        </div>
-                    </div>
+                    <form class="ms-auto" method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="btn btn-outline-secondary" type="submit"><i data-lucide="log-out" aria-hidden="true"></i>Sair</button>
+                    </form>
                 @endauth
-            </div>
-        </nav>
-
-        <main class="app-main">
-            <div class="container">
-                @if (session('status'))
-                    <div class="alert alert-success" role="alert">{{ session('status') }}</div>
-                @endif
-                @if (session('warning'))
-                    <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
-                @endif
-                @yield('content')
-            </div>
-        </main>
+            </header>
+            <main class="public-main">
+                <div class="container">
+                    @yield('content')
+                </div>
+            </main>
+        @endif
     </body>
 </html>

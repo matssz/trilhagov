@@ -52,7 +52,12 @@ class AuthenticationTest extends TestCase
             'email' => 'maria@municipio.test',
             'password' => 'senha-segura',
             'password_confirmation' => 'senha-segura',
-        ])->assertSessionHasErrors(['municipality_name', 'state', 'cnpj', 'ibge_code']);
+        ])->assertSessionHasErrors([
+            'municipality_name' => 'Informe o nome do município.',
+            'state' => 'Informe a UF.',
+            'cnpj' => 'Informe o CNPJ.',
+            'ibge_code' => 'Informe o código IBGE.',
+        ]);
 
         $this->assertGuest();
         $this->assertDatabaseCount('users', 0);
@@ -71,7 +76,7 @@ class AuthenticationTest extends TestCase
             'state' => 'SP',
             'cnpj' => '11.111.111/1111-11',
             'ibge_code' => '3550308',
-        ])->assertSessionHasErrors('cnpj');
+        ])->assertSessionHasErrors(['cnpj' => 'Informe um CNPJ válido.']);
 
         $this->assertDatabaseCount('users', 0);
     }

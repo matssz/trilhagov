@@ -18,7 +18,7 @@ class ValidCnpj implements ValidationRule
         $cnpj = preg_replace('/\D/', '', (string) $value);
 
         if (strlen($cnpj) !== 14 || preg_match('/^(\d)\1{13}$/', $cnpj)) {
-            $fail('O campo :attribute deve conter um CNPJ válido.');
+            $fail('Informe um CNPJ válido.');
 
             return;
         }
@@ -28,7 +28,7 @@ class ValidCnpj implements ValidationRule
         $secondVerifier = $this->calculateVerifier($digits.$firstVerifier);
 
         if ($cnpj !== $digits.$firstVerifier.$secondVerifier) {
-            $fail('O campo :attribute deve conter um CNPJ válido.');
+            $fail('Informe um CNPJ válido.');
         }
     }
 

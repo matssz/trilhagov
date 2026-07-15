@@ -6,26 +6,30 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <p class="page-kicker mb-2">{{ $municipality->name }} / {{ $municipality->state }}</p>
-            <h1 class="h3 mb-1">Painel de emendas</h1>
-            <p class="text-secondary mb-0">Posição consolidada em {{ now()->format('d/m/Y') }}.</p>
+            <h1 class="h3 mb-1">Dashboard de controle</h1>
+            <p class="text-secondary mb-0">Acompanhe a execução das emendas parlamentares em tempo real.</p>
         </div>
-        <a class="btn btn-primary" href="{{ route('emendas.create') }}">Nova emenda</a>
+        <a class="btn btn-primary" href="{{ route('emendas.create') }}"><i data-lucide="plus" aria-hidden="true"></i>Nova emenda</a>
     </div>
 
     <section class="metric-grid mb-4" aria-label="Indicadores">
         <div class="metric-card">
+            <span class="metric-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
             <div class="metric-label">Emendas registradas</div>
             <div class="metric-value">{{ $amendmentCount }}</div>
         </div>
         <div class="metric-card">
+            <span class="metric-icon"><i data-lucide="circle-dollar-sign" aria-hidden="true"></i></span>
             <div class="metric-label">Valor previsto</div>
             <div class="metric-value">R$ {{ number_format($expectedTotal, 2, ',', '.') }}</div>
         </div>
         <div class="metric-card">
+            <span class="metric-icon"><i data-lucide="circle-check" aria-hidden="true"></i></span>
             <div class="metric-label">Valor recebido</div>
             <div class="metric-value">R$ {{ number_format($receivedTotal, 2, ',', '.') }}</div>
         </div>
         <div class="metric-card {{ $overdueCount > 0 ? 'border-danger' : '' }}">
+            <span class="metric-icon"><i data-lucide="calendar-clock" aria-hidden="true"></i></span>
             <div class="metric-label">Prazos vencidos</div>
             <div class="metric-value {{ $overdueCount > 0 ? 'text-danger' : '' }}">{{ $overdueCount }}</div>
         </div>

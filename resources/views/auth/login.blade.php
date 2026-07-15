@@ -13,13 +13,14 @@
         <div class="auth-panel">
             <form method="POST" action="{{ route('login') }}" novalidate>
                 @csrf
+                <x-validation-summary />
                 <div class="mb-3">
-                    <label class="form-label" for="email">E-mail</label>
+                    <label class="form-label" for="email">E-mail <span class="required-mark">*</span></label>
                     <input class="form-control @error('email') is-invalid @enderror" id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" autofocus required>
                     @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="password">Senha</label>
+                    <label class="form-label" for="password">Senha <span class="required-mark">*</span></label>
                     <input class="form-control @error('password') is-invalid @enderror" id="password" name="password" type="password" autocomplete="current-password" required>
                     @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>

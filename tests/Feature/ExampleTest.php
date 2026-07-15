@@ -14,4 +14,12 @@ class ExampleTest extends TestCase
     {
         $this->get('/')->assertRedirect(route('login'));
     }
+
+    public function test_not_found_page_uses_human_message_and_correct_status(): void
+    {
+        $this->get('/pagina-que-nao-existe')
+            ->assertNotFound()
+            ->assertSee('Página não encontrada')
+            ->assertDontSee('Not Found');
+    }
 }

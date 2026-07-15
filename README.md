@@ -30,6 +30,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Laravel 12
 - Blade
 - Bootstrap 5
+- Lucide Icons
 - SQLite no desenvolvimento local
 
 ## Como executar
@@ -57,6 +58,7 @@ php artisan test
 - [Modelagem inicial](docs/modelagem-inicial.md)
 - [Roteiro de entrevista municipal](docs/roteiro-entrevista-municipal.md)
 - [Roadmap de módulos](docs/roadmap-modulos.md)
+- [Identidade visual](docs/identidade-visual.md)
 
 ## Limite atual
 

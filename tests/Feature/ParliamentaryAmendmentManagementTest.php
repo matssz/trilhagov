@@ -162,6 +162,8 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         $payload = $this->payloadWithToken("amendment-update-{$amendment->id}", [
             'reference' => $amendment->reference,
             'status' => ParliamentaryAmendment::STATUS_EXECUTING,
+            'received_amount' => '450000.00',
+            'received_at' => '2026-07-10',
             'notes' => 'Primeira alteracao',
         ]);
 
@@ -173,6 +175,47 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         )->assertRedirect(route('emendas.show', $amendment));
 
         $this->assertSame('Primeira alteracao', $amendment->fresh()->notes);
+    }
+
+    public function test_execution_status_requires_received_resource_information_in_portuguese(): void
+    {
+        [$user] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create', [
+            'status' => ParliamentaryAmendment::STATUS_EXECUTING,
+            'received_amount' => null,
+            'received_at' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $payload)
+            ->assertSessionHasErrors([
+                'received_amount' => 'Informe o valor recebido para a situação selecionada.',
+                'received_at' => 'Informe a data do recebimento para a situação selecionada.',
+            ]);
+
+        $this->assertDatabaseCount('parliamentary_amendments', 0);
+    }
+
+    public function test_core_dates_are_required_with_human_messages(): void
+    {
+        [$user] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create', [
+            'indicated_at' => null,
+            'communication_deadline' => null,
+            'execution_deadline' => null,
+            'accountability_deadline' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $payload)
+            ->assertSessionHasErrors([
+                'indicated_at' => 'Informe a data da indicação.',
+                'communication_deadline' => 'Informe o prazo de comunicação e publicidade.',
+                'execution_deadline' => 'Informe o prazo de execução.',
+                'accountability_deadline' => 'Informe o prazo de prestação de contas.',
+            ]);
+
+        $this->assertDatabaseCount('parliamentary_amendments', 0);
     }
 
     public function test_overdue_deadline_stops_alerting_after_completion(): void
