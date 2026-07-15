@@ -32,6 +32,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Checklist documental configurável por município.
 - Arquivos privados, versionados e vinculados às emendas.
 - Download autorizado e auditoria dos documentos anexados.
+- Atualização segura da sessão e do cache do navegador sem perder o login.
 
 ## Stack
 
@@ -77,6 +78,7 @@ php artisan test
 - [Roteiro de entrevista municipal](docs/roteiro-entrevista-municipal.md)
 - [Roadmap de módulos](docs/roadmap-modulos.md)
 - [Identidade visual](docs/identidade-visual.md)
+- [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)
 
 ## Limite atual
 

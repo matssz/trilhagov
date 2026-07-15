@@ -15,6 +15,7 @@ import {
     LogOut,
     Menu,
     Plus,
+    RefreshCw,
     Search,
     TriangleAlert,
     Trash2,
@@ -40,6 +41,7 @@ createIcons({
         LogOut,
         Menu,
         Plus,
+        RefreshCw,
         Search,
         TriangleAlert,
         Trash2,
@@ -140,6 +142,13 @@ document.addEventListener('submit', (event) => {
     form.querySelectorAll('button[type="submit"]').forEach((button) => {
         button.disabled = true;
         button.setAttribute('aria-disabled', 'true');
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Processando...';
+
+        if (button.hasAttribute('data-icon-submit')) {
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+            button.setAttribute('aria-label', 'Atualizando sistema');
+            button.setAttribute('title', 'Atualizando sistema');
+        } else {
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Processando...';
+        }
     });
 });

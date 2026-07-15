@@ -74,6 +74,12 @@
                                 <small>{{ $activeRoleLabel }}</small>
                             </span>
                         </div>
+                        <form method="POST" action="{{ route('application.refresh') }}">
+                            @csrf
+                            <button class="icon-button" type="submit" title="Atualizar sistema" aria-label="Atualizar sistema" data-icon-submit>
+                                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                            </button>
+                        </form>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button class="icon-button" type="submit" title="Sair" aria-label="Sair">
@@ -130,10 +136,18 @@
                     </span>
                 </a>
                 @auth
-                    <form class="ms-auto" method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button class="btn btn-outline-secondary" type="submit"><i data-lucide="log-out" aria-hidden="true"></i>Sair</button>
-                    </form>
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <form method="POST" action="{{ route('application.refresh') }}">
+                            @csrf
+                            <button class="icon-button" type="submit" title="Atualizar sistema" aria-label="Atualizar sistema" data-icon-submit>
+                                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="btn btn-outline-secondary" type="submit"><i data-lucide="log-out" aria-hidden="true"></i>Sair</button>
+                        </form>
+                    </div>
                 @endauth
             </header>
             <main class="public-main">

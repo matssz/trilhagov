@@ -9,6 +9,7 @@ use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
+use App\Http\Controllers\RefreshApplicationStateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/municipios/selecionar', [MunicipalitySelectionController::class, 'index'])->name('municipalities.select');
     Route::post('/municipios/selecionar', [MunicipalitySelectionController::class, 'store'])->name('municipalities.activate')->block(10, 10);
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->block(10, 10);
+    Route::post('/sistema/atualizar', RefreshApplicationStateController::class)->name('application.refresh')->block(10, 10);
 });
 
 Route::middleware(['auth', 'municipality'])->group(function () {

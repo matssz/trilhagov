@@ -15,6 +15,7 @@ Necessidades:
 - isolamento entre municípios;
 - proteção de formulários contra reenvio;
 - sessão e CSRF;
+- reset individual de estado temporário e prevenção de telas autenticadas em cache;
 - futura recuperação de senha;
 - convite seguro de servidores concluído no módulo de usuários.
 
