@@ -8,8 +8,8 @@ Usuário <-> Município -> Emenda parlamentar
 
 Usuários e municípios usam uma relação muitos-para-muitos porque uma prefeitura
 pode ter vários servidores e uma consultoria pode, no futuro, atender mais de um
-município. Nesta primeira interface, cada usuário opera o primeiro município ao
-qual está vinculado.
+município. Após o login, a sessão mantém o `active_municipality_id`; contas com
+mais de um vínculo precisam escolher o município antes de entrar no painel.
 
 ## municipalities
 
@@ -55,7 +55,10 @@ O campo `role` prepara a futura separação entre gestor, consulta e auditoria.
 ## Decisões de segurança
 
 - O município não vem de um campo escondido do formulário.
-- O controller descobre o município a partir do usuário autenticado.
+- O controller resolve o município ativo pela sessão e confirma o vínculo.
+- Contas sem município completo não entram na área interna.
+- CNPJ e código IBGE são obrigatórios e únicos.
+- Formulários de escrita usam token de submissão de uso único.
 - Consultas de detalhe e edição filtram primeiro os municípios do usuário.
 - Emendas não podem ser apagadas pela interface nesta etapa.
 - A referência não pode se repetir no mesmo município, esfera e exercício.

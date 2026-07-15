@@ -1,6 +1,6 @@
-# Emendas Municipais
+# TrilhaGov
 
-Aplicação para municípios controlarem emendas parlamentares, valores, situação,
+Plataforma para municípios controlarem emendas parlamentares, valores, situação,
 responsáveis e prazos de comunicação, execução e prestação de contas.
 
 ## Hipótese do produto
@@ -56,6 +56,7 @@ php artisan test
 - [Evidência e hipótese](docs/evidencia-e-hipotese.md)
 - [Modelagem inicial](docs/modelagem-inicial.md)
 - [Roteiro de entrevista municipal](docs/roteiro-entrevista-municipal.md)
+- [Roadmap de módulos](docs/roadmap-modulos.md)
 
 ## Limite atual
 

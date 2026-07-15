@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,13 +15,23 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/cadastro', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/cadastro', [RegisteredUserController::class, 'store']);
+    Route::post('/cadastro', [RegisteredUserController::class, 'store'])->block(10, 10);
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->block(10, 10);
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/municipios/selecionar', [MunicipalitySelectionController::class, 'index'])->name('municipalities.select');
+    Route::post('/municipios/selecionar', [MunicipalitySelectionController::class, 'store'])->name('municipalities.activate')->block(10, 10);
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->block(10, 10);
+});
+
+Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
-    Route::resource('emendas', ParliamentaryAmendmentController::class)->except('destroy');
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
+    Route::get('/emendas/create', [ParliamentaryAmendmentController::class, 'create'])->name('emendas.create');
+    Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
+    Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+    Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
+    Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
 });

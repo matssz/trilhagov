@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\ParliamentaryAmendment;
+use App\Services\CurrentMunicipality;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request, CurrentMunicipality $currentMunicipality): View
     {
-        $municipality = $request->user()->municipalities()->firstOrFail();
+        $municipality = $currentMunicipality->get($request);
         $query = $municipality->amendments();
         $amendments = (clone $query)->get();
 

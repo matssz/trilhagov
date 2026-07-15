@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\ParliamentaryAmendment;
+use App\Services\CurrentMunicipality;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +17,7 @@ class ParliamentaryAmendmentRequest extends FormRequest
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
-        $municipalityId = $this->user()->municipalities()->value('municipalities.id');
+        $municipalityId = app(CurrentMunicipality::class)->get($this)->id;
         $referenceRule = Rule::unique('parliamentary_amendments', 'reference')
             ->where('municipality_id', $municipalityId)
             ->where('government_sphere', $this->input('government_sphere'))
@@ -24,6 +25,7 @@ class ParliamentaryAmendmentRequest extends FormRequest
             ->ignore($this->route('emenda'));
 
         return [
+            '_submission_token' => ['required', 'string'],
             'reference' => ['required', 'string', 'max:100', $referenceRule],
             'fiscal_year' => ['required', 'integer', 'between:2000,'.(now()->year + 1)],
             'government_sphere' => ['required', Rule::in(array_keys(ParliamentaryAmendment::governmentSpheres()))],

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Municipality;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -14,22 +15,24 @@ class AuthenticationTest extends TestCase
     public function test_user_can_register_together_with_municipality(): void
     {
         $response = $this->post(route('register'), [
+            '_submission_token' => $this->submissionToken('register'),
             'name' => 'Maria Gestora',
             'email' => 'maria@municipio.test',
             'password' => 'senha-segura',
             'password_confirmation' => 'senha-segura',
-            'municipality_name' => 'Município de Exemplo',
+            'municipality_name' => 'Municipio de Exemplo',
             'state' => 'sp',
-            'cnpj' => '12.345.678/0001-90',
+            'cnpj' => '11.222.333/0001-81',
             'ibge_code' => '3550308',
         ]);
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticated();
         $this->assertDatabaseHas('municipalities', [
-            'name' => 'Município de Exemplo',
+            'name' => 'Municipio de Exemplo',
             'state' => 'SP',
-            'cnpj' => '12345678000190',
+            'cnpj' => '11222333000181',
+            'ibge_code' => '3550308',
         ]);
 
         $municipality = Municipality::firstOrFail();
@@ -38,6 +41,39 @@ class AuthenticationTest extends TestCase
             'user_id' => auth()->id(),
             'role' => 'manager',
         ]);
+        $this->assertSame($municipality->id, session('active_municipality_id'));
+    }
+
+    public function test_registration_requires_complete_municipality_information(): void
+    {
+        $this->post(route('register'), [
+            '_submission_token' => $this->submissionToken('register'),
+            'name' => 'Maria Gestora',
+            'email' => 'maria@municipio.test',
+            'password' => 'senha-segura',
+            'password_confirmation' => 'senha-segura',
+        ])->assertSessionHasErrors(['municipality_name', 'state', 'cnpj', 'ibge_code']);
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('municipalities', 0);
+    }
+
+    public function test_registration_rejects_invalid_cnpj(): void
+    {
+        $this->post(route('register'), [
+            '_submission_token' => $this->submissionToken('register'),
+            'name' => 'Maria Gestora',
+            'email' => 'maria@municipio.test',
+            'password' => 'senha-segura',
+            'password_confirmation' => 'senha-segura',
+            'municipality_name' => 'Municipio de Exemplo',
+            'state' => 'SP',
+            'cnpj' => '11.111.111/1111-11',
+            'ibge_code' => '3550308',
+        ])->assertSessionHasErrors('cnpj');
+
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_registered_user_can_login_and_logout(): void
@@ -52,8 +88,60 @@ class AuthenticationTest extends TestCase
         ])->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticatedAs($user);
+        $this->assertSame($municipality->id, session('active_municipality_id'));
 
         $this->post(route('logout'))->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_user_without_complete_municipality_cannot_login(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
+    public function test_user_with_multiple_municipalities_must_select_the_active_one(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+        $first = Municipality::factory()->create(['name' => 'Municipio A']);
+        $second = Municipality::factory()->create(['name' => 'Municipio B']);
+        $first->users()->attach($user, ['role' => 'manager']);
+        $second->users()->attach($user, ['role' => 'manager']);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertRedirect(route('municipalities.select'));
+
+        $this->assertNull(session('active_municipality_id'));
+
+        $this->post(route('municipalities.activate'), [
+            'municipality_id' => $second->id,
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertSame($second->id, session('active_municipality_id'));
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Municipio B')
+            ->assertDontSee('Municipio A');
+    }
+
+    private function submissionToken(string $scope): string
+    {
+        $token = (string) Str::uuid();
+
+        $this->withSession([
+            'form_submission_tokens' => [
+                $scope => [$token => now()->timestamp],
+            ],
+        ]);
+
+        return $token;
     }
 }

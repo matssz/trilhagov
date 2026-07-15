@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Cadastrar município | Emendas Municipais')
+@section('title', 'Cadastrar município | TrilhaGov')
 
 @section('content')
     <div class="auth-shell">
@@ -13,6 +13,10 @@
         <div class="auth-panel">
             <form method="POST" action="{{ route('register') }}" novalidate>
                 @csrf
+                <input name="_submission_token" type="hidden" value="{{ $submissionToken }}">
+                @error('_submission_token')
+                    <div class="alert alert-warning">{{ $message }}</div>
+                @enderror
                 <h2 class="h6 mb-3">Responsável pelo acesso</h2>
                 <div class="mb-3">
                     <label class="form-label" for="name">Nome</label>
@@ -43,20 +47,25 @@
                     @error('municipality_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="row g-3 mb-4">
-                    <div class="col-4">
+                    <div class="col-12 col-md-5">
                         <label class="form-label" for="state">UF</label>
-                        <input class="form-control text-uppercase @error('state') is-invalid @enderror" id="state" name="state" value="{{ old('state') }}" maxlength="2" required>
+                        <select class="form-select @error('state') is-invalid @enderror" id="state" name="state" required>
+                            <option value="">Selecione</option>
+                            @foreach ($states as $uf => $stateName)
+                                <option value="{{ $uf }}" @selected(old('state') === $uf)>{{ $uf }} · {{ $stateName }}</option>
+                            @endforeach
+                        </select>
                         @error('state')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-8">
+                    <div class="col-12 col-md-7">
                         <label class="form-label" for="ibge_code">Código IBGE</label>
-                        <input class="form-control @error('ibge_code') is-invalid @enderror" id="ibge_code" name="ibge_code" value="{{ old('ibge_code') }}" inputmode="numeric" maxlength="7">
+                        <input class="form-control @error('ibge_code') is-invalid @enderror" id="ibge_code" name="ibge_code" value="{{ old('ibge_code') }}" inputmode="numeric" maxlength="7" required>
                         @error('ibge_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label" for="cnpj">CNPJ principal</label>
-                    <input class="form-control @error('cnpj') is-invalid @enderror" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" inputmode="numeric">
+                    <input class="form-control @error('cnpj') is-invalid @enderror" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" inputmode="numeric" maxlength="18" required>
                     @error('cnpj')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <button class="btn btn-primary w-100" type="submit">Criar acesso</button>

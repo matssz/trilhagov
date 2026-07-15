@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Editar emenda | Emendas Municipais')
+@section('title', 'Editar emenda | TrilhaGov')
 
 @section('content')
     <a class="d-inline-block mb-3" href="{{ route('emendas.show', $amendment) }}">Voltar para a emenda</a>
@@ -11,6 +11,10 @@
     <form method="POST" action="{{ route('emendas.update', $amendment) }}" novalidate>
         @csrf
         @method('PUT')
+        <input name="_submission_token" type="hidden" value="{{ $submissionToken }}">
+        @error('_submission_token')
+            <div class="alert alert-warning">{{ $message }}</div>
+        @enderror
         <div class="content-panel p-3 p-md-4">
             @include('amendments._form')
         </div>

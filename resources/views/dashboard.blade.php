@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Painel | Emendas Municipais')
+@section('title', 'Painel | TrilhaGov')
 
 @section('content')
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

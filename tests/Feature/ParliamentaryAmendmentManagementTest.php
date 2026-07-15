@@ -6,6 +6,7 @@ use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ParliamentaryAmendmentManagementTest extends TestCase
@@ -20,8 +21,9 @@ class ParliamentaryAmendmentManagementTest extends TestCase
     public function test_user_can_create_amendment_for_their_municipality(): void
     {
         [$user, $municipality] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create');
 
-        $response = $this->actingAs($user)->post(route('emendas.store'), $this->validPayload());
+        $response = $this->actingAs($user)->post(route('emendas.store'), $payload);
 
         $amendment = $municipality->amendments()->firstOrFail();
 
@@ -51,6 +53,34 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->assertDontSee('EM-PROTEGIDA');
     }
 
+    public function test_active_municipality_scopes_validation_and_amendment_access(): void
+    {
+        [$user, $firstMunicipality] = $this->userAndMunicipality();
+        $secondMunicipality = Municipality::factory()->create();
+        $secondMunicipality->users()->attach($user, ['role' => 'manager']);
+        $firstAmendment = $this->createAmendment($firstMunicipality, $user, [
+            'reference' => 'EM-COMPARTILHADA',
+        ]);
+        $payload = $this->payloadWithToken('amendment-create', [
+            'reference' => 'EM-COMPARTILHADA',
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $secondMunicipality->id])
+            ->post(route('emendas.store'), $payload)
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $secondMunicipality->id,
+            'reference' => 'EM-COMPARTILHADA',
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $secondMunicipality->id])
+            ->get(route('emendas.show', $firstAmendment))
+            ->assertNotFound();
+    }
+
     public function test_user_cannot_view_or_update_another_municipalitys_amendment(): void
     {
         [$user] = $this->userAndMunicipality();
@@ -61,7 +91,10 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->get(route('emendas.show', $amendment))
             ->assertNotFound();
 
-        $payload = $this->validPayload(['reference' => 'TENTATIVA-ALTERACAO']);
+        $payload = $this->payloadWithToken(
+            "amendment-update-{$amendment->id}",
+            ['reference' => 'TENTATIVA-ALTERACAO'],
+        );
 
         $this->actingAs($user)
             ->put(route('emendas.update', $amendment), $payload)
@@ -74,32 +107,72 @@ class ParliamentaryAmendmentManagementTest extends TestCase
     {
         [$user, $municipality] = $this->userAndMunicipality();
         $this->createAmendment($municipality, $user, ['reference' => 'EM-DUPLICADA']);
+        $payload = $this->payloadWithToken('amendment-create', ['reference' => 'EM-DUPLICADA']);
 
-        $this->actingAs($user)->post(
-            route('emendas.store'),
-            $this->validPayload(['reference' => 'EM-DUPLICADA']),
-        )->assertSessionHasErrors('reference');
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $payload)
+            ->assertSessionHasErrors('reference');
 
         $this->assertDatabaseCount('parliamentary_amendments', 1);
+    }
+
+    public function test_repeated_create_request_is_processed_only_once(): void
+    {
+        [$user] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create');
+
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $payload)
+            ->assertRedirect();
+
+        $this->actingAs($user)
+            ->post(route('emendas.store'), array_merge($payload, ['reference' => 'EM-SEGUNDA']))
+            ->assertRedirect();
+
+        $this->assertDatabaseCount('parliamentary_amendments', 1);
+        $this->assertDatabaseMissing('parliamentary_amendments', ['reference' => 'EM-SEGUNDA']);
     }
 
     public function test_user_can_update_amendment_status_and_received_amount(): void
     {
         [$user, $municipality] = $this->userAndMunicipality();
         $amendment = $this->createAmendment($municipality, $user);
-
-        $this->actingAs($user)->put(route('emendas.update', $amendment), $this->validPayload([
+        $payload = $this->payloadWithToken("amendment-update-{$amendment->id}", [
             'reference' => $amendment->reference,
             'status' => ParliamentaryAmendment::STATUS_EXECUTING,
             'received_amount' => '450000.00',
             'received_at' => '2026-07-10',
-        ]))->assertRedirect(route('emendas.show', $amendment));
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('emendas.update', $amendment), $payload)
+            ->assertRedirect(route('emendas.show', $amendment));
 
         $this->assertDatabaseHas('parliamentary_amendments', [
             'id' => $amendment->id,
             'status' => ParliamentaryAmendment::STATUS_EXECUTING,
             'received_amount' => 450000,
         ]);
+    }
+
+    public function test_repeated_update_request_does_not_apply_a_second_change(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality();
+        $amendment = $this->createAmendment($municipality, $user);
+        $payload = $this->payloadWithToken("amendment-update-{$amendment->id}", [
+            'reference' => $amendment->reference,
+            'status' => ParliamentaryAmendment::STATUS_EXECUTING,
+            'notes' => 'Primeira alteracao',
+        ]);
+
+        $this->actingAs($user)->put(route('emendas.update', $amendment), $payload);
+
+        $this->actingAs($user)->put(
+            route('emendas.update', $amendment),
+            array_merge($payload, ['notes' => 'Alteracao repetida']),
+        )->assertRedirect(route('emendas.show', $amendment));
+
+        $this->assertSame('Primeira alteracao', $amendment->fresh()->notes);
     }
 
     public function test_overdue_deadline_stops_alerting_after_completion(): void
@@ -128,29 +201,29 @@ class ParliamentaryAmendmentManagementTest extends TestCase
     {
         [$user, $municipality] = $this->userAndMunicipality();
         $this->createAmendment($municipality, $user, [
-            'reference' => 'EM-SAÚDE',
-            'object' => 'Aquisição de ambulância para atendimento rural',
+            'reference' => 'EM-SAUDE',
+            'object' => 'Aquisicao de ambulancia para atendimento rural',
         ]);
         $this->createAmendment($municipality, $user, [
-            'reference' => 'EM-EDUCAÇÃO',
+            'reference' => 'EM-EDUCACAO',
             'object' => 'Reforma de escola municipal',
         ]);
 
         $this->actingAs($user)
-            ->get(route('emendas.index', ['search' => 'ambulância']))
+            ->get(route('emendas.index', ['search' => 'ambulancia']))
             ->assertOk()
-            ->assertSee('EM-SAÚDE')
-            ->assertDontSee('EM-EDUCAÇÃO');
+            ->assertSee('EM-SAUDE')
+            ->assertDontSee('EM-EDUCACAO');
     }
 
     public function test_invalid_status_is_rejected(): void
     {
         [$user] = $this->userAndMunicipality();
+        $payload = $this->payloadWithToken('amendment-create', ['status' => 'inventado']);
 
-        $this->actingAs($user)->post(
-            route('emendas.store'),
-            $this->validPayload(['status' => 'inventado']),
-        )->assertSessionHasErrors('status');
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $payload)
+            ->assertSessionHasErrors('status');
 
         $this->assertDatabaseCount('parliamentary_amendments', 0);
     }
@@ -177,6 +250,20 @@ class ParliamentaryAmendmentManagementTest extends TestCase
     }
 
     /** @return array<string, mixed> */
+    private function payloadWithToken(string $scope, array $overrides = []): array
+    {
+        $token = (string) Str::uuid();
+
+        $this->withSession([
+            'form_submission_tokens' => [
+                $scope => [$token => now()->timestamp],
+            ],
+        ]);
+
+        return $this->validPayload(array_merge(['_submission_token' => $token], $overrides));
+    }
+
+    /** @return array<string, mixed> */
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
@@ -187,8 +274,8 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             'transfer_type' => 'special',
             'author_name' => 'Deputada Exemplo',
             'author_party' => 'PSD',
-            'object' => 'Aquisição de equipamentos para unidade municipal de saúde',
-            'responsible_department' => 'Secretaria Municipal de Saúde',
+            'object' => 'Aquisicao de equipamentos para unidade municipal de saude',
+            'responsible_department' => 'Secretaria Municipal de Saude',
             'transferegov_code' => '123456',
             'expected_amount' => '500000.00',
             'received_amount' => null,

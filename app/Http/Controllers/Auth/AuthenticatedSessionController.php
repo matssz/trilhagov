@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\CurrentMunicipality;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, CurrentMunicipality $currentMunicipality): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
@@ -30,8 +31,24 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget('active_municipality_id');
+        $municipalities = $request->user()->municipalities()->complete()->get();
 
-        return redirect()->intended(route('dashboard'));
+        if ($municipalities->isEmpty()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Esta conta não possui um município com cadastro completo.',
+            ]);
+        }
+
+        if ($municipalities->count() === 1) {
+            $currentMunicipality->activate($request, $municipalities->first());
+
+            return redirect()->intended(route('dashboard'));
+        }
+
+        return redirect()->route('municipalities.select');
     }
 
     public function destroy(Request $request): RedirectResponse

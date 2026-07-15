@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "matssz/emendas-municipais",
+    "name": "matssz/trilhagov",
     "type": "project",
     "description": "Controle operacional de emendas parlamentares para municipios.",
     "keywords": ["laravel", "framework"],

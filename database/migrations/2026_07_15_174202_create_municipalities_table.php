@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->char('state', 2);
-            $table->string('cnpj', 14)->nullable()->unique();
-            $table->string('ibge_code', 7)->nullable()->unique();
+            $table->string('cnpj', 14)->unique();
+            $table->string('ibge_code', 7)->unique();
             $table->timestamps();
         });
     }

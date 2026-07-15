@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Entrar | Emendas Municipais')
+@section('title', 'Entrar | TrilhaGov')
 
 @section('content')
     <div class="auth-shell">
         <div class="mb-4">
             <p class="page-kicker mb-2">Acesso restrito</p>
             <h1 class="h3 mb-1">Entrar</h1>
-            <p class="text-secondary mb-0">Gestão municipal de emendas parlamentares.</p>
+            <p class="text-secondary mb-0">TrilhaGov · Gestão de emendas parlamentares.</p>
         </div>
 
         <div class="auth-panel">

@@ -1,4 +1,5 @@
 {
+    "name": "trilhagov",
     "private": true,
     "type": "module",
     "scripts": {

@@ -3,14 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>@yield('title', 'Emendas Municipais')</title>
+        <title>@yield('title', 'TrilhaGov')</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body>
         <nav class="navbar navbar-expand-lg app-navbar" data-bs-theme="dark">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="{{ auth()->check() ? route('dashboard') : route('login') }}">
-                    Emendas Municipais
+                    <span class="brand-mark">TG</span>TrilhaGov <span class="brand-module">Emendas</span>
                 </a>
                 @auth
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appNavigation" aria-controls="appNavigation" aria-expanded="false" aria-label="Abrir navegação">

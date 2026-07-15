@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $amendment->reference . ' | Emendas Municipais')
+@section('title', $amendment->reference . ' | TrilhaGov')
 
 @section('content')
     <a class="d-inline-block mb-3" href="{{ route('emendas.index') }}">Voltar para emendas</a>
