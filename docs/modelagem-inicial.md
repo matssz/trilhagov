@@ -1,0 +1,72 @@
+# Modelagem inicial
+
+## Relações
+
+```text
+Usuário <-> Município -> Emenda parlamentar
+```
+
+Usuários e municípios usam uma relação muitos-para-muitos porque uma prefeitura
+pode ter vários servidores e uma consultoria pode, no futuro, atender mais de um
+município. Nesta primeira interface, cada usuário opera o primeiro município ao
+qual está vinculado.
+
+## municipalities
+
+- `name`: nome do município.
+- `state`: unidade federativa.
+- `cnpj`: CNPJ principal, quando informado.
+- `ibge_code`: código IBGE, quando informado.
+
+## municipality_user
+
+Tabela intermediária que define quais usuários podem acessar cada município.
+O campo `role` prepara a futura separação entre gestor, consulta e auditoria.
+
+## parliamentary_amendments
+
+### Identificação
+
+- referência e exercício;
+- esfera federal ou estadual;
+- tipo de autoria;
+- modalidade de transferência;
+- código do Transferegov.
+
+### Origem e destinação
+
+- autor e partido;
+- objeto;
+- secretaria ou órgão responsável.
+
+### Execução
+
+- valor previsto e valor recebido;
+- situação atual;
+- datas de indicação e recebimento.
+
+### Controle de prazo
+
+- comunicação e publicidade;
+- execução;
+- prestação de contas;
+- data de conclusão de cada marco.
+
+## Decisões de segurança
+
+- O município não vem de um campo escondido do formulário.
+- O controller descobre o município a partir do usuário autenticado.
+- Consultas de detalhe e edição filtram primeiro os municípios do usuário.
+- Emendas não podem ser apagadas pela interface nesta etapa.
+- A referência não pode se repetir no mesmo município, esfera e exercício.
+
+## Próximas entidades candidatas
+
+Somente depois da validação do fluxo atual:
+
+- documentos e evidências;
+- histórico de alterações;
+- responsáveis por etapa;
+- fontes normativas e cronogramas;
+- relatório público de transparência;
+- importação por dados abertos do Transferegov.
