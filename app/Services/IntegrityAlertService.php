@@ -18,7 +18,12 @@ class IntegrityAlertService
         $municipality->load([
             'amendments.documents:id,parliamentary_amendment_id,document_type_id',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
+            'users:id,name,email',
         ]);
+        $operationalUserIds = $municipality->users
+            ->filter(fn ($user) => in_array($user->pivot->role, ['manager', 'editor'], true))
+            ->pluck('id')
+            ->all();
 
         $detections = [];
 
@@ -26,6 +31,7 @@ class IntegrityAlertService
             $this->detectDeadlines($amendment, $settings, $detections);
             $this->detectMissingDocuments($amendment, $municipality, $detections);
             $this->detectInconsistencies($amendment, $detections);
+            $this->detectAssignment($amendment, $operationalUserIds, $detections);
         }
 
         return DB::transaction(function () use ($municipality, $detections): array {
@@ -83,6 +89,8 @@ class IntegrityAlertService
                 $stats['resolved']++;
             }
 
+            $this->recalculateRisk($municipality);
+
             return $stats;
         });
     }
@@ -119,6 +127,12 @@ class IntegrityAlertService
             $severity = $daysUntil <= $settings->deadline_critical_days
                 ? IntegrityAlert::SEVERITY_CRITICAL
                 : IntegrityAlert::SEVERITY_INFO;
+            $overdueDays = max(0, -$daysUntil);
+            $escalationLevel = match (true) {
+                $overdueDays >= $settings->escalation_level_two_days => 2,
+                $overdueDays >= $settings->escalation_level_one_days => 1,
+                default => 0,
+            };
 
             $message = match (true) {
                 $daysUntil < 0 => sprintf('%s vencida há %d dia(s).', $label, abs($daysUntil)),
@@ -129,7 +143,12 @@ class IntegrityAlertService
             $this->addDetection($detections, $amendment, "deadline:{$key}", [
                 'category' => IntegrityAlert::CATEGORY_DEADLINE,
                 'severity' => $severity,
-                'title' => $daysUntil < 0 ? 'Prazo vencido' : 'Prazo próximo',
+                'escalation_level' => $escalationLevel,
+                'title' => match ($escalationLevel) {
+                    2 => 'Prazo em escalonamento máximo',
+                    1 => 'Prazo escalonado',
+                    default => $daysUntil < 0 ? 'Prazo vencido' : 'Prazo próximo',
+                },
                 'message' => $message,
                 'due_at' => $dueAt,
             ]);
@@ -211,8 +230,107 @@ class IntegrityAlertService
     }
 
     /**
+     * @param  array<int, int>  $operationalUserIds
      * @param  array<int, array<string, mixed>>  $detections
-     * @param  array{category: string, severity: string, title: string, message: string, due_at: Carbon|null}  $attributes
+     */
+    private function detectAssignment(
+        ParliamentaryAmendment $amendment,
+        array $operationalUserIds,
+        array &$detections,
+    ): void {
+        if ($amendment->status === ParliamentaryAmendment::STATUS_COMPLETED) {
+            return;
+        }
+
+        if ($amendment->responsible_user_id === null) {
+            $this->addDetection($detections, $amendment, 'assignment:missing', [
+                'category' => IntegrityAlert::CATEGORY_ASSIGNMENT,
+                'severity' => IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Responsável operacional não definido',
+                'message' => 'A emenda precisa de uma pessoa responsável para receber e tratar os alertas.',
+                'due_at' => null,
+            ]);
+
+            return;
+        }
+
+        if (! in_array($amendment->responsible_user_id, $operationalUserIds, true)) {
+            $this->addDetection($detections, $amendment, 'assignment:invalid', [
+                'category' => IntegrityAlert::CATEGORY_ASSIGNMENT,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Responsável sem acesso operacional',
+                'message' => 'A pessoa atribuída não possui mais perfil de gestor ou editor neste município.',
+                'due_at' => null,
+            ]);
+        }
+    }
+
+    private function recalculateRisk(Municipality $municipality): void
+    {
+        $alertsByAmendment = $municipality->integrityAlerts()
+            ->where('status', IntegrityAlert::STATUS_OPEN)
+            ->get()
+            ->groupBy('parliamentary_amendment_id');
+
+        foreach ($municipality->amendments as $amendment) {
+            $alerts = $alertsByAmendment->get($amendment->id, collect());
+            $score = $alerts->sum(fn (IntegrityAlert $alert) => match ($alert->severity) {
+                IntegrityAlert::SEVERITY_CRITICAL => 25,
+                IntegrityAlert::SEVERITY_WARNING => 12,
+                default => 4,
+            });
+            $highestEscalation = (int) $alerts->max('escalation_level');
+            $score += match ($highestEscalation) {
+                2 => 20,
+                1 => 10,
+                default => 0,
+            };
+            $assignmentAlert = $alerts->firstWhere('category', IntegrityAlert::CATEGORY_ASSIGNMENT);
+
+            if ($assignmentAlert !== null) {
+                $score += $assignmentAlert->severity === IntegrityAlert::SEVERITY_CRITICAL ? 15 : 8;
+            }
+
+            if ($amendment->status === ParliamentaryAmendment::STATUS_BLOCKED) {
+                $score += 20;
+            }
+
+            $score = min(100, $score);
+            $riskLevel = match (true) {
+                $score >= 70 => ParliamentaryAmendment::RISK_CRITICAL,
+                $score >= 40 => ParliamentaryAmendment::RISK_HIGH,
+                $score >= 20 => ParliamentaryAmendment::RISK_MODERATE,
+                default => ParliamentaryAmendment::RISK_LOW,
+            };
+            $reasons = $alerts
+                ->sortByDesc(fn (IntegrityAlert $alert) => match ($alert->severity) {
+                    IntegrityAlert::SEVERITY_CRITICAL => 3,
+                    IntegrityAlert::SEVERITY_WARNING => 2,
+                    default => 1,
+                })
+                ->map(fn (IntegrityAlert $alert) => $alert->title.': '.$alert->message)
+                ->when(
+                    $amendment->status === ParliamentaryAmendment::STATUS_BLOCKED,
+                    fn ($items) => $items->prepend('Emenda marcada com impedimento.'),
+                )
+                ->unique()
+                ->take(5)
+                ->values()
+                ->all();
+
+            $amendment->risk_score = $score;
+            $amendment->risk_level = $riskLevel;
+            $amendment->risk_reasons = $reasons;
+            $amendment->risk_calculated_at = now();
+            $amendment->timestamps = false;
+            $amendment->saveQuietly();
+            $amendment->timestamps = true;
+        }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $detections
+     * @param  array{category: string, severity: string, title: string, message: string, due_at: Carbon|null, escalation_level?: int}  $attributes
      */
     private function addDetection(
         array &$detections,
@@ -228,6 +346,7 @@ class IntegrityAlertService
                 'municipality_id' => $amendment->municipality_id,
                 'parliamentary_amendment_id' => $amendment->id,
                 'alert_key' => $alertKey,
+                'escalation_level' => 0,
                 ...$attributes,
             ],
         ];

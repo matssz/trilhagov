@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\IntegrityAlertService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,7 @@ class DocumentTypeController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $request->merge([
@@ -69,6 +71,7 @@ class DocumentTypeController extends Controller
             ]);
             $auditTrail->recordDocumentTypeCreation($request, $municipality, $documentType);
         });
+        $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', 'Tipo de documento adicionado ao checklist.');
     }
@@ -78,6 +81,7 @@ class DocumentTypeController extends Controller
         int $documentType,
         CurrentMunicipality $currentMunicipality,
         AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $type = $municipality->documentTypes()->findOrFail($documentType);
@@ -123,6 +127,7 @@ class DocumentTypeController extends Controller
                 $changedValues,
             );
         });
+        $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', "Checklist atualizado: {$type->name}.");
     }

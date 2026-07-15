@@ -482,9 +482,108 @@ h6 {
 
 .filters-grid {
     display: grid;
-    grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr) 130px auto;
+    grid-template-columns: minmax(220px, 2fr) minmax(170px, 1fr) 120px minmax(145px, 1fr) auto;
     gap: .75rem;
     align-items: center;
+}
+
+.risk-badge {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    gap: .3rem;
+    padding: .18rem .42rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: .68rem;
+    font-weight: 750;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.risk-badge svg {
+    width: 13px;
+    height: 13px;
+}
+
+.risk-low {
+    background: #e8f6ef;
+    border-color: #bce2ce;
+    color: var(--success);
+}
+
+.risk-moderate {
+    background: var(--gold-100);
+    border-color: #efd58b;
+    color: var(--warning);
+}
+
+.risk-high,
+.risk-critical {
+    background: #fde8e8;
+    border-color: #f2bcbc;
+    color: var(--danger);
+}
+
+.risk-critical {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+}
+
+.risk-meter {
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    background: #e7ecf2;
+}
+
+.risk-meter span {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+    background: var(--success);
+}
+
+.risk-meter .risk-meter-moderate {
+    background: var(--gold-500);
+}
+
+.risk-meter .risk-meter-high,
+.risk-meter .risk-meter-critical {
+    background: var(--danger);
+}
+
+.risk-reasons {
+    display: grid;
+    gap: .55rem;
+    margin: 0 0 1rem;
+    padding-left: 1.1rem;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.object-text svg {
+    width: 14px;
+    height: 14px;
+    vertical-align: -2px;
+}
+
+.escalation-badge {
+    display: inline-flex;
+    padding: .18rem .42rem;
+    border-radius: 4px;
+    background: #e9edf3;
+    color: var(--navy-800);
+    font-size: .68rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.escalation-2 {
+    background: var(--danger);
+    color: #fff;
 }
 
 .form-section {

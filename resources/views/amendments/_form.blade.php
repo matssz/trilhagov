@@ -68,10 +68,23 @@
             <textarea class="form-control @error('object') is-invalid @enderror" id="object" name="object" rows="4" maxlength="5000" required>{{ old('object', $amendment?->object) }}</textarea>
             @error('object')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="col-12">
+        <div class="col-md-6">
             <label class="form-label" for="responsible_department">Secretaria ou órgão responsável <span class="required-mark">*</span></label>
             <input class="form-control @error('responsible_department') is-invalid @enderror" id="responsible_department" name="responsible_department" value="{{ old('responsible_department', $amendment?->responsible_department) }}" maxlength="255" required>
             @error('responsible_department')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="responsible_user_id">Responsável operacional <span class="required-mark">*</span></label>
+            <select class="form-select @error('responsible_user_id') is-invalid @enderror" id="responsible_user_id" name="responsible_user_id" required>
+                <option value="">Selecione uma pessoa</option>
+                @foreach ($responsibleUsers as $responsibleUser)
+                    <option value="{{ $responsibleUser->id }}" @selected((string) old('responsible_user_id', $amendment?->responsible_user_id) === (string) $responsibleUser->id)>
+                        {{ $responsibleUser->name }} · {{ App\Models\User::municipalityRoles()[$responsibleUser->pivot->role] }}
+                    </option>
+                @endforeach
+            </select>
+            <div class="form-text">Receberá os alertas e responderá pelo acompanhamento.</div>
+            @error('responsible_user_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
     </div>
 </section>

@@ -20,6 +20,7 @@
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <p class="page-kicker mb-0">Emenda {{ $amendment->fiscal_year }}</p>
                 <x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" />
+                <x-risk-badge :level="$amendment->risk_level" :label="$amendment->riskLabel()" :score="$amendment->risk_score" />
             </div>
             <h1 class="h3 mb-1">{{ $amendment->reference }}</h1>
             <p class="text-secondary mb-0">{{ $amendment->municipality->name }} / {{ $amendment->municipality->state }}</p>
@@ -41,6 +42,7 @@
                         <dt>Autor</dt><dd>{{ $amendment->author_name }}{{ $amendment->author_party ? ' / '.$amendment->author_party : '' }}</dd>
                         <dt>Código Transferegov</dt><dd>{{ $amendment->transferegov_code ?: 'Não informado' }}</dd>
                         <dt>Órgão responsável</dt><dd>{{ $amendment->responsible_department }}</dd>
+                        <dt>Responsável operacional</dt><dd>{{ $amendment->responsibleUser?->name ?? 'Não definido' }}</dd>
                         <dt>Data da indicação</dt><dd>{{ $amendment->indicated_at?->format('d/m/Y') ?: 'Não informada' }}</dd>
                         <dt>Data do recebimento</dt><dd>{{ $amendment->received_at?->format('d/m/Y') ?: 'Não informada' }}</dd>
                         <dt>Valor previsto</dt><dd>R$ {{ number_format($amendment->expected_amount, 2, ',', '.') }}</dd>
@@ -64,6 +66,29 @@
         </div>
 
         <div class="col-lg-4">
+            <section class="content-panel mb-4">
+                <div class="content-panel-header d-flex align-items-center justify-content-between gap-2">
+                    <h2 class="h5 mb-0">Matriz de risco</h2>
+                    <x-risk-badge :level="$amendment->risk_level" :label="$amendment->riskLabel()" :score="$amendment->risk_score" />
+                </div>
+                <div class="content-panel-body">
+                    <div class="risk-meter" role="progressbar" aria-label="Pontuação de risco" aria-valuenow="{{ $amendment->risk_score }}" aria-valuemin="0" aria-valuemax="100">
+                        <span class="risk-meter-{{ $amendment->risk_level }}" style="width: {{ $amendment->risk_score }}%"></span>
+                    </div>
+                    @if ($amendment->risk_reasons)
+                        <ul class="risk-reasons">
+                            @foreach ($amendment->risk_reasons as $reason)
+                                <li>{{ $reason }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="small text-secondary mb-0">Nenhuma pendência relevante detectada.</p>
+                    @endif
+                    @if ($amendment->risk_calculated_at)
+                        <small class="text-secondary">Atualizado em {{ $amendment->risk_calculated_at->format('d/m/Y H:i') }}</small>
+                    @endif
+                </div>
+            </section>
             <section class="content-panel">
                 <div class="content-panel-header"><h2 class="h5 mb-0">Prazos de controle</h2></div>
                 <div class="content-panel-body">

@@ -35,6 +35,9 @@
                                 <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
                                     <strong>{{ $notification->data['title'] ?? 'Alerta do TrilhaGov' }}</strong>
                                     <span class="severity-badge severity-{{ $notificationSeverity }}">{{ $notificationSeverityLabel }}</span>
+                                    @if (($notification->data['escalation_level'] ?? 0) > 0)
+                                        <span class="escalation-badge escalation-{{ $notification->data['escalation_level'] }}">Escalonamento {{ $notification->data['escalation_level'] }}</span>
+                                    @endif
                                 </div>
                                 <p>{{ $notification->data['message'] ?? '' }}</p>
                                 <small>{{ $notification->data['amendment_reference'] ?? '' }} · {{ $notification->created_at->diffForHumans() }}</small>

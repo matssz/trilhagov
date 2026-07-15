@@ -35,6 +35,13 @@ class ParliamentaryAmendmentRequest extends FormRequest
             'author_party' => ['nullable', 'required_if:authorship_type,individual', 'string', 'max:20'],
             'object' => ['required', 'string', 'max:5000'],
             'responsible_department' => ['required', 'string', 'max:255'],
+            'responsible_user_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('municipality_user', 'user_id')->where(fn ($query) => $query
+                    ->where('municipality_id', $municipalityId)
+                    ->whereIn('role', ['manager', 'editor'])),
+            ],
             'transferegov_code' => ['nullable', 'required_if:government_sphere,federal', 'string', 'max:100'],
             'expected_amount' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
             'received_amount' => ['nullable', 'required_if:status,resource_received,executing,accountability_pending,completed', 'numeric', 'min:0', 'max:9999999999999.99', 'lte:expected_amount'],
@@ -59,6 +66,7 @@ class ParliamentaryAmendmentRequest extends FormRequest
             'transferegov_code.required_if' => 'Informe o código Transferegov para emendas federais.',
             'received_amount.required_if' => 'Informe o valor recebido para a situação selecionada.',
             'received_amount.lte' => 'O valor recebido não pode ser maior que o valor previsto.',
+            'responsible_user_id.exists' => 'Selecione um gestor ou editor ativo deste município.',
             'received_at.required_if' => 'Informe a data do recebimento para a situação selecionada.',
             'indicated_at.before_or_equal' => 'A data da indicação não pode estar no futuro.',
             'received_at.after_or_equal' => 'A data do recebimento não pode ser anterior à data da indicação.',
@@ -85,6 +93,7 @@ class ParliamentaryAmendmentRequest extends FormRequest
             'received_at', 'communication_deadline', 'communication_completed_at',
             'execution_deadline', 'execution_completed_at', 'accountability_deadline',
             'accountability_completed_at', 'notes',
+            'responsible_user_id',
         ];
         $data = [
             'reference' => trim((string) $this->input('reference')),

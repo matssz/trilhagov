@@ -30,10 +30,11 @@
             <div class="metric-label">Valor recebido</div>
             <div class="metric-value">R$ {{ number_format($receivedTotal, 2, ',', '.') }}</div>
         </div>
-        <div class="metric-card {{ $overdueCount > 0 ? 'border-danger' : '' }}">
-            <span class="metric-icon"><i data-lucide="calendar-clock" aria-hidden="true"></i></span>
-            <div class="metric-label">Prazos vencidos</div>
-            <div class="metric-value {{ $overdueCount > 0 ? 'text-danger' : '' }}">{{ $overdueCount }}</div>
+        <div class="metric-card {{ $highRiskCount > 0 ? 'border-danger' : '' }}">
+            <span class="metric-icon"><i data-lucide="gauge" aria-hidden="true"></i></span>
+            <div class="metric-label">Emendas em alto risco</div>
+            <div class="metric-value {{ $highRiskCount > 0 ? 'text-danger' : '' }}">{{ $highRiskCount }}</div>
+            <small class="text-secondary">{{ $overdueCount }} com prazo vencido</small>
         </div>
     </section>
 
@@ -54,7 +55,7 @@
                         <div class="deadline-row">
                             <div>
                                 <a class="fw-semibold" href="{{ route('emendas.show', $item['amendment']) }}">{{ $item['amendment']->reference }}</a>
-                                <div class="small text-secondary">{{ $deadline['label'] }} · {{ $item['amendment']->responsible_department }}</div>
+                                <div class="small text-secondary">{{ $deadline['label'] }} · {{ $item['amendment']->responsibleUser?->name ?? 'Sem responsável' }}</div>
                             </div>
                             <div class="deadline-date {{ $isOverdue ? 'deadline-overdue' : ($isUpcoming ? 'deadline-upcoming' : '') }}">
                                 {{ $deadline['date']->format('d/m/Y') }}
@@ -79,7 +80,10 @@
                                 <a class="fw-semibold" href="{{ route('emendas.show', $amendment) }}">{{ $amendment->reference }}</a>
                                 <div class="small text-secondary">{{ $amendment->author_name }}</div>
                             </div>
-                            <x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" />
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" />
+                                <x-risk-badge :level="$amendment->risk_level" :label="$amendment->riskLabel()" :score="$amendment->risk_score" />
+                            </div>
                         </div>
                     @empty
                         <div class="empty-state">

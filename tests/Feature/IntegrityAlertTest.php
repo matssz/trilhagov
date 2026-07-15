@@ -21,6 +21,7 @@ class IntegrityAlertTest extends TestCase
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
         $amendment = $this->amendment($municipality, $manager, [
+            'responsible_user_id' => $manager->id,
             'status' => ParliamentaryAmendment::STATUS_RESOURCE_RECEIVED,
             'received_amount' => null,
             'received_at' => null,
@@ -69,6 +70,7 @@ class IntegrityAlertTest extends TestCase
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
         $this->amendment($municipality, $manager, [
+            'responsible_user_id' => $manager->id,
             'execution_deadline' => today()->addDay(),
         ]);
         $processor = app(IntegrityAlertProcessor::class);
@@ -97,6 +99,7 @@ class IntegrityAlertTest extends TestCase
             'notify_email' => true,
         ]);
         $this->amendment($municipality, $manager, [
+            'responsible_user_id' => $manager->id,
             'execution_deadline' => today(),
         ]);
 
@@ -147,6 +150,92 @@ class IntegrityAlertTest extends TestCase
             'notify_email' => true,
             'notify_deadlines' => true,
             'notify_integrity' => false,
+        ]);
+    }
+
+    public function test_missing_responsible_person_creates_moderate_risk_and_is_resolved_after_assignment(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'execution_deadline' => today()->addMonths(6),
+        ]);
+        $service = app(IntegrityAlertService::class);
+
+        $service->sync($municipality);
+
+        $this->assertDatabaseHas('integrity_alerts', [
+            'parliamentary_amendment_id' => $amendment->id,
+            'alert_key' => 'assignment:missing',
+            'status' => IntegrityAlert::STATUS_OPEN,
+        ]);
+        $this->assertSame(ParliamentaryAmendment::RISK_MODERATE, $amendment->fresh()->risk_level);
+        $this->assertSame(20, $amendment->fresh()->risk_score);
+
+        $amendment->update(['responsible_user_id' => $manager->id]);
+        $service->sync($municipality->fresh());
+
+        $this->assertDatabaseHas('integrity_alerts', [
+            'alert_key' => 'assignment:missing',
+            'status' => IntegrityAlert::STATUS_RESOLVED,
+        ]);
+        $this->assertSame(ParliamentaryAmendment::RISK_LOW, $amendment->fresh()->risk_level);
+        $this->assertSame(0, $amendment->fresh()->risk_score);
+    }
+
+    public function test_level_two_escalation_notifies_responsible_managers_and_editors(): void
+    {
+        Notification::fake();
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $responsible = User::factory()->create();
+        $otherEditor = User::factory()->create();
+        $municipality->users()->attach($responsible, ['role' => User::ROLE_EDITOR]);
+        $municipality->users()->attach($otherEditor, ['role' => User::ROLE_EDITOR]);
+        $amendment = $this->amendment($municipality, $manager, [
+            'responsible_user_id' => $responsible->id,
+            'communication_deadline' => today()->subDays(8),
+            'execution_deadline' => today()->addMonths(3),
+        ]);
+
+        app(IntegrityAlertProcessor::class)->process($municipality);
+
+        $alert = IntegrityAlert::query()->where('alert_key', 'deadline:communication')->firstOrFail();
+        $this->assertSame(2, $alert->escalation_level);
+        $this->assertSame(ParliamentaryAmendment::RISK_HIGH, $amendment->fresh()->risk_level);
+        $this->assertSame(45, $amendment->fresh()->risk_score);
+        Notification::assertSentToTimes($responsible, IntegrityAlertNotification::class, 1);
+        Notification::assertSentToTimes($manager, IntegrityAlertNotification::class, 1);
+        Notification::assertSentToTimes($otherEditor, IntegrityAlertNotification::class, 1);
+        $this->assertDatabaseCount('alert_deliveries', 3);
+
+        $mail = (new IntegrityAlertNotification(
+            $alert->load(['amendment', 'municipality']),
+            ['mail'],
+        ))->toMail($manager);
+        $this->assertSame('TrilhaGov: Prazo em escalonamento máximo', $mail->subject);
+    }
+
+    public function test_manager_can_configure_escalation_matrix(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->patch(route('alerts.settings.update'), [
+                'deadline_warning_days' => 45,
+                'deadline_critical_days' => 10,
+                'overdue_repeat_days' => 5,
+                'escalation_level_one_days' => 2,
+                'escalation_level_two_days' => 12,
+                'notify_managers_on_warning' => '1',
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('municipality_alert_settings', [
+            'municipality_id' => $municipality->id,
+            'escalation_level_one_days' => 2,
+            'escalation_level_two_days' => 12,
+            'notify_managers_on_warning' => true,
+            'notify_editors_on_level_two' => false,
         ]);
     }
 

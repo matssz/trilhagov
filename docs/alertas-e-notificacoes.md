@@ -9,10 +9,48 @@ O TrilhaGov possui uma Central de Integridade que verifica, por município:
 - status de recurso recebido sem valor ou data de recebimento;
 - valor recebido acima do previsto;
 - emenda concluída sem todos os marcos registrados.
+- emenda ativa sem responsável operacional;
+- responsável que deixou de possuir perfil de gestor ou editor.
 
 Ao corrigir a origem da pendência, o alerta é resolvido automaticamente. O botão
 **Verificar e notificar** e o comando agendado podem ser executados repetidamente:
 uma chave por alerta, usuário, canal e ciclo impede envios duplicados.
+
+## Responsabilidade e escalonamento
+
+Cada emenda pode ser atribuída a uma pessoa com perfil de gestor ou editor no
+mesmo município. A troca fica registrada na trilha de auditoria. Emendas antigas
+sem atribuição continuam acessíveis, mas recebem uma pendência até a regularização.
+
+Os atrasos possuem dois níveis configuráveis:
+
+- nível 1: atraso que já exige ciência da gestão;
+- nível 2: atraso prolongado que também pode avisar todos os editores.
+
+A distribuição padrão segue esta matriz:
+
+| Situação | Destinatários |
+| --- | --- |
+| Informativo | Responsável operacional; gestores quando não houver responsável |
+| Atenção | Responsável e gestores, conforme a configuração municipal |
+| Crítico | Responsável e gestores |
+| Escalonamento 2 | Responsável, gestores e editores, conforme a configuração municipal |
+
+As preferências individuais de canal e categoria continuam sendo respeitadas.
+
+## Matriz de risco
+
+A pontuação vai de 0 a 100 e é recalculada a partir dos alertas abertos. Alertas
+informativos somam 4 pontos, alertas de atenção 12 e críticos 25. Escalonamentos,
+ausência de responsável e situação de impedimento acrescentam peso. As faixas são:
+
+- baixo: 0 a 19;
+- moderado: 20 a 39;
+- alto: 40 a 69;
+- crítico: 70 a 100.
+
+O sistema armazena até cinco motivos que compõem a nota. A matriz é um indicador
+operacional para priorização, não uma decisão jurídica nem uma previsão de multa.
 
 ### Dentro do sistema
 

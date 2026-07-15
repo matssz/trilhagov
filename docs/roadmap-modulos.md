@@ -126,14 +126,22 @@ Portal da Transparência do estado atendido.
 
 ## Módulo 6 - Alertas e responsabilidades
 
+Situação: primeira versão concluída.
+
+Cada emenda possui responsável operacional validado contra a equipe municipal.
+Prazos, documentos e inconsistências alimentam notificações idempotentes, dois
+níveis configuráveis de escalonamento e uma matriz de risco explicável.
+
 Necessidades:
 
 - responsável por etapa;
+- responsável operacional por emenda;
 - alertas internos e por e-mail;
 - antecedência configurável;
 - escalonamento de prazo vencido;
 - confirmação de leitura;
 - registro do alerta na auditoria.
+- nota de risco com os motivos detectados.
 
 Dependências: usuários, prazos confiáveis e auditoria.
 

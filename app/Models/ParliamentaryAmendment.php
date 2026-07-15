@@ -34,6 +34,14 @@ class ParliamentaryAmendment extends Model
 
     public const STATUS_BLOCKED = 'blocked';
 
+    public const RISK_LOW = 'low';
+
+    public const RISK_MODERATE = 'moderate';
+
+    public const RISK_HIGH = 'high';
+
+    public const RISK_CRITICAL = 'critical';
+
     protected $fillable = [
         'created_by',
         'reference',
@@ -45,6 +53,7 @@ class ParliamentaryAmendment extends Model
         'author_party',
         'object',
         'responsible_department',
+        'responsible_user_id',
         'transferegov_code',
         'expected_amount',
         'received_amount',
@@ -65,6 +74,7 @@ class ParliamentaryAmendment extends Model
         return [
             'expected_amount' => 'decimal:2',
             'received_amount' => 'decimal:2',
+            'responsible_user_id' => 'integer',
             'indicated_at' => 'date',
             'received_at' => 'date',
             'communication_deadline' => 'date',
@@ -73,6 +83,9 @@ class ParliamentaryAmendment extends Model
             'execution_completed_at' => 'date',
             'accountability_deadline' => 'date',
             'accountability_completed_at' => 'date',
+            'risk_score' => 'integer',
+            'risk_reasons' => 'array',
+            'risk_calculated_at' => 'datetime',
         ];
     }
 
@@ -141,6 +154,16 @@ class ParliamentaryAmendment extends Model
         return self::transferTypes()[$this->transfer_type] ?? $this->transfer_type;
     }
 
+    public function riskLabel(): string
+    {
+        return match ($this->risk_level) {
+            self::RISK_CRITICAL => 'Crítico',
+            self::RISK_HIGH => 'Alto',
+            self::RISK_MODERATE => 'Moderado',
+            default => 'Baixo',
+        };
+    }
+
     public function municipality(): BelongsTo
     {
         return $this->belongsTo(Municipality::class);
@@ -149,6 +172,11 @@ class ParliamentaryAmendment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
     public function auditLogs(): MorphMany

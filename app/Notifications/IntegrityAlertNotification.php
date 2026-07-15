@@ -30,6 +30,11 @@ class IntegrityAlertNotification extends Notification
             ->greeting("Olá, {$notifiable->name}.")
             ->line($this->alert->message)
             ->line("Emenda: {$this->alert->amendment->reference}")
+            ->when(
+                $this->alert->escalation_level > 0,
+                fn (MailMessage $message) => $message->line($this->alert->escalationLabel()),
+            )
+            ->line("Risco atual: {$this->alert->amendment->riskLabel()} ({$this->alert->amendment->risk_score}/100)")
             ->action('Ver emenda', route('emendas.show', $this->alert->amendment))
             ->line('Este aviso foi gerado pelas preferências de notificação do seu município.');
     }
@@ -45,9 +50,12 @@ class IntegrityAlertNotification extends Notification
             'amendment_reference' => $this->alert->amendment->reference,
             'category' => $this->alert->category,
             'severity' => $this->alert->severity,
+            'escalation_level' => $this->alert->escalation_level,
             'title' => $this->alert->title,
             'message' => $this->alert->message,
             'due_at' => $this->alert->due_at?->toDateString(),
+            'risk_score' => $this->alert->amendment->risk_score,
+            'risk_level' => $this->alert->amendment->risk_level,
             'url' => route('emendas.show', $this->alert->amendment),
         ];
     }

@@ -346,6 +346,37 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         $this->assertDatabaseCount('parliamentary_amendments', 0);
     }
 
+    public function test_responsible_person_must_be_an_operational_member_of_the_active_municipality(): void
+    {
+        [$manager, $municipality] = $this->userAndMunicipality();
+        $viewer = User::factory()->create();
+        $editor = User::factory()->create();
+        $outsider = User::factory()->create();
+        $otherMunicipality = Municipality::factory()->create();
+        $municipality->users()->attach($viewer, ['role' => User::ROLE_VIEWER]);
+        $municipality->users()->attach($editor, ['role' => User::ROLE_EDITOR]);
+        $otherMunicipality->users()->attach($outsider, ['role' => User::ROLE_MANAGER]);
+
+        $this->actingAs($manager)
+            ->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
+                'responsible_user_id' => $viewer->id,
+            ]))
+            ->assertSessionHasErrors('responsible_user_id');
+
+        $this->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
+            'responsible_user_id' => $outsider->id,
+        ]))->assertSessionHasErrors('responsible_user_id');
+
+        $this->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
+            'responsible_user_id' => $editor->id,
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $municipality->id,
+            'responsible_user_id' => $editor->id,
+        ]);
+    }
+
     /** @return array{User, Municipality} */
     private function userAndMunicipality(): array
     {

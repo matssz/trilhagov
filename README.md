@@ -37,6 +37,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Notificações internas com leitura, preferências individuais e proteção contra duplicidade.
 - Alertas por e-mail preparados para provedor de produção e ativados por opção do usuário.
 - Regras municipais configuráveis para antecedência e repetição de prazos vencidos.
+- Responsável operacional por emenda, escalonamento em dois níveis e matriz de risco explicável.
 
 ## Stack
 

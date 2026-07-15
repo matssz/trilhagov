@@ -8,6 +8,7 @@ use App\Models\ParliamentaryAmendment;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\IntegrityAlertService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class ParliamentaryAmendmentController extends Controller
         private readonly CurrentMunicipality $currentMunicipality,
         private readonly FormSubmission $formSubmission,
         private readonly AuditTrail $auditTrail,
+        private readonly IntegrityAlertService $integrityAlertService,
     ) {}
 
     public function index(Request $request): View
@@ -28,8 +30,11 @@ class ParliamentaryAmendmentController extends Controller
         $search = trim((string) $request->query('search'));
         $status = (string) $request->query('status');
         $year = (string) $request->query('year');
+        $risk = (string) $request->query('risk');
+        $this->integrityAlertService->sync($municipality);
 
         $amendments = $municipality->amendments()
+            ->with('responsibleUser')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('reference', 'like', "%{$search}%")
@@ -40,6 +45,7 @@ class ParliamentaryAmendmentController extends Controller
             })
             ->when(array_key_exists($status, ParliamentaryAmendment::statuses()), fn ($query) => $query->where('status', $status))
             ->when(ctype_digit($year), fn ($query) => $query->where('fiscal_year', (int) $year))
+            ->when(in_array($risk, ['low', 'moderate', 'high', 'critical'], true), fn ($query) => $query->where('risk_level', $risk))
             ->latest('fiscal_year')
             ->latest('id')
             ->paginate(12)
@@ -51,6 +57,7 @@ class ParliamentaryAmendmentController extends Controller
             'search' => $search,
             'selectedStatus' => $status,
             'selectedYear' => $year,
+            'selectedRisk' => $risk,
             'statuses' => ParliamentaryAmendment::statuses(),
             'canEdit' => $request->user()->canEditMunicipality($municipality->id),
         ]);
@@ -100,6 +107,8 @@ class ParliamentaryAmendmentController extends Controller
                 ->withErrors(['reference' => 'Esta emenda já foi cadastrada para o município, esfera e exercício.']);
         }
 
+        $this->integrityAlertService->sync($municipality->fresh());
+
         return redirect()
             ->route('emendas.show', $amendment)
             ->with('status', 'Emenda cadastrada com sucesso.');
@@ -111,7 +120,7 @@ class ParliamentaryAmendmentController extends Controller
     public function show(Request $request, int $emenda): View
     {
         $amendment = $this->amendmentForUser($request, $emenda)
-            ->load(['municipality', 'creator', 'auditLogs', 'documents.documentType']);
+            ->load(['municipality', 'creator', 'responsibleUser', 'auditLogs', 'documents.documentType']);
         $documentTypes = $amendment->municipality->documentTypes()
             ->active()
             ->orderBy('sort_order')
@@ -179,6 +188,7 @@ class ParliamentaryAmendmentController extends Controller
                 $amendment->getChanges(),
             );
         });
+        $this->integrityAlertService->sync($amendment->municipality()->firstOrFail());
 
         return redirect()
             ->route('emendas.show', $amendment)
@@ -203,8 +213,14 @@ class ParliamentaryAmendmentController extends Controller
     /** @return array<string, mixed> */
     private function formOptions(Request $request): array
     {
+        $municipality = $this->municipalityForUser($request);
+
         return [
-            'municipality' => $this->municipalityForUser($request),
+            'municipality' => $municipality,
+            'responsibleUsers' => $municipality->users()
+                ->wherePivotIn('role', ['manager', 'editor'])
+                ->orderBy('name')
+                ->get(),
             'statuses' => ParliamentaryAmendment::statuses(),
             'governmentSpheres' => ParliamentaryAmendment::governmentSpheres(),
             'authorshipTypes' => ParliamentaryAmendment::authorshipTypes(),

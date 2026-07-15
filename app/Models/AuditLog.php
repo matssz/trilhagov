@@ -107,6 +107,7 @@ class AuditLog extends Model
             'author_party' => 'Partido',
             'object' => 'Objeto',
             'responsible_department' => 'Órgão responsável',
+            'responsible_user_id' => 'Responsável operacional',
             'transferegov_code' => 'Código Transferegov',
             'expected_amount' => 'Valor previsto',
             'received_amount' => 'Valor recebido',
@@ -131,6 +132,10 @@ class AuditLog extends Model
 
         if ($field === 'role') {
             return User::municipalityRoles()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'responsible_user_id') {
+            return User::query()->find($value)?->name ?? 'Usuário não disponível';
         }
 
         if (in_array($field, ['is_required', 'is_active'], true)) {

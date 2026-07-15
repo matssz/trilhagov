@@ -60,6 +60,7 @@
                         <option value="deadline" @selected(request('category') === 'deadline')>Prazo</option>
                         <option value="document" @selected(request('category') === 'document')>Documento</option>
                         <option value="consistency" @selected(request('category') === 'consistency')>Consistência</option>
+                        <option value="assignment" @selected(request('category') === 'assignment')>Responsabilidade</option>
                     </select>
                 </label>
                 <label>
@@ -78,12 +79,15 @@
             @forelse ($alerts as $alert)
                 <article class="integrity-alert integrity-alert-{{ $alert->severity }}">
                     <span class="alert-severity-icon" aria-hidden="true">
-                        <i data-lucide="{{ $alert->category === 'deadline' ? 'calendar-clock' : ($alert->category === 'document' ? 'file-warning' : 'shield-alert') }}"></i>
+                        <i data-lucide="{{ $alert->category === 'deadline' ? 'calendar-clock' : ($alert->category === 'document' ? 'file-warning' : ($alert->category === 'assignment' ? 'user-round-check' : 'shield-alert')) }}"></i>
                     </span>
                     <div class="integrity-alert-copy">
                         <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                             <span class="severity-badge severity-{{ $alert->severity }}">{{ $alert->severityLabel() }}</span>
                             <span class="alert-category">{{ $alert->categoryLabel() }}</span>
+                            @if ($alert->escalationLabel())
+                                <span class="escalation-badge escalation-{{ $alert->escalation_level }}">{{ $alert->escalationLabel() }}</span>
+                            @endif
                             @if ($alert->status === 'resolved')
                                 <span class="badge text-bg-success">Resolvido</span>
                             @endif
@@ -133,6 +137,27 @@
                         <div class="input-group"><input class="form-control" id="overdue_repeat_days" name="overdue_repeat_days" type="number" min="1" max="30" value="{{ old('overdue_repeat_days', $settings->overdue_repeat_days) }}" required><span class="input-group-text">dias</span></div>
                     </div>
                     <div class="col-md-3"><button class="btn btn-primary w-100" type="submit">Salvar regras</button></div>
+                    <div class="col-12"><hr class="my-1"></div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="escalation_level_one_days">Escalonamento 1</label>
+                        <div class="input-group"><input class="form-control" id="escalation_level_one_days" name="escalation_level_one_days" type="number" min="1" max="30" value="{{ old('escalation_level_one_days', $settings->escalation_level_one_days) }}" required><span class="input-group-text">dias vencido</span></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="escalation_level_two_days">Escalonamento 2</label>
+                        <div class="input-group"><input class="form-control" id="escalation_level_two_days" name="escalation_level_two_days" type="number" min="2" max="90" value="{{ old('escalation_level_two_days', $settings->escalation_level_two_days) }}" required><span class="input-group-text">dias vencido</span></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="notification-preference h-100">
+                            <div><strong>Gestores em atenção</strong><small>Avisar gestores nos alertas amarelos</small></div>
+                            <div class="form-check form-switch"><input class="form-check-input" name="notify_managers_on_warning" type="checkbox" value="1" @checked(old('notify_managers_on_warning', $settings->notify_managers_on_warning)) aria-label="Avisar gestores em alertas de atenção"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="notification-preference h-100">
+                            <div><strong>Editores no nível 2</strong><small>Ampliar o aviso no atraso máximo</small></div>
+                            <div class="form-check form-switch"><input class="form-check-input" name="notify_editors_on_level_two" type="checkbox" value="1" @checked(old('notify_editors_on_level_two', $settings->notify_editors_on_level_two)) aria-label="Avisar editores no escalonamento dois"></div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </section>

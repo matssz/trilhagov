@@ -26,7 +26,7 @@ class AlertCenterController extends Controller
 
         $query->where('status', $status);
 
-        if (in_array($request->query('category'), ['deadline', 'document', 'consistency'], true)) {
+        if (in_array($request->query('category'), ['deadline', 'document', 'consistency', 'assignment'], true)) {
             $query->where('category', $request->query('category'));
         }
 
@@ -76,7 +76,11 @@ class AlertCenterController extends Controller
             'deadline_warning_days' => ['required', 'integer', 'min:7', 'max:90'],
             'deadline_critical_days' => ['required', 'integer', 'min:1', 'lt:deadline_warning_days'],
             'overdue_repeat_days' => ['required', 'integer', 'min:1', 'max:30'],
+            'escalation_level_one_days' => ['required', 'integer', 'min:1', 'max:30'],
+            'escalation_level_two_days' => ['required', 'integer', 'gt:escalation_level_one_days', 'max:90'],
         ]);
+        $validated['notify_managers_on_warning'] = $request->boolean('notify_managers_on_warning');
+        $validated['notify_editors_on_level_two'] = $request->boolean('notify_editors_on_level_two');
 
         $municipality->alertSetting()->updateOrCreate([], $validated);
 

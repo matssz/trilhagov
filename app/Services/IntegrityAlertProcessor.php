@@ -37,7 +37,8 @@ class IntegrityAlertProcessor
                 $cycleKey = $this->cycleKey($alert, $settings->overdue_repeat_days);
 
                 foreach ($municipality->users as $user) {
-                    if (! $this->categoryEnabled($alert, $user->pivot)) {
+                    if (! $this->categoryEnabled($alert, $user->pivot)
+                        || ! $this->shouldReceiveAlert($alert, $user->id, $user->pivot->role, $settings)) {
                         continue;
                     }
 
@@ -89,6 +90,28 @@ class IntegrityAlertProcessor
             : (bool) $membership->notify_integrity;
     }
 
+    private function shouldReceiveAlert(
+        IntegrityAlert $alert,
+        int $userId,
+        string $role,
+        object $settings,
+    ): bool {
+        if ($alert->amendment->responsible_user_id === $userId) {
+            return true;
+        }
+
+        if ($role === 'manager') {
+            return $alert->amendment->responsible_user_id === null
+                || $alert->severity === IntegrityAlert::SEVERITY_CRITICAL
+                || ($alert->severity === IntegrityAlert::SEVERITY_WARNING && $settings->notify_managers_on_warning)
+                || $alert->escalation_level > 0;
+        }
+
+        return $role === 'editor'
+            && $alert->escalation_level >= 2
+            && $settings->notify_editors_on_level_two;
+    }
+
     private function cycleKey(IntegrityAlert $alert, int $overdueRepeatDays): string
     {
         if ($alert->category !== IntegrityAlert::CATEGORY_DEADLINE || $alert->due_at === null) {
@@ -100,7 +123,7 @@ class IntegrityAlertProcessor
         if ($daysUntil < 0) {
             $cycle = intdiv(abs($daysUntil), max(1, $overdueRepeatDays));
 
-            return "overdue:{$cycle}:".$alert->due_at->format('Ymd');
+            return "overdue:{$alert->escalation_level}:{$cycle}:".$alert->due_at->format('Ymd');
         }
 
         if ($daysUntil === 0) {

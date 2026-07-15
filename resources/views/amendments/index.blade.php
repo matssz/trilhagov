@@ -22,6 +22,13 @@
             @endforeach
         </select>
         <input class="form-control" name="year" type="number" value="{{ $selectedYear }}" min="2000" max="{{ now()->year + 1 }}" placeholder="Exercício" aria-label="Filtrar por exercício">
+        <select class="form-select" name="risk" aria-label="Filtrar por risco">
+            <option value="">Todos os riscos</option>
+            <option value="critical" @selected($selectedRisk === 'critical')>Crítico</option>
+            <option value="high" @selected($selectedRisk === 'high')>Alto</option>
+            <option value="moderate" @selected($selectedRisk === 'moderate')>Moderado</option>
+            <option value="low" @selected($selectedRisk === 'low')>Baixo</option>
+        </select>
         <button class="btn btn-outline-primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Filtrar</button>
     </form>
 
@@ -55,7 +62,13 @@
                                     <div class="fw-semibold">{{ $amendment->reference }}</div>
                                     <small class="text-secondary">{{ $amendment->fiscal_year }} · {{ $amendment->governmentSphereLabel() }}</small>
                                 </td>
-                                <td class="object-text">{{ $amendment->object }}</td>
+                                <td class="object-text">
+                                    {{ $amendment->object }}
+                                    <div class="small text-secondary mt-1">
+                                        <i data-lucide="user-round-check" aria-hidden="true"></i>
+                                        {{ $amendment->responsibleUser?->name ?? 'Sem responsável operacional' }}
+                                    </div>
+                                </td>
                                 <td>{{ $amendment->author_name }}</td>
                                 <td class="text-nowrap">R$ {{ number_format($amendment->expected_amount, 2, ',', '.') }}</td>
                                 <td class="text-nowrap">
@@ -68,7 +81,10 @@
                                         <span class="text-secondary">Não informado</span>
                                     @endif
                                 </td>
-                                <td><x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" /></td>
+                                <td>
+                                    <x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" />
+                                    <div class="mt-2"><x-risk-badge :level="$amendment->risk_level" :label="$amendment->riskLabel()" :score="$amendment->risk_score" /></div>
+                                </td>
                                 <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ route('emendas.show', $amendment) }}">Ver</a></td>
                             </tr>
                         @endforeach

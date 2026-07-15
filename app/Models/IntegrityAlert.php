@@ -18,6 +18,8 @@ class IntegrityAlert extends Model
 
     public const CATEGORY_CONSISTENCY = 'consistency';
 
+    public const CATEGORY_ASSIGNMENT = 'assignment';
+
     public const SEVERITY_INFO = 'info';
 
     public const SEVERITY_WARNING = 'warning';
@@ -30,6 +32,7 @@ class IntegrityAlert extends Model
         'alert_key',
         'category',
         'severity',
+        'escalation_level',
         'title',
         'message',
         'due_at',
@@ -42,6 +45,7 @@ class IntegrityAlert extends Model
     {
         return [
             'due_at' => 'date',
+            'escalation_level' => 'integer',
             'detected_at' => 'datetime',
             'resolved_at' => 'datetime',
         ];
@@ -76,7 +80,17 @@ class IntegrityAlert extends Model
         return match ($this->category) {
             self::CATEGORY_DEADLINE => 'Prazo',
             self::CATEGORY_DOCUMENT => 'Documento',
+            self::CATEGORY_ASSIGNMENT => 'Responsabilidade',
             default => 'Consistência',
+        };
+    }
+
+    public function escalationLabel(): ?string
+    {
+        return match ($this->escalation_level) {
+            2 => 'Escalonamento 2',
+            1 => 'Escalonamento 1',
+            default => null,
         };
     }
 }

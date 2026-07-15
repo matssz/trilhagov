@@ -7,6 +7,7 @@ use App\Models\DocumentType;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\IntegrityAlertService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,7 @@ class AmendmentDocumentController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $amendment = $municipality->amendments()->findOrFail($emenda);
@@ -99,6 +101,7 @@ class AmendmentDocumentController extends Controller
 
             throw $exception;
         }
+        $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', "Documento anexado como versão {$document->version}.");
     }
