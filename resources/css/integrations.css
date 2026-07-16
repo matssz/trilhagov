@@ -555,6 +555,204 @@
     font-size: .7rem;
 }
 
+.financial-reconciliation {
+    padding: 1rem 1.1rem;
+    border-top: 1px solid var(--line);
+    background: #ffffff;
+}
+
+.financial-reconciliation-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.financial-reconciliation-heading h3 {
+    margin: 0;
+    font-size: .92rem;
+    font-weight: 800;
+}
+
+.financial-reconciliation-heading p:last-child {
+    margin: .25rem 0 0;
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.financial-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .32rem;
+    margin-top: .35rem;
+    color: var(--warning);
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.financial-status svg {
+    width: 14px;
+    height: 14px;
+}
+
+.financial-consistent .financial-status { color: var(--success); }
+.financial-failed .financial-status { color: var(--danger); }
+
+.financial-comparisons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: .9rem;
+    overflow: hidden;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+
+.financial-comparisons article {
+    display: grid;
+    min-width: 0;
+    min-height: 108px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: .65rem;
+    align-content: center;
+    padding: .8rem;
+    background: #fbfcfe;
+}
+
+.comparison-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    grid-row: 1 / 3;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--navy-100);
+    color: var(--navy-800);
+}
+
+.comparison-icon svg { width: 17px; height: 17px; }
+.comparison-consistent .comparison-icon { background: #e5f4ed; color: var(--success); }
+.comparison-divergent .comparison-icon { background: var(--gold-100); color: var(--warning); }
+
+.comparison-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.comparison-copy > span {
+    color: var(--muted);
+    font-size: .63rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.comparison-copy strong {
+    margin: .15rem 0;
+    color: var(--navy-950);
+    font-size: .9rem;
+}
+
+.comparison-copy small {
+    color: var(--muted);
+    font-size: .66rem;
+}
+
+.comparison-result {
+    grid-column: 2;
+    color: var(--warning);
+    font-size: .64rem;
+    font-weight: 750;
+}
+
+.comparison-consistent .comparison-result { color: var(--success); }
+.comparison-pending .comparison-result { color: var(--muted); }
+
+.local-execution-context {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem 1rem;
+    align-items: center;
+    padding: .72rem 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .67rem;
+}
+
+.local-execution-context strong { color: var(--navy-950); }
+.local-execution-context small { flex-basis: 100%; font-size: .64rem; }
+
+.financial-evidence summary {
+    display: flex;
+    min-width: 0;
+    min-height: 42px;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    color: var(--navy-800);
+    cursor: pointer;
+    overflow: hidden;
+    font-size: .72rem;
+    font-weight: 750;
+    list-style: none;
+}
+
+.financial-evidence summary::-webkit-details-marker { display: none; }
+.financial-evidence summary span { display: inline-flex; min-width: 0; align-items: center; gap: .42rem; }
+.financial-evidence summary svg { width: 15px; height: 15px; flex: 0 0 15px; }
+.financial-evidence > summary > svg { transition: transform .2s ease; }
+.financial-evidence[open] > summary > svg { transform: rotate(180deg); }
+
+.financial-evidence-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+    padding: .8rem 0;
+    border-top: 1px solid var(--line);
+}
+
+.financial-evidence-body h4 {
+    margin: 0 0 .45rem;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.official-record {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .5rem 0;
+    border-top: 1px solid #edf1f6;
+    font-size: .68rem;
+}
+
+.official-record > span { display: flex; min-width: 0; flex-direction: column; }
+.official-record > strong { flex: 0 0 auto; color: var(--navy-950); }
+.official-record small { color: var(--muted); font-size: .62rem; overflow-wrap: anywhere; }
+.official-record-empty { margin: 0; color: var(--muted); font-size: .68rem; }
+
+.financial-evidence footer {
+    color: var(--muted);
+    font-size: .62rem;
+}
+
+.financial-failure {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-top: .75rem;
+    padding: .7rem;
+    background: #faeaea;
+    border-left: 3px solid var(--danger);
+    color: #7b2b2b;
+    font-size: .7rem;
+}
+
+.financial-failure svg { width: 17px; height: 17px; flex: 0 0 17px; }
+
 .integration-empty {
     display: grid;
     min-height: 280px;
@@ -584,7 +782,8 @@
 
 @media (max-width: 1099.98px) {
     .integration-metrics,
-    .candidate-summary {
+    .candidate-summary,
+    .financial-comparisons {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -622,9 +821,19 @@
     }
 
     .candidate-header,
-    .difference-heading {
+    .difference-heading,
+    .financial-reconciliation-heading {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .financial-reconciliation-heading form,
+    .financial-reconciliation-heading .btn {
+        width: 100%;
+    }
+
+    .financial-evidence-body {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .candidate-source {
@@ -684,7 +893,8 @@
 
     .source-health,
     .integration-metrics,
-    .candidate-summary {
+    .candidate-summary,
+    .financial-comparisons {
         grid-template-columns: minmax(0, 1fr);
     }
 

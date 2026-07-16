@@ -133,6 +133,11 @@ class Municipality extends Model
         return $this->hasMany(ExternalAmendmentCandidate::class);
     }
 
+    public function externalFinancialReconciliations(): HasMany
+    {
+        return $this->hasMany(ExternalFinancialReconciliation::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

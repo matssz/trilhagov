@@ -339,6 +339,10 @@ h6 {
 }
 
 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .42rem;
     border-radius: 6px;
     font-weight: 650;
 }
@@ -346,8 +350,9 @@ h6 {
 .btn svg {
     width: 17px;
     height: 17px;
-    margin-right: .42rem;
-    vertical-align: -3px;
+    flex: 0 0 17px;
+    margin: 0;
+    vertical-align: middle;
 }
 
 .btn-primary {

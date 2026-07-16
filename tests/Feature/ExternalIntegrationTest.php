@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ExternalAmendmentCandidate;
 use App\Models\ExternalDataSync;
+use App\Models\ExternalFinancialReconciliation;
+use App\Models\FinancialCommitment;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -139,6 +141,93 @@ class ExternalIntegrationTest extends TestCase
         $this->post(route('integrations.sync'), $payload)->assertSessionHas('warning', 'Esta sincronização já foi solicitada.');
     }
 
+    public function test_financial_reconciliation_compares_equivalent_values_without_changing_local_records(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'expected_amount' => 110000,
+            'received_amount' => 110000,
+        ]);
+        $commitment = $amendment->financialCommitments()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'commitment_number' => '2026NE001',
+            'supplier_name' => 'Fornecedor Teste',
+            'procurement_process' => 'PROC-001',
+            'object_description' => 'Execução municipal',
+            'committed_amount' => 30000,
+            'committed_at' => '2026-04-10',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ]);
+        $commitment->payments()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'payment_reference' => 'PAG-001',
+            'amount' => 10000,
+            'paid_at' => '2026-05-10',
+        ]);
+        $candidate = $this->candidate($municipality, [
+            'parliamentary_amendment_id' => $amendment->id,
+            'match_status' => ExternalAmendmentCandidate::STATUS_MATCHED,
+        ]);
+        Http::fake(fn ($request) => $this->financialResponseFor($request->url()));
+        $token = $this->sessionFor($municipality, "external-financial-{$candidate->id}");
+
+        $this->actingAs($manager)->post(route('integrations.candidates.financial', $candidate), [
+            '_submission_token' => $token,
+        ])->assertSessionHas('status');
+
+        $reconciliation = ExternalFinancialReconciliation::firstOrFail();
+        $this->assertSame(110000.0, (float) $reconciliation->official_committed_amount);
+        $this->assertSame(110000.0, (float) $reconciliation->official_ordered_amount);
+        $this->assertSame(100500.0, (float) $reconciliation->official_account_balance);
+        $this->assertSame(30000.0, (float) $reconciliation->local_committed_amount);
+        $this->assertSame(10000.0, (float) $reconciliation->local_paid_amount);
+        $this->assertSame(100000.0, (float) $reconciliation->local_estimated_balance);
+        $this->assertSame(500.0, (float) $reconciliation->differences['account_balance']['difference']);
+        $this->assertSame(ExternalFinancialReconciliation::STATUS_DIVERGENT, $reconciliation->status);
+        $this->assertCount(3, $reconciliation->official_payment_orders);
+        $this->assertSame(110000.0, (float) $amendment->fresh()->received_amount);
+        $this->assertDatabaseCount('financial_payments', 1);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'external_financial_reconciled']);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'empenhos_especiais')
+            && (int) $request['id_plano_acao'] === 3221);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'saldo_conta_gestao_financeira_especiais')
+            && $request['id_agencia_conta'] === '1428-34782');
+
+        $amendment->update(['received_amount' => null]);
+        $secondToken = $this->sessionFor($municipality, "external-financial-{$candidate->id}");
+        $this->actingAs($manager)->post(route('integrations.candidates.financial', $candidate), [
+            '_submission_token' => $secondToken,
+        ])->assertSessionHas('status');
+        $this->assertSame(
+            ExternalFinancialReconciliation::STATUS_INCOMPLETE,
+            $candidate->financialReconciliations()->firstOrFail()->status,
+        );
+    }
+
+    public function test_financial_failure_is_recorded_and_duplicate_submission_is_blocked(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $candidate = $this->candidate($municipality);
+        Http::fake(['*' => Http::response(['message' => 'temporary failure'], 503)]);
+        $token = $this->sessionFor($municipality, "external-financial-{$candidate->id}");
+        $payload = ['_submission_token' => $token];
+
+        $this->actingAs($manager)
+            ->post(route('integrations.candidates.financial', $candidate), $payload)
+            ->assertSessionHas('warning', 'A consulta financeira oficial não respondeu corretamente. A falha foi registrada e pode ser tentada novamente.');
+
+        $this->assertDatabaseHas('external_financial_reconciliations', [
+            'external_amendment_candidate_id' => $candidate->id,
+            'status' => ExternalFinancialReconciliation::STATUS_FAILED,
+        ]);
+        $this->post(route('integrations.candidates.financial', $candidate), $payload)
+            ->assertSessionHas('warning', 'Esta conciliação financeira já foi solicitada.');
+        $this->assertDatabaseCount('external_financial_reconciliations', 1);
+    }
+
     public function test_integration_access_respects_roles_and_active_municipality(): void
     {
         [$viewer, $municipality] = $this->memberWithMunicipality(User::ROLE_VIEWER);
@@ -151,6 +240,7 @@ class ExternalIntegrationTest extends TestCase
             ->assertSee('Caixa de conferência')
             ->assertDontSee('Consultar fonte oficial');
         $this->post(route('integrations.sync'), [])->assertForbidden();
+        $this->post(route('integrations.candidates.financial', $candidate), [])->assertForbidden();
 
         [$otherManager, $otherMunicipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
         $token = $this->sessionFor($otherMunicipality, "external-ignore-{$candidate->id}");
@@ -201,7 +291,61 @@ class ExternalIntegrationTest extends TestCase
             'detalhamento_objeto' => null,
             'nome_objeto' => null,
             'id_beneficiario' => 7052,
+            'id_agencia_conta' => '1428-34782',
         ];
+    }
+
+    private function financialResponseFor(string $url)
+    {
+        if (str_contains($url, 'empenhos_especiais')) {
+            return Http::response([
+                'data' => [
+                    ['id_empenho' => 4904, 'numero_empenho' => '2026NE001', 'valor_empenho' => 30000, 'data_emissao_empenho' => '2026-01-10', 'descricao_situacao_empenho' => 'Enviado'],
+                    ['id_empenho' => 3653, 'numero_empenho' => '2026NE002', 'valor_empenho' => 80000, 'data_emissao_empenho' => '2026-01-10', 'descricao_situacao_empenho' => 'Enviado'],
+                ],
+                'total_pages' => 1,
+            ]);
+        }
+
+        if (str_contains($url, 'documentos_habeis_especiais')) {
+            $document = str_contains($url, 'id_empenho=4904')
+                ? ['id_dh' => 21257, 'numero_documento_habil' => '2026TF001', 'valor_dh' => 30000]
+                : ['id_dh' => 21258, 'numero_documento_habil' => '2026TF002', 'valor_dh' => 80000];
+
+            return Http::response(['data' => [$document], 'total_pages' => 1]);
+        }
+
+        if (str_contains($url, 'ordens_pagamentos_ordens_bancarias_especiais')) {
+            $documentId = str_contains($url, 'id_dh=21257') ? 21257 : 21258;
+            $orders = [[
+                'id_op_ob' => $documentId,
+                'id_dh' => $documentId,
+                'numero_ordem_bancaria' => '2026OB'.$documentId,
+                'data_emissao_ob' => '2026-02-10',
+                'descricao_situacao_op' => 'Enviada ao banco',
+            ]];
+            if ($documentId === 21257) {
+                $orders[] = [
+                    'id_op_ob' => 99999,
+                    'id_dh' => $documentId,
+                    'numero_ordem_bancaria' => '2026OB99999',
+                    'data_emissao_ob' => '2026-02-10',
+                    'descricao_situacao_op' => 'Reprocessada',
+                ];
+            }
+
+            return Http::response(['data' => $orders, 'total_pages' => 1]);
+        }
+
+        if (str_contains($url, 'saldo_conta_gestao_financeira_especiais')) {
+            return Http::response(['data' => [[
+                'id_agencia_conta' => '1428-34782',
+                'data_saldo_conta' => '2026-07-15',
+                'saldo_final_gestao_financeira' => 100500,
+            ]], 'total_pages' => 1]);
+        }
+
+        return Http::response(['data_ultima_atualizacao' => '2026-07-16T00:00:00']);
     }
 
     /** @return array{User, Municipality} */

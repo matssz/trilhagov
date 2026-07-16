@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ExternalAmendmentCandidate;
 use App\Models\ExternalDataSync;
+use App\Models\ExternalFinancialReconciliation;
 use App\Models\ParliamentaryAmendment;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\ExternalAmendmentReconciliationService;
+use App\Services\ExternalFinancialReconciliationService;
 use App\Services\FormSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class ExternalIntegrationController extends Controller
         $selectedStatus = (string) $request->query('status');
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
         $query = $municipality->externalAmendmentCandidates()
-            ->with(['amendment', 'reviewer', 'sync'])
+            ->with(['amendment', 'reviewer', 'sync', 'latestFinancialReconciliation'])
             ->when(array_key_exists($selectedStatus, ExternalAmendmentCandidate::statuses()), fn ($query) => $query->where('match_status', $selectedStatus))
             ->orderByRaw("CASE match_status WHEN 'divergent' THEN 0 WHEN 'new' THEN 1 WHEN 'linked' THEN 2 WHEN 'matched' THEN 3 WHEN 'imported' THEN 4 ELSE 5 END")
             ->latest('last_seen_at');
@@ -58,9 +60,50 @@ class ExternalIntegrationController extends Controller
                     'apply' => $formSubmission->issue($request, "external-apply-{$candidate->id}"),
                     'import' => $formSubmission->issue($request, "external-import-{$candidate->id}"),
                     'ignore' => $formSubmission->issue($request, "external-ignore-{$candidate->id}"),
+                    'financial' => $formSubmission->issue($request, "external-financial-{$candidate->id}"),
                 ],
             ]) : collect(),
         ]);
+    }
+
+    public function reconcileFinancial(
+        Request $request,
+        int $candidate,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        ExternalFinancialReconciliationService $reconciliationService,
+        AuditTrail $auditTrail,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $candidateModel = $municipality->externalAmendmentCandidates()->findOrFail($candidate);
+        $request->validate(['_submission_token' => ['required', 'string']]);
+
+        if (! $formSubmission->consume($request, "external-financial-{$candidateModel->id}")) {
+            return back()->with('warning', 'Esta conciliação financeira já foi solicitada.');
+        }
+
+        $reconciliation = $reconciliationService->reconcile($candidateModel, $request->user());
+        $auditValues = [
+            'external_source' => 'Transferegov',
+            'external_code' => $candidateModel->external_code,
+            'reconciliation_status' => $reconciliation->statusLabel(),
+            'official_committed_amount' => $reconciliation->official_committed_amount,
+            'official_ordered_amount' => $reconciliation->official_ordered_amount,
+            'official_account_balance' => $reconciliation->official_account_balance,
+        ];
+
+        if ($candidateModel->parliamentary_amendment_id) {
+            $amendment = $municipality->amendments()->findOrFail($candidateModel->parliamentary_amendment_id);
+            $auditTrail->recordOperation($request, $amendment, 'external_financial_reconciled', $auditValues);
+        } else {
+            $auditTrail->recordMunicipalityOperation($request, $municipality, 'external_financial_reconciled', $auditValues);
+        }
+
+        if ($reconciliation->status === ExternalFinancialReconciliation::STATUS_FAILED) {
+            return back()->with('warning', 'A consulta financeira oficial não respondeu corretamente. A falha foi registrada e pode ser tentada novamente.');
+        }
+
+        return back()->with('status', 'Conciliação financeira atualizada. Os dados oficiais e municipais permanecem separados para sua conferência.');
     }
 
     public function sync(

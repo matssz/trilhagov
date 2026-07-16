@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ExternalAmendmentCandidate extends Model
 {
@@ -93,5 +95,20 @@ class ExternalAmendmentCandidate extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function financialReconciliations(): HasMany
+    {
+        return $this->hasMany(ExternalFinancialReconciliation::class)
+            ->latest('reconciled_at')
+            ->latest('id');
+    }
+
+    public function latestFinancialReconciliation(): HasOne
+    {
+        return $this->hasOne(ExternalFinancialReconciliation::class)->ofMany([
+            'reconciled_at' => 'max',
+            'id' => 'max',
+        ]);
     }
 }

@@ -89,6 +89,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
         Route::post('/integracoes/transferegov/sincronizar', [ExternalIntegrationController::class, 'sync'])->name('integrations.sync')->block(20, 20);
+        Route::post('/integracoes/candidatos/{candidate}/conciliar-financeiro', [ExternalIntegrationController::class, 'reconcileFinancial'])->name('integrations.candidates.financial')->block(20, 20);
         Route::patch('/integracoes/candidatos/{candidate}/vincular', [ExternalIntegrationController::class, 'link'])->name('integrations.candidates.link')->block(10, 10);
         Route::patch('/integracoes/candidatos/{candidate}/aplicar', [ExternalIntegrationController::class, 'apply'])->name('integrations.candidates.apply')->block(10, 10);
         Route::post('/integracoes/candidatos/{candidate}/importar', [ExternalIntegrationController::class, 'import'])->name('integrations.candidates.import')->block(10, 10);

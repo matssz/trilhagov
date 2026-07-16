@@ -45,5 +45,29 @@ TRANSFEREGOV_API_URL=https://api-publica.transferegov.gestao.gov.br/especiais
 TRANSFEREGOV_API_TIMEOUT=20
 ```
 
-Empenhos, ordens de pagamento e saldo bancário permanecem fora da primeira
-versão até a conferência dos identificadores em emendas municipais reais.
+## Conciliação financeira oficial
+
+Cada plano pode ser conciliado manualmente pela Caixa de Conferência. A consulta
+percorre uma cadeia identificável da API:
+
+1. empenhos federais filtrados por `id_plano_acao`;
+2. documentos hábeis filtrados por `id_empenho`;
+3. ordens de pagamento e bancárias filtradas por `id_dh`;
+4. último saldo publicado filtrado por `id_agencia_conta`.
+
+A comparação respeita o significado contábil dos registros:
+
+- empenhos federais são comparados ao valor previsto da emenda;
+- ordens bancárias federais são comparadas ao valor recebido pelo município;
+- saldo oficial é comparado ao valor recebido menos pagamentos municipais;
+- empenhos e pagamentos municipais aparecem como contexto da execução, sem serem
+  tratados como equivalentes aos lançamentos federais.
+
+O mesmo documento hábil é somado apenas uma vez, mesmo quando possui mais de uma
+ordem bancária. Rendimentos, tarifas e lançamentos ainda não cadastrados podem
+explicar diferenças de saldo, por isso o sistema sinaliza para conferência e nunca
+altera registros locais automaticamente.
+
+Cada tentativa cria um retrato histórico com valores oficiais, valores locais,
+evidências, data da base e usuário responsável. Falhas também são persistidas e
+podem ser consultadas novamente com um novo token de submissão.

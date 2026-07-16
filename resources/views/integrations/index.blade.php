@@ -67,6 +67,8 @@
                 $tokens = $actionTokens[$candidate->id] ?? [];
                 $suggestedReference = $candidate->amendment_code ?: $candidate->external_code;
                 $suggestedObject = $candidate->object ?: '';
+                $financial = $candidate->latestFinancialReconciliation;
+                $currency = fn ($value) => $value === null ? 'Não informado' : 'R$ '.number_format((float) $value, 2, ',', '.');
             @endphp
             <article class="candidate-card candidate-{{ $candidate->match_status }}">
                 <header class="candidate-header">
@@ -97,6 +99,82 @@
                         <span>{{ count($candidate->differences ?? []) }} diferença(s)</span>
                     </div>
                 @endif
+
+                <section class="financial-reconciliation {{ $financial ? 'financial-'.$financial->status : '' }}">
+                    <header class="financial-reconciliation-heading">
+                        <div>
+                            <p class="panel-kicker">Conferência de repasse</p>
+                            <h3>Conciliação financeira oficial</h3>
+                            @if ($financial)
+                                <span class="financial-status"><i data-lucide="{{ $financial->status === 'consistent' ? 'circle-check' : ($financial->status === 'failed' ? 'circle-x' : 'triangle-alert') }}" aria-hidden="true"></i>{{ $financial->statusLabel() }}</span>
+                            @else
+                                <p>Consulte empenhos federais, ordens bancárias e o saldo da conta vinculada.</p>
+                            @endif
+                        </div>
+                        @if ($canEdit)
+                            <form method="POST" action="{{ route('integrations.candidates.financial', $candidate) }}">
+                                @csrf
+                                <input type="hidden" name="_submission_token" value="{{ $tokens['financial'] ?? '' }}">
+                                <button class="btn btn-sm btn-outline-primary" type="submit"><i data-lucide="refresh-cw" aria-hidden="true"></i>{{ $financial ? 'Atualizar conciliação' : 'Conciliar financeiro' }}</button>
+                            </form>
+                        @endif
+                    </header>
+
+                    @if ($financial?->status === 'failed')
+                        <div class="financial-failure"><i data-lucide="database-zap" aria-hidden="true"></i><span>A fonte oficial ficou indisponível nesta tentativa. Nenhum valor local foi alterado.</span></div>
+                    @elseif ($financial)
+                        <div class="financial-comparisons">
+                            @foreach (($financial->differences ?? []) as $key => $comparison)
+                                <article class="comparison-{{ $comparison['state'] }}">
+                                    <span class="comparison-icon"><i data-lucide="{{ $key === 'transfer_commitment' ? 'file-check-2' : ($key === 'transfer_received' ? 'receipt-text' : 'wallet-cards') }}" aria-hidden="true"></i></span>
+                                    <div class="comparison-copy">
+                                        <span>{{ $comparison['label'] }}</span>
+                                        <strong>{{ $currency($comparison['official']) }}</strong>
+                                        <small>TrilhaGov: {{ $currency($comparison['local']) }}</small>
+                                    </div>
+                                    <span class="comparison-result">
+                                        @if ($comparison['difference'] === null)
+                                            Aguardando dado local
+                                        @elseif (abs((float) $comparison['difference']) <= 0.01)
+                                            Sem diferença
+                                        @else
+                                            Diferença de {{ $currency(abs((float) $comparison['difference'])) }}
+                                        @endif
+                                    </span>
+                                </article>
+                            @endforeach
+                        </div>
+
+                        <div class="local-execution-context">
+                            <span><strong>{{ $currency($financial->local_committed_amount) }}</strong> empenhado na execução municipal</span>
+                            <span><strong>{{ $currency($financial->local_paid_amount) }}</strong> pago na execução municipal</span>
+                            <small>O saldo local é uma estimativa. Rendimentos, tarifas e lançamentos bancários podem justificar diferenças.</small>
+                        </div>
+
+                        <details class="financial-evidence">
+                            <summary><span><i data-lucide="database-zap" aria-hidden="true"></i>Ver evidências da fonte oficial</span><i data-lucide="chevron-down" aria-hidden="true"></i></summary>
+                            <div class="financial-evidence-body">
+                                <section>
+                                    <h4>Empenhos federais</h4>
+                                    @forelse ($financial->official_commitments ?? [] as $commitment)
+                                        <div class="official-record"><span><strong>{{ $commitment['numero_empenho'] ?? 'Sem número' }}</strong><small>{{ isset($commitment['data_emissao_empenho']) ? \Illuminate\Support\Carbon::parse($commitment['data_emissao_empenho'])->format('d/m/Y') : 'Data não informada' }} · {{ $commitment['descricao_situacao_empenho'] ?? 'Situação não informada' }}</small></span><strong>{{ $currency($commitment['valor_empenho'] ?? null) }}</strong></div>
+                                    @empty
+                                        <p class="official-record-empty">Nenhum empenho publicado para este plano.</p>
+                                    @endforelse
+                                </section>
+                                <section>
+                                    <h4>Ordens bancárias</h4>
+                                    @forelse ($financial->official_payment_orders ?? [] as $order)
+                                        <div class="official-record"><span><strong>{{ $order['numero_ordem_bancaria'] ?? $order['numero_ordem_pagamento'] ?? 'Sem número' }}</strong><small>{{ isset($order['data_emissao_ob']) ? \Illuminate\Support\Carbon::parse($order['data_emissao_ob'])->format('d/m/Y') : 'Data não informada' }} · {{ $order['descricao_situacao_op'] ?? 'Situação não informada' }}</small></span><strong>{{ $currency($order['valor_dh'] ?? null) }}</strong></div>
+                                    @empty
+                                        <p class="official-record-empty">Nenhuma ordem bancária publicada para este plano.</p>
+                                    @endforelse
+                                </section>
+                            </div>
+                            <footer>Consultado em {{ $financial->reconciled_at->format('d/m/Y H:i') }}{{ $financial->source_updated_at ? ' · base atualizada em '.$financial->source_updated_at->format('d/m/Y') : '' }}.</footer>
+                        </details>
+                    @endif
+                </section>
 
                 @if ($candidate->match_status === 'divergent' && $candidate->amendment)
                     <form class="difference-review" method="POST" action="{{ route('integrations.candidates.apply', $candidate) }}">
