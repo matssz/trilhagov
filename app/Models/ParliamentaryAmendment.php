@@ -251,6 +251,11 @@ class ParliamentaryAmendment extends Model
         return $this->hasMany(ExternalAmendmentCandidate::class);
     }
 
+    public function workItems(): HasMany
+    {
+        return $this->hasMany(MunicipalWorkItem::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

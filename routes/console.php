@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('alerts:process')
     ->hourly()
     ->withoutOverlapping(30);
+
+Schedule::command('work-items:sync')
+    ->hourlyAt(15)
+    ->withoutOverlapping(30);

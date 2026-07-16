@@ -161,7 +161,7 @@
 
         <div class="execution-stage-list">
             @forelse ($amendment->executionStages as $stage)
-                <article class="execution-stage-row {{ $stage->isOverdue() ? 'is-overdue' : '' }}">
+                <article class="execution-stage-row {{ $stage->isOverdue() ? 'is-overdue' : '' }}" id="etapa-{{ $stage->id }}">
                     <div class="stage-order">{{ $loop->iteration }}</div>
                     <div class="stage-main">
                         <div class="d-flex flex-wrap align-items-center gap-2">

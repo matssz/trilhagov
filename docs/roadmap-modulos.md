@@ -197,10 +197,29 @@ Entregue na primeira versão:
 - descarte com justificativa e reabertura quando a fonte oficial mudar;
 - retentativas limitadas e mensagem humana quando a API estiver indisponível.
 
-Próxima evolução: incluir empenhos, ordens bancárias e saldo oficial na
-conciliação, após validar os identificadores com casos reais.
+Evolução entregue: conciliação histórica de empenhos federais, ordens bancárias e
+saldo oficial, sem tratar a execução municipal como contabilidade equivalente.
 
 Dependências: modelo estabilizado e dados reais suficientes para mapear os campos.
+
+## Módulo 8 - Central de Trabalho Municipal
+
+Situação: primeira versão concluída.
+
+Entregue na primeira versão:
+
+- fila operacional única para equipes municipais pequenas;
+- geração idempotente a partir de responsabilidades, prazos, documentos,
+  execução, conciliação e prestação de contas;
+- prioridade explicável por vencimento e sensibilidade operacional;
+- atribuição, andamento e anotações sem permitir conclusão fictícia;
+- resolução automática quando o dado de origem é corrigido;
+- reabertura sem duplicidade quando uma pendência retorna;
+- atalhos para o contexto exato e atualização horária agendada;
+- isolamento municipal, perfis e auditoria.
+
+Próxima validação: observar uma equipe municipal usando a fila durante uma semana
+e medir quais ações são úteis, redundantes ou ainda precisam de orientação.
 
 ## Ordem recomendada
 
@@ -212,6 +231,7 @@ Dependências: modelo estabilizado e dados reais suficientes para mapear os camp
 6. Gerar transparência e prestação de contas.
 7. Adicionar alertas.
 8. Integrar fontes oficiais.
+9. Consolidar as próximas ações na Central de Trabalho.
 
 ## Itens fora do escopo atual
 

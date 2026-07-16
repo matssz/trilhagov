@@ -138,6 +138,11 @@ class Municipality extends Model
         return $this->hasMany(ExternalFinancialReconciliation::class);
     }
 
+    public function workItems(): HasMany
+    {
+        return $this->hasMany(MunicipalWorkItem::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

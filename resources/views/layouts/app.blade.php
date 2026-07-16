@@ -49,6 +49,10 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        <a class="sidebar-link {{ request()->routeIs('work-center.*') ? 'active' : '' }}" href="{{ route('work-center.index') }}">
+                            <i data-lucide="clipboard-check" aria-hidden="true"></i>
+                            <span>Trabalho</span>
+                        </a>
                         <a class="sidebar-link {{ request()->routeIs('alerts.*') ? 'active' : '' }}" href="{{ route('alerts.index') }}">
                             <i data-lucide="shield-alert" aria-hidden="true"></i>
                             <span>Integridade</span>

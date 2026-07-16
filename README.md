@@ -53,6 +53,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Caixa de conferência com candidatos novos, correspondências e divergências campo a campo.
 - Importação controlada, aplicação seletiva e proveniência preservada sem sobrescrita automática.
 - Histórico de sincronizações, data da base oficial, falhas e decisões dos revisores.
+- Central de Trabalho com próximas ações geradas a partir das pendências reais do município.
+- Priorização por prazo e risco, atribuição de responsáveis e resolução automática pela fonte.
 
 ## Stack
 
@@ -115,6 +117,7 @@ hora sem repetir o mesmo envio.
 - [Alertas e notificações](docs/alertas-e-notificacoes.md)
 - [Transparência e inteligência gerencial](docs/transparencia-e-inteligencia.md)
 - [Integrações e conferência de dados](docs/integracoes-oficiais.md)
+- [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
 
 ## Limite atual
 

@@ -173,7 +173,7 @@
 
             <div class="accountability-requirement-list">
                 @foreach ($process->requirements as $requirement)
-                    <article class="accountability-requirement-row status-{{ $requirement->status }}">
+                    <article class="accountability-requirement-row status-{{ $requirement->status }}" id="requisito-{{ $requirement->id }}">
                         <span class="requirement-state"><i data-lucide="{{ $requirement->status === 'completed' ? 'circle-check' : ($requirement->status === 'not_applicable' ? 'circle-minus' : 'circle-dot') }}" aria-hidden="true"></i></span>
                         <div class="requirement-copy">
                             <div class="d-flex flex-wrap align-items-center gap-2"><h3 class="h6 mb-0">{{ $requirement->title }}</h3><span class="badge text-bg-light">{{ $requirement->categoryLabel() }}</span>@if ($requirement->is_required)<span class="badge text-bg-warning">Obrigatório</span>@endif</div>
@@ -222,7 +222,7 @@
             @endif
             <div class="diligence-list">
                 @forelse ($process->diligences as $diligence)
-                    <article class="diligence-row {{ $diligence->isOverdue() ? 'is-overdue' : '' }}">
+                    <article class="diligence-row {{ $diligence->isOverdue() ? 'is-overdue' : '' }}" id="diligencia-{{ $diligence->id }}">
                         <span class="diligence-icon"><i data-lucide="message-square" aria-hidden="true"></i></span>
                         <div class="diligence-copy"><div class="d-flex flex-wrap align-items-center gap-2"><h3 class="h6 mb-0">{{ $diligence->title }}</h3><span class="diligence-status status-{{ $diligence->status }}">{{ $diligence->statusLabel() }}</span>@if ($diligence->isOverdue())<span class="badge text-bg-danger">Atrasada</span>@endif</div><p>{{ $diligence->description }}</p><small>{{ $diligence->assignedUser?->name ?? $process->responsibleUser?->name ?? 'Sem responsável' }} · prazo {{ $diligence->due_at->format('d/m/Y') }}</small>@if ($diligence->response_notes)<div class="diligence-response"><strong>Resposta:</strong> {{ $diligence->response_notes }} · protocolo {{ $diligence->response_protocol }}</div>@endif</div>
                         @if ($canEdit)

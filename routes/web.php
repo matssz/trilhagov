@@ -24,6 +24,7 @@ use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\TransparencySettingsController;
+use App\Http\Controllers\WorkCenterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
     Route::get('/relatorios/emendas.csv', ReportExportController::class)->name('reports.export');
     Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
+    Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
     Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
@@ -89,6 +91,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
         Route::post('/integracoes/transferegov/sincronizar', [ExternalIntegrationController::class, 'sync'])->name('integrations.sync')->block(20, 20);
+        Route::post('/trabalho/atualizar', [WorkCenterController::class, 'synchronize'])->name('work-center.sync')->block(20, 20);
+        Route::patch('/trabalho/acoes/{item}', [WorkCenterController::class, 'update'])->name('work-center.items.update')->block(10, 10);
         Route::post('/integracoes/candidatos/{candidate}/conciliar-financeiro', [ExternalIntegrationController::class, 'reconcileFinancial'])->name('integrations.candidates.financial')->block(20, 20);
         Route::patch('/integracoes/candidatos/{candidate}/vincular', [ExternalIntegrationController::class, 'link'])->name('integrations.candidates.link')->block(10, 10);
         Route::patch('/integracoes/candidatos/{candidate}/aplicar', [ExternalIntegrationController::class, 'apply'])->name('integrations.candidates.apply')->block(10, 10);

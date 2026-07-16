@@ -124,7 +124,7 @@
         </div>
 
         <div class="col-12">
-            <section class="content-panel mb-4">
+            <section class="content-panel mb-4" id="documentos">
                 <div class="content-panel-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                     <div>
                         <div class="d-flex align-items-center gap-2">

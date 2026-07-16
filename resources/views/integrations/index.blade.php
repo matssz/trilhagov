@@ -70,7 +70,7 @@
                 $financial = $candidate->latestFinancialReconciliation;
                 $currency = fn ($value) => $value === null ? 'Não informado' : 'R$ '.number_format((float) $value, 2, ',', '.');
             @endphp
-            <article class="candidate-card candidate-{{ $candidate->match_status }}">
+            <article class="candidate-card candidate-{{ $candidate->match_status }}" id="candidato-{{ $candidate->id }}">
                 <header class="candidate-header">
                     <div class="candidate-identity">
                         <span class="candidate-status">{{ $candidate->statusLabel() }}</span>
