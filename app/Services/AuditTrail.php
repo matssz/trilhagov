@@ -150,6 +150,26 @@ class AuditTrail
         return $this->record($request, $amendment, $action, $oldValues, $newValues);
     }
 
+    /** @param array<string, mixed> $newValues @param array<string, mixed>|null $oldValues */
+    public function recordMunicipalityOperation(
+        Request $request,
+        Municipality $municipality,
+        string $action,
+        array $newValues,
+        ?array $oldValues = null,
+    ): AuditLog {
+        return $municipality->auditLogs()->create([
+            'municipality_id' => $municipality->id,
+            'user_id' => $request->user()?->id,
+            'actor_name' => $request->user()?->name ?? 'Portal público',
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
+        ]);
+    }
+
     /** @param array<string, mixed>|null $oldValues @param array<string, mixed> $newValues */
     private function record(
         Request $request,

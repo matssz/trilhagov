@@ -1,5 +1,6 @@
 import './bootstrap';
 import 'bootstrap';
+import Chart from 'chart.js/auto';
 import {
     ArrowLeft,
     BadgeCheck,
@@ -53,7 +54,13 @@ import {
     WalletCards,
     Webhook,
     ExternalLink,
+    EyeOff,
+    FilterX,
+    Globe2,
+    Lightbulb,
     MessageSquare,
+    Sheet,
+    ShieldCheck,
     createIcons,
 } from 'lucide';
 
@@ -111,8 +118,117 @@ createIcons({
         WalletCards,
         Webhook,
         ExternalLink,
+        EyeOff,
+        FilterX,
+        Globe2,
+        Lightbulb,
         MessageSquare,
+        Sheet,
+        ShieldCheck,
     },
+});
+
+const chartColors = {
+    navy: '#123f70',
+    blue: '#3976a8',
+    green: '#17845b',
+    gold: '#d2a62b',
+    red: '#c43d3d',
+    teal: '#1f7f88',
+    gray: '#9aa7b8',
+};
+
+const compactCurrency = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+});
+
+document.querySelectorAll('[data-analytics-chart]').forEach((canvas) => {
+    const labels = JSON.parse(canvas.dataset.labels ?? '[]');
+    const values = JSON.parse(canvas.dataset.values ?? '[]').map(Number);
+    const type = canvas.dataset.analyticsChart;
+
+    if (values.length === 0 || values.every((value) => value === 0)) {
+        canvas.hidden = true;
+        const empty = document.createElement('div');
+        empty.className = 'chart-empty';
+        empty.textContent = 'Sem dados para o recorte selecionado.';
+        canvas.parentElement?.appendChild(empty);
+
+        return;
+    }
+
+    const isCurrency = ['financial', 'departments', 'authors'].includes(type);
+    const isHorizontal = ['status', 'departments', 'authors'].includes(type);
+    const isDonut = type === 'risk';
+    const colors = type === 'risk'
+        ? [chartColors.green, chartColors.gold, '#e47b36', chartColors.red]
+        : type === 'financial'
+            ? [chartColors.navy, chartColors.blue, chartColors.gold, chartColors.green]
+            : [chartColors.navy, chartColors.teal, chartColors.gold, chartColors.green, chartColors.blue, chartColors.red];
+
+    new Chart(canvas, {
+        type: isDonut ? 'doughnut' : 'bar',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderColor: isDonut ? '#ffffff' : colors,
+                borderWidth: isDonut ? 3 : 0,
+                borderRadius: isDonut ? 0 : 5,
+                barThickness: type === 'financial' ? 34 : undefined,
+            }],
+        },
+        options: {
+            indexAxis: isHorizontal ? 'y' : 'x',
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 450 },
+            cutout: isDonut ? '70%' : undefined,
+            plugins: {
+                legend: {
+                    display: isDonut,
+                    position: 'bottom',
+                    labels: { usePointStyle: true, boxWidth: 8, padding: 16, color: '#536178', font: { size: 11 } },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => isCurrency
+                            ? ` ${compactCurrency.format(Number(context.raw))}`
+                            : ` ${context.raw} emenda(s)`,
+                    },
+                },
+            },
+            scales: isDonut ? undefined : {
+                x: {
+                    grid: { display: !isHorizontal, color: '#edf1f6' },
+                    border: { display: false },
+                    ticks: {
+                        color: '#6a7688',
+                        font: { size: 11 },
+                        callback: isHorizontal
+                            ? (value) => isCurrency ? compactCurrency.format(value) : value
+                            : (_value, index) => labels[index],
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { display: isHorizontal, color: '#edf1f6' },
+                    border: { display: false },
+                    ticks: {
+                        color: '#536178',
+                        font: { size: 11, weight: 600 },
+                        callback: isHorizontal
+                            ? (_value, index) => labels[index]
+                            : (value) => isCurrency ? compactCurrency.format(value) : value,
+                    },
+                },
+            },
+        },
+    });
 });
 
 const receivedStatuses = [

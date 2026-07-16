@@ -112,8 +112,8 @@ e evidências, com futura integração ao Siafic quando houver viabilidade.
 
 ## Módulo 5 - Prestação de contas e transparência
 
-Situação: primeira versão da prestação de contas concluída. Transparência
-pública e exportação em planilha permanecem no roadmap.
+Situação: primeira versão da prestação de contas, inteligência gerencial,
+transparência pública e exportação em planilha concluída.
 
 Necessidades:
 
@@ -133,11 +133,19 @@ Entregue na primeira versão:
 - indicador de prontidão e bloqueio de envio com pendências;
 - dossiê consolidado em PDF e pacote ZIP com documentos privados;
 - alertas, escalonamento e auditoria das operações.
+- painel analítico filtrável com funil financeiro, execução física e qualidade cadastral;
+- diagnósticos automáticos de prazo, risco, responsabilidade e concentração de recursos;
+- exportação CSV interna auditada e protegida contra fórmulas;
+- portal público opcional, ativado pelo gestor, com filtros e exportação de dados;
+- bloqueio de dados internos, documentos, fornecedores, usuários e motivos de risco na visão pública.
 
 Dependências: execução, documentos e auditoria.
 
 Validação necessária: confirmar o formato exigido pelo tribunal de contas e pelo
 Portal da Transparência do estado atendido.
+
+Próxima evolução: versionar relatórios oficiais e integrar fontes do Transferegov
+sem sobrescrever informações municipais confirmadas.
 
 ## Módulo 6 - Alertas e responsabilidades
 

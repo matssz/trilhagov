@@ -44,6 +44,11 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Diligências com prazo, resposta, escalonamento e trilha de auditoria.
 - Indicador de prontidão que bloqueia envio e aprovação enquanto houver pendências críticas.
 - Dossiê em PDF e pacote ZIP com os documentos privados autorizados da emenda.
+- Central de inteligência com filtros globais, indicadores financeiros, execução física e diagnósticos acionáveis.
+- Gráficos de conversão do recurso, situações, riscos, órgãos e autores.
+- Exportação CSV auditada, isolada por município e protegida contra injeção de fórmulas.
+- Portal público de transparência ativado exclusivamente pelo gestor, com filtros e dados abertos.
+- Separação entre dados publicáveis e informações internas, documentos e fornecedores.
 
 ## Stack
 
@@ -52,6 +57,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Blade
 - Bootstrap 5
 - Lucide Icons
+- Chart.js
 - Dompdf
 - SQLite no desenvolvimento local
 
@@ -103,6 +109,7 @@ hora sem repetir o mesmo envio.
 - [Identidade visual](docs/identidade-visual.md)
 - [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)
 - [Alertas e notificações](docs/alertas-e-notificacoes.md)
+- [Transparência e inteligência gerencial](docs/transparencia-e-inteligencia.md)
 
 ## Limite atual
 

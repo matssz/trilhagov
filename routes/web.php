@@ -19,7 +19,10 @@ use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
+use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
+use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\TransparencySettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +33,8 @@ Route::get('/', function () {
 
 Route::get('/convites/{token}', [InvitationAcceptanceController::class, 'show'])->name('invitations.show');
 Route::post('/convites/{token}', [InvitationAcceptanceController::class, 'accept'])->name('invitations.accept')->block(10, 10);
+Route::get('/transparencia/{municipality:transparency_slug}', [PublicTransparencyController::class, 'show'])->name('transparency.show');
+Route::get('/transparencia/{municipality:transparency_slug}/emendas.csv', [PublicTransparencyController::class, 'export'])->name('transparency.export');
 
 Route::middleware('guest')->group(function () {
     Route::get('/cadastro', [RegisteredUserController::class, 'create'])->name('register');
@@ -47,6 +52,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
+    Route::get('/relatorios/emendas.csv', ReportExportController::class)->name('reports.export');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
     Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
@@ -68,6 +74,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
+        Route::patch('/transparencia/configuracao', TransparencySettingsController::class)->name('transparency.settings.update')->block(10, 10);
         Route::patch('/alertas/configuracoes', [AlertCenterController::class, 'updateSettings'])->name('alerts.settings.update')->block(10, 10);
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);

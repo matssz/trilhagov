@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Municipality extends Model
 {
@@ -20,7 +21,18 @@ class Municipality extends Model
         'state',
         'cnpj',
         'ibge_code',
+        'transparency_enabled',
+        'transparency_slug',
+        'transparency_updated_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'transparency_enabled' => 'boolean',
+            'transparency_updated_at' => 'datetime',
+        ];
+    }
 
     /** @return array<string, string> */
     public static function states(): array
@@ -102,6 +114,13 @@ class Municipality extends Model
     public function accountabilityDiligences(): HasMany
     {
         return $this->hasMany(AccountabilityDiligence::class);
+    }
+
+    public function auditLogs(): MorphMany
+    {
+        return $this->morphMany(AuditLog::class, 'auditable')
+            ->latest('created_at')
+            ->latest('id');
     }
 
     public function scopeComplete(Builder $query): Builder

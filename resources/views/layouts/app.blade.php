@@ -1,7 +1,8 @@
 @php
     $workspaceLayout = auth()->check()
         && ! request()->routeIs('municipalities.*')
-        && ! request()->routeIs('invitations.*');
+        && ! request()->routeIs('invitations.*')
+        && ! request()->routeIs('transparency.*');
     $activeRole = $workspaceLayout
         ? auth()->user()->roleForMunicipality((int) session('active_municipality_id'))
         : null;
