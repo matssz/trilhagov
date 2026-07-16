@@ -36,6 +36,7 @@
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
         <a class="active" href="{{ route('emendas.show', $amendment) }}" aria-current="page">Visão geral</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
+        <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>
     </nav>
 
     <div class="row g-4">

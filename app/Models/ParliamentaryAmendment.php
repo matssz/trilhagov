@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
@@ -223,6 +224,21 @@ class ParliamentaryAmendment extends Model
         return $stages->isEmpty()
             ? 0
             : (int) round($stages->average('progress_percentage'));
+    }
+
+    public function accountabilityProcess(): HasOne
+    {
+        return $this->hasOne(AccountabilityProcess::class);
+    }
+
+    public function accountabilityRequirements(): HasMany
+    {
+        return $this->hasMany(AccountabilityRequirement::class);
+    }
+
+    public function accountabilityDiligences(): HasMany
+    {
+        return $this->hasMany(AccountabilityDiligence::class);
     }
 
     public function integrityAlerts(): HasMany

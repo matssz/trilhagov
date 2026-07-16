@@ -1535,6 +1535,7 @@ h6 {
 }
 
 .amendment-tabs a {
+    flex: 0 0 auto;
     min-width: 112px;
     padding: .7rem 1rem;
     border-bottom: 3px solid transparent;
@@ -2035,5 +2036,497 @@ h6 {
     .evidence-row .btn {
         grid-column: 2;
         width: fit-content;
+    }
+}
+
+.accountability-status,
+.diligence-status {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    padding: .18rem .42rem;
+    border-radius: 4px;
+    background: var(--navy-100);
+    color: var(--navy-800);
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.accountability-status-approved,
+.diligence-status.status-closed,
+.diligence-status.status-responded {
+    background: #e8f6ef;
+    color: var(--success);
+}
+
+.accountability-status-pending_correction,
+.accountability-status-rejected {
+    background: #fde8e8;
+    color: var(--danger);
+}
+
+.accountability-start {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1.4rem;
+}
+
+.accountability-start-icon,
+.dossier-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--navy-100);
+    color: var(--navy-900);
+}
+
+.accountability-start-icon svg,
+.dossier-icon svg {
+    width: 27px;
+    height: 27px;
+}
+
+.accountability-start .data-list {
+    grid-template-columns: 180px minmax(0, 1fr);
+}
+
+.readiness-panel {
+    overflow: hidden;
+}
+
+.readiness-panel.has-blockers {
+    border-left: 4px solid var(--danger);
+}
+
+.readiness-panel.is-ready {
+    border-left: 4px solid var(--success);
+}
+
+.readiness-meter {
+    height: 6px;
+    overflow: hidden;
+    background: #e7ecf2;
+}
+
+.readiness-meter span {
+    display: block;
+    height: 100%;
+    background: var(--danger);
+}
+
+.readiness-panel.is-ready .readiness-meter span {
+    background: var(--success);
+}
+
+.readiness-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem 1rem;
+    padding: 1rem 1.15rem;
+}
+
+.readiness-list > div {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: .5rem;
+    color: var(--danger);
+    font-size: .82rem;
+}
+
+.readiness-list > div.warning {
+    color: var(--warning);
+}
+
+.readiness-list svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+}
+
+.accountability-process-form {
+    padding: 1.15rem;
+}
+
+.accountability-process-grid,
+.requirement-create-grid,
+.diligence-create-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.accountability-process-grid .span-2,
+.requirement-create-grid .span-2,
+.diligence-create-grid .span-2 {
+    grid-column: span 2;
+}
+
+.diligence-create-grid .span-3 {
+    grid-column: span 3;
+}
+
+.reconciliation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.reconciliation-grid > div {
+    display: grid;
+    gap: .3rem;
+    padding: 1.15rem;
+    border-right: 1px solid var(--line);
+}
+
+.reconciliation-grid > div:last-child {
+    border-right: 0;
+}
+
+.reconciliation-grid span {
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.reconciliation-grid strong {
+    color: var(--navy-950);
+    font-size: 1.12rem;
+}
+
+.reconciliation-grid .has-difference {
+    background: #fff5f5;
+}
+
+.reconciliation-grid .has-difference strong {
+    color: var(--danger);
+}
+
+.accountability-form-band {
+    padding: 1.15rem;
+    border-bottom: 1px solid var(--line);
+    background: #f8fafc;
+}
+
+.accountability-inline-submit {
+    min-height: 42px;
+    margin-top: 1.85rem;
+    white-space: nowrap;
+}
+
+.accountability-requirement-list,
+.diligence-list {
+    display: grid;
+}
+
+.accountability-requirement-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto 38px;
+    gap: .9rem;
+    align-items: start;
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.accountability-requirement-row:last-child {
+    border-bottom: 0;
+}
+
+.accountability-requirement-row.status-completed {
+    box-shadow: inset 4px 0 var(--success);
+}
+
+.accountability-requirement-row.status-not_applicable {
+    box-shadow: inset 4px 0 #9aa4b2;
+}
+
+.requirement-state,
+.diligence-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 6px;
+    background: #eef2f6;
+    color: var(--muted);
+}
+
+.status-completed .requirement-state {
+    background: #e8f6ef;
+    color: var(--success);
+}
+
+.requirement-state svg,
+.diligence-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.requirement-copy {
+    display: grid;
+    min-width: 0;
+    gap: .25rem;
+}
+
+.requirement-copy p,
+.diligence-copy p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .82rem;
+    white-space: pre-line;
+}
+
+.requirement-copy > a {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    gap: .3rem;
+    overflow-wrap: anywhere;
+    font-size: .76rem;
+}
+
+.requirement-copy > a svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+}
+
+.requirement-copy > small {
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.requirement-status {
+    padding-top: .35rem;
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.requirement-editor,
+.diligence-editor {
+    position: relative;
+}
+
+.requirement-editor > summary,
+.diligence-editor > summary {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 6px;
+    color: var(--navy-800);
+    cursor: pointer;
+    list-style: none;
+}
+
+.requirement-editor > summary:hover,
+.diligence-editor > summary:hover {
+    background: var(--navy-100);
+}
+
+.requirement-editor > summary::-webkit-details-marker,
+.diligence-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+.requirement-editor > summary svg,
+.diligence-editor > summary svg {
+    width: 17px;
+    height: 17px;
+}
+
+.requirement-editor[open],
+.diligence-editor[open] {
+    grid-column: 2 / -1;
+}
+
+.requirement-editor[open] > summary,
+.diligence-editor[open] > summary {
+    margin-left: auto;
+}
+
+.requirement-editor > form,
+.diligence-editor > form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: .75rem;
+    margin-top: .75rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f8fafc;
+}
+
+.diligence-editor > form .span-2 {
+    grid-column: span 2;
+}
+
+.diligence-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 38px;
+    gap: .9rem;
+    align-items: start;
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.diligence-row:last-child {
+    border-bottom: 0;
+}
+
+.diligence-row.is-overdue {
+    box-shadow: inset 4px 0 var(--danger);
+}
+
+.diligence-copy {
+    display: grid;
+    gap: .3rem;
+    min-width: 0;
+}
+
+.diligence-copy > small {
+    color: var(--muted);
+    font-size: .74rem;
+}
+
+.diligence-response {
+    margin-top: .4rem;
+    padding: .65rem;
+    border-left: 3px solid var(--success);
+    background: #edf8f3;
+    color: #315f4e;
+    font-size: .78rem;
+}
+
+.dossier-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem;
+}
+
+.dossier-actions > div:first-child {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 1rem;
+}
+
+@media (max-width: 1199.98px) {
+    .accountability-process-grid,
+    .requirement-create-grid,
+    .diligence-create-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .diligence-create-grid .span-3 {
+        grid-column: span 2;
+    }
+
+    .accountability-inline-submit {
+        width: fit-content;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .accountability-start {
+        grid-template-columns: 52px minmax(0, 1fr);
+    }
+
+    .accountability-start form {
+        grid-column: 2;
+    }
+
+    .accountability-start .data-list {
+        grid-template-columns: 1fr;
+    }
+
+    .readiness-list,
+    .reconciliation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reconciliation-grid > div {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .reconciliation-grid > div:last-child {
+        border-bottom: 0;
+    }
+
+    .requirement-editor > form,
+    .diligence-editor > form {
+        grid-template-columns: 1fr;
+    }
+
+    .diligence-editor > form .span-2 {
+        grid-column: auto;
+    }
+
+    .dossier-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .accountability-process-grid,
+    .requirement-create-grid,
+    .diligence-create-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-process-grid .span-2,
+    .requirement-create-grid .span-2,
+    .diligence-create-grid .span-2,
+    .diligence-create-grid .span-3 {
+        grid-column: auto;
+    }
+
+    .accountability-requirement-row {
+        grid-template-columns: 34px minmax(0, 1fr) 36px;
+        gap: .7rem;
+    }
+
+    .requirement-status {
+        grid-column: 2;
+        padding-top: 0;
+    }
+
+    .requirement-editor {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .requirement-editor[open] {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+
+    .diligence-editor[open] {
+        grid-column: 1 / -1;
+    }
+
+    .accountability-start {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-start-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .accountability-start form {
+        grid-column: auto;
     }
 }

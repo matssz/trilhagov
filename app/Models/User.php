@@ -81,6 +81,16 @@ class User extends Authenticatable
         return $this->hasMany(ParliamentaryAmendment::class, 'responsible_user_id');
     }
 
+    public function responsibleAccountabilityProcesses(): HasMany
+    {
+        return $this->hasMany(AccountabilityProcess::class, 'responsible_user_id');
+    }
+
+    public function assignedAccountabilityDiligences(): HasMany
+    {
+        return $this->hasMany(AccountabilityDiligence::class, 'assigned_user_id');
+    }
+
     /** @return array<string, string> */
     public static function municipalityRoles(): array
     {

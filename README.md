@@ -38,6 +38,12 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Alertas por e-mail preparados para provedor de produção e ativados por opção do usuário.
 - Regras municipais configuráveis para antecedência e repetição de prazos vencidos.
 - Responsável operacional por emenda, escalonamento em dois níveis e matriz de risco explicável.
+- Etapas de execução, empenhos, pagamentos parciais, fornecedores e conciliação financeira.
+- Evidências de entrega vinculadas às etapas e alertas destinados ao responsável correto.
+- Processo de prestação de contas com checklist configurável, protocolo e devolução de saldo.
+- Diligências com prazo, resposta, escalonamento e trilha de auditoria.
+- Indicador de prontidão que bloqueia envio e aprovação enquanto houver pendências críticas.
+- Dossiê em PDF e pacote ZIP com os documentos privados autorizados da emenda.
 
 ## Stack
 
@@ -46,6 +52,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Blade
 - Bootstrap 5
 - Lucide Icons
+- Dompdf
 - SQLite no desenvolvimento local
 
 ## Como executar

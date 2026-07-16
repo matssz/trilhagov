@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class IntegrityAlertService
 {
+    public function __construct(private readonly AccountabilityService $accountabilityService) {}
+
     /** @return array{created: int, updated: int, resolved: int, open: int} */
     public function sync(Municipality $municipality): array
     {
@@ -19,6 +21,8 @@ class IntegrityAlertService
             'amendments.documents:id,parliamentary_amendment_id,document_type_id,execution_stage_id',
             'amendments.executionStages',
             'amendments.financialCommitments.payments',
+            'amendments.accountabilityProcess.requirements',
+            'amendments.accountabilityProcess.diligences',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -34,6 +38,7 @@ class IntegrityAlertService
             $this->detectMissingDocuments($amendment, $municipality, $detections);
             $this->detectInconsistencies($amendment, $detections);
             $this->detectExecutionControls($amendment, $settings, $detections);
+            $this->detectAccountabilityControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
         }
 
@@ -370,6 +375,113 @@ class IntegrityAlertService
                 'title' => 'Responsável sem acesso operacional',
                 'message' => 'A pessoa atribuída não possui mais perfil de gestor ou editor neste município.',
                 'due_at' => null,
+            ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectAccountabilityControls(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+    ): void {
+        $process = $amendment->accountabilityProcess;
+
+        if ($process === null) {
+            if ($amendment->status === ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING) {
+                $this->addDetection($detections, $amendment, 'accountability:missing-process', [
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => IntegrityAlert::SEVERITY_WARNING,
+                    'title' => 'Prestação de contas não iniciada',
+                    'message' => 'A emenda está aguardando prestação, mas o processo de controle ainda não foi aberto.',
+                    'due_at' => $amendment->accountability_deadline,
+                ]);
+            }
+
+            return;
+        }
+
+        if ($process->due_at !== null
+            && ($amendment->accountability_deadline === null || ! $process->due_at->equalTo($amendment->accountability_deadline))
+            && $process->status !== 'approved') {
+            $daysUntil = (int) today()->diffInDays($process->due_at, false);
+
+            if ($daysUntil <= $settings->deadline_warning_days) {
+                $overdueDays = max(0, -$daysUntil);
+                $escalationLevel = match (true) {
+                    $overdueDays >= $settings->escalation_level_two_days => 2,
+                    $overdueDays >= $settings->escalation_level_one_days => 1,
+                    default => 0,
+                };
+                $this->addDetection($detections, $amendment, 'deadline:accountability-process', [
+                    'assigned_user_id' => $process->responsible_user_id ?? $amendment->responsible_user_id,
+                    'category' => IntegrityAlert::CATEGORY_DEADLINE,
+                    'severity' => $daysUntil <= $settings->deadline_critical_days
+                        ? IntegrityAlert::SEVERITY_CRITICAL
+                        : IntegrityAlert::SEVERITY_INFO,
+                    'escalation_level' => $escalationLevel,
+                    'title' => $daysUntil < 0 ? 'Prestação de contas atrasada' : 'Prazo da prestação próximo',
+                    'message' => $daysUntil < 0
+                        ? 'A prestação está atrasada há '.abs($daysUntil).' dia(s).'
+                        : 'A prestação vence em '.$daysUntil.' dia(s).',
+                    'due_at' => $process->due_at,
+                ]);
+            }
+        }
+
+        foreach ($process->diligences->where('status', 'open') as $diligence) {
+            $daysUntil = (int) today()->diffInDays($diligence->due_at, false);
+
+            if ($daysUntil > $settings->deadline_warning_days) {
+                continue;
+            }
+
+            $overdueDays = max(0, -$daysUntil);
+            $escalationLevel = match (true) {
+                $overdueDays >= $settings->escalation_level_two_days => 2,
+                $overdueDays >= $settings->escalation_level_one_days => 1,
+                default => 0,
+            };
+            $this->addDetection($detections, $amendment, "deadline:diligence:{$diligence->id}", [
+                'assigned_user_id' => $diligence->assigned_user_id ?? $process->responsible_user_id ?? $amendment->responsible_user_id,
+                'category' => IntegrityAlert::CATEGORY_DEADLINE,
+                'severity' => $daysUntil <= $settings->deadline_critical_days
+                    ? IntegrityAlert::SEVERITY_CRITICAL
+                    : IntegrityAlert::SEVERITY_INFO,
+                'escalation_level' => $escalationLevel,
+                'title' => $daysUntil < 0 ? 'Diligência atrasada' : 'Prazo de diligência próximo',
+                'message' => $daysUntil < 0
+                    ? "A diligência {$diligence->title} está atrasada há ".abs($daysUntil).' dia(s).'
+                    : "A diligência {$diligence->title} vence em {$daysUntil} dia(s).",
+                'due_at' => $diligence->due_at,
+            ]);
+        }
+
+        $readiness = $this->accountabilityService->readiness($amendment, $process);
+
+        if (in_array($process->status, ['submitted', 'under_review', 'approved'], true)
+            && ! $readiness['ready']) {
+            $this->addDetection($detections, $amendment, 'accountability:submitted-with-pendencies', [
+                'assigned_user_id' => $process->responsible_user_id ?? $amendment->responsible_user_id,
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Prestação enviada com pendências',
+                'message' => $readiness['blockers']->first(),
+                'due_at' => $process->due_at,
+            ]);
+        }
+
+        if ($process->status === 'preparing'
+            && $process->due_at !== null
+            && $process->due_at->lte(today()->addDays($settings->deadline_warning_days))
+            && ! $readiness['ready']) {
+            $this->addDetection($detections, $amendment, 'accountability:not-ready', [
+                'assigned_user_id' => $process->responsible_user_id ?? $amendment->responsible_user_id,
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Prestação ainda não está pronta',
+                'message' => $readiness['blockers']->first(),
+                'due_at' => $process->due_at,
             ]);
         }
     }

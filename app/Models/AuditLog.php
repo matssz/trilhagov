@@ -62,6 +62,12 @@ class AuditLog extends Model
             'financial_commitment_created' => 'Empenho registrado',
             'financial_commitment_cancelled' => 'Empenho cancelado',
             'financial_payment_created' => 'Pagamento registrado',
+            'accountability_created' => 'Prestação de contas iniciada',
+            'accountability_updated' => 'Prestação de contas atualizada',
+            'accountability_requirement_created' => 'Item do checklist criado',
+            'accountability_requirement_updated' => 'Checklist da prestação atualizado',
+            'accountability_diligence_created' => 'Diligência registrada',
+            'accountability_diligence_updated' => 'Diligência atualizada',
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
@@ -105,6 +111,23 @@ class AuditLog extends Model
             'payment_reference' => 'Referência do pagamento',
             'payment_amount' => 'Valor pago',
             'execution_stage' => 'Etapa de execução',
+            'accountability_status' => 'Situação da prestação',
+            'accountability_due_at' => 'Prazo da prestação',
+            'requirement' => 'Item do checklist',
+            'requirement_category' => 'Categoria',
+            'requirement_status' => 'Situação do item',
+            'accountability_document' => 'Documento vinculado',
+            'diligence' => 'Diligência',
+            'diligence_due_at' => 'Prazo da diligência',
+            'diligence_status' => 'Situação da diligência',
+            'assigned_user_id' => 'Responsável',
+            'protocol_number' => 'Protocolo',
+            'submitted_at' => 'Data de envio',
+            'approved_at' => 'Data de aprovação',
+            'returned_amount' => 'Valor devolvido',
+            'returned_at' => 'Data da devolução',
+            'return_reference' => 'Referência da devolução',
+            'response_protocol' => 'Protocolo da resposta',
             'role' => 'Perfil de acesso',
             'document_type' => 'Tipo de documento',
             'document_name' => 'Arquivo',
@@ -151,7 +174,7 @@ class AuditLog extends Model
             return User::municipalityRoles()[$value] ?? (string) $value;
         }
 
-        if ($field === 'responsible_user_id') {
+        if (in_array($field, ['responsible_user_id', 'assigned_user_id'], true)) {
             return User::query()->find($value)?->name ?? 'Usuário não disponível';
         }
 
@@ -159,7 +182,7 @@ class AuditLog extends Model
             return $value ? 'Sim' : 'Não';
         }
 
-        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount'], true)) {
+        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount'], true)) {
             return 'R$ '.number_format((float) $value, 2, ',', '.');
         }
 
@@ -168,6 +191,10 @@ class AuditLog extends Model
         }
 
         if ($field === 'status') {
+            if (str_starts_with($this->action, 'accountability_')) {
+                return AccountabilityProcess::statuses()[$value] ?? (string) $value;
+            }
+
             return ParliamentaryAmendment::statuses()[$value] ?? (string) $value;
         }
 

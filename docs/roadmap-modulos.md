@@ -92,6 +92,8 @@ Validação necessária: obter checklists reais de pelo menos dois municípios o
 
 ## Módulo 4 - Execução física e financeira
 
+Situação: primeira versão concluída.
+
 Necessidades:
 
 - conta bancária específica;
@@ -108,7 +110,10 @@ Dependências: documentos, permissões e auditoria.
 Alerta: não construir contabilidade paralela. O módulo deve consolidar controle
 e evidências, com futura integração ao Siafic quando houver viabilidade.
 
-## Módulo 5 - Transparência e prestação de contas
+## Módulo 5 - Prestação de contas e transparência
+
+Situação: primeira versão da prestação de contas concluída. Transparência
+pública e exportação em planilha permanecem no roadmap.
 
 Necessidades:
 
@@ -118,6 +123,16 @@ Necessidades:
 - página pública com campos aprovados;
 - conferência de dados ausentes;
 - histórico do relatório gerado.
+
+Entregue na primeira versão:
+
+- processo com responsável, prazo, situação, protocolo e aprovação;
+- checklist operacional configurável e documentos vinculados;
+- conciliação entre recebido, pago, devolvido e saldo pendente;
+- diligências com responsável, prazo, resposta e protocolo;
+- indicador de prontidão e bloqueio de envio com pendências;
+- dossiê consolidado em PDF e pacote ZIP com documentos privados;
+- alertas, escalonamento e auditoria das operações.
 
 Dependências: execução, documentos e auditoria.
 

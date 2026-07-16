@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
 class AmendmentDocument extends Model
@@ -63,6 +64,11 @@ class AmendmentDocument extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function accountabilityRequirements(): HasMany
+    {
+        return $this->hasMany(AccountabilityRequirement::class);
     }
 
     public function formattedSize(): string

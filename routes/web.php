@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AccountabilityController;
+use App\Http\Controllers\AccountabilityDiligenceController;
+use App\Http\Controllers\AccountabilityDossierController;
+use App\Http\Controllers\AccountabilityRequirementController;
 use App\Http\Controllers\AlertCenterController;
 use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\AmendmentExecutionController;
@@ -58,6 +62,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
     Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
+    Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
+    Route::get('/emendas/{emenda}/prestacao-de-contas/dossie.pdf', [AccountabilityDossierController::class, 'pdf'])->name('emendas.accountability.dossier.pdf');
+    Route::get('/emendas/{emenda}/prestacao-de-contas/pacote.zip', [AccountabilityDossierController::class, 'package'])->name('emendas.accountability.dossier.package');
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
@@ -80,5 +87,11 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/emendas/{emenda}/empenhos', [FinancialCommitmentController::class, 'store'])->name('emendas.commitments.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/empenhos/{empenho}/cancelar', [FinancialCommitmentController::class, 'cancel'])->name('emendas.commitments.cancel')->block(10, 10);
         Route::post('/emendas/{emenda}/empenhos/{empenho}/pagamentos', [FinancialPaymentController::class, 'store'])->name('emendas.payments.store')->block(10, 10);
+        Route::post('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'store'])->name('emendas.accountability.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'update'])->name('emendas.accountability.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/prestacao-de-contas/requisitos', [AccountabilityRequirementController::class, 'store'])->name('emendas.accountability.requirements.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/prestacao-de-contas/requisitos/{requisito}', [AccountabilityRequirementController::class, 'update'])->name('emendas.accountability.requirements.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/prestacao-de-contas/diligencias', [AccountabilityDiligenceController::class, 'store'])->name('emendas.accountability.diligences.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/prestacao-de-contas/diligencias/{diligencia}', [AccountabilityDiligenceController::class, 'update'])->name('emendas.accountability.diligences.update')->block(10, 10);
     });
 });
