@@ -89,6 +89,7 @@ class AuditTrail
                 'document_name' => $document->original_name,
                 'document_version' => $document->version,
                 'document_size' => $document->formattedSize(),
+                'execution_stage' => $document->executionStage?->title,
             ],
             'ip_address' => $request->ip(),
             'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
@@ -136,6 +137,17 @@ class AuditTrail
             'ip_address' => $request->ip(),
             'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
         ]);
+    }
+
+    /** @param array<string, mixed> $newValues @param array<string, mixed>|null $oldValues */
+    public function recordOperation(
+        Request $request,
+        ParliamentaryAmendment $amendment,
+        string $action,
+        array $newValues,
+        ?array $oldValues = null,
+    ): AuditLog {
+        return $this->record($request, $amendment, $action, $oldValues, $newValues);
     }
 
     /** @param array<string, mixed>|null $oldValues @param array<string, mixed> $newValues */

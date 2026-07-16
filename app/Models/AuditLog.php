@@ -57,6 +57,11 @@ class AuditLog extends Model
     public function actionLabel(): string
     {
         return match ($this->action) {
+            'execution_stage_created' => 'Etapa de execução criada',
+            'execution_stage_updated' => 'Etapa de execução atualizada',
+            'financial_commitment_created' => 'Empenho registrado',
+            'financial_commitment_cancelled' => 'Empenho cancelado',
+            'financial_payment_created' => 'Pagamento registrado',
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
@@ -88,6 +93,18 @@ class AuditLog extends Model
     private static function fieldLabels(): array
     {
         return [
+            'stage' => 'Etapa',
+            'title' => 'Título da etapa',
+            'stage_status' => 'Situação da etapa',
+            'progress_percentage' => 'Progresso físico',
+            'planned_end_at' => 'Previsão de conclusão',
+            'commitment_number' => 'Número do empenho',
+            'supplier_name' => 'Fornecedor',
+            'committed_amount' => 'Valor empenhado',
+            'cancellation_reason' => 'Motivo do cancelamento',
+            'payment_reference' => 'Referência do pagamento',
+            'payment_amount' => 'Valor pago',
+            'execution_stage' => 'Etapa de execução',
             'role' => 'Perfil de acesso',
             'document_type' => 'Tipo de documento',
             'document_name' => 'Arquivo',
@@ -142,8 +159,12 @@ class AuditLog extends Model
             return $value ? 'Sim' : 'Não';
         }
 
-        if (in_array($field, ['expected_amount', 'received_amount'], true)) {
+        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount'], true)) {
             return 'R$ '.number_format((float) $value, 2, ',', '.');
+        }
+
+        if ($field === 'progress_percentage') {
+            return (int) $value.'%';
         }
 
         if ($field === 'status') {

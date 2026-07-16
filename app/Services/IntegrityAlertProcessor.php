@@ -96,6 +96,10 @@ class IntegrityAlertProcessor
         string $role,
         object $settings,
     ): bool {
+        if ($alert->assigned_user_id === $userId) {
+            return true;
+        }
+
         if ($alert->amendment->responsible_user_id === $userId) {
             return true;
         }

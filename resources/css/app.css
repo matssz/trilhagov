@@ -1047,6 +1047,10 @@ h6 {
     align-items: start;
 }
 
+.document-upload-form-with-stage {
+    grid-template-columns: minmax(170px, .8fr) minmax(190px, .9fr) minmax(240px, 1.25fr) minmax(170px, .8fr) auto;
+}
+
 .document-upload-button {
     min-height: 42px;
     margin-top: 1.85rem;
@@ -1520,5 +1524,516 @@ h6 {
 
     .notification-actions {
         grid-column: 2;
+    }
+}
+
+.amendment-tabs {
+    display: flex;
+    gap: .25rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+}
+
+.amendment-tabs a {
+    min-width: 112px;
+    padding: .7rem 1rem;
+    border-bottom: 3px solid transparent;
+    color: var(--muted);
+    font-size: .86rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.amendment-tabs a:hover,
+.amendment-tabs a.active {
+    border-bottom-color: var(--gold-500);
+    color: var(--navy-900);
+}
+
+.metric-card.metric-danger::before {
+    background: var(--danger);
+}
+
+.metric-card.metric-danger .metric-value {
+    color: var(--danger);
+}
+
+.execution-progress-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.execution-progress-item {
+    min-width: 0;
+    padding: 1.15rem;
+}
+
+.execution-progress-item + .execution-progress-item {
+    border-left: 1px solid var(--line);
+}
+
+.execution-progress-item small {
+    color: var(--muted);
+    font-size: .75rem;
+}
+
+.execution-progress {
+    height: 9px;
+    overflow: hidden;
+    margin: .7rem 0 .45rem;
+    border-radius: 4px;
+    background: #e7ecf2;
+}
+
+.execution-progress span {
+    display: block;
+    height: 100%;
+    background: var(--success);
+}
+
+.execution-progress.financial span {
+    background: var(--gold-500);
+}
+
+.execution-progress.compact {
+    width: min(100%, 580px);
+    height: 6px;
+    margin: .8rem 0 0;
+}
+
+.execution-form-band {
+    padding: 1.15rem;
+    border-bottom: 1px solid var(--line);
+    background: #f8fafc;
+}
+
+.execution-form-heading {
+    display: grid;
+    margin-bottom: 1rem;
+}
+
+.execution-form-heading small {
+    margin-top: .12rem;
+    color: var(--muted);
+}
+
+.stage-form-grid,
+.stage-edit-grid,
+.commitment-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.stage-form-grid .span-2,
+.stage-edit-grid .span-2 {
+    grid-column: span 2;
+}
+
+.stage-form-grid .span-full,
+.stage-edit-grid .span-full,
+.commitment-form-grid .span-full {
+    grid-column: 1 / -1;
+}
+
+.execution-stage-list,
+.commitment-list,
+.evidence-list {
+    display: grid;
+}
+
+.execution-stage-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 58px 38px;
+    gap: 1rem;
+    align-items: start;
+    padding: 1.1rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.execution-stage-row:last-child {
+    border-bottom: 0;
+}
+
+.execution-stage-row.is-overdue {
+    box-shadow: inset 4px 0 var(--danger);
+}
+
+.stage-order {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--navy-100);
+    color: var(--navy-900);
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+.stage-main {
+    min-width: 0;
+}
+
+.stage-main > p {
+    margin: .4rem 0;
+    color: var(--muted);
+    font-size: .86rem;
+    white-space: pre-line;
+}
+
+.stage-status {
+    display: inline-flex;
+    padding: .18rem .42rem;
+    border-radius: 4px;
+    background: #eef2f6;
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.stage-status-in_progress {
+    background: var(--gold-100);
+    color: var(--warning);
+}
+
+.stage-status-completed {
+    background: #e8f6ef;
+    color: var(--success);
+}
+
+.stage-status-blocked {
+    background: #fde8e8;
+    color: var(--danger);
+}
+
+.stage-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem 1rem;
+    color: var(--muted);
+    font-size: .75rem;
+}
+
+.stage-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.stage-meta svg {
+    width: 14px;
+    height: 14px;
+}
+
+.stage-percentage {
+    color: var(--navy-900);
+    text-align: right;
+}
+
+.stage-editor {
+    position: relative;
+}
+
+.stage-editor > summary {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 6px;
+    color: var(--navy-800);
+    cursor: pointer;
+    list-style: none;
+}
+
+.stage-editor > summary:hover {
+    background: var(--navy-100);
+}
+
+.stage-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+.stage-editor > summary svg {
+    width: 17px;
+    height: 17px;
+}
+
+.stage-editor > form {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f8fafc;
+}
+
+.stage-editor[open] {
+    grid-column: 2 / -1;
+}
+
+.stage-editor[open] > summary {
+    margin-left: auto;
+}
+
+.commitment-row {
+    border-bottom: 1px solid var(--line);
+}
+
+.commitment-row:last-child {
+    border-bottom: 0;
+}
+
+.commitment-row.is-cancelled {
+    background: #fafafa;
+    opacity: .82;
+}
+
+.commitment-summary {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) auto;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 1rem 1.15rem;
+}
+
+.commitment-summary p {
+    margin-top: .35rem;
+    color: var(--ink);
+    font-size: .85rem;
+}
+
+.commitment-summary small {
+    color: var(--muted);
+    font-size: .74rem;
+}
+
+.commitment-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(105px, 1fr));
+    gap: .75rem;
+}
+
+.commitment-values > span {
+    display: grid;
+    text-align: right;
+}
+
+.commitment-values strong {
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.commitment-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .65rem 1.15rem;
+    border-top: 1px solid #edf1f5;
+    color: var(--navy-800);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.commitment-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.commitment-details > summary svg {
+    width: 16px;
+    height: 16px;
+    transition: transform .18s ease;
+}
+
+.commitment-details[open] > summary svg {
+    transform: rotate(180deg);
+}
+
+.commitment-detail-body {
+    padding: 1rem 1.15rem 1.15rem;
+    background: #fafcff;
+    border-top: 1px solid var(--line);
+}
+
+.commitment-object p {
+    margin: .3rem 0 1rem;
+    color: var(--muted);
+    font-size: .84rem;
+    white-space: pre-line;
+}
+
+.payment-list {
+    margin-bottom: 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.payment-list > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.payment-list span {
+    display: grid;
+}
+
+.payment-list small {
+    color: var(--muted);
+}
+
+.payment-form,
+.execution-evidence-form {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    gap: .75rem;
+    align-items: start;
+    padding-top: .25rem;
+}
+
+.payment-submit,
+.evidence-submit {
+    min-height: 42px;
+    margin-top: 1.85rem;
+    white-space: nowrap;
+}
+
+.cancel-commitment > summary {
+    width: fit-content;
+    color: var(--danger);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.execution-evidence-form {
+    padding: 1.15rem;
+    border-bottom: 1px solid var(--line);
+    background: #f8fafc;
+}
+
+.evidence-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: .8rem;
+    align-items: center;
+    padding: .9rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.evidence-row:last-child {
+    border-bottom: 0;
+}
+
+.evidence-row > span:nth-child(2) {
+    display: grid;
+}
+
+.evidence-row small {
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    font-size: .75rem;
+}
+
+@media (max-width: 1199.98px) {
+    .stage-form-grid,
+    .stage-edit-grid,
+    .commitment-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .payment-form,
+    .execution-evidence-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .payment-submit,
+    .evidence-submit {
+        width: fit-content;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .execution-progress-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .execution-progress-item + .execution-progress-item {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+    }
+
+    .stage-form-grid,
+    .stage-edit-grid,
+    .commitment-form-grid,
+    .payment-form,
+    .execution-evidence-form {
+        grid-template-columns: 1fr;
+    }
+
+    .stage-form-grid .span-2,
+    .stage-edit-grid .span-2,
+    .stage-form-grid .span-full,
+    .stage-edit-grid .span-full,
+    .commitment-form-grid .span-full {
+        grid-column: auto;
+    }
+
+    .execution-stage-row {
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+        gap: .75rem;
+    }
+
+    .stage-percentage {
+        grid-column: 2;
+        text-align: left;
+    }
+
+    .stage-editor {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .stage-editor[open] {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+
+    .commitment-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .commitment-values {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .commitment-values > span {
+        text-align: left;
+    }
+
+    .commitment-values strong {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .commitment-values {
+        grid-template-columns: 1fr;
+    }
+
+    .evidence-row {
+        grid-template-columns: 34px minmax(0, 1fr);
+    }
+
+    .evidence-row .btn {
+        grid-column: 2;
+        width: fit-content;
     }
 }

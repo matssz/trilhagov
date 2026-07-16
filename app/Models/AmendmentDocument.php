@@ -14,6 +14,7 @@ class AmendmentDocument extends Model
         'municipality_id',
         'parliamentary_amendment_id',
         'document_type_id',
+        'execution_stage_id',
         'uploaded_by',
         'uploader_name',
         'original_name',
@@ -52,6 +53,11 @@ class AmendmentDocument extends Model
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    public function executionStage(): BelongsTo
+    {
+        return $this->belongsTo(ExecutionStage::class);
     }
 
     public function uploader(): BelongsTo

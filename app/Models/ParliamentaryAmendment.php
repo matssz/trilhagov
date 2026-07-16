@@ -193,6 +193,38 @@ class ParliamentaryAmendment extends Model
             ->latest('id');
     }
 
+    public function executionStages(): HasMany
+    {
+        return $this->hasMany(ExecutionStage::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function financialCommitments(): HasMany
+    {
+        return $this->hasMany(FinancialCommitment::class)
+            ->latest('committed_at')
+            ->latest('id');
+    }
+
+    public function financialPayments(): HasMany
+    {
+        return $this->hasMany(FinancialPayment::class)
+            ->latest('paid_at')
+            ->latest('id');
+    }
+
+    public function physicalExecutionPercentage(): int
+    {
+        $stages = $this->relationLoaded('executionStages')
+            ? $this->executionStages
+            : $this->executionStages()->get();
+
+        return $stages->isEmpty()
+            ? 0
+            : (int) round($stages->average('progress_percentage'));
+    }
+
     public function integrityAlerts(): HasMany
     {
         return $this->hasMany(IntegrityAlert::class);

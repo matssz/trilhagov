@@ -74,6 +74,21 @@ class Municipality extends Model
         return $this->hasMany(AmendmentDocument::class);
     }
 
+    public function executionStages(): HasMany
+    {
+        return $this->hasMany(ExecutionStage::class);
+    }
+
+    public function financialCommitments(): HasMany
+    {
+        return $this->hasMany(FinancialCommitment::class);
+    }
+
+    public function financialPayments(): HasMany
+    {
+        return $this->hasMany(FinancialPayment::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

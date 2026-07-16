@@ -25,10 +25,18 @@
             <h1 class="h3 mb-1">{{ $amendment->reference }}</h1>
             <p class="text-secondary mb-0">{{ $amendment->municipality->name }} / {{ $amendment->municipality->state }}</p>
         </div>
-        @if ($canEdit)
-            <a class="btn btn-primary" href="{{ route('emendas.edit', $amendment) }}">Editar emenda</a>
-        @endif
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="gauge" aria-hidden="true"></i>Acompanhar execução</a>
+            @if ($canEdit)
+                <a class="btn btn-primary" href="{{ route('emendas.edit', $amendment) }}">Editar emenda</a>
+            @endif
+        </div>
     </div>
+
+    <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
+        <a class="active" href="{{ route('emendas.show', $amendment) }}" aria-current="page">Visão geral</a>
+        <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
+    </nav>
 
     <div class="row g-4">
         <div class="col-lg-8">
@@ -180,7 +188,7 @@
                     <div class="document-upload-section">
                         <h3 class="h6 mb-3">Anexar documento</h3>
                         <x-validation-summary />
-                        <form class="document-upload-form" method="POST" action="{{ route('emendas.documents.store', $amendment) }}" enctype="multipart/form-data" novalidate>
+                        <form class="document-upload-form document-upload-form-with-stage" method="POST" action="{{ route('emendas.documents.store', $amendment) }}" enctype="multipart/form-data" novalidate>
                             @csrf
                             <input name="_submission_token" type="hidden" value="{{ $documentSubmissionToken }}">
                             <div>
@@ -198,6 +206,16 @@
                                 <input class="form-control @error('document') is-invalid @enderror" id="document" name="document" type="file" accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.csv,.doc,.docx" required>
                                 <div class="form-text">PDF, imagem, planilha ou documento de texto, com até 10 MB.</div>
                                 @error('document')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div>
+                                <label class="form-label" for="execution_stage_id">Etapa de execução</label>
+                                <select class="form-select @error('execution_stage_id') is-invalid @enderror" id="execution_stage_id" name="execution_stage_id">
+                                    <option value="">Documento geral da emenda</option>
+                                    @foreach ($executionStages as $stage)
+                                        <option value="{{ $stage->id }}" @selected((string) old('execution_stage_id') === (string) $stage->id)>{{ $stage->title }}</option>
+                                    @endforeach
+                                </select>
+                                @error('execution_stage_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div>
                                 <label class="form-label" for="document_notes">Observação</label>
@@ -227,6 +245,7 @@
                                     <th>Tipo</th>
                                     <th>Arquivo</th>
                                     <th>Versão</th>
+                                    <th>Etapa</th>
                                     <th>Enviado por</th>
                                     <th>Data</th>
                                     <th class="text-end">Ação</th>
@@ -241,6 +260,7 @@
                                             <small class="text-secondary">{{ $document->formattedSize() }}{{ $document->notes ? ' · '.$document->notes : '' }}</small>
                                         </td>
                                         <td data-label="Versão">{{ $document->version }}</td>
+                                        <td data-label="Etapa">{{ $document->executionStage?->title ?? 'Documento geral' }}</td>
                                         <td data-label="Enviado por">{{ $document->uploader_name }}</td>
                                         <td class="text-nowrap" data-label="Data">{{ $document->created_at->format('d/m/Y H:i') }}</td>
                                         <td class="text-end" data-label="Ação">

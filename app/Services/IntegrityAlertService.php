@@ -16,7 +16,9 @@ class IntegrityAlertService
     {
         $settings = $municipality->alertSetting()->firstOrCreate([]);
         $municipality->load([
-            'amendments.documents:id,parliamentary_amendment_id,document_type_id',
+            'amendments.documents:id,parliamentary_amendment_id,document_type_id,execution_stage_id',
+            'amendments.executionStages',
+            'amendments.financialCommitments.payments',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -31,6 +33,7 @@ class IntegrityAlertService
             $this->detectDeadlines($amendment, $settings, $detections);
             $this->detectMissingDocuments($amendment, $municipality, $detections);
             $this->detectInconsistencies($amendment, $detections);
+            $this->detectExecutionControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
         }
 
@@ -229,6 +232,112 @@ class IntegrityAlertService
         }
     }
 
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectExecutionControls(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+    ): void {
+        foreach ($amendment->executionStages as $stage) {
+            if ($stage->status === 'completed' || $stage->planned_end_at === null) {
+                continue;
+            }
+
+            $daysUntil = (int) today()->diffInDays($stage->planned_end_at, false);
+
+            if ($daysUntil > $settings->deadline_warning_days) {
+                continue;
+            }
+
+            $overdueDays = max(0, -$daysUntil);
+            $escalationLevel = match (true) {
+                $overdueDays >= $settings->escalation_level_two_days => 2,
+                $overdueDays >= $settings->escalation_level_one_days => 1,
+                default => 0,
+            };
+            $severity = $daysUntil <= $settings->deadline_critical_days
+                ? IntegrityAlert::SEVERITY_CRITICAL
+                : IntegrityAlert::SEVERITY_INFO;
+            $message = match (true) {
+                $daysUntil < 0 => "A etapa {$stage->title} está atrasada há ".abs($daysUntil).' dia(s).',
+                $daysUntil === 0 => "A etapa {$stage->title} vence hoje.",
+                default => "A etapa {$stage->title} vence em {$daysUntil} dia(s).",
+            };
+
+            $this->addDetection($detections, $amendment, "deadline:stage:{$stage->id}", [
+                'assigned_user_id' => $stage->responsible_user_id ?? $amendment->responsible_user_id,
+                'category' => IntegrityAlert::CATEGORY_DEADLINE,
+                'severity' => $severity,
+                'escalation_level' => $escalationLevel,
+                'title' => $daysUntil < 0 ? 'Etapa de execução atrasada' : 'Prazo de etapa próximo',
+                'message' => $message,
+                'due_at' => $stage->planned_end_at,
+            ]);
+        }
+
+        $executionStatuses = [
+            ParliamentaryAmendment::STATUS_EXECUTING,
+            ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
+            ParliamentaryAmendment::STATUS_COMPLETED,
+        ];
+
+        if (in_array($amendment->status, $executionStatuses, true) && $amendment->executionStages->isEmpty()) {
+            $this->addDetection($detections, $amendment, 'execution:missing-stages', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Execução sem etapas cadastradas',
+                'message' => 'O acompanhamento físico precisa de etapas e entregas verificáveis.',
+                'due_at' => null,
+            ]);
+        }
+
+        $activeCommitments = $amendment->financialCommitments->where('status', 'active');
+        $committedAmount = (float) $activeCommitments->sum('committed_amount');
+        $paidAmount = (float) $activeCommitments->sum(fn ($commitment) => $commitment->payments->sum('amount'));
+        $receivedAmount = $amendment->received_amount === null ? null : (float) $amendment->received_amount;
+
+        if ($receivedAmount !== null && $committedAmount > $receivedAmount + 0.00001) {
+            $this->addDetection($detections, $amendment, 'execution:commitments-over-received', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Empenhos acima do valor recebido',
+                'message' => 'O total empenhado supera o recurso recebido em R$ '.number_format($committedAmount - $receivedAmount, 2, ',', '.').'.',
+                'due_at' => null,
+            ]);
+        }
+
+        if ($receivedAmount !== null && $paidAmount > $receivedAmount + 0.00001) {
+            $this->addDetection($detections, $amendment, 'execution:payments-over-received', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Pagamentos acima do valor recebido',
+                'message' => 'O total pago supera o recurso recebido em R$ '.number_format($paidAmount - $receivedAmount, 2, ',', '.').'.',
+                'due_at' => null,
+            ]);
+        }
+
+        if ($paidAmount > 0 && $amendment->documents->whereNotNull('execution_stage_id')->isEmpty()) {
+            $this->addDetection($detections, $amendment, 'execution:payments-without-evidence', [
+                'category' => IntegrityAlert::CATEGORY_DOCUMENT,
+                'severity' => IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Pagamento sem evidência de entrega',
+                'message' => 'Há pagamento registrado, mas nenhuma evidência foi vinculada às etapas de execução.',
+                'due_at' => null,
+            ]);
+        }
+
+        if ($amendment->status === ParliamentaryAmendment::STATUS_COMPLETED
+            && $amendment->physicalExecutionPercentage() < 100) {
+            $this->addDetection($detections, $amendment, 'execution:completed-with-open-stages', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Emenda concluída com execução física pendente',
+                'message' => 'A média das etapas está abaixo de 100%. Revise as entregas antes de encerrar a emenda.',
+                'due_at' => null,
+            ]);
+        }
+    }
+
     /**
      * @param  array<int, int>  $operationalUserIds
      * @param  array<int, array<string, mixed>>  $detections
@@ -330,7 +439,7 @@ class IntegrityAlertService
 
     /**
      * @param  array<int, array<string, mixed>>  $detections
-     * @param  array{category: string, severity: string, title: string, message: string, due_at: Carbon|null, escalation_level?: int}  $attributes
+     * @param  array{category: string, severity: string, title: string, message: string, due_at: Carbon|null, escalation_level?: int, assigned_user_id?: int|null}  $attributes
      */
     private function addDetection(
         array &$detections,

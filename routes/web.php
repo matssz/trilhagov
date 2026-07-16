@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\AlertCenterController;
 use App\Http\Controllers\AmendmentDocumentController;
+use App\Http\Controllers\AmendmentExecutionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\ExecutionStageController;
+use App\Http\Controllers\FinancialCommitmentController;
+use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
@@ -53,6 +57,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+    Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
@@ -70,5 +75,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
         Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
         Route::post('/emendas/{emenda}/documentos', [AmendmentDocumentController::class, 'store'])->name('emendas.documents.store')->block(10, 10);
+        Route::post('/emendas/{emenda}/etapas', [ExecutionStageController::class, 'store'])->name('emendas.stages.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/etapas/{etapa}', [ExecutionStageController::class, 'update'])->name('emendas.stages.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/empenhos', [FinancialCommitmentController::class, 'store'])->name('emendas.commitments.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/empenhos/{empenho}/cancelar', [FinancialCommitmentController::class, 'cancel'])->name('emendas.commitments.cancel')->block(10, 10);
+        Route::post('/emendas/{emenda}/empenhos/{empenho}/pagamentos', [FinancialPaymentController::class, 'store'])->name('emendas.payments.store')->block(10, 10);
     });
 });

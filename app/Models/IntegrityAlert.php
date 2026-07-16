@@ -29,6 +29,7 @@ class IntegrityAlert extends Model
     protected $fillable = [
         'municipality_id',
         'parliamentary_amendment_id',
+        'assigned_user_id',
         'alert_key',
         'category',
         'severity',
@@ -59,6 +60,11 @@ class IntegrityAlert extends Model
     public function amendment(): BelongsTo
     {
         return $this->belongsTo(ParliamentaryAmendment::class, 'parliamentary_amendment_id');
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
     public function deliveries(): HasMany

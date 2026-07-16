@@ -40,6 +40,13 @@ class AmendmentDocumentController extends Controller
                     ->where('municipality_id', $municipality->id)
                     ->where('is_active', true)),
             ],
+            'execution_stage_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('execution_stages', 'id')->where(fn ($query) => $query
+                    ->where('municipality_id', $municipality->id)
+                    ->where('parliamentary_amendment_id', $amendment->id)),
+            ],
             'document' => [
                 'required',
                 File::types(['pdf', 'jpg', 'jpeg', 'png', 'xls', 'xlsx', 'csv', 'doc', 'docx'])
@@ -83,6 +90,7 @@ class AmendmentDocumentController extends Controller
                 $document = $amendment->documents()->create([
                     'municipality_id' => $municipality->id,
                     'document_type_id' => $validated['document_type_id'],
+                    'execution_stage_id' => $validated['execution_stage_id'] ?? null,
                     'uploaded_by' => $request->user()->id,
                     'uploader_name' => $request->user()->name,
                     'original_name' => $originalName,
