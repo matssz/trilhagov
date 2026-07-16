@@ -1,5 +1,6 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import './analytics.css';
+@import './integrations.css';
 
 :root {
     --navy-950: #071f3d;

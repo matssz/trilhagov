@@ -56,6 +56,10 @@
                                 <span class="sidebar-count">{{ min($unreadNotificationCount, 99) }}</span>
                             @endif
                         </a>
+                        <a class="sidebar-link {{ request()->routeIs('integrations.*') ? 'active' : '' }}" href="{{ route('integrations.index') }}">
+                            <i data-lucide="database-zap" aria-hidden="true"></i>
+                            <span>Integrações</span>
+                        </a>
                         @if ($canManageUsers)
                             <a class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                                 <i data-lucide="users" aria-hidden="true"></i>

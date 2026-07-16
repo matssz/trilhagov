@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'transferegov' => [
+        'base_url' => env('TRANSFEREGOV_API_URL', 'https://api-publica.transferegov.gestao.gov.br/especiais'),
+        'timeout' => (int) env('TRANSFEREGOV_API_TIMEOUT', 20),
+    ],
+
 ];

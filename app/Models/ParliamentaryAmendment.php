@@ -246,6 +246,11 @@ class ParliamentaryAmendment extends Model
         return $this->hasMany(IntegrityAlert::class);
     }
 
+    public function externalCandidates(): HasMany
+    {
+        return $this->hasMany(ExternalAmendmentCandidate::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

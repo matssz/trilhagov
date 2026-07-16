@@ -173,6 +173,9 @@ institucional de cada prefeitura.
 
 ## Módulo 7 - Integrações oficiais
 
+Situação: primeira versão da integração com Transferências Especiais do
+Transferegov concluída.
+
 Necessidades candidatas:
 
 - dados abertos e APIs do Transferegov;
@@ -180,6 +183,22 @@ Necessidades candidatas:
 - identificação da fonte e horário da sincronização;
 - tratamento de divergências sem sobrescrever dado confirmado;
 - monitoramento de falhas e mudança de contrato da API.
+
+Entregue na primeira versão:
+
+- consulta do beneficiário pelo CNPJ municipal na API pública oficial;
+- leitura paginada dos planos de ação e da data de atualização da fonte;
+- histórico de sincronizações, quantidades, falhas e usuário iniciador;
+- candidatos externos versionados por hash e separados por município;
+- correspondência por código do plano ou da emenda;
+- detecção explicável de divergências em exercício, autoria, objeto e valor;
+- vínculo sem sobrescrita, aplicação seletiva de campos e auditoria;
+- importação somente após preenchimento das responsabilidades e datas municipais;
+- descarte com justificativa e reabertura quando a fonte oficial mudar;
+- retentativas limitadas e mensagem humana quando a API estiver indisponível.
+
+Próxima evolução: incluir empenhos, ordens bancárias e saldo oficial na
+conciliação, após validar os identificadores com casos reais.
 
 Dependências: modelo estabilizado e dados reais suficientes para mapear os campos.
 

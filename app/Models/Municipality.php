@@ -123,6 +123,16 @@ class Municipality extends Model
             ->latest('id');
     }
 
+    public function externalDataSyncs(): HasMany
+    {
+        return $this->hasMany(ExternalDataSync::class);
+    }
+
+    public function externalAmendmentCandidates(): HasMany
+    {
+        return $this->hasMany(ExternalAmendmentCandidate::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

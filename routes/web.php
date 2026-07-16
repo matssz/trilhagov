@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ExecutionStageController;
+use App\Http\Controllers\ExternalIntegrationController;
 use App\Http\Controllers\FinancialCommitmentController;
 use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
@@ -53,6 +54,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/painel', DashboardController::class)->name('dashboard');
     Route::get('/relatorios/emendas.csv', ReportExportController::class)->name('reports.export');
+    Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
     Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
@@ -86,6 +88,11 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/integracoes/transferegov/sincronizar', [ExternalIntegrationController::class, 'sync'])->name('integrations.sync')->block(20, 20);
+        Route::patch('/integracoes/candidatos/{candidate}/vincular', [ExternalIntegrationController::class, 'link'])->name('integrations.candidates.link')->block(10, 10);
+        Route::patch('/integracoes/candidatos/{candidate}/aplicar', [ExternalIntegrationController::class, 'apply'])->name('integrations.candidates.apply')->block(10, 10);
+        Route::post('/integracoes/candidatos/{candidate}/importar', [ExternalIntegrationController::class, 'import'])->name('integrations.candidates.import')->block(10, 10);
+        Route::patch('/integracoes/candidatos/{candidate}/ignorar', [ExternalIntegrationController::class, 'ignore'])->name('integrations.candidates.ignore')->block(10, 10);
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
         Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
         Route::post('/emendas/{emenda}/documentos', [AmendmentDocumentController::class, 'store'])->name('emendas.documents.store')->block(10, 10);

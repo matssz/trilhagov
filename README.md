@@ -49,6 +49,10 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Exportação CSV auditada, isolada por município e protegida contra injeção de fórmulas.
 - Portal público de transparência ativado exclusivamente pelo gestor, com filtros e dados abertos.
 - Separação entre dados publicáveis e informações internas, documentos e fornecedores.
+- Consulta da API oficial de Transferências Especiais do Transferegov pelo CNPJ municipal.
+- Caixa de conferência com candidatos novos, correspondências e divergências campo a campo.
+- Importação controlada, aplicação seletiva e proveniência preservada sem sobrescrita automática.
+- Histórico de sincronizações, data da base oficial, falhas e decisões dos revisores.
 
 ## Stack
 
@@ -110,6 +114,7 @@ hora sem repetir o mesmo envio.
 - [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)
 - [Alertas e notificações](docs/alertas-e-notificacoes.md)
 - [Transparência e inteligência gerencial](docs/transparencia-e-inteligencia.md)
+- [Integrações e conferência de dados](docs/integracoes-oficiais.md)
 
 ## Limite atual
 
