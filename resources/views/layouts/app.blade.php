@@ -11,7 +11,7 @@
     $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
     $unreadNotificationCount = $workspaceLayout
         ? auth()->user()->unreadNotifications()
-            ->where('data->municipality_id', (int) session('active_municipality_id'))
+            ->whereJsonContains('data->municipality_id', (int) session('active_municipality_id'))
             ->count()
         : 0;
 @endphp
