@@ -17,8 +17,12 @@ use App\Http\Controllers\ExternalIntegrationController;
 use App\Http\Controllers\FinancialCommitmentController;
 use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
+use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalUserController;
+use App\Http\Controllers\MunicipalWorkPlanController;
+use App\Http\Controllers\MunicipalWorkPlanPdfController;
+use App\Http\Controllers\MunicipalWorkPlanStageController;
 use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
@@ -73,6 +77,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+    Route::get('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'index'])->name('emendas.work-plan');
+    Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
     Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
     Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
     Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
@@ -81,6 +87,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
+        Route::post('/emendas/{emenda}/plano-de-trabalho/parecer', [MunicipalAdmissibilityReviewController::class, 'store'])->name('emendas.work-plan.review')->block(10, 10);
         Route::patch('/transparencia/configuracao', TransparencySettingsController::class)->name('transparency.settings.update')->block(10, 10);
         Route::patch('/alertas/configuracoes', [AlertCenterController::class, 'updateSettings'])->name('alerts.settings.update')->block(10, 10);
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
@@ -109,6 +116,12 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
         Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
         Route::post('/emendas/{emenda}/documentos', [AmendmentDocumentController::class, 'store'])->name('emendas.documents.store')->block(10, 10);
+        Route::post('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'store'])->name('emendas.work-plan.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'update'])->name('emendas.work-plan.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/plano-de-trabalho/enviar', [MunicipalWorkPlanController::class, 'submit'])->name('emendas.work-plan.submit')->block(10, 10);
+        Route::post('/emendas/{emenda}/plano-de-trabalho/etapas', [MunicipalWorkPlanStageController::class, 'store'])->name('emendas.work-plan.stages.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/plano-de-trabalho/etapas/{etapa}', [MunicipalWorkPlanStageController::class, 'update'])->name('emendas.work-plan.stages.update')->block(10, 10);
+        Route::delete('/emendas/{emenda}/plano-de-trabalho/etapas/{etapa}', [MunicipalWorkPlanStageController::class, 'destroy'])->name('emendas.work-plan.stages.destroy')->block(10, 10);
         Route::patch('/emendas/{emenda}/conformidade-tcesp/{regra}', [AmendmentComplianceController::class, 'update'])->name('emendas.compliance.update')->block(10, 10);
         Route::post('/emendas/{emenda}/etapas', [ExecutionStageController::class, 'store'])->name('emendas.stages.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/etapas/{etapa}', [ExecutionStageController::class, 'update'])->name('emendas.stages.update')->block(10, 10);

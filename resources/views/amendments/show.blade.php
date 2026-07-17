@@ -27,6 +27,7 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             @if ($amendment->supportsTcespCompliance())
+                <a class="btn btn-outline-primary" href="{{ route('emendas.work-plan', $amendment) }}"><i data-lucide="clipboard-list" aria-hidden="true"></i>Plano de trabalho</a>
                 <a class="btn btn-outline-primary" href="{{ route('emendas.compliance', $amendment) }}"><i data-lucide="badge-check" aria-hidden="true"></i>Conferir TCESP</a>
             @endif
             <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="gauge" aria-hidden="true"></i>Acompanhar execução</a>
@@ -38,6 +39,9 @@
 
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
         <a class="active" href="{{ route('emendas.show', $amendment) }}" aria-current="page">Visão geral</a>
+        @if ($amendment->supportsTcespCompliance())
+            <a href="{{ route('emendas.work-plan', $amendment) }}">Plano de trabalho</a>
+        @endif
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
         @if ($amendment->supportsTcespCompliance())
             <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>

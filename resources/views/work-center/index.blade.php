@@ -8,6 +8,7 @@
             'responsibility' => 'user-round-check',
             'communication' => 'message-square',
             'document' => 'file-check-2',
+            'planning' => 'clipboard-list',
             'execution' => 'gauge',
             'financial' => 'receipt-text',
             'accountability' => 'clipboard-check',

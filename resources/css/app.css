@@ -4,6 +4,7 @@
 @import './work-center.css';
 @import './spreadsheet-imports.css';
 @import './compliance.css';
+@import './work-plan.css';
 
 :root {
     --navy-950: #071f3d;

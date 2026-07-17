@@ -9,12 +9,15 @@ use App\Models\ExternalFinancialReconciliation;
 use App\Models\FinancialCommitment;
 use App\Models\Municipality;
 use App\Models\MunicipalWorkItem;
+use App\Models\MunicipalWorkPlan;
 use App\Models\ParliamentaryAmendment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class MunicipalWorkItemService
 {
+    public function __construct(private readonly MunicipalWorkPlanService $workPlanService) {}
+
     /** @return array{active: int, created: int, reopened: int, completed: int} */
     public function synchronize(Municipality $municipality): array
     {
@@ -24,7 +27,9 @@ class MunicipalWorkItemService
             ->orderBy('sort_order')
             ->get();
         $amendments = $municipality->amendments()->with([
+            'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
+            'municipalWorkPlan.stages',
             'executionStages',
             'financialCommitments',
             'accountabilityProcess.requirements',
@@ -124,6 +129,48 @@ class MunicipalWorkItemService
                 $nextDeadline,
                 MunicipalWorkItem::PRIORITY_HIGH,
             );
+        }
+
+        if ($amendment->supportsTcespCompliance()) {
+            $plan = $amendment->municipalWorkPlan;
+
+            if ($plan === null) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:municipal-work-plan:create",
+                    'planning',
+                    'Iniciar plano de trabalho municipal',
+                    'Estruture beneficiário, metas, custos e cronograma antes da análise de admissibilidade.',
+                    route('emendas.work-plan', $amendment, false),
+                    $amendment->communication_deadline,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                    $amendment->responsible_user_id,
+                );
+            } elseif ($plan->isEditable()) {
+                $readiness = $this->workPlanService->readiness($plan, $amendment);
+                $isAdjustment = $plan->status === MunicipalWorkPlan::STATUS_ADJUSTMENTS_REQUESTED;
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:municipal-work-plan:prepare",
+                    'planning',
+                    $isAdjustment ? 'Corrigir plano devolvido' : 'Concluir plano de trabalho',
+                    $isAdjustment
+                        ? 'Atenda os ajustes registrados no parecer e envie uma nova revisão para análise.'
+                        : ($readiness['blockers'][0] ?? 'Confira o plano e envie a primeira revisão para análise técnica.'),
+                    route('emendas.work-plan', $amendment, false),
+                    $amendment->communication_deadline,
+                    $isAdjustment ? MunicipalWorkItem::PRIORITY_HIGH : MunicipalWorkItem::PRIORITY_NORMAL,
+                    $amendment->responsible_user_id,
+                );
+            } elseif ($plan->status === MunicipalWorkPlan::STATUS_UNDER_REVIEW) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:municipal-work-plan:review:{$plan->revision_number}",
+                    'planning',
+                    "Emitir parecer de admissibilidade R{$plan->revision_number}",
+                    'Avalie todos os critérios e conclua pela aprovação, devolução para ajustes ou rejeição fundamentada.',
+                    route('emendas.work-plan', $amendment, false).'#parecer',
+                    $amendment->communication_deadline,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                );
+            }
         }
 
         if ($amendment->communication_completed_at === null && $amendment->communication_deadline !== null) {

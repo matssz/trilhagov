@@ -153,6 +153,16 @@ class Municipality extends Model
         return $this->hasMany(AmendmentComplianceReview::class);
     }
 
+    public function municipalWorkPlans(): HasMany
+    {
+        return $this->hasMany(MunicipalWorkPlan::class);
+    }
+
+    public function municipalAdmissibilityReviews(): HasMany
+    {
+        return $this->hasMany(MunicipalAdmissibilityReview::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

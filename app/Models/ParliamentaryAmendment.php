@@ -275,6 +275,16 @@ class ParliamentaryAmendment extends Model
         return $this->hasMany(AmendmentComplianceReview::class);
     }
 
+    public function municipalWorkPlan(): HasOne
+    {
+        return $this->hasOne(MunicipalWorkPlan::class);
+    }
+
+    public function municipalAdmissibilityReviews(): HasMany
+    {
+        return $this->hasMany(MunicipalAdmissibilityReview::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

@@ -76,6 +76,7 @@ class MunicipalWorkItem extends Model
             'responsibility' => 'Responsabilidade',
             'communication' => 'Comunicação',
             'document' => 'Documentação',
+            'planning' => 'Planejamento',
             'execution' => 'Execução',
             'financial' => 'Financeiro',
             'accountability' => 'Prestação de contas',

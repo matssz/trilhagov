@@ -39,13 +39,35 @@ Toda revisão registra usuário, data, versão da matriz e alteração no histó
 imutável da emenda. Requisições repetidas usam token de uso único e não geram
 revisões ou eventos duplicados.
 
+## Plano de trabalho e admissibilidade
+
+Emendas municipais paulistas também possuem um fluxo estruturado de planejamento:
+
+- identificação do beneficiário ou órgão executor, CNPJ e contato;
+- objeto detalhado, justificativa e necessidade pública;
+- metas física e finalística;
+- programa, ação orçamentária, plano de aplicação e memória de cálculo;
+- operação e manutenção futura;
+- controles condicionais de saúde, engenharia, licença ambiental e PCA;
+- cronograma físico-financeiro com entregas, datas e valores;
+- bloqueio do envio quando o total das etapas diverge do valor da emenda;
+- parecer de admissibilidade com sete critérios e conclusão fundamentada;
+- devolução para ajustes e reenvio como nova revisão;
+- cópia histórica imutável de cada versão analisada;
+- geração de PDF operacional com plano, cronograma e pareceres;
+- ações automáticas na Central de Trabalho durante todas as fases.
+
+Editores e gestores podem preparar o plano. Durante a análise ele permanece
+bloqueado, e somente um gestor pode emitir o parecer. A aprovação exige que não
+exista critério marcado como não atendido. Devolução ou rejeição exigem ao menos
+uma não conformidade identificada; a devolução também exige instruções de ajuste.
+
 ## Limites e próximos requisitos
 
 Ainda precisam ser construídos e validados com procuradores, controladores,
 contadores e equipes legislativas municipais:
 
 - parametrização da Lei Orgânica, LDO, Regimento Interno e prazos de cada município;
-- formulário estruturado do plano de trabalho e parecer de admissibilidade;
 - fluxo de impedimento temporário ou insuperável, diligência e remanejamento;
 - cadastro e exportação no formato exigido pelo sistema Audesp;
 - conciliação dos códigos contábeis, conta bancária e regra Audesp 47.4.63;

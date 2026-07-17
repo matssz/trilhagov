@@ -64,6 +64,9 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Proteção contra duplicidades e sobrescrita dos dados já confirmados pelo município.
 - Matriz versionada do Manual TCESP de julho de 2026 para emendas impositivas municipais paulistas.
 - Revisões com evidência obrigatória, documento vinculado, responsável, data e histórico de auditoria.
+- Plano de trabalho municipal com metas, enquadramento, memória de cálculo e cronograma físico-financeiro.
+- Parecer de admissibilidade imutável, devolução para ajustes, revisões históricas e PDF operacional.
+- Ações automáticas de planejamento e parecer integradas à Central de Trabalho.
 
 ## Stack
 

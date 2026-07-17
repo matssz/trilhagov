@@ -3,6 +3,14 @@
 Este documento organiza a evolução técnica e comercial. A ordem considera risco,
 dependências e capacidade de validar cada entrega com usuários municipais.
 
+## Entregue - planejamento de emendas impositivas municipais
+
+- Plano de trabalho estruturado conforme o Manual TCESP de julho de 2026.
+- Cronograma físico-financeiro conciliado com o valor da emenda.
+- Submissão versionada e bloqueio durante análise.
+- Parecer de admissibilidade com aprovação, ajustes ou rejeição fundamentada.
+- Histórico imutável, PDF e integração com a Central de Trabalho.
+
 ## Módulo 0 - Identidade municipal
 
 Situação: base concluída nesta etapa.

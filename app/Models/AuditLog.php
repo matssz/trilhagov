@@ -81,6 +81,13 @@ class AuditLog extends Model
             'amendments_spreadsheet_previewed' => 'Planilha de emendas conferida',
             'amendments_spreadsheet_imported' => 'Planilha de emendas importada',
             'compliance_review_updated' => 'Conformidade TCESP revisada',
+            'municipal_work_plan_created' => 'Plano de trabalho iniciado',
+            'municipal_work_plan_updated' => 'Plano de trabalho atualizado',
+            'municipal_work_plan_submitted' => 'Plano enviado para análise',
+            'municipal_work_plan_stage_created' => 'Etapa do plano criada',
+            'municipal_work_plan_stage_updated' => 'Etapa do plano atualizada',
+            'municipal_work_plan_stage_deleted' => 'Etapa do plano removida',
+            'municipal_admissibility_review_created' => 'Parecer de admissibilidade emitido',
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
@@ -155,6 +162,13 @@ class AuditLog extends Model
             'compliance_evidence' => 'Evidência ou constatação',
             'compliance_document' => 'Documento de evidência',
             'compliance_framework' => 'Versão da matriz',
+            'work_plan_status' => 'Situação do plano',
+            'work_plan_revision' => 'Revisão do plano',
+            'work_plan_fields' => 'Campos atualizados',
+            'work_plan_stage' => 'Etapa do plano',
+            'planned_amount' => 'Valor planejado',
+            'admissibility_conclusion' => 'Conclusão da admissibilidade',
+            'admissibility_rationale' => 'Fundamentação do parecer',
             'work_item' => 'Ação operacional',
             'work_item_status' => 'Andamento da ação',
             'active' => 'Ações ativas',
@@ -223,7 +237,7 @@ class AuditLog extends Model
             return $value ? 'Sim' : 'Não';
         }
 
-        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount'], true)) {
+        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount', 'planned_amount'], true)) {
             return 'R$ '.number_format((float) $value, 2, ',', '.');
         }
 
@@ -241,6 +255,14 @@ class AuditLog extends Model
 
         if ($field === 'compliance_status') {
             return AmendmentComplianceReview::statuses()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'work_plan_status') {
+            return MunicipalWorkPlan::statuses()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'admissibility_conclusion') {
+            return MunicipalAdmissibilityReview::conclusions()[$value] ?? (string) $value;
         }
 
         if ($field === 'government_sphere') {
