@@ -131,6 +131,26 @@ class IntegrityAlertTest extends TestCase
             ->assertDontSee('EM-OUTRO-MUNICIPIO');
     }
 
+    public function test_automatic_read_sync_is_limited_to_one_run_per_interval(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->amendment($municipality, $manager, [
+            'reference' => 'EM-SYNC-CONTROLADO',
+            'execution_deadline' => today(),
+        ]);
+        $service = app(IntegrityAlertService::class);
+
+        $firstRun = $service->syncIfDue($municipality);
+        $secondRun = $service->syncIfDue($municipality->fresh());
+
+        $this->assertIsArray($firstRun);
+        $this->assertNull($secondRun);
+        $this->assertDatabaseHas('integrity_alerts', [
+            'parliamentary_amendment_id' => $municipality->amendments()->firstOrFail()->id,
+            'alert_key' => 'deadline:execution',
+        ]);
+    }
+
     public function test_user_can_update_personal_notification_preferences(): void
     {
         [$viewer, $municipality] = $this->memberWithMunicipality(User::ROLE_VIEWER);

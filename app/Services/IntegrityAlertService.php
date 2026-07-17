@@ -7,11 +7,33 @@ use App\Models\Municipality;
 use App\Models\MunicipalityAlertSetting;
 use App\Models\ParliamentaryAmendment;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class IntegrityAlertService
 {
+    private const REFRESH_INTERVAL_SECONDS = 300;
+
     public function __construct(private readonly AccountabilityService $accountabilityService) {}
+
+    /** @return array{created: int, updated: int, resolved: int, open: int}|null */
+    public function syncIfDue(Municipality $municipality): ?array
+    {
+        $cacheKey = $this->refreshCacheKey($municipality);
+
+        if (! Cache::add($cacheKey, true, now()->addSeconds(self::REFRESH_INTERVAL_SECONDS))) {
+            return null;
+        }
+
+        try {
+            return $this->sync($municipality);
+        } catch (Throwable $exception) {
+            Cache::forget($cacheKey);
+
+            throw $exception;
+        }
+    }
 
     /** @return array{created: int, updated: int, resolved: int, open: int} */
     public function sync(Municipality $municipality): array
@@ -42,7 +64,7 @@ class IntegrityAlertService
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
         }
 
-        return DB::transaction(function () use ($municipality, $detections): array {
+        $stats = DB::transaction(function () use ($municipality, $detections): array {
             $stats = ['created' => 0, 'updated' => 0, 'resolved' => 0, 'open' => count($detections)];
             $detectedKeys = [];
 
@@ -101,6 +123,19 @@ class IntegrityAlertService
 
             return $stats;
         });
+
+        Cache::put(
+            $this->refreshCacheKey($municipality),
+            true,
+            now()->addSeconds(self::REFRESH_INTERVAL_SECONDS),
+        );
+
+        return $stats;
+    }
+
+    private function refreshCacheKey(Municipality $municipality): string
+    {
+        return "integrity-alerts:municipality:{$municipality->id}:fresh";
     }
 
     /** @param array<int, array<string, mixed>> $detections */

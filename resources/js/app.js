@@ -1,6 +1,5 @@
 import './bootstrap';
 import 'bootstrap';
-import Chart from 'chart.js/auto';
 import {
     ArrowLeft,
     BadgeCheck,
@@ -60,6 +59,7 @@ import {
     EyeOff,
     FilterX,
     FileInput,
+    FileSpreadsheet,
     GitCompareArrows,
     Globe2,
     Lightbulb,
@@ -132,6 +132,7 @@ createIcons({
         EyeOff,
         FilterX,
         FileInput,
+        FileSpreadsheet,
         GitCompareArrows,
         Globe2,
         Lightbulb,
@@ -161,7 +162,16 @@ const compactCurrency = new Intl.NumberFormat('pt-BR', {
     maximumFractionDigits: 1,
 });
 
-document.querySelectorAll('[data-analytics-chart]').forEach((canvas) => {
+const analyticsCanvases = document.querySelectorAll('[data-analytics-chart]');
+
+async function renderAnalyticsCharts() {
+    if (analyticsCanvases.length === 0) {
+        return;
+    }
+
+    const { default: Chart } = await import('chart.js/auto');
+
+    analyticsCanvases.forEach((canvas) => {
     const labels = JSON.parse(canvas.dataset.labels ?? '[]');
     const values = JSON.parse(canvas.dataset.values ?? '[]').map(Number);
     const type = canvas.dataset.analyticsChart;
@@ -185,7 +195,7 @@ document.querySelectorAll('[data-analytics-chart]').forEach((canvas) => {
             ? [chartColors.navy, chartColors.blue, chartColors.gold, chartColors.green]
             : [chartColors.navy, chartColors.teal, chartColors.gold, chartColors.green, chartColors.blue, chartColors.red];
 
-    new Chart(canvas, {
+        new Chart(canvas, {
         type: isDonut ? 'doughnut' : 'bar',
         data: {
             labels,
@@ -244,8 +254,11 @@ document.querySelectorAll('[data-analytics-chart]').forEach((canvas) => {
                 },
             },
         },
+        });
     });
-});
+}
+
+renderAnalyticsCharts();
 
 const receivedStatuses = [
     'resource_received',

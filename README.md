@@ -81,10 +81,13 @@ npm install
 php artisan key:generate
 php artisan migrate
 npm run build
-composer serve
+composer serve:fast
 ```
 
 Abra `http://127.0.0.1:8001`.
+
+No Windows, `composer serve:fast` prepara os caches do Laravel e ativa o OPcache.
+O comando portatil `composer serve` continua disponivel para outros sistemas.
 
 O comando `composer serve` prepara o PHP local para uploads de até 12 MB. A
 aplicação aceita arquivos de até 10 MB; em produção, os limites do PHP e do
@@ -125,6 +128,7 @@ hora sem repetir o mesmo envio.
 - [Integrações e conferência de dados](docs/integracoes-oficiais.md)
 - [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
 - [Importação assistida de planilhas](docs/importacao-assistida-planilhas.md)
+- [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
 
 ## Limite atual
 

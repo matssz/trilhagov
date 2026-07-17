@@ -20,7 +20,7 @@ class DashboardController extends Controller
         FormSubmission $formSubmission,
     ): View {
         $municipality = $currentMunicipality->get($request);
-        $integrityAlertService->sync($municipality);
+        $integrityAlertService->syncIfDue($municipality);
         $filters = $request->only(['year', 'sphere', 'status', 'department']);
         $analytics = $analyticsService->dashboard($municipality, $filters);
         $options = $analyticsService->filterOptions($municipality);

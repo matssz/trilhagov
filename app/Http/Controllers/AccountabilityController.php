@@ -28,7 +28,7 @@ class AccountabilityController extends Controller
         IntegrityAlertService $integrityAlertService,
     ): View {
         $municipality = $currentMunicipality->get($request);
-        $integrityAlertService->sync($municipality);
+        $integrityAlertService->syncIfDue($municipality);
         $amendment = $municipality->amendments()
             ->with([
                 'municipality',

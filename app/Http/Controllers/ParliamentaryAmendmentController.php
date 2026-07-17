@@ -31,7 +31,7 @@ class ParliamentaryAmendmentController extends Controller
         $status = (string) $request->query('status');
         $year = (string) $request->query('year');
         $risk = (string) $request->query('risk');
-        $this->integrityAlertService->sync($municipality);
+        $this->integrityAlertService->syncIfDue($municipality);
 
         $amendments = $municipality->amendments()
             ->with('responsibleUser')

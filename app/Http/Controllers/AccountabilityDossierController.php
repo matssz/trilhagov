@@ -44,9 +44,10 @@ class AccountabilityDossierController extends Controller
             'Documentos incluídos: '.$amendment->documents->count(),
         ];
         $zip->addFromString('MANIFESTO.txt', implode(PHP_EOL, $manifest).PHP_EOL);
+        $temporaryDocuments = [];
 
         foreach ($amendment->documents as $document) {
-            if (! Storage::disk('local')->exists($document->storage_path)) {
+            if (! Storage::exists($document->storage_path)) {
                 continue;
             }
 
@@ -62,10 +63,29 @@ class AccountabilityDossierController extends Controller
                 $document->version,
                 $originalName !== '' ? $originalName : 'arquivo',
             );
-            $zip->addFile(Storage::disk('local')->path($document->storage_path), $archiveName);
+            $source = Storage::readStream($document->storage_path);
+            $temporaryDocument = tmpfile();
+
+            if ($source === false || $temporaryDocument === false) {
+                if (is_resource($source)) {
+                    fclose($source);
+                }
+
+                continue;
+            }
+
+            stream_copy_to_stream($source, $temporaryDocument);
+            fclose($source);
+            $metadata = stream_get_meta_data($temporaryDocument);
+            $temporaryDocuments[] = $temporaryDocument;
+            $zip->addFile($metadata['uri'], $archiveName);
         }
 
         $zip->close();
+
+        foreach ($temporaryDocuments as $temporaryDocument) {
+            fclose($temporaryDocument);
+        }
 
         return response()
             ->download($temporaryPath, $this->baseFilename($amendment).'.zip', ['Content-Type' => 'application/zip'])

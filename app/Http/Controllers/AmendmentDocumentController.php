@@ -63,7 +63,7 @@ class AmendmentDocumentController extends Controller
         $extension = $file->extension() ?: strtolower($file->getClientOriginalExtension());
         $directory = "documents/{$municipality->id}/{$amendment->id}";
         $filename = Str::uuid().'.'.$extension;
-        $storagePath = Storage::disk('local')->putFileAs($directory, $file, $filename);
+        $storagePath = Storage::putFileAs($directory, $file, $filename);
 
         if (! $storagePath) {
             throw ValidationException::withMessages([
@@ -105,7 +105,7 @@ class AmendmentDocumentController extends Controller
                 return $document;
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::delete($storagePath);
 
             throw $exception;
         }
@@ -126,9 +126,9 @@ class AmendmentDocumentController extends Controller
             ->where('municipality_id', $municipality->id)
             ->findOrFail($documento);
 
-        abort_unless(Storage::disk('local')->exists($document->storage_path), 404);
+        abort_unless(Storage::exists($document->storage_path), 404);
 
-        return Storage::disk('local')->download(
+        return Storage::download(
             $document->storage_path,
             $document->original_name,
             ['Content-Type' => $document->mime_type],

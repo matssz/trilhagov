@@ -18,7 +18,7 @@ class AlertCenterController extends Controller
         IntegrityAlertService $alertService,
     ): View {
         $municipality = $currentMunicipality->get($request);
-        $alertService->sync($municipality);
+        $alertService->syncIfDue($municipality);
         $query = $municipality->integrityAlerts()->with('amendment');
         $status = in_array($request->query('status'), ['open', 'resolved'], true)
             ? $request->query('status')
