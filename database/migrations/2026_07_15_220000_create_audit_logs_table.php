@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('municipality_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('actor_name');
-            $table->string('action', 30);
+            $table->string('action', 80);
             $table->string('auditable_type');
             $table->unsignedBigInteger('auditable_id');
             $table->json('old_values')->nullable();
