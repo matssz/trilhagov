@@ -16,6 +16,10 @@ Ao corrigir a origem da pendência, o alerta é resolvido automaticamente. O bot
 **Verificar e notificar** e o comando agendado podem ser executados repetidamente:
 uma chave por alerta, usuário, canal e ciclo impede envios duplicados.
 
+O monitoramento também considera os prazos de impedimentos e diligências técnicas.
+Impedimentos insuperáveis confirmados sem encaminhamento geram alerta até que exista
+remanejamento ou encerramento formal.
+
 ## Responsabilidade e escalonamento
 
 Cada emenda pode ser atribuída a uma pessoa com perfil de gestor ou editor no

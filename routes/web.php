@@ -8,6 +8,7 @@ use App\Http\Controllers\AlertCenterController;
 use App\Http\Controllers\AmendmentComplianceController;
 use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\AmendmentExecutionController;
+use App\Http\Controllers\AmendmentRemappingController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
@@ -29,6 +30,8 @@ use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\SpreadsheetImportController;
+use App\Http\Controllers\TechnicalDiligenceController;
+use App\Http\Controllers\TechnicalImpedimentController;
 use App\Http\Controllers\TransparencySettingsController;
 use App\Http\Controllers\WorkCenterController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +82,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
     Route::get('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'index'])->name('emendas.work-plan');
     Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
+    Route::get('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'index'])->name('emendas.impediments');
     Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
     Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
     Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
@@ -122,6 +126,13 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/emendas/{emenda}/plano-de-trabalho/etapas', [MunicipalWorkPlanStageController::class, 'store'])->name('emendas.work-plan.stages.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/plano-de-trabalho/etapas/{etapa}', [MunicipalWorkPlanStageController::class, 'update'])->name('emendas.work-plan.stages.update')->block(10, 10);
         Route::delete('/emendas/{emenda}/plano-de-trabalho/etapas/{etapa}', [MunicipalWorkPlanStageController::class, 'destroy'])->name('emendas.work-plan.stages.destroy')->block(10, 10);
+        Route::post('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'store'])->name('emendas.impediments.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/impedimentos/{impedimento}', [TechnicalImpedimentController::class, 'update'])->name('emendas.impediments.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/impedimentos/{impedimento}/diligencias', [TechnicalDiligenceController::class, 'store'])->name('emendas.impediments.diligences.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/impedimentos/{impedimento}/diligencias/{diligencia}', [TechnicalDiligenceController::class, 'update'])->name('emendas.impediments.diligences.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos', [AmendmentRemappingController::class, 'store'])->name('emendas.impediments.remappings.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos/{remanejamento}', [AmendmentRemappingController::class, 'update'])->name('emendas.impediments.remappings.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos/{remanejamento}/enviar', [AmendmentRemappingController::class, 'submit'])->name('emendas.impediments.remappings.submit')->block(10, 10);
         Route::patch('/emendas/{emenda}/conformidade-tcesp/{regra}', [AmendmentComplianceController::class, 'update'])->name('emendas.compliance.update')->block(10, 10);
         Route::post('/emendas/{emenda}/etapas', [ExecutionStageController::class, 'store'])->name('emendas.stages.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/etapas/{etapa}', [ExecutionStageController::class, 'update'])->name('emendas.stages.update')->block(10, 10);
@@ -134,5 +145,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::patch('/emendas/{emenda}/prestacao-de-contas/requisitos/{requisito}', [AccountabilityRequirementController::class, 'update'])->name('emendas.accountability.requirements.update')->block(10, 10);
         Route::post('/emendas/{emenda}/prestacao-de-contas/diligencias', [AccountabilityDiligenceController::class, 'store'])->name('emendas.accountability.diligences.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/prestacao-de-contas/diligencias/{diligencia}', [AccountabilityDiligenceController::class, 'update'])->name('emendas.accountability.diligences.update')->block(10, 10);
+    });
+
+    Route::middleware('municipality.role:manager')->group(function () {
+        Route::patch('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos/{remanejamento}/decidir', [AmendmentRemappingController::class, 'decide'])->name('emendas.impediments.remappings.decide')->block(10, 10);
     });
 });

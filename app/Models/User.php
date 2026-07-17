@@ -16,6 +16,9 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** @var array<int, string|null> */
+    private array $municipalityRoleCache = [];
+
     public const ROLE_MANAGER = 'manager';
 
     public const ROLE_EDITOR = 'editor';
@@ -91,6 +94,16 @@ class User extends Authenticatable
         return $this->hasMany(AccountabilityDiligence::class, 'assigned_user_id');
     }
 
+    public function assignedTechnicalImpediments(): HasMany
+    {
+        return $this->hasMany(TechnicalImpediment::class, 'assigned_user_id');
+    }
+
+    public function assignedTechnicalDiligences(): HasMany
+    {
+        return $this->hasMany(TechnicalDiligence::class, 'assigned_user_id');
+    }
+
     /** @return array<string, string> */
     public static function municipalityRoles(): array
     {
@@ -108,7 +121,11 @@ class User extends Authenticatable
             return null;
         }
 
-        return $this->municipalities()
+        if (array_key_exists($municipalityId, $this->municipalityRoleCache)) {
+            return $this->municipalityRoleCache[$municipalityId];
+        }
+
+        return $this->municipalityRoleCache[$municipalityId] = $this->municipalities()
             ->whereKey($municipalityId)
             ->value('municipality_user.role');
     }

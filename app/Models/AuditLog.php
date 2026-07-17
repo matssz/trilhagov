@@ -88,6 +88,14 @@ class AuditLog extends Model
             'municipal_work_plan_stage_updated' => 'Etapa do plano atualizada',
             'municipal_work_plan_stage_deleted' => 'Etapa do plano removida',
             'municipal_admissibility_review_created' => 'Parecer de admissibilidade emitido',
+            'technical_impediment_created' => 'Impedimento técnico registrado',
+            'technical_impediment_updated' => 'Impedimento técnico atualizado',
+            'technical_diligence_created' => 'Diligência técnica aberta',
+            'technical_diligence_updated' => 'Diligência técnica atualizada',
+            'amendment_remapping_created' => 'Proposta de remanejamento criada',
+            'amendment_remapping_updated' => 'Proposta de remanejamento atualizada',
+            'amendment_remapping_submitted' => 'Remanejamento enviado para decisão',
+            'amendment_remapping_decided' => 'Remanejamento decidido',
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
@@ -169,6 +177,18 @@ class AuditLog extends Model
             'planned_amount' => 'Valor planejado',
             'admissibility_conclusion' => 'Conclusão da admissibilidade',
             'admissibility_rationale' => 'Fundamentação do parecer',
+            'impediment' => 'Impedimento',
+            'impediment_category' => 'Categoria do impedimento',
+            'impediment_nature' => 'Natureza do impedimento',
+            'impediment_status' => 'Situação do impedimento',
+            'impediment_due_at' => 'Prazo do impedimento',
+            'resolution_notes' => 'Fundamentação da solução',
+            'technical_diligence' => 'Diligência técnica',
+            'technical_diligence_status' => 'Situação da diligência técnica',
+            'remapping_status' => 'Situação do remanejamento',
+            'remapping_amount' => 'Valor do remanejamento',
+            'proposed_object' => 'Objeto proposto',
+            'decision_reference' => 'Referência da decisão',
             'work_item' => 'Ação operacional',
             'work_item_status' => 'Andamento da ação',
             'active' => 'Ações ativas',
@@ -237,7 +257,7 @@ class AuditLog extends Model
             return $value ? 'Sim' : 'Não';
         }
 
-        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount', 'planned_amount'], true)) {
+        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount', 'planned_amount', 'remapping_amount'], true)) {
             return 'R$ '.number_format((float) $value, 2, ',', '.');
         }
 
@@ -263,6 +283,26 @@ class AuditLog extends Model
 
         if ($field === 'admissibility_conclusion') {
             return MunicipalAdmissibilityReview::conclusions()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'impediment_category') {
+            return TechnicalImpediment::categories()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'impediment_nature') {
+            return TechnicalImpediment::natures()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'impediment_status') {
+            return TechnicalImpediment::statuses()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'technical_diligence_status') {
+            return TechnicalDiligence::statuses()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'remapping_status') {
+            return AmendmentRemapping::statuses()[$value] ?? (string) $value;
         }
 
         if ($field === 'government_sphere') {

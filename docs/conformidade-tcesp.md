@@ -62,13 +62,24 @@ bloqueado, e somente um gestor pode emitir o parecer. A aprovação exige que n�
 exista critério marcado como não atendido. Devolução ou rejeição exigem ao menos
 uma não conformidade identificada; a devolução também exige instruções de ajuste.
 
+## Impedimentos, diligências e remanejamento
+
+O fluxo operacional permite registrar uma constatação técnica, classificá-la como
+temporária ou insuperável, atribuir responsável, prazo e evidência e abrir diligências
+com resposta e protocolo. Impedimentos insuperáveis podem originar uma proposta de
+remanejamento, preservando o objeto original. A decisão exige perfil de gestor,
+fundamentação e referência formal.
+
+Prazos vencidos entram nos alertas de integridade e na Central de Trabalho. Aprovar
+um remanejamento não altera automaticamente os dados originais da emenda nem substitui
+o procedimento legal aplicável no município.
+
 ## Limites e próximos requisitos
 
 Ainda precisam ser construídos e validados com procuradores, controladores,
 contadores e equipes legislativas municipais:
 
 - parametrização da Lei Orgânica, LDO, Regimento Interno e prazos de cada município;
-- fluxo de impedimento temporário ou insuperável, diligência e remanejamento;
 - cadastro e exportação no formato exigido pelo sistema Audesp;
 - conciliação dos códigos contábeis, conta bancária e regra Audesp 47.4.63;
 - publicação dos campos do artigo 3º da Resolução TCESP nº 17/2025 no portal público;

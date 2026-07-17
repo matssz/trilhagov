@@ -120,7 +120,15 @@ class ParliamentaryAmendmentController extends Controller
     public function show(Request $request, int $emenda): View
     {
         $amendment = $this->amendmentForUser($request, $emenda)
-            ->load(['municipality', 'creator', 'responsibleUser', 'auditLogs', 'documents.documentType', 'documents.executionStage']);
+            ->load([
+                'municipality',
+                'creator',
+                'responsibleUser',
+                'documents.documentType',
+                'documents.executionStage',
+                'executionStages',
+                'auditLogs' => fn ($query) => $query->limit(40),
+            ]);
         $documentTypes = $amendment->municipality->documentTypes()
             ->active()
             ->orderBy('sort_order')
@@ -143,7 +151,7 @@ class ParliamentaryAmendmentController extends Controller
             'canManageChecklist' => $request->user()->roleForMunicipality($amendment->municipality_id) === 'manager',
             'documentTypes' => $documentTypes,
             'documents' => $amendment->documents,
-            'executionStages' => $amendment->executionStages()->get(),
+            'executionStages' => $amendment->executionStages,
             'latestDocumentsByType' => $latestDocumentsByType,
             'checklistCompleted' => $completedTypes->count(),
             'checklistTotal' => $documentTypes->count(),

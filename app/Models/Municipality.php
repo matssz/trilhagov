@@ -158,6 +158,21 @@ class Municipality extends Model
         return $this->hasMany(MunicipalWorkPlan::class);
     }
 
+    public function technicalImpediments(): HasMany
+    {
+        return $this->hasMany(TechnicalImpediment::class);
+    }
+
+    public function technicalDiligences(): HasMany
+    {
+        return $this->hasMany(TechnicalDiligence::class);
+    }
+
+    public function remappings(): HasMany
+    {
+        return $this->hasMany(AmendmentRemapping::class);
+    }
+
     public function municipalAdmissibilityReviews(): HasMany
     {
         return $this->hasMany(MunicipalAdmissibilityReview::class);

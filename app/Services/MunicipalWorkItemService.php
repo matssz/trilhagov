@@ -11,6 +11,8 @@ use App\Models\Municipality;
 use App\Models\MunicipalWorkItem;
 use App\Models\MunicipalWorkPlan;
 use App\Models\ParliamentaryAmendment;
+use App\Models\TechnicalDiligence;
+use App\Models\TechnicalImpediment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +32,8 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'technicalImpediments.diligences',
+            'technicalImpediments.remappings',
             'executionStages',
             'financialCommitments',
             'accountabilityProcess.requirements',
@@ -168,6 +172,48 @@ class MunicipalWorkItemService
                     'Avalie todos os critérios e conclua pela aprovação, devolução para ajustes ou rejeição fundamentada.',
                     route('emendas.work-plan', $amendment, false).'#parecer',
                     $amendment->communication_deadline,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                );
+            }
+        }
+
+        foreach ($amendment->technicalImpediments as $impediment) {
+            if ($impediment->isOpen()) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:technical-impediment:{$impediment->id}",
+                    'impediment',
+                    "Resolver impedimento: {$impediment->title}",
+                    $impediment->nature === TechnicalImpediment::NATURE_INSURMOUNTABLE
+                        ? 'Fundamente a conclusão e avalie o remanejamento do objeto antes de encerrar a ocorrência.'
+                        : 'Conduza a análise, reúna evidências e registre a solução ou a classificação definitiva.',
+                    route('emendas.impediments', $amendment, false).'#impedimento-'.$impediment->id,
+                    $impediment->resolution_due_at,
+                    $impediment->isOverdue() ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
+                    $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            foreach ($impediment->diligences->where('status', TechnicalDiligence::STATUS_OPEN) as $diligence) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:technical-diligence:{$diligence->id}",
+                    'impediment',
+                    "Responder diligência: {$diligence->title}",
+                    'Prepare a resposta, vincule a evidência e registre o protocolo dentro do prazo.',
+                    route('emendas.impediments', $amendment, false).'#impedimento-'.$impediment->id,
+                    $diligence->due_at,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                    $diligence->assigned_user_id ?? $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            foreach ($impediment->remappings->where('status', 'submitted') as $remapping) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:remapping-decision:{$remapping->id}",
+                    'impediment',
+                    'Decidir proposta de remanejamento',
+                    'Confira o novo objeto, o valor e a justificativa; registre a decisão e sua referência formal.',
+                    route('emendas.impediments', $amendment, false).'#impedimento-'.$impediment->id,
+                    $impediment->resolution_due_at,
                     MunicipalWorkItem::PRIORITY_HIGH,
                 );
             }

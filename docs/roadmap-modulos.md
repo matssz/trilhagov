@@ -11,6 +11,14 @@ dependências e capacidade de validar cada entrega com usuários municipais.
 - Parecer de admissibilidade com aprovação, ajustes ou rejeição fundamentada.
 - Histórico imutável, PDF e integração com a Central de Trabalho.
 
+## Entregue - impedimentos, diligências e remanejamento
+
+- Ocorrência técnica com categoria, natureza, impacto, responsável, prazo e evidência.
+- Classificação temporária ou insuperável e encerramento fundamentado.
+- Diligência com solicitação, resposta, protocolo, documento e avaliação da resposta.
+- Proposta preservando o objeto original e decisão restrita ao gestor.
+- Alertas de prazo, auditoria e ações automáticas na Central de Trabalho.
+
 ## Módulo 0 - Identidade municipal
 
 Situação: base concluída nesta etapa.

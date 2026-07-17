@@ -9,6 +9,7 @@
             'communication' => 'message-square',
             'document' => 'file-check-2',
             'planning' => 'clipboard-list',
+            'impediment' => 'shield-alert',
             'execution' => 'gauge',
             'financial' => 'receipt-text',
             'accountability' => 'clipboard-check',

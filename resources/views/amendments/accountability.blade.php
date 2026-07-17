@@ -30,6 +30,7 @@
         @if ($amendment->supportsTcespCompliance())
             <a href="{{ route('emendas.work-plan', $amendment) }}">Plano de trabalho</a>
         @endif
+        <a href="{{ route('emendas.impediments', $amendment) }}">Impedimentos</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
         @if ($amendment->supportsTcespCompliance())
             <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>

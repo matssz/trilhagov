@@ -45,6 +45,8 @@ class IntegrityAlertService
             'amendments.financialCommitments.payments',
             'amendments.accountabilityProcess.requirements',
             'amendments.accountabilityProcess.diligences',
+            'amendments.technicalImpediments.diligences',
+            'amendments.technicalImpediments.remappings',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -61,6 +63,7 @@ class IntegrityAlertService
             $this->detectInconsistencies($amendment, $detections);
             $this->detectExecutionControls($amendment, $settings, $detections);
             $this->detectAccountabilityControls($amendment, $settings, $detections);
+            $this->detectTechnicalImpedimentControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
         }
 
@@ -412,6 +415,95 @@ class IntegrityAlertService
                 'due_at' => null,
             ]);
         }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectTechnicalImpedimentControls(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+    ): void {
+        foreach ($amendment->technicalImpediments as $impediment) {
+            if ($impediment->isOpen() && $impediment->resolution_due_at !== null) {
+                $this->detectOperationalDeadline(
+                    $amendment,
+                    $settings,
+                    $detections,
+                    "impediment:{$impediment->id}",
+                    'Prazo de impedimento',
+                    $impediment->title,
+                    $impediment->resolution_due_at,
+                    $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            foreach ($impediment->diligences->where('status', 'open') as $diligence) {
+                $this->detectOperationalDeadline(
+                    $amendment,
+                    $settings,
+                    $detections,
+                    "technical-diligence:{$diligence->id}",
+                    'Prazo de diligência técnica',
+                    $diligence->title,
+                    $diligence->due_at,
+                    $diligence->assigned_user_id ?? $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            if ($impediment->nature === 'insurmountable'
+                && $impediment->status === 'confirmed'
+                && $impediment->remappings->whereIn('status', ['draft', 'submitted', 'approved'])->isEmpty()) {
+                $this->addDetection($detections, $amendment, "impediment:{$impediment->id}:decision", [
+                    'assigned_user_id' => $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => IntegrityAlert::SEVERITY_WARNING,
+                    'title' => 'Impedimento insuperável sem encaminhamento',
+                    'message' => "O impedimento {$impediment->title} foi confirmado, mas ainda não possui remanejamento ou encerramento formal.",
+                    'due_at' => $impediment->resolution_due_at,
+                ]);
+            }
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectOperationalDeadline(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+        string $key,
+        string $title,
+        string $subject,
+        Carbon $dueAt,
+        ?int $assignedUserId,
+    ): void {
+        $daysUntil = (int) today()->diffInDays($dueAt, false);
+        if ($daysUntil > $settings->deadline_warning_days) {
+            return;
+        }
+
+        $overdueDays = max(0, -$daysUntil);
+        $escalationLevel = match (true) {
+            $overdueDays >= $settings->escalation_level_two_days => 2,
+            $overdueDays >= $settings->escalation_level_one_days => 1,
+            default => 0,
+        };
+        $message = match (true) {
+            $daysUntil < 0 => "{$subject} venceu há ".abs($daysUntil).' dia(s).',
+            $daysUntil === 0 => "{$subject} vence hoje.",
+            default => "{$subject} vence em {$daysUntil} dia(s).",
+        };
+
+        $this->addDetection($detections, $amendment, "deadline:{$key}", [
+            'assigned_user_id' => $assignedUserId,
+            'category' => IntegrityAlert::CATEGORY_DEADLINE,
+            'severity' => $daysUntil <= $settings->deadline_critical_days
+                ? IntegrityAlert::SEVERITY_CRITICAL
+                : IntegrityAlert::SEVERITY_INFO,
+            'escalation_level' => $escalationLevel,
+            'title' => $daysUntil < 0 ? "{$title} vencido" : "{$title} próximo",
+            'message' => $message,
+            'due_at' => $dueAt,
+        ]);
     }
 
     /** @param array<int, array<string, mixed>> $detections */

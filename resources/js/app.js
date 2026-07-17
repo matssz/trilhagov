@@ -272,6 +272,38 @@ async function renderAnalyticsCharts() {
 
 renderAnalyticsCharts();
 
+const routeProgress = document.querySelector('[data-route-progress]');
+
+function startRouteProgress() {
+    routeProgress?.classList.add('is-loading');
+}
+
+function stopRouteProgress() {
+    routeProgress?.classList.remove('is-loading');
+}
+
+document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+
+    if (!(link instanceof HTMLAnchorElement)
+        || event.defaultPrevented
+        || event.button !== 0
+        || event.metaKey
+        || event.ctrlKey
+        || event.shiftKey
+        || event.altKey
+        || link.target === '_blank'
+        || link.hasAttribute('download')
+        || link.origin !== window.location.origin
+        || link.hash && link.pathname === window.location.pathname) {
+        return;
+    }
+
+    startRouteProgress();
+});
+
+window.addEventListener('pageshow', stopRouteProgress);
+
 const receivedStatuses = [
     'resource_received',
     'executing',

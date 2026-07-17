@@ -26,6 +26,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="{{ $workspaceLayout ? 'has-workspace' : 'has-public-layout' }}">
+        <div class="route-progress" data-route-progress aria-hidden="true"><span></span></div>
         @if ($workspaceLayout)
             <div class="app-shell">
                 <aside class="offcanvas-lg offcanvas-start app-sidebar" id="appSidebar" tabindex="-1" aria-labelledby="appSidebarLabel">

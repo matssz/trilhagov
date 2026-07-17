@@ -24,6 +24,7 @@
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
         <a href="{{ route('emendas.show', $amendment) }}">Visão geral</a>
         <a class="active" href="{{ route('emendas.work-plan', $amendment) }}" aria-current="page">Plano de trabalho</a>
+        <a href="{{ route('emendas.impediments', $amendment) }}">Impedimentos</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
         <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
         <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>

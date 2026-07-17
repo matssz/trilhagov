@@ -67,6 +67,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Plano de trabalho municipal com metas, enquadramento, memória de cálculo e cronograma físico-financeiro.
 - Parecer de admissibilidade imutável, devolução para ajustes, revisões históricas e PDF operacional.
 - Ações automáticas de planejamento e parecer integradas à Central de Trabalho.
+- Impedimentos técnicos classificados, diligências protocoladas e remanejamento com decisão exclusiva do gestor.
+- Alertas de prazo e tarefas automáticas para ocorrências técnicas, com isolamento municipal e auditoria.
 
 ## Stack
 
@@ -135,6 +137,7 @@ hora sem repetir o mesmo envio.
 - [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
 - [Importação assistida de planilhas](docs/importacao-assistida-planilhas.md)
 - [Matriz de conformidade TCESP](docs/conformidade-tcesp.md)
+- [Impedimentos, diligências e remanejamento](docs/impedimentos-diligencias-remanejamento.md)
 - [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
 - [Deploy gratuito com Render e Supabase](docs/deploy-gratuito.md)
 

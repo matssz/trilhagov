@@ -280,6 +280,21 @@ class ParliamentaryAmendment extends Model
         return $this->hasOne(MunicipalWorkPlan::class);
     }
 
+    public function technicalImpediments(): HasMany
+    {
+        return $this->hasMany(TechnicalImpediment::class)->latest('identified_at')->latest('id');
+    }
+
+    public function technicalDiligences(): HasMany
+    {
+        return $this->hasMany(TechnicalDiligence::class)->latest('due_at')->latest('id');
+    }
+
+    public function remappings(): HasMany
+    {
+        return $this->hasMany(AmendmentRemapping::class)->latest('created_at');
+    }
+
     public function municipalAdmissibilityReviews(): HasMany
     {
         return $this->hasMany(MunicipalAdmissibilityReview::class);
