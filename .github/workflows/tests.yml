@@ -96,6 +96,12 @@ jobs:
           extensions: mbstring, pdo_pgsql
           coverage: none
 
+      - name: Preparar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
       - name: Instalar dependencias PHP
         run: composer install --no-interaction --prefer-dist --no-progress
 
@@ -103,6 +109,11 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+
+      - name: Compilar interface
+        run: |
+          npm ci
+          npm run build
 
       - name: Executar testes no PostgreSQL
         shell: bash
