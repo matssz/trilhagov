@@ -115,7 +115,8 @@ jobs:
           set -e
 
           if [ "$test_status" -ne 0 ]; then
-            grep -E 'SQLSTATE|Exception|Error|FAIL|Tests:|Failed|failed|Expected|Actual|could not' postgres-test.log \
+            grep -E 'SQLSTATE|Exception|Error|FAIL|Tests:|Failed|failed|Expected|Actual|could not|does not exist|Undefined' postgres-test.log \
+              | grep -vE '^#|/vendor/|Pipeline.php|handleException' \
               | tail -n 10 \
               | while IFS= read -r line; do
               line=${line//'%'/'%25'}

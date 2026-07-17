@@ -15,7 +15,7 @@ class NotificationCenterController extends Controller
         $municipality = $currentMunicipality->get($request);
         $membership = $request->user()->municipalities()->findOrFail($municipality->id)->pivot;
         $notifications = $request->user()->notifications()
-            ->where('data->municipality_id', $municipality->id)
+            ->whereJsonContains('data->municipality_id', $municipality->id)
             ->latest()
             ->paginate(20);
 
@@ -57,7 +57,7 @@ class NotificationCenterController extends Controller
     {
         $municipality = $currentMunicipality->get($request);
         $request->user()->unreadNotifications()
-            ->where('data->municipality_id', $municipality->id)
+            ->whereJsonContains('data->municipality_id', $municipality->id)
             ->update(['read_at' => now()]);
 
         return back()->with('status', 'Notificações marcadas como lidas.');
