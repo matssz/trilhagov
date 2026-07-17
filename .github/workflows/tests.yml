@@ -116,18 +116,15 @@ jobs:
 
           if [ "$test_status" -ne 0 ]; then
             set +e
-            {
-              grep -E 'testing.ERROR|SQLSTATE|Exception|Error' storage/logs/laravel.log 2>/dev/null \
-                | grep -vE '^#|/vendor/|Pipeline.php|handleException|HTTP request returned status code 503' \
-                | head -n 8
-              grep -E 'SQLSTATE|Exception|Error|FAIL|Tests:|Failed|failed|Expected|Actual|could not|does not exist|Undefined' postgres-test.log \
-                | grep -vE '^#|/vendor/|Pipeline.php|handleException'
-            } | head -n 10 | while IFS= read -r line; do
-              line=${line//'%'/'%25'}
-              line=${line//$'\r'/'%0D'}
-              line=${line//$'\n'/'%0A'}
-              echo "::error title=Falha nos testes PostgreSQL::$line"
-            done
+            failure_excerpt=$(awk '
+              /^[[:space:]]+FAILED[[:space:]]/ { capture = 1 }
+              capture { print; lines++ }
+              lines == 45 { exit }
+            ' postgres-test.log)
+            failure_excerpt=${failure_excerpt//'%'/'%25'}
+            failure_excerpt=${failure_excerpt//$'\r'/'%0D'}
+            failure_excerpt=${failure_excerpt//$'\n'/'%0A'}
+            echo "::error title=Primeira falha PostgreSQL::$failure_excerpt"
             set -e
           fi
 
