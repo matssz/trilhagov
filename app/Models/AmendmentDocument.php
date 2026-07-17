@@ -71,6 +71,11 @@ class AmendmentDocument extends Model
         return $this->hasMany(AccountabilityRequirement::class);
     }
 
+    public function complianceReviews(): HasMany
+    {
+        return $this->hasMany(AmendmentComplianceReview::class);
+    }
+
     public function formattedSize(): string
     {
         if ($this->size_bytes < 1024 * 1024) {

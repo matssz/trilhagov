@@ -3,6 +3,7 @@
 @import './integrations.css';
 @import './work-center.css';
 @import './spreadsheet-imports.css';
+@import './compliance.css';
 
 :root {
     --navy-950: #071f3d;

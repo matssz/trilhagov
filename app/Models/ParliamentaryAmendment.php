@@ -43,6 +43,8 @@ class ParliamentaryAmendment extends Model
 
     public const RISK_CRITICAL = 'critical';
 
+    private const SAO_PAULO_CAPITAL_IBGE_CODE = '3550308';
+
     protected $fillable = [
         'created_by',
         'reference',
@@ -109,7 +111,7 @@ class ParliamentaryAmendment extends Model
     /** @return array<string, string> */
     public static function governmentSpheres(): array
     {
-        return ['federal' => 'Federal', 'state' => 'Estadual'];
+        return ['federal' => 'Federal', 'state' => 'Estadual', 'municipal' => 'Municipal'];
     }
 
     /** @return array<string, string> */
@@ -127,6 +129,7 @@ class ParliamentaryAmendment extends Model
     public static function transferTypes(): array
     {
         return [
+            'direct_execution' => 'Execução direta pelo Município',
             'special' => 'Transferência especial',
             'defined_purpose' => 'Finalidade definida',
             'agreement' => 'Convênio ou contrato de repasse',
@@ -153,6 +156,17 @@ class ParliamentaryAmendment extends Model
     public function transferTypeLabel(): string
     {
         return self::transferTypes()[$this->transfer_type] ?? $this->transfer_type;
+    }
+
+    public function supportsTcespCompliance(): bool
+    {
+        $municipality = $this->relationLoaded('municipality')
+            ? $this->municipality
+            : $this->municipality()->first(['state', 'ibge_code']);
+
+        return $this->government_sphere === 'municipal'
+            && $municipality?->state === 'SP'
+            && (string) $municipality?->ibge_code !== self::SAO_PAULO_CAPITAL_IBGE_CODE;
     }
 
     public function riskLabel(): string
@@ -254,6 +268,11 @@ class ParliamentaryAmendment extends Model
     public function workItems(): HasMany
     {
         return $this->hasMany(MunicipalWorkItem::class);
+    }
+
+    public function complianceReviews(): HasMany
+    {
+        return $this->hasMany(AmendmentComplianceReview::class);
     }
 
     public function scopeForUser(Builder $query, User $user): Builder

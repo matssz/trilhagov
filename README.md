@@ -22,7 +22,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 ## Primeira entrega
 
 - Cadastro do gestor e do município.
-- Cadastro e edição de emendas federais ou estaduais.
+- Cadastro e edição de emendas federais, estaduais ou municipais.
 - Controle de autoria, modalidade, objeto, órgão e códigos externos.
 - Valores previsto e recebido.
 - Situações do ciclo da emenda.
@@ -62,6 +62,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Priorização por prazo e risco, atribuição de responsáveis e resolução automática pela fonte.
 - Importação assistida de planilhas CSV com pré-visualização e validação por linha.
 - Proteção contra duplicidades e sobrescrita dos dados já confirmados pelo município.
+- Matriz versionada do Manual TCESP de julho de 2026 para emendas impositivas municipais paulistas.
+- Revisões com evidência obrigatória, documento vinculado, responsável, data e histórico de auditoria.
 
 ## Stack
 
@@ -129,6 +131,7 @@ hora sem repetir o mesmo envio.
 - [Integrações e conferência de dados](docs/integracoes-oficiais.md)
 - [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
 - [Importação assistida de planilhas](docs/importacao-assistida-planilhas.md)
+- [Matriz de conformidade TCESP](docs/conformidade-tcesp.md)
 - [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
 - [Deploy gratuito com Render e Supabase](docs/deploy-gratuito.md)
 

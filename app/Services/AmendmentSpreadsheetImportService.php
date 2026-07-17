@@ -403,6 +403,7 @@ class AmendmentSpreadsheetImportService
         $normalized['government_sphere'] = $this->enumValue((string) $normalized['government_sphere'], [
             'federal' => ['federal', 'uniao'],
             'state' => ['estadual', 'estado'],
+            'municipal' => ['municipal', 'municipio'],
         ]);
         $normalized['authorship_type'] = $this->enumValue((string) $normalized['authorship_type'], [
             'individual' => ['individual'],
@@ -411,6 +412,7 @@ class AmendmentSpreadsheetImportService
             'other' => ['outra', 'outro'],
         ]);
         $normalized['transfer_type'] = $this->enumValue((string) $normalized['transfer_type'], [
+            'direct_execution' => ['execucao_direta', 'execucao_direta_pelo_municipio'],
             'special' => ['transferencia_especial', 'especial'],
             'defined_purpose' => ['finalidade_definida'],
             'agreement' => ['convenio', 'contrato_de_repasse', 'convenio_ou_contrato_de_repasse'],

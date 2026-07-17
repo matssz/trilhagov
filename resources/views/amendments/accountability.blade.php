@@ -28,6 +28,9 @@
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
         <a href="{{ route('emendas.show', $amendment) }}">Visão geral</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
+        @if ($amendment->supportsTcespCompliance())
+            <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
+        @endif
         <a class="active" href="{{ route('emendas.accountability', $amendment) }}" aria-current="page">Prestação de contas</a>
     </nav>
 

@@ -41,7 +41,7 @@
             @error('transfer_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-4">
-            <label class="form-label" for="transferegov_code">Código Transferegov <span class="required-mark">*</span></label>
+            <label class="form-label" for="transferegov_code">Código Transferegov</label>
             <input class="form-control @error('transferegov_code') is-invalid @enderror" id="transferegov_code" name="transferegov_code" value="{{ old('transferegov_code', $amendment?->transferegov_code) }}" maxlength="100">
             <div class="form-text">Obrigatório para emendas federais.</div>
             @error('transferegov_code')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror

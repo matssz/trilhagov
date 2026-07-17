@@ -26,6 +26,9 @@
             <p class="text-secondary mb-0">{{ $amendment->municipality->name }} / {{ $amendment->municipality->state }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            @if ($amendment->supportsTcespCompliance())
+                <a class="btn btn-outline-primary" href="{{ route('emendas.compliance', $amendment) }}"><i data-lucide="badge-check" aria-hidden="true"></i>Conferir TCESP</a>
+            @endif
             <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="gauge" aria-hidden="true"></i>Acompanhar execução</a>
             @if ($canEdit)
                 <a class="btn btn-primary" href="{{ route('emendas.edit', $amendment) }}">Editar emenda</a>
@@ -36,6 +39,9 @@
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">
         <a class="active" href="{{ route('emendas.show', $amendment) }}" aria-current="page">Visão geral</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
+        @if ($amendment->supportsTcespCompliance())
+            <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
+        @endif
         <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>
     </nav>
 

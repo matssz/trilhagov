@@ -1,0 +1,59 @@
+# Matriz de conformidade TCESP
+
+## Finalidade
+
+O módulo transforma o **Manual de Emendas Parlamentares Impositivas Municipais**
+do Tribunal de Contas do Estado de São Paulo, publicado em julho de 2026, em um
+roteiro operacional por emenda. Ele é aplicável somente quando:
+
+- o município cadastrado pertence ao Estado de São Paulo; e
+- a esfera da emenda é `Municipal`.
+
+O Município de São Paulo (código IBGE 3550308) é excluído, pois possui Tribunal
+de Contas próprio e não integra a jurisdição municipal do TCESP.
+
+Fonte oficial: <https://www.tce.sp.gov.br/publicacoes/manual-emendas-parlamentares-impositivas-municipais>
+
+O módulo é um apoio à conferência e à organização de evidências. Não emite
+parecer jurídico, não certifica conformidade e não representa validação do TCESP.
+
+## Versão inicial
+
+A matriz `tcesp-manual-2026-07` contém 24 verificações organizadas em:
+
+1. Base normativa.
+2. Objeto e orçamento.
+3. Metas e viabilidade.
+4. Plano de trabalho.
+5. Beneficiário e saúde.
+6. Impedimentos técnicos.
+7. Transparência e Audesp.
+8. Prestação de contas e controle interno.
+
+Cada item pode ser classificado como `Pendente`, `Atendido`, `Não atendido` ou
+`Não se aplica`. Para marcar atendimento, é obrigatório descrever a evidência ou
+vincular um documento da própria emenda. Situações negativas e dispensas exigem
+justificativa textual.
+
+Toda revisão registra usuário, data, versão da matriz e alteração no histórico
+imutável da emenda. Requisições repetidas usam token de uso único e não geram
+revisões ou eventos duplicados.
+
+## Limites e próximos requisitos
+
+Ainda precisam ser construídos e validados com procuradores, controladores,
+contadores e equipes legislativas municipais:
+
+- parametrização da Lei Orgânica, LDO, Regimento Interno e prazos de cada município;
+- formulário estruturado do plano de trabalho e parecer de admissibilidade;
+- fluxo de impedimento temporário ou insuperável, diligência e remanejamento;
+- cadastro e exportação no formato exigido pelo sistema Audesp;
+- conciliação dos códigos contábeis, conta bancária e regra Audesp 47.4.63;
+- publicação dos campos do artigo 3º da Resolução TCESP nº 17/2025 no portal público;
+- relatórios periódicos para Câmara, controle interno e prestação de contas;
+- regras específicas para saúde e organizações da sociedade civil;
+- revisão jurídica do conteúdo antes de qualquer promessa comercial de conformidade.
+
+As regras da matriz ficam em `app/Services/TcespComplianceFramework.php`. Uma
+alteração normativa deve criar nova versão, preservando as revisões históricas da
+versão anterior.

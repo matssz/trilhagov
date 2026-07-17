@@ -5,6 +5,7 @@ use App\Http\Controllers\AccountabilityDiligenceController;
 use App\Http\Controllers\AccountabilityDossierController;
 use App\Http\Controllers\AccountabilityRequirementController;
 use App\Http\Controllers\AlertCenterController;
+use App\Http\Controllers\AmendmentComplianceController;
 use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\AmendmentExecutionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+    Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
     Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
     Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
     Route::get('/emendas/{emenda}/prestacao-de-contas/dossie.pdf', [AccountabilityDossierController::class, 'pdf'])->name('emendas.accountability.dossier.pdf');
@@ -107,6 +109,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/emendas/{emenda}/edit', [ParliamentaryAmendmentController::class, 'edit'])->name('emendas.edit');
         Route::match(['put', 'patch'], '/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'update'])->name('emendas.update')->block(10, 10);
         Route::post('/emendas/{emenda}/documentos', [AmendmentDocumentController::class, 'store'])->name('emendas.documents.store')->block(10, 10);
+        Route::patch('/emendas/{emenda}/conformidade-tcesp/{regra}', [AmendmentComplianceController::class, 'update'])->name('emendas.compliance.update')->block(10, 10);
         Route::post('/emendas/{emenda}/etapas', [ExecutionStageController::class, 'store'])->name('emendas.stages.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/etapas/{etapa}', [ExecutionStageController::class, 'update'])->name('emendas.stages.update')->block(10, 10);
         Route::post('/emendas/{emenda}/empenhos', [FinancialCommitmentController::class, 'store'])->name('emendas.commitments.store')->block(10, 10);

@@ -80,6 +80,7 @@ class AuditLog extends Model
             'work_item_updated' => 'Ação operacional atualizada',
             'amendments_spreadsheet_previewed' => 'Planilha de emendas conferida',
             'amendments_spreadsheet_imported' => 'Planilha de emendas importada',
+            'compliance_review_updated' => 'Conformidade TCESP revisada',
             'created' => 'Emenda cadastrada',
             'updated' => 'Emenda atualizada',
             'role_updated' => 'Perfil de acesso atualizado',
@@ -149,6 +150,11 @@ class AuditLog extends Model
             'records' => 'Registros consultados',
             'divergences' => 'Divergências encontradas',
             'review_notes' => 'Justificativa da revisão',
+            'compliance_rule' => 'Regra TCESP',
+            'compliance_status' => 'Situação de conformidade',
+            'compliance_evidence' => 'Evidência ou constatação',
+            'compliance_document' => 'Documento de evidência',
+            'compliance_framework' => 'Versão da matriz',
             'work_item' => 'Ação operacional',
             'work_item_status' => 'Andamento da ação',
             'active' => 'Ações ativas',
@@ -231,6 +237,10 @@ class AuditLog extends Model
             }
 
             return ParliamentaryAmendment::statuses()[$value] ?? (string) $value;
+        }
+
+        if ($field === 'compliance_status') {
+            return AmendmentComplianceReview::statuses()[$value] ?? (string) $value;
         }
 
         if ($field === 'government_sphere') {
