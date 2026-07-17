@@ -105,4 +105,22 @@ jobs:
           php artisan key:generate
 
       - name: Executar testes no PostgreSQL
-        run: php artisan test
+        shell: bash
+        run: |
+          php artisan about --only=environment
+
+          set +e
+          php artisan test 2>&1 | tee postgres-test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$test_status" -ne 0 ]; then
+            tail -n 80 postgres-test.log | while IFS= read -r line; do
+              line=${line//'%'/'%25'}
+              line=${line//$'\r'/'%0D'}
+              line=${line//$'\n'/'%0A'}
+              echo "::error title=Falha nos testes PostgreSQL::$line"
+            done
+          fi
+
+          exit "$test_status"
