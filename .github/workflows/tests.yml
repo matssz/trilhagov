@@ -115,6 +115,7 @@ jobs:
           set -e
 
           if [ "$test_status" -ne 0 ]; then
+            set +e
             {
               grep -E 'testing.ERROR|SQLSTATE|Exception|Error' storage/logs/laravel.log 2>/dev/null \
                 | grep -vE '^#|/vendor/|Pipeline.php|handleException|HTTP request returned status code 503' \
@@ -127,6 +128,7 @@ jobs:
               line=${line//$'\n'/'%0A'}
               echo "::error title=Falha nos testes PostgreSQL::$line"
             done
+            set -e
           fi
 
           exit "$test_status"
