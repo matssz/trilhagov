@@ -27,7 +27,7 @@ class IntegrityAlertTest extends TestCase
             'received_at' => null,
             'execution_deadline' => today()->addDays(5),
         ]);
-        $municipality->documentTypes()->create([
+        $documentType = $municipality->documentTypes()->create([
             'name' => 'Plano de trabalho',
             'is_required' => true,
             'is_active' => true,
@@ -43,7 +43,7 @@ class IntegrityAlertTest extends TestCase
             'severity' => IntegrityAlert::SEVERITY_CRITICAL,
             'status' => IntegrityAlert::STATUS_OPEN,
         ]);
-        $this->assertDatabaseHas('integrity_alerts', ['alert_key' => 'document:1']);
+        $this->assertDatabaseHas('integrity_alerts', ['alert_key' => "document:{$documentType->id}"]);
         $this->assertDatabaseHas('integrity_alerts', ['alert_key' => 'consistency:receipt']);
     }
 
