@@ -1,0 +1,68 @@
+services:
+  - type: web
+    name: trilhagov
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    autoDeployTrigger: checksPass
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: TrilhaGov
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_LOCALE
+        value: pt_BR
+      - key: APP_FALLBACK_LOCALE
+        value: pt_BR
+      - key: APP_TIMEZONE
+        value: America/Sao_Paulo
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_SCHEMA
+        value: trilhagov
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: FILESYSTEM_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "true"
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: alertas@trilhagov.local
+      - key: MAIL_FROM_NAME
+        value: TrilhaGov
+      - key: SCHEDULER_TOKEN
+        sync: false

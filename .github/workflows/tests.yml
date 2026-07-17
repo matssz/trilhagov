@@ -41,3 +41,68 @@ jobs:
 
       - name: Executar testes
         run: php artisan test
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v5
+
+      - name: Validar arquivos de infraestrutura
+        run: |
+          bash -n docker/start-render.sh
+          ruby -e "require 'yaml'; YAML.safe_load_file('render.yaml', aliases: true)"
+
+      - name: Construir imagem de producao
+        run: docker build --tag trilhagov:test .
+
+  postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: trilhagov_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d trilhagov_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: trilhagov_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SCHEMA: public
+
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v5
+
+      - name: Preparar PHP com PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_pgsql
+          coverage: none
+
+      - name: Instalar dependencias PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Preparar ambiente
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Executar testes no PostgreSQL
+        run: php artisan test

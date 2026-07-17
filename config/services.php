@@ -40,4 +40,8 @@ return [
         'timeout' => (int) env('TRANSFEREGOV_API_TIMEOUT', 20),
     ],
 
+    'scheduler' => [
+        'token' => env('SCHEDULER_TOKEN'),
+    ],
+
 ];

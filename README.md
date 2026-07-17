@@ -1,6 +1,7 @@
 # TrilhaGov
 
 [![Testes](https://github.com/matssz/trilhagov/actions/workflows/tests.yml/badge.svg)](https://github.com/matssz/trilhagov/actions/workflows/tests.yml)
+[![Deploy no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/matssz/trilhagov)
 
 Plataforma para municípios controlarem emendas parlamentares, valores, situação,
 responsáveis e prazos de comunicação, execução e prestação de contas.
@@ -129,6 +130,7 @@ hora sem repetir o mesmo envio.
 - [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
 - [Importação assistida de planilhas](docs/importacao-assistida-planilhas.md)
 - [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
+- [Deploy gratuito com Render e Supabase](docs/deploy-gratuito.md)
 
 ## Limite atual
 
