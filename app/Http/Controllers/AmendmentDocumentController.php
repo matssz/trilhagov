@@ -86,7 +86,8 @@ class AmendmentDocumentController extends Controller
                     ->where('parliamentary_amendment_id', $amendment->id)
                     ->where('document_type_id', $validated['document_type_id'])
                     ->lockForUpdate()
-                    ->max('version');
+                    ->pluck('version')
+                    ->max();
                 $document = $amendment->documents()->create([
                     'municipality_id' => $municipality->id,
                     'document_type_id' => $validated['document_type_id'],
