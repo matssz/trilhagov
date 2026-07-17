@@ -143,6 +143,11 @@ class Municipality extends Model
         return $this->hasMany(MunicipalWorkItem::class);
     }
 
+    public function amendmentImportBatches(): HasMany
+    {
+        return $this->hasMany(AmendmentImportBatch::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

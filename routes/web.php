@@ -23,6 +23,7 @@ use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\SpreadsheetImportController;
 use App\Http\Controllers\TransparencySettingsController;
 use App\Http\Controllers\WorkCenterController;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,11 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::get('/importacoes/planilhas', [SpreadsheetImportController::class, 'index'])->name('spreadsheet-imports.index');
+        Route::get('/importacoes/planilhas/modelo.csv', [SpreadsheetImportController::class, 'template'])->name('spreadsheet-imports.template');
+        Route::post('/importacoes/planilhas/pre-visualizar', [SpreadsheetImportController::class, 'preview'])->name('spreadsheet-imports.preview')->block(20, 20);
+        Route::get('/importacoes/planilhas/{batch}', [SpreadsheetImportController::class, 'show'])->name('spreadsheet-imports.show');
+        Route::post('/importacoes/planilhas/{batch}/confirmar', [SpreadsheetImportController::class, 'confirm'])->name('spreadsheet-imports.confirm')->block(20, 20);
         Route::post('/integracoes/transferegov/sincronizar', [ExternalIntegrationController::class, 'sync'])->name('integrations.sync')->block(20, 20);
         Route::post('/trabalho/atualizar', [WorkCenterController::class, 'synchronize'])->name('work-center.sync')->block(20, 20);
         Route::patch('/trabalho/acoes/{item}', [WorkCenterController::class, 'update'])->name('work-center.items.update')->block(10, 10);

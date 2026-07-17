@@ -14,6 +14,10 @@ oficiais, planilhas, documentos e secretarias.
 O produto não substitui o Transferegov, o Siafic, o Portal da Transparência ou a
 análise jurídica. Ele funciona como camada de controle operacional e evidências.
 
+## Demonstração visual
+
+![Importação assistida de planilhas no TrilhaGov](docs/images/importacao-assistida.png)
+
 ## Primeira entrega
 
 - Cadastro do gestor e do município.
@@ -55,6 +59,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Histórico de sincronizações, data da base oficial, falhas e decisões dos revisores.
 - Central de Trabalho com próximas ações geradas a partir das pendências reais do município.
 - Priorização por prazo e risco, atribuição de responsáveis e resolução automática pela fonte.
+- Importação assistida de planilhas CSV com pré-visualização e validação por linha.
+- Proteção contra duplicidades e sobrescrita dos dados já confirmados pelo município.
 
 ## Stack
 
@@ -118,6 +124,7 @@ hora sem repetir o mesmo envio.
 - [Transparência e inteligência gerencial](docs/transparencia-e-inteligencia.md)
 - [Integrações e conferência de dados](docs/integracoes-oficiais.md)
 - [Central de Trabalho Municipal](docs/central-trabalho-municipal.md)
+- [Importação assistida de planilhas](docs/importacao-assistida-planilhas.md)
 
 ## Limite atual
 

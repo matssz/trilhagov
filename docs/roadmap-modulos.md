@@ -221,6 +221,25 @@ Entregue na primeira versão:
 Próxima validação: observar uma equipe municipal usando a fila durante uma semana
 e medir quais ações são úteis, redundantes ou ainda precisam de orientação.
 
+## Módulo 9 - Importação Assistida de Planilhas
+
+Situação: primeira versão concluída.
+
+Entregue na primeira versão:
+
+- modelo CSV compatível com Excel e outros editores de planilhas;
+- leitura de vírgula ou ponto e vírgula e codificações comuns do Windows;
+- normalização de datas, valores e termos municipais em português;
+- pré-visualização por linha antes de alterar o inventário;
+- classificação explicável entre apta, duplicada e inválida;
+- importação apenas das linhas aptas, sem sobrescrever registros;
+- nova verificação de concorrência durante a confirmação;
+- limite por arquivo, isolamento municipal, perfis, idempotência e auditoria;
+- atualização dos alertas e da Central de Trabalho após a importação.
+
+Próxima validação: testar arquivos reais anonimizados de pelo menos dois
+municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
+
 ## Ordem recomendada
 
 1. Concluir identidade municipal e robustez.
@@ -232,6 +251,7 @@ e medir quais ações são úteis, redundantes ou ainda precisam de orientação
 7. Adicionar alertas.
 8. Integrar fontes oficiais.
 9. Consolidar as próximas ações na Central de Trabalho.
+10. Migrar o inventário existente por importação assistida.
 
 ## Itens fora do escopo atual
 

@@ -49,6 +49,12 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        @if ($canEditAmendments)
+                            <a class="sidebar-link {{ request()->routeIs('spreadsheet-imports.*') ? 'active' : '' }}" href="{{ route('spreadsheet-imports.index') }}">
+                                <i data-lucide="file-spreadsheet" aria-hidden="true"></i>
+                                <span>Importar</span>
+                            </a>
+                        @endif
                         <a class="sidebar-link {{ request()->routeIs('work-center.*') ? 'active' : '' }}" href="{{ route('work-center.index') }}">
                             <i data-lucide="clipboard-check" aria-hidden="true"></i>
                             <span>Trabalho</span>
