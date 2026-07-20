@@ -71,6 +71,10 @@
                             <i data-lucide="database-zap" aria-hidden="true"></i>
                             <span>Integrações</span>
                         </a>
+                        <a class="sidebar-link {{ request()->routeIs('municipal-rules.*') ? 'active' : '' }}" href="{{ route('municipal-rules.index') }}">
+                            <i data-lucide="landmark" aria-hidden="true"></i>
+                            <span>Normas municipais</span>
+                        </a>
                         @if ($canManageUsers)
                             <a class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                                 <i data-lucide="users" aria-hidden="true"></i>

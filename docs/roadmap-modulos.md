@@ -19,6 +19,20 @@ dependências e capacidade de validar cada entrega com usuários municipais.
 - Proposta preservando o objeto original e decisão restrita ao gestor.
 - Alertas de prazo, auditoria e ações automáticas na Central de Trabalho.
 
+## Entregue - parametrização normativa municipal
+
+- Configurações versionadas por município, exercício e revisão.
+- Cadastro de Lei Orgânica, Regimento Interno, PPA, LDO, LOA e atos locais.
+- Parâmetros de limite, RCL, saúde, admissibilidade, impedimentos e transparência.
+- Situação Audesp, responsável, rastreabilidade bancária e retenção documental.
+- Diagnóstico explicável com requisitos obrigatórios e pontos de atenção.
+- Revisão jurídica obrigatória antes da ativação.
+- Congelamento da versão vigente e cópia segura para novas revisões.
+- Isolamento municipal, permissões, idempotência e auditoria.
+
+Próxima validação: preencher a configuração de um exercício com a procuradoria,
+controladoria, contabilidade e Câmara de um município piloto.
+
 ## Módulo 0 - Identidade municipal
 
 Situação: base concluída nesta etapa.
@@ -268,6 +282,9 @@ municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
 8. Integrar fontes oficiais.
 9. Consolidar as próximas ações na Central de Trabalho.
 10. Migrar o inventário existente por importação assistida.
+11. Parametrizar a legislação e os prazos de cada município.
+12. Aplicar os parâmetros vigentes nos alertas e na admissibilidade.
+13. Completar a transparência exigida e validar a remessa Audesp.
 
 ## Itens fora do escopo atual
 

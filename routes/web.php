@@ -20,6 +20,7 @@ use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalitySelectionController;
+use App\Http\Controllers\MunicipalRegulatoryProfileController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
@@ -68,6 +69,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
     Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
+    Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
     Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
     Route::patch('/notificacoes/{notification}/ler', [NotificationCenterController::class, 'markAsRead'])->name('notifications.read')->block(10, 10);
@@ -94,6 +96,12 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/emendas/{emenda}/plano-de-trabalho/parecer', [MunicipalAdmissibilityReviewController::class, 'store'])->name('emendas.work-plan.review')->block(10, 10);
         Route::patch('/transparencia/configuracao', TransparencySettingsController::class)->name('transparency.settings.update')->block(10, 10);
         Route::patch('/alertas/configuracoes', [AlertCenterController::class, 'updateSettings'])->name('alerts.settings.update')->block(10, 10);
+        Route::post('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'store'])->name('municipal-rules.store')->block(10, 10);
+        Route::patch('/configuracoes/normas-municipais/{profile}', [MunicipalRegulatoryProfileController::class, 'update'])->name('municipal-rules.update')->block(10, 10);
+        Route::post('/configuracoes/normas-municipais/{profile}/instrumentos', [MunicipalRegulatoryProfileController::class, 'addInstrument'])->name('municipal-rules.instruments.store')->block(10, 10);
+        Route::delete('/configuracoes/normas-municipais/{profile}/instrumentos/{instrument}', [MunicipalRegulatoryProfileController::class, 'removeInstrument'])->name('municipal-rules.instruments.destroy')->block(10, 10);
+        Route::post('/configuracoes/normas-municipais/{profile}/ativar', [MunicipalRegulatoryProfileController::class, 'activate'])->name('municipal-rules.activate')->block(10, 10);
+        Route::post('/configuracoes/normas-municipais/{profile}/revisar', [MunicipalRegulatoryProfileController::class, 'revise'])->name('municipal-rules.revise')->block(10, 10);
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
         Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);

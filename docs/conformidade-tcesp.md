@@ -79,7 +79,7 @@ o procedimento legal aplicável no município.
 Ainda precisam ser construídos e validados com procuradores, controladores,
 contadores e equipes legislativas municipais:
 
-- parametrização da Lei Orgânica, LDO, Regimento Interno e prazos de cada município;
+- aplicação automática da parametrização vigente nos prazos e validações de cada emenda;
 - cadastro e exportação no formato exigido pelo sistema Audesp;
 - conciliação dos códigos contábeis, conta bancária e regra Audesp 47.4.63;
 - publicação dos campos do artigo 3º da Resolução TCESP nº 17/2025 no portal público;
@@ -90,3 +90,8 @@ contadores e equipes legislativas municipais:
 As regras da matriz ficam em `app/Services/TcespComplianceFramework.php`. Uma
 alteração normativa deve criar nova versão, preservando as revisões históricas da
 versão anterior.
+
+A parametrização de Lei Orgânica, Regimento, PPA, LDO, LOA, limites, saúde,
+impedimentos, transparência, rastreabilidade e revisão jurídica foi entregue no
+módulo de Normas Municipais. O desenho e seus limites estão documentados em
+`docs/parametrizacao-normativa-municipal.md`.
