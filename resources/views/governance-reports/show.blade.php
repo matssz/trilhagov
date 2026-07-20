@@ -21,6 +21,11 @@
 
     @if (!$report->isDraft())
         <div class="governance-seal mb-4"><i data-lucide="badge-check" aria-hidden="true"></i><div><strong>Versão fechada para auditoria</strong><p>Emitida em {{ $report->issued_at->format('d/m/Y H:i') }} por {{ $report->issuer->name }}. O conteúdo e o hash desta fotografia não podem ser alterados.</p></div><code>{{ $report->snapshot_sha256 }}</code></div>
+
+        <section class="dispatch-report-cta mb-4">
+            <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><p class="page-kicker mb-1">Fluxo entre órgãos municipais</p><h2 class="h5 mb-1">Protocolo institucional</h2><p>{{ $dispatches->count() }} remessa(s) registrada(s) · {{ $dispatches->where('status', 'acknowledged')->count() }} recebida(s)</p></div></div>
+            <a class="btn btn-primary" href="{{ route('report-dispatches.index', $report) }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Abrir remessas</a>
+        </section>
     @endif
 
     <div class="governance-metrics mb-4">

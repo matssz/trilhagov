@@ -15,3 +15,7 @@ Schedule::command('alerts:process')
 Schedule::command('work-items:sync')
     ->hourlyAt(15)
     ->withoutOverlapping(30);
+
+Schedule::command('report-dispatches:process')
+    ->hourlyAt(30)
+    ->withoutOverlapping(30);

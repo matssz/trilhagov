@@ -25,6 +25,7 @@ use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
+use App\Http\Controllers\MunicipalReportDispatchController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
@@ -74,6 +75,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/relatorios/governanca/{report}', [MunicipalGovernanceReportController::class, 'show'])->name('governance-reports.show');
     Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
     Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
+    Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
+    Route::get('/relatorios/remessas/{dispatch}', [MunicipalReportDispatchController::class, 'show'])->name('report-dispatches.show');
+    Route::get('/relatorios/remessas/{dispatch}/recibo.pdf', [MunicipalReportDispatchController::class, 'receipt'])->name('report-dispatches.receipt');
+    Route::get('/relatorios/remessas/{dispatch}/eventos/{event}/comprovante', [MunicipalReportDispatchController::class, 'evidence'])->name('report-dispatches.evidence');
     Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
     Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
@@ -110,6 +115,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager')->group(function () {
         Route::post('/relatorios/governanca/{report}/emitir', [MunicipalGovernanceReportController::class, 'issue'])->name('governance-reports.issue')->block(10, 10);
+        Route::post('/relatorios/remessas/{dispatch}/cancelar', [MunicipalReportDispatchController::class, 'cancel'])->name('report-dispatches.cancel')->block(10, 10);
         Route::post('/emendas/{emenda}/plano-de-trabalho/parecer', [MunicipalAdmissibilityReviewController::class, 'store'])->name('emendas.work-plan.review')->block(10, 10);
         Route::patch('/transparencia/configuracao', TransparencySettingsController::class)->name('transparency.settings.update')->block(10, 10);
         Route::patch('/alertas/configuracoes', [AlertCenterController::class, 'updateSettings'])->name('alerts.settings.update')->block(10, 10);
@@ -131,6 +137,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::middleware('municipality.role:manager,editor')->group(function () {
         Route::post('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'store'])->name('governance-reports.store')->block(10, 10);
         Route::patch('/relatorios/governanca/{report}/atualizar', [MunicipalGovernanceReportController::class, 'refresh'])->name('governance-reports.refresh')->block(10, 10);
+        Route::post('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'store'])->name('report-dispatches.store')->block(10, 10);
+        Route::post('/relatorios/remessas/{dispatch}/enviar', [MunicipalReportDispatchController::class, 'send'])->name('report-dispatches.send')->block(20, 10);
+        Route::post('/relatorios/remessas/{dispatch}/retorno', [MunicipalReportDispatchController::class, 'recordReturn'])->name('report-dispatches.return')->block(20, 10);
         Route::post('/audesp/homologacoes', [AudespHomologationController::class, 'store'])->name('audesp-homologations.store')->block(20, 10);
         Route::post('/audesp/homologacoes/{batch}/reconferir', [AudespHomologationController::class, 'recheck'])->name('audesp-homologations.recheck')->block(20, 10);
         Route::post('/audesp/homologacoes/{batch}/transmissao', [AudespHomologationController::class, 'recordSubmission'])->name('audesp-homologations.submission')->block(20, 10);

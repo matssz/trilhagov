@@ -23,6 +23,7 @@
                     @forelse ($notifications as $notification)
                         @php
                             $notificationSeverity = $notification->data['severity'] ?? 'info';
+                            $notificationContext = $notification->data['amendment_reference'] ?? $notification->data['report_code'] ?? null;
                             $notificationSeverityLabel = match ($notificationSeverity) {
                                 'critical' => 'Crítico',
                                 'warning' => 'Atenção',
@@ -40,10 +41,10 @@
                                     @endif
                                 </div>
                                 <p>{{ $notification->data['message'] ?? '' }}</p>
-                                <small>{{ $notification->data['amendment_reference'] ?? '' }} · {{ $notification->created_at->diffForHumans() }}</small>
+                                <small>@if($notificationContext){{ $notificationContext }} · @endif{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
                             <div class="notification-actions">
-                                <a class="icon-button" href="{{ $notification->data['url'] ?? route('alerts.index') }}" title="Abrir emenda" aria-label="Abrir emenda"><i data-lucide="external-link" aria-hidden="true"></i></a>
+                                <a class="icon-button" href="{{ $notification->data['url'] ?? route('alerts.index') }}" title="Abrir item" aria-label="Abrir item"><i data-lucide="external-link" aria-hidden="true"></i></a>
                                 @if (! $notification->read_at)
                                     <form method="POST" action="{{ route('notifications.read', $notification) }}">
                                         @csrf

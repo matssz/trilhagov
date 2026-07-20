@@ -148,6 +148,9 @@ class MunicipalGovernanceReportController extends Controller
             'canIssue' => $canIssue,
             'refreshToken' => $canEdit ? $formSubmission->issue($request, "governance-report-refresh-{$report->id}") : null,
             'issueToken' => $canIssue ? $formSubmission->issue($request, "governance-report-issue-{$report->id}") : null,
+            'dispatches' => $report->status === MunicipalGovernanceReport::STATUS_ISSUED
+                ? $report->dispatches()->with('responsibleUser:id,name')->latest()->limit(5)->get()
+                : collect(),
         ]);
     }
 
