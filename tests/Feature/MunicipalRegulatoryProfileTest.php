@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Municipality;
 use App\Models\MunicipalNormativeInstrument;
 use App\Models\MunicipalRegulatoryProfile;
+use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -69,6 +70,21 @@ class MunicipalRegulatoryProfileTest extends TestCase
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
         $profile = $this->completeProfile($municipality, $manager);
+        $amendment = ParliamentaryAmendment::factory()
+            ->for($municipality)
+            ->for($manager, 'creator')
+            ->create(['fiscal_year' => 2026, 'government_sphere' => 'municipal']);
+        $impediment = $amendment->technicalImpediments()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'category' => 'technical',
+            'nature' => 'under_analysis',
+            'status' => 'identified',
+            'title' => 'Pendência técnica',
+            'description' => 'Descrição suficiente para o teste.',
+            'impact' => 'Execução temporariamente suspensa.',
+            'identified_at' => today(),
+        ]);
 
         $this->actingAs($manager)
             ->withSession(['active_municipality_id' => $municipality->id])
@@ -78,6 +94,8 @@ class MunicipalRegulatoryProfileTest extends TestCase
         $profile->refresh();
         $this->assertSame(MunicipalRegulatoryProfile::STATUS_ACTIVE, $profile->status);
         $this->assertNotNull($profile->activated_at);
+        $this->assertSame($profile->id, $amendment->fresh()->municipal_regulatory_profile_id);
+        $this->assertSame($profile->id, $impediment->fresh()->municipal_regulatory_profile_id);
         $this->assertDatabaseHas('audit_logs', ['action' => 'municipal_rules_activated']);
 
         $this->expectException(LogicException::class);

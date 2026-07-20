@@ -77,6 +77,7 @@ class MunicipalWorkItem extends Model
             'communication' => 'Comunicação',
             'document' => 'Documentação',
             'planning' => 'Planejamento',
+            'normative' => 'Normas municipais',
             'impediment' => 'Impedimentos',
             'execution' => 'Execução',
             'financial' => 'Financeiro',

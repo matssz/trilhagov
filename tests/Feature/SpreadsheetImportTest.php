@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AmendmentImportBatch;
 use App\Models\AmendmentImportRow;
 use App\Models\Municipality;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -77,11 +78,26 @@ class SpreadsheetImportTest extends TestCase
     public function test_confirmation_imports_only_valid_rows_and_cannot_repeat(): void
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $profile = $municipality->regulatoryProfiles()->create([
+            'created_by' => $manager->id,
+            'fiscal_year' => 2026,
+            'version' => 1,
+            'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
+            'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,
+            'previous_year_rcl' => 100000000,
+            'individual_limit_percentage' => 1,
+            'activated_at' => now(),
+        ]);
         $previewToken = $this->sessionToken($municipality, "spreadsheet-preview-{$municipality->id}");
         $this->actingAs($manager)->post(route('spreadsheet-imports.preview'), [
             '_submission_token' => $previewToken,
             'spreadsheet' => UploadedFile::fake()->createWithContent('controle.csv', $this->csv([
-                $this->validRow(['Identificacao da emenda' => 'EM-IMPORTADA']),
+                $this->validRow([
+                    'Identificacao da emenda' => 'EM-IMPORTADA',
+                    'Esfera' => 'Municipal',
+                    'Modalidade' => 'Execucao direta',
+                    'Codigo Transferegov' => '',
+                ]),
                 $this->validRow(['Identificacao da emenda' => 'EM-CORRIGIR', 'Prazo de execucao' => 'data desconhecida']),
             ])),
         ]);
@@ -99,6 +115,7 @@ class SpreadsheetImportTest extends TestCase
             'reference' => 'EM-IMPORTADA',
             'expected_amount' => 500000,
             'created_by' => $manager->id,
+            'municipal_regulatory_profile_id' => $profile->id,
         ]);
         $this->assertDatabaseMissing('parliamentary_amendments', ['reference' => 'EM-CORRIGIR']);
         $this->assertSame(AmendmentImportBatch::STATUS_COMPLETED, $batch->fresh()->status);

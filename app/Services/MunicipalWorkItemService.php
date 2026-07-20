@@ -18,7 +18,10 @@ use Illuminate\Support\Facades\DB;
 
 class MunicipalWorkItemService
 {
-    public function __construct(private readonly MunicipalWorkPlanService $workPlanService) {}
+    public function __construct(
+        private readonly MunicipalWorkPlanService $workPlanService,
+        private readonly MunicipalRuleApplicationService $municipalRules,
+    ) {}
 
     /** @return array{active: int, created: int, reopened: int, completed: int} */
     public function synchronize(Municipality $municipality): array
@@ -32,6 +35,7 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'regulatoryProfile',
             'technicalImpediments.diligences',
             'technicalImpediments.remappings',
             'executionStages',
@@ -135,6 +139,26 @@ class MunicipalWorkItemService
             );
         }
 
+        foreach ($this->municipalRules->assessment($amendment)['violations'] as $violation) {
+            $actionUrl = in_array($violation['code'], ['profile_missing', 'regime_not_instituted'], true)
+                ? route('municipal-rules.index', [], false)
+                : ($violation['code'] === 'health_reserve_unverified'
+                    ? route('emendas.work-plan', $amendment, false)
+                    : route('emendas.edit', $amendment, false));
+            $items[] = $this->specification(
+                "amendment:{$amendment->id}:normative:{$violation['code']}",
+                'normative',
+                $violation['title'],
+                $violation['message'],
+                $actionUrl,
+                $nextDeadline,
+                $violation['severity'] === 'critical'
+                    ? MunicipalWorkItem::PRIORITY_HIGH
+                    : MunicipalWorkItem::PRIORITY_NORMAL,
+                $amendment->responsible_user_id,
+            );
+        }
+
         if ($amendment->supportsTcespCompliance()) {
             $plan = $amendment->municipalWorkPlan;
 
@@ -178,6 +202,19 @@ class MunicipalWorkItemService
         }
 
         foreach ($amendment->technicalImpediments as $impediment) {
+            if ($impediment->communicated_at === null && $impediment->communication_due_at !== null) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:technical-impediment:{$impediment->id}:communication",
+                    'communication',
+                    'Comunicar impedimento formalmente',
+                    'Registre a data e o protocolo da comunicação ao Legislativo dentro do prazo municipal.',
+                    route('emendas.impediments', $amendment, false).'#impedimento-'.$impediment->id,
+                    $impediment->communication_due_at,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                    $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
             if ($impediment->isOpen()) {
                 $items[] = $this->specification(
                     "amendment:{$amendment->id}:technical-impediment:{$impediment->id}",

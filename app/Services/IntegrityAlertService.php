@@ -15,7 +15,10 @@ class IntegrityAlertService
 {
     private const REFRESH_INTERVAL_SECONDS = 300;
 
-    public function __construct(private readonly AccountabilityService $accountabilityService) {}
+    public function __construct(
+        private readonly AccountabilityService $accountabilityService,
+        private readonly MunicipalRuleApplicationService $municipalRules,
+    ) {}
 
     /** @return array{created: int, updated: int, resolved: int, open: int}|null */
     public function syncIfDue(Municipality $municipality): ?array
@@ -47,6 +50,8 @@ class IntegrityAlertService
             'amendments.accountabilityProcess.diligences',
             'amendments.technicalImpediments.diligences',
             'amendments.technicalImpediments.remappings',
+            'amendments.regulatoryProfile',
+            'amendments.municipalWorkPlan',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -65,6 +70,7 @@ class IntegrityAlertService
             $this->detectAccountabilityControls($amendment, $settings, $detections);
             $this->detectTechnicalImpedimentControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
+            $this->detectNormativeControls($amendment, $detections);
         }
 
         $stats = DB::transaction(function () use ($municipality, $detections): array {
@@ -219,6 +225,22 @@ class IntegrityAlertService
                 'severity' => IntegrityAlert::SEVERITY_WARNING,
                 'title' => 'Documento obrigatório pendente',
                 'message' => "O checklist exige: {$documentType->name}.",
+                'due_at' => null,
+            ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectNormativeControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        foreach ($this->municipalRules->assessment($amendment)['violations'] as $violation) {
+            $this->addDetection($detections, $amendment, 'normative:'.$violation['code'], [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => $violation['severity'] === 'critical'
+                    ? IntegrityAlert::SEVERITY_CRITICAL
+                    : IntegrityAlert::SEVERITY_WARNING,
+                'title' => $violation['title'],
+                'message' => $violation['message'],
                 'due_at' => null,
             ]);
         }
@@ -424,6 +446,19 @@ class IntegrityAlertService
         array &$detections,
     ): void {
         foreach ($amendment->technicalImpediments as $impediment) {
+            if ($impediment->communicated_at === null && $impediment->communication_due_at !== null) {
+                $this->detectOperationalDeadline(
+                    $amendment,
+                    $settings,
+                    $detections,
+                    "impediment-communication:{$impediment->id}",
+                    'Comunicação de impedimento',
+                    $impediment->title,
+                    $impediment->communication_due_at,
+                    $impediment->assigned_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+
             if ($impediment->isOpen() && $impediment->resolution_due_at !== null) {
                 $this->detectOperationalDeadline(
                     $amendment,

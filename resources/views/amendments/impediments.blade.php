@@ -81,6 +81,7 @@
 
                     <div class="impediment-facts">
                         <span><i data-lucide="user-round-check" aria-hidden="true"></i><small>Responsável</small><strong>{{ $impediment->assignedUser?->name ?? 'Não definido' }}</strong></span>
+                        <span class="{{ ! $impediment->communicated_at && $impediment->communication_due_at?->isBefore(today()) ? 'is-overdue' : '' }}"><i data-lucide="send" aria-hidden="true"></i><small>Comunicação formal</small><strong>{{ $impediment->communicated_at?->format('d/m/Y') ?? ($impediment->communication_due_at ? 'Até '.$impediment->communication_due_at->format('d/m/Y') : 'Não parametrizada') }}</strong></span>
                         <span class="{{ $impediment->isOverdue() ? 'is-overdue' : '' }}"><i data-lucide="calendar-clock" aria-hidden="true"></i><small>Prazo</small><strong>{{ $impediment->resolution_due_at?->format('d/m/Y') ?? 'Não definido' }}</strong></span>
                         <span><i data-lucide="message-square" aria-hidden="true"></i><small>Diligências abertas</small><strong>{{ $openDiligences }}</strong></span>
                         <span><i data-lucide="route" aria-hidden="true"></i><small>Remanejamento</small><strong>{{ $activeRemapping?->statusLabel() ?? 'Não iniciado' }}</strong></span>
@@ -126,6 +127,15 @@
                                     <div>
                                         <label class="form-label" for="due-{{ $impediment->id }}">Prazo de resolução</label>
                                         <input class="form-control" id="due-{{ $impediment->id }}" name="resolution_due_at" type="date" value="{{ $impediment->resolution_due_at?->format('Y-m-d') }}">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="communicated-{{ $impediment->id }}">Comunicado em</label>
+                                        <input class="form-control" id="communicated-{{ $impediment->id }}" name="communicated_at" type="date" value="{{ $impediment->communicated_at?->format('Y-m-d') }}" max="{{ today()->format('Y-m-d') }}">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="communication-reference-{{ $impediment->id }}">Protocolo da comunicação</label>
+                                        <input class="form-control" id="communication-reference-{{ $impediment->id }}" name="communication_reference" value="{{ $impediment->communication_reference }}" maxlength="180">
+                                        @if ($impediment->communication_due_at)<div class="form-text">Prazo normativo: {{ $impediment->communication_due_at->format('d/m/Y') }}</div>@endif
                                     </div>
                                     <div class="span-2">
                                         <label class="form-label" for="evidence-{{ $impediment->id }}">Documento de evidência</label>
@@ -323,10 +333,16 @@
                     <div>
                         <label class="form-label" for="identified_at">Identificado em <span class="required-mark">*</span></label>
                         <input class="form-control" id="identified_at" name="identified_at" type="date" value="{{ old('identified_at', today()->format('Y-m-d')) }}" required>
+                        @if ($suggestedCommunicationDueAt)
+                            <div class="form-text">Comunicação formal sugerida até {{ \Illuminate\Support\Carbon::parse($suggestedCommunicationDueAt)->format('d/m/Y') }}.</div>
+                        @endif
                     </div>
                     <div>
                         <label class="form-label" for="resolution_due_at">Prazo de resolução</label>
-                        <input class="form-control" id="resolution_due_at" name="resolution_due_at" type="date" value="{{ old('resolution_due_at') }}">
+                        <input class="form-control" id="resolution_due_at" name="resolution_due_at" type="date" value="{{ old('resolution_due_at', $suggestedResolutionDueAt) }}">
+                        @if ($regulatoryProfile?->impediment_correction_days !== null)
+                            <div class="form-text">Sugestão da norma {{ $regulatoryProfile->fiscal_year }}/v{{ $regulatoryProfile->version }}: {{ $regulatoryProfile->impediment_correction_days }} dia(s) para saneamento.</div>
+                        @endif
                     </div>
                     <div>
                         <label class="form-label" for="evidence_document_id">Evidência inicial</label>

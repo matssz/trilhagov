@@ -85,12 +85,23 @@ prazos de impedimento e regra de rastreabilidade bancária.
 
 ## Próximas integrações
 
-1. Vincular automaticamente a configuração vigente à emenda do mesmo exercício.
-2. Levar os prazos locais para alertas, diligências e Central de Trabalho.
-3. Validar valor e quantidade de emendas durante a admissibilidade.
-4. Publicar os campos mínimos de transparência com registro de atualização.
-5. Mapear o leiaute XSD vigente da Audesp antes de gerar qualquer arquivo.
-6. Criar matrizes próprias para outros Tribunais de Contas, sempre versionadas.
+Entregue na aplicação operacional:
+
+1. Vínculo imutável entre emenda, impedimento e versão normativa do exercício.
+2. Vínculo automático no cadastro manual, importação por planilha e ativação da norma.
+3. Bloqueio explicável de valor mínimo, quantidade e teto total por autor.
+4. Detecção de registros importados fora dos parâmetros, sem exclusão de dados.
+5. Prazo local separado para comunicação formal e para saneamento do impedimento.
+6. Encerramento automático de alertas após registrar data e protocolo da comunicação.
+7. Ações correspondentes na Integridade e na Central de Trabalho.
+8. Apuração provisória da reserva da saúde no método global ou por vereador.
+
+Próximas integrações:
+
+1. Validar a apuração da saúde com contabilidade e controle interno do piloto.
+2. Publicar os campos mínimos de transparência com registro de atualização.
+3. Mapear o leiaute XSD vigente da Audesp antes de gerar qualquer arquivo.
+4. Criar matrizes próprias para outros Tribunais de Contas, sempre versionadas.
 
 ## Limite jurídico
 

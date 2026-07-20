@@ -123,6 +123,16 @@ class MunicipalRegulatoryProfile extends Model
         return $this->hasMany(MunicipalNormativeInstrument::class);
     }
 
+    public function amendments(): HasMany
+    {
+        return $this->hasMany(ParliamentaryAmendment::class);
+    }
+
+    public function technicalImpediments(): HasMany
+    {
+        return $this->hasMany(TechnicalImpediment::class);
+    }
+
     public function statusLabel(): string
     {
         return self::statuses()[$this->status] ?? $this->status;

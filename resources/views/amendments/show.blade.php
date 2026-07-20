@@ -86,6 +86,36 @@
         </div>
 
         <div class="col-lg-4">
+            @if ($amendment->government_sphere === 'municipal')
+                <section class="content-panel normative-amendment-panel mb-4">
+                    <div class="content-panel-header d-flex align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2"><i data-lucide="landmark" aria-hidden="true"></i><h2 class="h5 mb-0">Regra municipal</h2></div>
+                        @if ($normativeAssessment['profile'])
+                            <span class="normative-version">{{ $normativeAssessment['profile']->fiscal_year }}/v{{ $normativeAssessment['profile']->version }}</span>
+                        @endif
+                    </div>
+                    <div class="content-panel-body">
+                        @if ($normativeAssessment['profile'])
+                            <dl class="normative-metrics">
+                                <div><dt>Total do autor</dt><dd>R$ {{ number_format($normativeAssessment['author_total'], 2, ',', '.') }}</dd></div>
+                                <div><dt>Quantidade</dt><dd>{{ $normativeAssessment['author_count'] }}</dd></div>
+                                <div><dt>Teto individual</dt><dd>{{ $normativeAssessment['ceiling'] === null ? 'Não parametrizado' : 'R$ '.number_format($normativeAssessment['ceiling'], 2, ',', '.') }}</dd></div>
+                                <div><dt>Saldo no teto</dt><dd>{{ $normativeAssessment['remaining'] === null ? 'Não calculado' : 'R$ '.number_format($normativeAssessment['remaining'], 2, ',', '.') }}</dd></div>
+                            </dl>
+                        @endif
+                        @if ($normativeAssessment['violations'] !== [])
+                            <ul class="normative-violations">
+                                @foreach($normativeAssessment['violations'] as $violation)
+                                    <li class="{{ $violation['severity'] }}"><i data-lucide="{{ $violation['severity'] === 'critical' ? 'circle-alert' : 'triangle-alert' }}" aria-hidden="true"></i><span><strong>{{ $violation['title'] }}</strong><small>{{ $violation['message'] }}</small></span></li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="normative-clear"><i data-lucide="circle-check" aria-hidden="true"></i>Parâmetros vigentes atendidos.</p>
+                        @endif
+                        <a class="normative-source-link" href="{{ route('municipal-rules.index', $normativeAssessment['profile'] ? ['perfil' => $normativeAssessment['profile']->id] : []) }}">Ver fundamento normativo<i data-lucide="arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                </section>
+            @endif
             <section class="content-panel mb-4">
                 <div class="content-panel-header d-flex align-items-center justify-content-between gap-2">
                     <h2 class="h5 mb-0">Matriz de risco</h2>

@@ -47,6 +47,7 @@ class ParliamentaryAmendment extends Model
 
     protected $fillable = [
         'created_by',
+        'municipal_regulatory_profile_id',
         'reference',
         'fiscal_year',
         'government_sphere',
@@ -192,6 +193,11 @@ class ParliamentaryAmendment extends Model
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function regulatoryProfile(): BelongsTo
+    {
+        return $this->belongsTo(MunicipalRegulatoryProfile::class, 'municipal_regulatory_profile_id');
     }
 
     public function auditLogs(): MorphMany

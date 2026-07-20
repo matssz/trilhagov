@@ -69,6 +69,23 @@
             <p><strong>Controle assistido.</strong> A ativação registra a decisão municipal, mas não substitui parecer jurídico nem validação do Tribunal de Contas.</p>
         </div>
 
+        <section class="rules-portfolio-band">
+            <div class="rules-section-title">
+                <div><p class="panel-kicker">Aplicação no exercício</p><h2>Reserva municipal da saúde</h2></div>
+                <span class="health-status health-status-{{ $portfolio['status'] }}">{{ match($portfolio['status']) { 'compliant' => 'Percentual alcançado', 'attention' => 'Abaixo do parâmetro', 'pending_classification' => 'Classificação pendente', default => 'Não parametrizada' } }}</span>
+            </div>
+            <div class="rules-portfolio-metrics">
+                <div><span>Emendas vinculadas</span><strong>{{ $portfolio['amendment_count'] }}</strong><small>{{ $portfolio['author_count'] }} autor(es)</small></div>
+                <div><span>Total individual</span><strong>R$ {{ number_format($portfolio['total'], 2, ',', '.') }}</strong><small>Base da revisão</small></div>
+                <div><span>Identificado para saúde</span><strong>R$ {{ number_format($portfolio['health_total'], 2, ',', '.') }}</strong><small>Conforme planos de trabalho</small></div>
+                <div><span>Reserva esperada</span><strong>{{ $portfolio['health_required'] === null ? 'Não calculada' : 'R$ '.number_format($portfolio['health_required'], 2, ',', '.') }}</strong><small>{{ $profile->health_reserve_method ? App\Models\MunicipalRegulatoryProfile::healthReserveMethods()[$profile->health_reserve_method] : 'Método não definido' }}</small></div>
+                <div><span>Diferença provisória</span><strong>{{ $portfolio['shortfall'] === null ? 'Não calculada' : 'R$ '.number_format($portfolio['shortfall'], 2, ',', '.') }}</strong><small>{{ $profile->health_reserve_method === 'per_councilor' ? $portfolio['authors_below'].' autor(es) abaixo' : $portfolio['unclassified'].' plano(s) sem classificação' }}</small></div>
+            </div>
+            @if ($portfolio['unclassified'] > 0)
+                <p class="portfolio-caveat"><i data-lucide="info" aria-hidden="true"></i>A apuração permanece provisória até classificar saúde em {{ $portfolio['unclassified'] }} plano(s) de trabalho.</p>
+            @endif
+        </section>
+
         <section class="rules-diagnostic-band">
             <div class="rules-section-title">
                 <div><p class="panel-kicker">Diagnóstico</p><h2>Prontidão normativa</h2></div>

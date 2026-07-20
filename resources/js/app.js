@@ -2,6 +2,7 @@ import './bootstrap';
 import 'bootstrap';
 import {
     ArrowLeft,
+    ArrowRight,
     BadgeCheck,
     Bell,
     BellRing,
@@ -12,6 +13,7 @@ import {
     ChevronDown,
     ChevronRight,
     CircleCheck,
+    CircleAlert,
     CircleDot,
     CircleDollarSign,
     CircleX,
@@ -84,6 +86,7 @@ import {
 createIcons({
     icons: {
         ArrowLeft,
+        ArrowRight,
         BadgeCheck,
         Bell,
         BellRing,
@@ -94,6 +97,7 @@ createIcons({
         ChevronDown,
         ChevronRight,
         CircleCheck,
+        CircleAlert,
         CircleDot,
         CircleDollarSign,
         CircleX,

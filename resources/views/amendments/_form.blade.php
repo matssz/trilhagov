@@ -1,5 +1,16 @@
 @php($amendment = $amendment ?? null)
 
+@if ($activeRegulatoryProfiles->isNotEmpty())
+    <div class="normative-form-context">
+        <i data-lucide="landmark" aria-hidden="true"></i>
+        <div>
+            <strong>Normas municipais vigentes</strong>
+            <span>@foreach($activeRegulatoryProfiles as $rules){{ $rules->fiscal_year }}/v{{ $rules->version }}{{ ! $loop->last ? ' · ' : '' }}@endforeach</span>
+        </div>
+        <a href="{{ route('municipal-rules.index') }}">Consultar</a>
+    </div>
+@endif
+
 <section class="form-section">
     <div class="form-section-heading"><span>1</span><h2 class="h5 mb-0">Identificação</h2></div>
     <div class="row g-3">

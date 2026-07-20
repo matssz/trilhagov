@@ -69,6 +69,7 @@ class AmendmentSpreadsheetImportService
         private readonly AuditTrail $auditTrail,
         private readonly IntegrityAlertService $integrityAlertService,
         private readonly MunicipalWorkItemService $workItemService,
+        private readonly MunicipalRuleApplicationService $municipalRules,
     ) {}
 
     public function createPreview(Municipality $municipality, User $user, UploadedFile $file): AmendmentImportBatch
@@ -199,6 +200,11 @@ class AmendmentSpreadsheetImportService
                     $amendment = $municipality->amendments()->create([
                         ...$data,
                         'created_by' => $request->user()->id,
+                        'municipal_regulatory_profile_id' => $this->municipalRules->profileFor(
+                            $municipality,
+                            (int) $data['fiscal_year'],
+                            (string) $data['government_sphere'],
+                        )?->id,
                     ]);
                 } catch (QueryException $exception) {
                     if ((string) $exception->getCode() !== '23000') {

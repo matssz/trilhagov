@@ -22,11 +22,18 @@ Saída: configuração vigente aprovada pelo município, sem pendências de ativ
 
 ## Etapa 2 - Regras locais aplicadas ao fluxo
 
+Situação: primeira versão operacional entregue; validação com dados reais pendente.
+
 - associar automaticamente a emenda à configuração vigente do seu exercício;
 - validar quantidade, valor mínimo, teto e reserva da saúde;
 - calcular prazos de comunicação e saneamento de impedimentos;
 - levar os prazos locais para alertas e Central de Trabalho;
 - registrar qual versão normativa fundamentou cada análise e parecer.
+
+Entregue no sistema: vínculo histórico, valor mínimo, quantidade, teto por autor,
+prazos de comunicação e saneamento, alertas, Central de Trabalho e consolidação
+provisória da reserva da saúde. A validação contábil com o piloto permanece
+obrigatória antes de tratar o resultado como conferência concluída.
 
 Saída: nenhuma validação crítica depende de prazo ou percentual fixo no código.
 

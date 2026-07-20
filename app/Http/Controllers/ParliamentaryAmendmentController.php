@@ -9,6 +9,7 @@ use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\IntegrityAlertService;
+use App\Services\MunicipalRuleApplicationService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class ParliamentaryAmendmentController extends Controller
         private readonly FormSubmission $formSubmission,
         private readonly AuditTrail $auditTrail,
         private readonly IntegrityAlertService $integrityAlertService,
+        private readonly MunicipalRuleApplicationService $municipalRules,
     ) {}
 
     public function index(Request $request): View
@@ -89,9 +91,16 @@ class ParliamentaryAmendmentController extends Controller
 
         try {
             $amendment = DB::transaction(function () use ($request, $municipality): ParliamentaryAmendment {
+                $data = $request->safe()->except('_submission_token');
+                $profile = $this->municipalRules->profileFor(
+                    $municipality,
+                    (int) $data['fiscal_year'],
+                    (string) $data['government_sphere'],
+                );
                 $amendment = $municipality->amendments()->create([
-                    ...$request->safe()->except('_submission_token'),
+                    ...$data,
                     'created_by' => $request->user()->id,
+                    'municipal_regulatory_profile_id' => $profile?->id,
                 ]);
                 $this->auditTrail->recordCreation($request, $amendment);
 
@@ -124,6 +133,8 @@ class ParliamentaryAmendmentController extends Controller
                 'municipality',
                 'creator',
                 'responsibleUser',
+                'regulatoryProfile',
+                'municipalWorkPlan',
                 'documents.documentType',
                 'documents.executionStage',
                 'executionStages',
@@ -156,6 +167,7 @@ class ParliamentaryAmendmentController extends Controller
             'checklistCompleted' => $completedTypes->count(),
             'checklistTotal' => $documentTypes->count(),
             'requiredPending' => $requiredPending,
+            'normativeAssessment' => $this->municipalRules->assessment($amendment),
             'documentSubmissionToken' => $canEdit
                 ? $this->formSubmission->issue($request, "amendment-document-upload-{$amendment->id}")
                 : null,
@@ -188,6 +200,13 @@ class ParliamentaryAmendmentController extends Controller
         $amendment = $this->amendmentForUser($request, $emenda);
         DB::transaction(function () use ($request, $amendment): void {
             $amendment->fill($request->safe()->except('_submission_token'));
+            if ($amendment->municipal_regulatory_profile_id === null) {
+                $amendment->municipal_regulatory_profile_id = $this->municipalRules->profileFor(
+                    $amendment->municipality()->firstOrFail(),
+                    $amendment->fiscal_year,
+                    $amendment->government_sphere,
+                )?->id;
+            }
             $oldValues = $amendment->getOriginal();
             $amendment->save();
             $this->auditTrail->recordUpdate(
@@ -234,6 +253,10 @@ class ParliamentaryAmendmentController extends Controller
             'governmentSpheres' => ParliamentaryAmendment::governmentSpheres(),
             'authorshipTypes' => ParliamentaryAmendment::authorshipTypes(),
             'transferTypes' => ParliamentaryAmendment::transferTypes(),
+            'activeRegulatoryProfiles' => $municipality->regulatoryProfiles()
+                ->where('status', 'active')
+                ->orderByDesc('fiscal_year')
+                ->get(),
         ];
     }
 }

@@ -33,6 +33,21 @@ dependências e capacidade de validar cada entrega com usuários municipais.
 Próxima validação: preencher a configuração de um exercício com a procuradoria,
 controladoria, contabilidade e Câmara de um município piloto.
 
+## Entregue - aplicação operacional das normas municipais
+
+- Vínculo histórico da emenda e do impedimento à revisão normativa utilizada.
+- Aplicação automática no cadastro manual, planilha e inventário preexistente.
+- Validação de valor mínimo, quantidade e teto financeiro por autor.
+- Mensagens de campo com valor encontrado, limite e versão de fundamento.
+- Detecção posterior para dados importados ou legados fora dos parâmetros.
+- Prazos distintos para comunicar e sanear impedimentos.
+- Protocolo obrigatório para concluir a comunicação formal.
+- Alertas e ações de trabalho resolvidos automaticamente após a correção.
+- Consolidação provisória da reserva da saúde global ou por vereador.
+
+Próxima validação: conferir a apuração agregada da saúde com a contabilidade e o
+controle interno de um município piloto.
+
 ## Módulo 0 - Identidade municipal
 
 Situação: base concluída nesta etapa.

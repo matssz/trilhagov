@@ -8,6 +8,7 @@ use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\MunicipalRegulatoryReadiness;
+use App\Services\MunicipalRuleApplicationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -22,6 +23,7 @@ class MunicipalRegulatoryProfileController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         MunicipalRegulatoryReadiness $readiness,
+        MunicipalRuleApplicationService $municipalRules,
     ): View {
         $municipality = $currentMunicipality->get($request);
         $profiles = $municipality->regulatoryProfiles()
@@ -38,6 +40,7 @@ class MunicipalRegulatoryProfileController extends Controller
             'profiles' => $profiles,
             'profile' => $selected,
             'diagnostic' => $selected ? $readiness->evaluate($selected) : null,
+            'portfolio' => $selected ? $municipalRules->portfolioAssessment($selected) : null,
             'members' => $municipality->users()->orderBy('name')->get(),
             'canManage' => $request->user()->roleForMunicipality($municipality->id) === 'manager',
             'profileToken' => $formSubmission->issue($request, 'municipal-rules-create'),
@@ -220,10 +223,22 @@ class MunicipalRegulatoryProfileController extends Controller
                 'activated_at' => now(),
                 'updated_by' => $request->user()->id,
             ]);
+            $boundAmendments = $municipality->amendments()
+                ->where('fiscal_year', $rules->fiscal_year)
+                ->where('government_sphere', 'municipal')
+                ->whereNull('municipal_regulatory_profile_id')
+                ->update(['municipal_regulatory_profile_id' => $rules->id]);
+            $boundImpediments = $municipality->technicalImpediments()
+                ->whereNull('municipal_regulatory_profile_id')
+                ->whereHas('amendment', fn ($query) => $query
+                    ->where('municipal_regulatory_profile_id', $rules->id))
+                ->update(['municipal_regulatory_profile_id' => $rules->id]);
             $auditTrail->recordMunicipalityOperation($request, $municipality, 'municipal_rules_activated', [
                 'profile_id' => $rules->id,
                 'fiscal_year' => $rules->fiscal_year,
                 'regulatory_version' => $rules->version,
+                'amendments_bound' => $boundAmendments,
+                'impediments_bound' => $boundImpediments,
             ]);
         });
 

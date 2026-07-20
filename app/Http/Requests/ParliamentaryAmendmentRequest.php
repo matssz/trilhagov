@@ -4,8 +4,10 @@ namespace App\Http\Requests;
 
 use App\Models\ParliamentaryAmendment;
 use App\Services\CurrentMunicipality;
+use App\Services\MunicipalRuleApplicationService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ParliamentaryAmendmentRequest extends FormRequest
 {
@@ -84,6 +86,34 @@ class ParliamentaryAmendmentRequest extends FormRequest
             'accountability_completed_at.after_or_equal' => 'A conclusão da prestação de contas não pode ser anterior à data da indicação.',
             'accountability_completed_at.before_or_equal' => 'A conclusão da prestação de contas não pode estar no futuro.',
         ];
+    }
+
+    /** @return array<int, callable> */
+    public function after(): array
+    {
+        return [function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $municipality = app(CurrentMunicipality::class)->get($this);
+            $amendmentId = $this->route('emenda');
+            $current = $amendmentId
+                ? $municipality->amendments()->with('regulatoryProfile')->findOrFail($amendmentId)
+                : null;
+            $errors = app(MunicipalRuleApplicationService::class)->blockingErrors(
+                $municipality,
+                $this->only([
+                    'fiscal_year', 'government_sphere', 'authorship_type',
+                    'author_name', 'expected_amount',
+                ]),
+                $current,
+            );
+
+            foreach ($errors as $field => $message) {
+                $validator->errors()->add($field, $message);
+            }
+        }];
     }
 
     protected function prepareForValidation(): void

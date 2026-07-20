@@ -28,6 +28,7 @@ class TechnicalImpediment extends Model
     protected $fillable = [
         'municipality_id',
         'parliamentary_amendment_id',
+        'municipal_regulatory_profile_id',
         'created_by',
         'assigned_user_id',
         'evidence_document_id',
@@ -38,6 +39,9 @@ class TechnicalImpediment extends Model
         'description',
         'impact',
         'identified_at',
+        'communication_due_at',
+        'communicated_at',
+        'communication_reference',
         'resolution_due_at',
         'resolution_notes',
         'resolved_at',
@@ -47,6 +51,8 @@ class TechnicalImpediment extends Model
     {
         return [
             'identified_at' => 'date',
+            'communication_due_at' => 'date',
+            'communicated_at' => 'date',
             'resolution_due_at' => 'date',
             'resolved_at' => 'datetime',
         ];
@@ -123,6 +129,11 @@ class TechnicalImpediment extends Model
     public function amendment(): BelongsTo
     {
         return $this->belongsTo(ParliamentaryAmendment::class, 'parliamentary_amendment_id');
+    }
+
+    public function regulatoryProfile(): BelongsTo
+    {
+        return $this->belongsTo(MunicipalRegulatoryProfile::class, 'municipal_regulatory_profile_id');
     }
 
     public function assignedUser(): BelongsTo

@@ -6,6 +6,7 @@ use App\Models\TechnicalImpediment;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\MunicipalRuleApplicationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,12 +22,14 @@ class TechnicalImpedimentController extends Controller
         int $emenda,
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
+        MunicipalRuleApplicationService $municipalRules,
     ): View {
         $municipality = $currentMunicipality->get($request);
         $amendment = $municipality->amendments()
             ->with([
                 'municipality',
                 'responsibleUser',
+                'regulatoryProfile',
                 'documents.documentType',
                 'technicalImpediments.assignedUser',
                 'technicalImpediments.evidenceDocument.documentType',
@@ -68,6 +71,9 @@ class TechnicalImpedimentController extends Controller
                 'overdue' => $openImpediments->filter->isOverdue()->count() + $openDiligences->filter->isOverdue()->count(),
                 'insurmountable' => $impediments->where('nature', TechnicalImpediment::NATURE_INSURMOUNTABLE)->count(),
             ],
+            'regulatoryProfile' => $amendment->regulatoryProfile,
+            'suggestedResolutionDueAt' => $municipalRules->suggestedImpedimentDueDate($amendment, today()),
+            'suggestedCommunicationDueAt' => $municipalRules->suggestedImpedimentCommunicationDate($amendment, today()),
             'createToken' => $canEdit
                 ? $formSubmission->issue($request, "technical-impediment-create-{$amendment->id}")
                 : null,
@@ -115,10 +121,21 @@ class TechnicalImpedimentController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         AuditTrail $auditTrail,
+        MunicipalRuleApplicationService $municipalRules,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
-        $amendment = $municipality->amendments()->findOrFail($emenda);
+        $amendment = $municipality->amendments()->with('regulatoryProfile')->findOrFail($emenda);
         $validated = $request->validate($this->rules($municipality->id, $amendment->id));
+        if (blank($validated['resolution_due_at'] ?? null)) {
+            $validated['resolution_due_at'] = $municipalRules->suggestedImpedimentDueDate(
+                $amendment,
+                $validated['identified_at'],
+            );
+        }
+        $validated['communication_due_at'] = $municipalRules->suggestedImpedimentCommunicationDate(
+            $amendment,
+            $validated['identified_at'],
+        );
 
         if (! $formSubmission->consume($request, "technical-impediment-create-{$amendment->id}")) {
             return back()->with('warning', 'Este impedimento já foi registrado.');
@@ -129,6 +146,7 @@ class TechnicalImpedimentController extends Controller
                 ...$validated,
                 'municipality_id' => $municipality->id,
                 'created_by' => $request->user()->id,
+                'municipal_regulatory_profile_id' => $amendment->municipal_regulatory_profile_id,
                 'status' => TechnicalImpediment::STATUS_IDENTIFIED,
             ]);
             $auditTrail->recordOperation($request, $amendment, 'technical_impediment_created', [
@@ -136,6 +154,7 @@ class TechnicalImpedimentController extends Controller
                 'impediment_category' => $impediment->category,
                 'impediment_nature' => $impediment->nature,
                 'impediment_due_at' => $impediment->resolution_due_at,
+                'communication_due_at' => $impediment->communication_due_at,
                 'assigned_user_id' => $impediment->assigned_user_id,
             ]);
         });
@@ -160,6 +179,8 @@ class TechnicalImpedimentController extends Controller
             'status' => ['required', Rule::in(array_keys(TechnicalImpediment::statuses()))],
             'assigned_user_id' => ['nullable', 'integer', $this->municipalUserRule($municipality->id)],
             'resolution_due_at' => ['nullable', 'date', 'after_or_equal:identified_at'],
+            'communicated_at' => ['nullable', 'date', 'after_or_equal:identified_at', 'before_or_equal:today', 'required_with:communication_reference'],
+            'communication_reference' => ['nullable', 'string', 'max:180', 'required_with:communicated_at'],
             'identified_at' => ['required', 'date'],
             'resolution_notes' => ['nullable', 'string', 'max:5000'],
             'evidence_document_id' => ['nullable', 'integer', $this->documentRule($municipality->id, $amendment->id)],
@@ -196,7 +217,7 @@ class TechnicalImpedimentController extends Controller
         }
 
         DB::transaction(function () use ($request, $validated, $amendment, $impediment, $auditTrail): void {
-            $oldValues = $impediment->only(['nature', 'status', 'assigned_user_id', 'resolution_due_at', 'resolution_notes']);
+            $oldValues = $impediment->only(['nature', 'status', 'assigned_user_id', 'resolution_due_at', 'communicated_at', 'communication_reference', 'resolution_notes']);
             $terminal = in_array($validated['status'], [
                 TechnicalImpediment::STATUS_RESOLVED,
                 TechnicalImpediment::STATUS_CONFIRMED,
@@ -212,6 +233,8 @@ class TechnicalImpedimentController extends Controller
                 'impediment_status' => $impediment->status,
                 'assigned_user_id' => $impediment->assigned_user_id,
                 'impediment_due_at' => $impediment->resolution_due_at,
+                'communicated_at' => $impediment->communicated_at,
+                'communication_reference' => $impediment->communication_reference,
                 'resolution_notes' => $impediment->resolution_notes,
             ], [
                 'impediment' => $impediment->title,
@@ -219,6 +242,8 @@ class TechnicalImpedimentController extends Controller
                 'impediment_status' => $oldValues['status'],
                 'assigned_user_id' => $oldValues['assigned_user_id'],
                 'impediment_due_at' => $oldValues['resolution_due_at'],
+                'communicated_at' => $oldValues['communicated_at'],
+                'communication_reference' => $oldValues['communication_reference'],
                 'resolution_notes' => $oldValues['resolution_notes'],
             ]);
         });
