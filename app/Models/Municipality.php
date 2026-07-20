@@ -216,6 +216,11 @@ class Municipality extends Model
         return $this->hasMany(MunicipalNormativeInstrument::class);
     }
 
+    public function governanceReports(): HasMany
+    {
+        return $this->hasMany(MunicipalGovernanceReport::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

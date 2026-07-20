@@ -52,6 +52,10 @@
                             <span>Emendas</span>
                         </a>
                         @if ($activeMunicipality?->supportsTcespAudesp())
+                            <a class="sidebar-link {{ request()->routeIs('governance-reports.*') ? 'active' : '' }}" href="{{ route('governance-reports.index') }}">
+                                <i data-lucide="scroll-text" aria-hidden="true"></i>
+                                <span>Relatórios mensais</span>
+                            </a>
                             <a class="sidebar-link {{ request()->routeIs('audesp-homologations.*') ? 'active' : '' }}" href="{{ route('audesp-homologations.index') }}">
                                 <i data-lucide="package-check" aria-hidden="true"></i>
                                 <span>Homologação Audesp</span>
