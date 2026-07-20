@@ -24,6 +24,7 @@
         <a href="{{ route('emendas.work-plan', $amendment) }}">Plano de trabalho</a>
         <a href="{{ route('emendas.impediments', $amendment) }}">Impedimentos</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
+        <a href="{{ route('emendas.audesp', $amendment) }}">Audesp</a>
         <a class="active" href="{{ route('emendas.compliance', $amendment) }}" aria-current="page">Conformidade TCESP</a>
         <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>
     </nav>

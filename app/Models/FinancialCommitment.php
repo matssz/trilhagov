@@ -64,6 +64,13 @@ class FinancialCommitment extends Model
             ->orderByDesc('id');
     }
 
+    public function liquidations(): HasMany
+    {
+        return $this->hasMany(FinancialLiquidation::class)
+            ->orderByDesc('liquidated_at')
+            ->orderByDesc('id');
+    }
+
     public function paidAmount(): float
     {
         return (float) ($this->payments_sum_amount ?? $this->payments()->sum('amount'));
@@ -72,5 +79,15 @@ class FinancialCommitment extends Model
     public function remainingAmount(): float
     {
         return max(0, (float) $this->committed_amount - $this->paidAmount());
+    }
+
+    public function liquidatedAmount(): float
+    {
+        return (float) ($this->liquidations_sum_amount ?? $this->liquidations()->sum('amount'));
+    }
+
+    public function remainingToLiquidate(): float
+    {
+        return max(0, (float) $this->committed_amount - $this->liquidatedAmount());
     }
 }

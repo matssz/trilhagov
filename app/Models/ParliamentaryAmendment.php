@@ -277,6 +277,18 @@ class ParliamentaryAmendment extends Model
             ->latest('id');
     }
 
+    public function financialLiquidations(): HasMany
+    {
+        return $this->hasMany(FinancialLiquidation::class)
+            ->latest('liquidated_at')
+            ->latest('id');
+    }
+
+    public function audespRegistration(): HasOne
+    {
+        return $this->hasOne(AudespAmendmentRegistration::class);
+    }
+
     public function transparencyEvents(): HasMany
     {
         return $this->hasMany(AmendmentTransparencyEvent::class)

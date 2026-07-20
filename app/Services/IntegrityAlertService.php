@@ -19,6 +19,7 @@ class IntegrityAlertService
         private readonly AccountabilityService $accountabilityService,
         private readonly MunicipalRuleApplicationService $municipalRules,
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
+        private readonly AudespTraceabilityService $audespTraceability,
     ) {}
 
     /** @return array{created: int, updated: int, resolved: int, open: int}|null */
@@ -47,6 +48,9 @@ class IntegrityAlertService
             'amendments.documents:id,parliamentary_amendment_id,document_type_id,execution_stage_id',
             'amendments.executionStages',
             'amendments.financialCommitments.payments',
+            'amendments.financialCommitments.liquidations.payments',
+            'amendments.financialPayments',
+            'amendments.audespRegistration',
             'amendments.accountabilityProcess.requirements',
             'amendments.accountabilityProcess.diligences',
             'amendments.technicalImpediments.diligences',
@@ -74,6 +78,7 @@ class IntegrityAlertService
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
             $this->detectNormativeControls($amendment, $detections);
             $this->detectTransparencyControls($amendment, $detections);
+            $this->detectAudespControls($amendment, $detections);
         }
 
         $stats = DB::transaction(function () use ($municipality, $detections): array {
@@ -268,6 +273,28 @@ class IntegrityAlertService
             'title' => 'Publicação municipal incompleta',
             'message' => 'Complete o rol mínimo: '.implode(', ', $readiness['missing']).'.',
             'due_at' => $readiness['publication_deadline'],
+        ]);
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectAudespControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        if (! $amendment->supportsTcespCompliance()) {
+            return;
+        }
+
+        $readiness = $this->audespTraceability->evaluate($amendment);
+        if ($readiness['ready']) {
+            return;
+        }
+
+        $effectiveFrom = Carbon::create(2026, 4, 1)->startOfDay();
+        $this->addDetection($detections, $amendment, 'audesp:registration-readiness', [
+            'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+            'severity' => $effectiveFrom->isPast() ? IntegrityAlert::SEVERITY_CRITICAL : IntegrityAlert::SEVERITY_WARNING,
+            'title' => 'Cadastro Audesp com bloqueios',
+            'message' => collect($readiness['blockers'])->take(3)->join(' '),
+            'due_at' => null,
         ]);
     }
 

@@ -22,6 +22,7 @@ class MunicipalWorkItemService
         private readonly MunicipalWorkPlanService $workPlanService,
         private readonly MunicipalRuleApplicationService $municipalRules,
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
+        private readonly AudespTraceabilityService $audespTraceability,
     ) {}
 
     /** @return array{active: int, created: int, reopened: int, completed: int} */
@@ -42,6 +43,9 @@ class MunicipalWorkItemService
             'technicalImpediments.remappings',
             'executionStages',
             'financialCommitments',
+            'financialCommitments.liquidations.payments',
+            'financialPayments',
+            'audespRegistration',
             'accountabilityProcess.requirements',
             'accountabilityProcess.diligences',
             'externalCandidates.latestFinancialReconciliation',
@@ -174,6 +178,20 @@ class MunicipalWorkItemService
                     $transparency['publication_deadline']->isBefore(now())
                         ? MunicipalWorkItem::PRIORITY_CRITICAL
                         : MunicipalWorkItem::PRIORITY_HIGH,
+                    $amendment->responsible_user_id,
+                );
+            }
+
+            $audesp = $this->audespTraceability->evaluate($amendment);
+            if (! $audesp['ready']) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:audesp-readiness",
+                    'financial',
+                    'Preparar cadastro contábil Audesp',
+                    collect($audesp['blockers'])->take(2)->join(' '),
+                    route('emendas.audesp', $amendment, false),
+                    null,
+                    MunicipalWorkItem::PRIORITY_CRITICAL,
                     $amendment->responsible_user_id,
                 );
             }

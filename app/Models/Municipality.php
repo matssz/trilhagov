@@ -101,6 +101,16 @@ class Municipality extends Model
         return $this->hasMany(FinancialPayment::class);
     }
 
+    public function financialLiquidations(): HasMany
+    {
+        return $this->hasMany(FinancialLiquidation::class);
+    }
+
+    public function audespAmendmentRegistrations(): HasMany
+    {
+        return $this->hasMany(AudespAmendmentRegistration::class);
+    }
+
     public function accountabilityProcesses(): HasMany
     {
         return $this->hasMany(AccountabilityProcess::class);

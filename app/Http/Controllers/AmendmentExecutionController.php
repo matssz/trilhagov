@@ -29,13 +29,16 @@ class AmendmentExecutionController extends Controller
                 'documents.documentType',
                 'documents.executionStage',
                 'financialCommitments.executionStage',
+                'financialCommitments.liquidations.payments',
                 'financialCommitments.payments.creator',
+                'financialCommitments.payments.liquidation',
             ])
             ->findOrFail($emenda);
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
         $activeCommitments = $amendment->financialCommitments->where('status', 'active');
         $committedAmount = (float) $activeCommitments->sum('committed_amount');
         $paidAmount = (float) $activeCommitments->sum(fn ($commitment) => $commitment->payments->sum('amount'));
+        $liquidatedAmount = (float) $activeCommitments->sum(fn ($commitment) => $commitment->liquidations->sum('amount'));
         $receivedAmount = (float) ($amendment->received_amount ?? 0);
 
         return view('amendments.execution', [
@@ -53,6 +56,7 @@ class AmendmentExecutionController extends Controller
                 ->get(),
             'committedAmount' => $committedAmount,
             'paidAmount' => $paidAmount,
+            'liquidatedAmount' => $liquidatedAmount,
             'receivedAmount' => $receivedAmount,
             'availableBalance' => $receivedAmount - $paidAmount,
             'uncommittedBalance' => $receivedAmount - $committedAmount,

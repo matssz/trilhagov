@@ -62,6 +62,11 @@ class AuditLog extends Model
             'financial_commitment_created' => 'Empenho registrado',
             'financial_commitment_cancelled' => 'Empenho cancelado',
             'financial_payment_created' => 'Pagamento registrado',
+            'financial_liquidation_created' => 'Liquidação registrada',
+            'audesp_registration_created' => 'Cadastro Audesp iniciado',
+            'audesp_registration_updated' => 'Cadastro Audesp atualizado',
+            'audesp_preview_exported' => 'Prévia Audesp exportada',
+            'audesp_diagnostic_exported' => 'Diagnóstico Audesp exportado',
             'accountability_created' => 'Prestação de contas iniciada',
             'accountability_updated' => 'Prestação de contas atualizada',
             'accountability_requirement_created' => 'Item do checklist criado',
@@ -144,6 +149,16 @@ class AuditLog extends Model
             'cancellation_reason' => 'Motivo do cancelamento',
             'payment_reference' => 'Referência do pagamento',
             'payment_amount' => 'Valor pago',
+            'liquidation_reference' => 'Referência da liquidação',
+            'liquidation_amount' => 'Valor liquidado',
+            'supporting_document' => 'Documento da liquidação',
+            'audesp_schema' => 'Versão do XSD Audesp',
+            'audesp_number' => 'Número no cadastro Audesp',
+            'audesp_year' => 'Ano no cadastro Audesp',
+            'audesp_application_code' => 'Código de aplicação combinado',
+            'audesp_ready' => 'Prontidão Audesp',
+            'audesp_blockers' => 'Bloqueios Audesp',
+            'preview_count' => 'Prévias geradas',
             'execution_stage' => 'Etapa de execução',
             'accountability_status' => 'Situação da prestação',
             'accountability_due_at' => 'Prazo da prestação',
@@ -286,7 +301,7 @@ class AuditLog extends Model
             return $value ? 'Sim' : 'Não';
         }
 
-        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'returned_amount', 'planned_amount', 'remapping_amount'], true)) {
+        if (in_array($field, ['expected_amount', 'received_amount', 'committed_amount', 'payment_amount', 'liquidation_amount', 'returned_amount', 'planned_amount', 'remapping_amount'], true)) {
             return 'R$ '.number_format((float) $value, 2, ',', '.');
         }
 

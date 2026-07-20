@@ -12,6 +12,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class FinancialPaymentController extends Controller
@@ -23,11 +24,22 @@ class FinancialPaymentController extends Controller
         $commitment = $amendment->financialCommitments()->findOrFail($empenho);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
+            'financial_liquidation_id' => [
+                Rule::requiredIf($amendment->supportsTcespCompliance()),
+                'nullable',
+                'integer',
+                Rule::exists('financial_liquidations', 'id')->where(fn ($query) => $query
+                    ->where('municipality_id', $municipality->id)
+                    ->where('parliamentary_amendment_id', $amendment->id)
+                    ->where('financial_commitment_id', $commitment->id)),
+            ],
             'payment_reference' => ['required', 'string', 'max:100'],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999999.99'],
             'paid_at' => ['required', 'date', 'after_or_equal:'.$commitment->committed_at->toDateString()],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
+            'financial_liquidation_id.required' => 'Selecione a liquidação que autoriza este pagamento.',
+            'financial_liquidation_id.exists' => 'A liquidação selecionada não pertence a este empenho.',
             'paid_at.after_or_equal' => 'A data do pagamento não pode ser anterior à data do empenho.',
         ]);
 
@@ -51,16 +63,36 @@ class FinancialPaymentController extends Controller
                     ]);
                 }
 
+                $liquidation = null;
+                if (filled($validated['financial_liquidation_id'] ?? null)) {
+                    $liquidation = $locked->liquidations()->lockForUpdate()->findOrFail($validated['financial_liquidation_id']);
+                    $liquidationRemaining = (float) $liquidation->amount - (float) $liquidation->payments()->sum('amount');
+
+                    if ((float) $validated['amount'] > $liquidationRemaining + 0.00001) {
+                        throw ValidationException::withMessages([
+                            'amount' => 'O pagamento ultrapassa o saldo disponível da liquidação, que é R$ '.number_format(max(0, $liquidationRemaining), 2, ',', '.').'.',
+                        ]);
+                    }
+
+                    if ($validated['paid_at'] < $liquidation->liquidated_at->toDateString()) {
+                        throw ValidationException::withMessages([
+                            'paid_at' => 'A data do pagamento não pode ser anterior à liquidação selecionada.',
+                        ]);
+                    }
+                }
+
                 $payment = $locked->payments()->create([
                     ...$validated,
                     'municipality_id' => $municipality->id,
                     'parliamentary_amendment_id' => $amendment->id,
                     'created_by' => $request->user()->id,
+                    'financial_liquidation_id' => $liquidation?->id,
                     'payment_reference' => trim($validated['payment_reference']),
                     'notes' => filled($validated['notes'] ?? null) ? trim($validated['notes']) : null,
                 ]);
                 $auditTrail->recordOperation($request, $amendment, 'financial_payment_created', [
                     'commitment_number' => $locked->commitment_number,
+                    'liquidation_reference' => $liquidation?->liquidation_reference,
                     'payment_reference' => $payment->payment_reference,
                     'payment_amount' => $payment->amount,
                 ]);

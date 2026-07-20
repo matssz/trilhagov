@@ -104,6 +104,12 @@ class FinancialCommitmentController extends Controller
                 ]);
             }
 
+            if ($locked->liquidations()->exists()) {
+                throw ValidationException::withMessages([
+                    'cancellation_reason' => 'Não é possível cancelar um empenho que já possui liquidação. Registre a anulação no sistema contábil e preserve a evidência no TrilhaGov.',
+                ]);
+            }
+
             $locked->update([
                 'status' => FinancialCommitment::STATUS_CANCELLED,
                 'cancellation_reason' => trim($validated['cancellation_reason']),

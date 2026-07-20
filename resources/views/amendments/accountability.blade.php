@@ -33,6 +33,7 @@
         <a href="{{ route('emendas.impediments', $amendment) }}">Impedimentos</a>
         <a href="{{ route('emendas.execution', $amendment) }}">Execução</a>
         @if ($amendment->supportsTcespCompliance())
+            <a href="{{ route('emendas.audesp', $amendment) }}">Audesp</a>
             <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
         @endif
         <a class="active" href="{{ route('emendas.accountability', $amendment) }}" aria-current="page">Prestação de contas</a>

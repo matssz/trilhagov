@@ -32,6 +32,7 @@
         <a href="{{ route('emendas.impediments', $amendment) }}">Impedimentos</a>
         <a class="active" href="{{ route('emendas.execution', $amendment) }}" aria-current="page">Execução</a>
         @if ($amendment->supportsTcespCompliance())
+            <a href="{{ route('emendas.audesp', $amendment) }}">Audesp</a>
             <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
         @endif
         <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>
@@ -219,7 +220,7 @@
 
     <section class="content-panel mb-4" id="commitments">
         <div class="content-panel-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-            <div class="d-flex align-items-center gap-2"><i data-lucide="briefcase-business" aria-hidden="true"></i><h2 class="h5 mb-0">Empenhos e pagamentos</h2></div>
+            <div class="d-flex align-items-center gap-2"><i data-lucide="briefcase-business" aria-hidden="true"></i><h2 class="h5 mb-0">Empenhos, liquidações e pagamentos</h2></div>
             @if ($canEdit)
                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#newCommitmentForm" aria-expanded="false" aria-controls="newCommitmentForm"><i data-lucide="plus" aria-hidden="true"></i>Novo empenho</button>
             @endif
@@ -249,6 +250,7 @@
         <div class="commitment-list">
             @forelse ($amendment->financialCommitments as $commitment)
                 @php($commitmentPaid = (float) $commitment->payments->sum('amount'))
+                @php($commitmentLiquidated = (float) $commitment->liquidations->sum('amount'))
                 @php($commitmentRemaining = max(0, (float) $commitment->committed_amount - $commitmentPaid))
                 <article class="commitment-row {{ $commitment->status === 'cancelled' ? 'is-cancelled' : '' }}">
                     <div class="commitment-summary">
@@ -257,7 +259,7 @@
                             <p class="mb-1">{{ $commitment->supplier_name }}{{ $commitment->supplier_document ? ' · '.$commitment->supplier_document : '' }}</p>
                             <small>Processo {{ $commitment->procurement_process }} · {{ $commitment->committed_at->format('d/m/Y') }}{{ $commitment->executionStage ? ' · '.$commitment->executionStage->title : '' }}</small>
                         </div>
-                        <div class="commitment-values"><span><small>Empenhado</small><strong>R$ {{ number_format($commitment->committed_amount, 2, ',', '.') }}</strong></span><span><small>Pago</small><strong>R$ {{ number_format($commitmentPaid, 2, ',', '.') }}</strong></span><span><small>Saldo</small><strong>R$ {{ number_format($commitmentRemaining, 2, ',', '.') }}</strong></span></div>
+                        <div class="commitment-values"><span><small>Empenhado</small><strong>R$ {{ number_format($commitment->committed_amount, 2, ',', '.') }}</strong></span><span><small>Liquidado</small><strong>R$ {{ number_format($commitmentLiquidated, 2, ',', '.') }}</strong></span><span><small>Pago</small><strong>R$ {{ number_format($commitmentPaid, 2, ',', '.') }}</strong></span></div>
                     </div>
                     <details class="commitment-details">
                         <summary><span>Ver movimentações e objeto</span><i data-lucide="chevron-down" aria-hidden="true"></i></summary>
@@ -273,19 +275,25 @@
                                 <p class="small text-secondary">Nenhum pagamento registrado.</p>
                             @endif
 
-                            @if ($canEdit && $commitment->status === 'active' && $commitmentRemaining > 0)
+                            @php($availableLiquidations = $commitment->liquidations->filter(fn ($liquidation) => $liquidation->availableAmount() > 0))
+                            @if ($canEdit && $commitment->status === 'active' && $commitmentRemaining > 0 && (! $amendment->supportsTcespCompliance() || $availableLiquidations->isNotEmpty()))
                                 <form class="payment-form" method="POST" action="{{ route('emendas.payments.store', [$amendment, $commitment]) }}" novalidate>
                                     @csrf
                                     <input name="_submission_token" type="hidden" value="{{ $paymentCreateTokens->get($commitment->id) }}">
+                                    @if ($amendment->supportsTcespCompliance())
+                                        <div><label class="form-label" for="payment_liquidation_{{ $commitment->id }}">Liquidação <span class="required-mark">*</span></label><select class="form-select" id="payment_liquidation_{{ $commitment->id }}" name="financial_liquidation_id" required><option value="">Selecione</option>@foreach ($availableLiquidations as $liquidation)<option value="{{ $liquidation->id }}">{{ $liquidation->liquidation_reference }} · saldo R$ {{ number_format($liquidation->availableAmount(), 2, ',', '.') }}</option>@endforeach</select></div>
+                                    @endif
                                     <div><label class="form-label" for="payment_reference_{{ $commitment->id }}">Referência <span class="required-mark">*</span></label><input class="form-control" id="payment_reference_{{ $commitment->id }}" name="payment_reference" required></div>
                                     <div><label class="form-label" for="payment_amount_{{ $commitment->id }}">Valor <span class="required-mark">*</span></label><input class="form-control" id="payment_amount_{{ $commitment->id }}" name="amount" type="number" min="0.01" max="{{ $commitmentRemaining }}" step="0.01" required></div>
                                     <div><label class="form-label" for="paid_at_{{ $commitment->id }}">Data <span class="required-mark">*</span></label><input class="form-control" id="paid_at_{{ $commitment->id }}" name="paid_at" type="date" min="{{ $commitment->committed_at->toDateString() }}" required></div>
                                     <div><label class="form-label" for="payment_notes_{{ $commitment->id }}">Observação</label><input class="form-control" id="payment_notes_{{ $commitment->id }}" name="notes" maxlength="500"></div>
                                     <button class="btn btn-primary payment-submit" type="submit"><i data-lucide="receipt-text" aria-hidden="true"></i>Registrar pagamento</button>
                                 </form>
+                            @elseif ($canEdit && $amendment->supportsTcespCompliance() && $commitment->status === 'active' && $commitmentRemaining > 0)
+                                <div class="checklist-warning mt-3"><i data-lucide="triangle-alert" aria-hidden="true"></i><span>Registre uma liquidação na aba <a href="{{ route('emendas.audesp', $amendment) }}#cadeia-contabil">Audesp</a> antes do pagamento.</span></div>
                             @endif
 
-                            @if ($canEdit && $commitment->status === 'active' && $commitment->payments->isEmpty())
+                            @if ($canEdit && $commitment->status === 'active' && $commitment->payments->isEmpty() && $commitment->liquidations->isEmpty())
                                 <details class="cancel-commitment mt-3"><summary>Cancelar empenho</summary><form class="d-flex flex-column flex-md-row align-items-md-end gap-2 mt-2" method="POST" action="{{ route('emendas.commitments.cancel', [$amendment, $commitment]) }}">@csrf @method('PATCH')<input name="_submission_token" type="hidden" value="{{ $commitmentCancelTokens->get($commitment->id) }}"><div class="flex-grow-1"><label class="form-label" for="cancellation_reason_{{ $commitment->id }}">Motivo <span class="required-mark">*</span></label><input class="form-control" id="cancellation_reason_{{ $commitment->id }}" name="cancellation_reason" maxlength="1000" required></div><button class="btn btn-outline-danger" type="submit"><i data-lucide="circle-x" aria-hidden="true"></i>Confirmar cancelamento</button></form></details>
                             @endif
                         </div>

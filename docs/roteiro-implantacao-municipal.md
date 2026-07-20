@@ -57,12 +57,24 @@ Saída: checklist de transparência aprovado por controle interno e procuradoria
 
 ## Etapa 4 - Audesp e contabilidade para municípios paulistas
 
+Situação: preparação técnica entregue; homologação com dados reais, contador e
+fornecedor do Siafic pendente.
+
 - obter o XSD e comunicados vigentes diretamente do TCESP;
 - mapear identificadores, contas, fonte de recurso e códigos de aplicação;
 - importar arquivo de teste sem alterar a contabilidade municipal;
 - validar a regra 47.4.63 e divergências antes da remessa mensal;
 - gerar prévia, relatório de erros e pacote auditável;
 - homologar com contador e fornecedor do Siafic do município piloto.
+
+Entregue no sistema: campos e limites do XSD `2026_A`, tabela oficial de funções e
+subfunções, código de aplicação combinado, diagnóstico da regra `47.4.63`, controle
+da reclassificação de saldos anteriores, liquidação imutável anterior ao pagamento,
+alertas, ações operacionais e prévia XML marcada como interna e não transmissível.
+
+Pendente: mapear o descritor e as operações do arquivo completo produzido pelo
+Siafic, importar o retorno do ambiente Audesp, preservar recibos e homologar um
+balancete real sem permitir que o TrilhaGov altere a contabilidade municipal.
 
 Saída: arquivo de homologação aceito e procedimento operacional documentado.
 

@@ -11,6 +11,7 @@ class FinancialPayment extends Model
     protected $fillable = [
         'municipality_id',
         'parliamentary_amendment_id',
+        'financial_liquidation_id',
         'created_by',
         'payment_reference',
         'amount',
@@ -45,6 +46,11 @@ class FinancialPayment extends Model
     public function commitment(): BelongsTo
     {
         return $this->belongsTo(FinancialCommitment::class, 'financial_commitment_id');
+    }
+
+    public function liquidation(): BelongsTo
+    {
+        return $this->belongsTo(FinancialLiquidation::class, 'financial_liquidation_id');
     }
 
     public function creator(): BelongsTo
