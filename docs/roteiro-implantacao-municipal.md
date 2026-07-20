@@ -39,12 +39,19 @@ Saída: nenhuma validação crítica depende de prazo ou percentual fixo no cód
 
 ## Etapa 3 - Transparência municipal completa
 
+Situação: primeira versão técnica entregue; validação jurídica, contábil e de campo
+com Município piloto pendente.
+
 - completar os campos públicos exigidos pelo ato do Tribunal competente;
 - publicar valores autorizado, liberado e executado separadamente;
 - exibir conta ou identificador de rastreabilidade conforme a regra aplicável;
 - publicar instrumento, processo, cronograma e prazo de aplicação;
 - registrar mudanças, cancelamentos e data da última atualização;
 - incluir pesquisa, filtros e exportação acessível.
+
+Entregue no sistema: cadastro obrigatório, exceção bancária controlada, cronograma,
+histórico público imutável, página por emenda, CSV aberto, alertas de completude e
+ações automáticas na Central de Trabalho.
 
 Saída: checklist de transparência aprovado por controle interno e procuradoria.
 

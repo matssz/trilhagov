@@ -62,7 +62,7 @@
                 <tbody>
                     @forelse ($analytics['amendments'] as $amendment)
                         <tr>
-                            <td data-label="Emenda"><strong>{{ $amendment->reference }}</strong><small>{{ $amendment->fiscal_year }} · {{ $amendment->governmentSphereLabel() }}</small><small>{{ $amendment->author_name }}</small></td>
+                            <td data-label="Emenda"><a class="public-amendment-link" href="{{ route('transparency.detail', [$routeMunicipality, $amendment]) }}"><strong>{{ $amendment->reference }}</strong><i data-lucide="arrow-up-right" aria-hidden="true"></i></a><small>{{ $amendment->fiscal_year }} · {{ $amendment->governmentSphereLabel() }}</small><small>{{ $amendment->author_name }}</small></td>
                             <td data-label="Objeto"><span class="public-object">{{ $amendment->object }}</span><small>{{ $amendment->responsible_department }}</small></td>
                             <td data-label="Situação"><x-amendment-status-badge :status="$amendment->status" :label="$amendment->statusLabel()" /></td>
                             <td data-label="Execução"><div class="public-progress"><span><strong>{{ $amendment->physicalExecutionPercentage() }}%</strong> físico</span><div class="progress"><div class="progress-bar" style="width: {{ $amendment->physicalExecutionPercentage() }}%"></div></div></div></td>

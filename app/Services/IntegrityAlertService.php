@@ -18,6 +18,7 @@ class IntegrityAlertService
     public function __construct(
         private readonly AccountabilityService $accountabilityService,
         private readonly MunicipalRuleApplicationService $municipalRules,
+        private readonly MunicipalTransparencyReadiness $transparencyReadiness,
     ) {}
 
     /** @return array{created: int, updated: int, resolved: int, open: int}|null */
@@ -51,7 +52,8 @@ class IntegrityAlertService
             'amendments.technicalImpediments.diligences',
             'amendments.technicalImpediments.remappings',
             'amendments.regulatoryProfile',
-            'amendments.municipalWorkPlan',
+            'amendments.municipalWorkPlan.stages',
+            'amendments.transparencyEvents',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -71,6 +73,7 @@ class IntegrityAlertService
             $this->detectTechnicalImpedimentControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
             $this->detectNormativeControls($amendment, $detections);
+            $this->detectTransparencyControls($amendment, $detections);
         }
 
         $stats = DB::transaction(function () use ($municipality, $detections): array {
@@ -244,6 +247,28 @@ class IntegrityAlertService
                 'due_at' => null,
             ]);
         }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectTransparencyControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        if (! $amendment->supportsTcespCompliance()) {
+            return;
+        }
+
+        $readiness = $this->transparencyReadiness->evaluate($amendment);
+        if ($readiness['complete']) {
+            return;
+        }
+
+        $overdue = $readiness['publication_deadline']->isBefore(now());
+        $this->addDetection($detections, $amendment, 'transparency:minimum-list', [
+            'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+            'severity' => $overdue ? IntegrityAlert::SEVERITY_CRITICAL : IntegrityAlert::SEVERITY_WARNING,
+            'title' => 'Publicação municipal incompleta',
+            'message' => 'Complete o rol mínimo: '.implode(', ', $readiness['missing']).'.',
+            'due_at' => $readiness['publication_deadline'],
+        ]);
     }
 
     /** @param array<int, array<string, mixed>> $detections */

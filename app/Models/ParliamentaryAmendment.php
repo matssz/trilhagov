@@ -35,6 +35,8 @@ class ParliamentaryAmendment extends Model
 
     public const STATUS_BLOCKED = 'blocked';
 
+    public const STATUS_CANCELLED = 'cancelled';
+
     public const RISK_LOW = 'low';
 
     public const RISK_MODERATE = 'moderate';
@@ -56,17 +58,29 @@ class ParliamentaryAmendment extends Model
         'author_name',
         'author_party',
         'object',
+        'expense_destination',
         'responsible_department',
+        'beneficiary_location',
         'responsible_user_id',
         'transferegov_code',
+        'legal_instrument',
+        'administrative_process',
+        'bank_tracking_type',
+        'bank_account_number',
+        'funding_source_code',
+        'application_code_fixed',
+        'application_code_variable',
         'expected_amount',
         'received_amount',
         'status',
+        'cancellation_reason',
+        'cancelled_at',
         'indicated_at',
         'received_at',
         'communication_deadline',
         'communication_completed_at',
         'execution_deadline',
+        'application_deadline',
         'execution_completed_at',
         'accountability_deadline',
         'accountability_completed_at',
@@ -84,6 +98,8 @@ class ParliamentaryAmendment extends Model
             'communication_deadline' => 'date',
             'communication_completed_at' => 'date',
             'execution_deadline' => 'date',
+            'application_deadline' => 'date',
+            'cancelled_at' => 'datetime',
             'execution_completed_at' => 'date',
             'accountability_deadline' => 'date',
             'accountability_completed_at' => 'date',
@@ -106,7 +122,33 @@ class ParliamentaryAmendment extends Model
             self::STATUS_ACCOUNTABILITY_PENDING => 'Prestação de contas pendente',
             self::STATUS_COMPLETED => 'Concluída',
             self::STATUS_BLOCKED => 'Com impedimento',
+            self::STATUS_CANCELLED => 'Cancelada',
         ];
+    }
+
+    /** @return array<string, string> */
+    public static function expenseDestinations(): array
+    {
+        return ['cost' => 'Custeio', 'investment' => 'Investimento'];
+    }
+
+    /** @return array<string, string> */
+    public static function bankTrackingTypes(): array
+    {
+        return [
+            'specific_account' => 'Conta bancária específica',
+            'municipal_direct_codes' => 'Execução direta com rastreabilidade contábil',
+        ];
+    }
+
+    public function expenseDestinationLabel(): string
+    {
+        return self::expenseDestinations()[$this->expense_destination] ?? 'Não informado';
+    }
+
+    public function bankTrackingTypeLabel(): string
+    {
+        return self::bankTrackingTypes()[$this->bank_tracking_type] ?? 'Não informado';
     }
 
     /** @return array<string, string> */
@@ -232,6 +274,13 @@ class ParliamentaryAmendment extends Model
     {
         return $this->hasMany(FinancialPayment::class)
             ->latest('paid_at')
+            ->latest('id');
+    }
+
+    public function transparencyEvents(): HasMany
+    {
+        return $this->hasMany(AmendmentTransparencyEvent::class)
+            ->latest('occurred_at')
             ->latest('id');
     }
 

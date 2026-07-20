@@ -7,6 +7,7 @@ use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\IntegrityAlertService;
+use App\Services\MunicipalTransparencyTrail;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class FinancialPaymentController extends Controller
 {
-    public function store(Request $request, int $emenda, int $empenho, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, IntegrityAlertService $integrityAlertService): RedirectResponse
+    public function store(Request $request, int $emenda, int $empenho, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, IntegrityAlertService $integrityAlertService, MunicipalTransparencyTrail $transparencyTrail): RedirectResponse
     {
         $municipality = $currentMunicipality->get($request);
         $amendment = $municipality->amendments()->findOrFail($emenda);
@@ -35,7 +36,7 @@ class FinancialPaymentController extends Controller
         }
 
         try {
-            $payment = DB::transaction(function () use ($request, $validated, $municipality, $amendment, $commitment, $auditTrail) {
+            $payment = DB::transaction(function () use ($request, $validated, $municipality, $amendment, $commitment, $auditTrail, $transparencyTrail) {
                 $locked = FinancialCommitment::query()->lockForUpdate()->findOrFail($commitment->id);
 
                 if ($locked->status !== FinancialCommitment::STATUS_ACTIVE) {
@@ -63,6 +64,7 @@ class FinancialPaymentController extends Controller
                     'payment_reference' => $payment->payment_reference,
                     'payment_amount' => $payment->amount,
                 ]);
+                $transparencyTrail->recordPayment($amendment, $payment->payment_reference, $payment->amount, $payment->paid_at);
 
                 return $payment;
             });

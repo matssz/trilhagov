@@ -7,13 +7,14 @@ use App\Models\ParliamentaryAmendment;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\MunicipalTransparencyTrail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MunicipalWorkPlanStageController extends Controller
 {
-    public function store(Request $request, int $emenda, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail): RedirectResponse
+    public function store(Request $request, int $emenda, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, MunicipalTransparencyTrail $transparencyTrail): RedirectResponse
     {
         [$amendment, $plan] = $this->context($request, $emenda, $currentMunicipality);
         $validated = $request->validate($this->rules());
@@ -22,7 +23,7 @@ class MunicipalWorkPlanStageController extends Controller
             return back()->with('warning', 'A inclusão desta etapa já foi processada.');
         }
 
-        DB::transaction(function () use ($request, $amendment, $plan, $validated, $auditTrail): void {
+        DB::transaction(function () use ($request, $amendment, $plan, $validated, $auditTrail, $transparencyTrail): void {
             $stage = $plan->stages()->create([
                 ...$validated,
                 'municipality_id' => $amendment->municipality_id,
@@ -33,12 +34,13 @@ class MunicipalWorkPlanStageController extends Controller
                 'work_plan_stage' => $stage->title,
                 'planned_amount' => $stage->planned_amount,
             ]);
+            $transparencyTrail->recordSchedule($amendment, 'created', $stage);
         });
 
         return back()->with('status', 'Etapa adicionada ao cronograma.');
     }
 
-    public function update(Request $request, int $emenda, int $etapa, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail): RedirectResponse
+    public function update(Request $request, int $emenda, int $etapa, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, MunicipalTransparencyTrail $transparencyTrail): RedirectResponse
     {
         [$amendment, $plan] = $this->context($request, $emenda, $currentMunicipality);
         $stage = $plan->stages()->findOrFail($etapa);
@@ -48,7 +50,7 @@ class MunicipalWorkPlanStageController extends Controller
             return back()->with('warning', 'A alteração desta etapa já foi processada.');
         }
 
-        DB::transaction(function () use ($request, $amendment, $stage, $validated, $auditTrail): void {
+        DB::transaction(function () use ($request, $amendment, $stage, $validated, $auditTrail, $transparencyTrail): void {
             $oldValues = $stage->only(array_keys($validated));
             $stage->update($validated);
             $auditTrail->recordOperation($request, $amendment, 'municipal_work_plan_stage_updated', [
@@ -58,12 +60,13 @@ class MunicipalWorkPlanStageController extends Controller
                 'work_plan_stage' => $oldValues['title'],
                 'planned_amount' => $oldValues['planned_amount'],
             ]);
+            $transparencyTrail->recordSchedule($amendment, 'updated', $stage);
         });
 
         return back()->with('status', 'Etapa atualizada.');
     }
 
-    public function destroy(Request $request, int $emenda, int $etapa, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail): RedirectResponse
+    public function destroy(Request $request, int $emenda, int $etapa, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, MunicipalTransparencyTrail $transparencyTrail): RedirectResponse
     {
         [$amendment, $plan] = $this->context($request, $emenda, $currentMunicipality);
         $stage = $plan->stages()->findOrFail($etapa);
@@ -73,11 +76,12 @@ class MunicipalWorkPlanStageController extends Controller
             return back()->with('warning', 'A remoção desta etapa já foi processada.');
         }
 
-        DB::transaction(function () use ($request, $amendment, $stage, $auditTrail): void {
+        DB::transaction(function () use ($request, $amendment, $stage, $auditTrail, $transparencyTrail): void {
             $auditTrail->recordOperation($request, $amendment, 'municipal_work_plan_stage_deleted', [
                 'work_plan_stage' => $stage->title,
                 'planned_amount' => $stage->planned_amount,
             ]);
+            $transparencyTrail->recordSchedule($amendment, 'deleted', $stage);
             $stage->delete();
         });
 

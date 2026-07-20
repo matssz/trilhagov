@@ -31,16 +31,28 @@ class AmendmentSpreadsheetImportService
         'author_name' => 'Autor',
         'author_party' => 'Partido',
         'object' => 'Objeto',
+        'expense_destination' => 'Destinacao (custeio ou investimento)',
         'responsible_department' => 'Secretaria responsavel',
+        'beneficiary_location' => 'Municipio ou localidade beneficiada',
         'transferegov_code' => 'Codigo Transferegov',
+        'legal_instrument' => 'Instrumento juridico',
+        'administrative_process' => 'Processo administrativo',
+        'bank_tracking_type' => 'Rastreabilidade bancaria',
+        'bank_account_number' => 'Numero da conta bancaria',
+        'funding_source_code' => 'Fonte de Recursos',
+        'application_code_fixed' => 'Codigo de Aplicacao Fixo',
+        'application_code_variable' => 'Codigo de Aplicacao Variavel',
         'expected_amount' => 'Valor previsto',
         'received_amount' => 'Valor recebido',
         'status' => 'Situacao',
+        'cancellation_reason' => 'Motivo do cancelamento',
+        'cancelled_at' => 'Data do cancelamento',
         'indicated_at' => 'Data da indicacao',
         'received_at' => 'Data do recebimento',
         'communication_deadline' => 'Prazo de comunicacao',
         'communication_completed_at' => 'Comunicacao concluida em',
         'execution_deadline' => 'Prazo de execucao',
+        'application_deadline' => 'Prazo de aplicacao dos recursos',
         'execution_completed_at' => 'Execucao concluida em',
         'accountability_deadline' => 'Prazo de prestacao de contas',
         'accountability_completed_at' => 'Prestacao de contas concluida em',
@@ -70,6 +82,7 @@ class AmendmentSpreadsheetImportService
         private readonly IntegrityAlertService $integrityAlertService,
         private readonly MunicipalWorkItemService $workItemService,
         private readonly MunicipalRuleApplicationService $municipalRules,
+        private readonly MunicipalTransparencyTrail $transparencyTrail,
     ) {}
 
     public function createPreview(Municipality $municipality, User $user, UploadedFile $file): AmendmentImportBatch
@@ -219,6 +232,7 @@ class AmendmentSpreadsheetImportService
                     continue;
                 }
                 $this->auditTrail->recordCreation($request, $amendment);
+                $this->transparencyTrail->recordCreation($amendment);
                 $row->update([
                     'status' => AmendmentImportRow::STATUS_IMPORTED,
                     'parliamentary_amendment_id' => $amendment->id,
@@ -268,10 +282,11 @@ class AmendmentSpreadsheetImportService
         fwrite($stream, "\xEF\xBB\xBF");
         fputcsv($stream, array_values(self::TEMPLATE_HEADERS), ';');
         fputcsv($stream, [
-            'EM-2026-001', '2026', 'Federal', 'Individual', 'Transferencia especial',
-            'Deputada Maria Silva', 'PSD', 'Reforma da unidade basica de saude',
-            'Secretaria Municipal de Saude', '123456', 'R$ 500.000,00', '',
-            'Identificada', '15/03/2026', '', '30/04/2026', '', '31/12/2026', '',
+            'EM-2026-001', '2026', 'Municipal', 'Individual', 'Execucao direta pelo municipio',
+            'Vereadora Maria Silva', 'PSD', 'Reforma da unidade basica de saude', 'Investimento',
+            'Secretaria Municipal de Saude', 'Municipio de Exemplo', '', '', 'PROC-001/2026',
+            'Execucao direta com codigos', '', '08', '100.0000', '001', 'R$ 500.000,00', '',
+            'Identificada', '', '', '15/03/2026', '', '30/04/2026', '', '31/12/2026', '31/12/2026', '',
             '31/03/2027', '', 'Exemplo: substitua esta linha pelos dados do municipio.',
         ], ';');
         rewind($stream);
@@ -364,16 +379,28 @@ class AmendmentSpreadsheetImportService
             'author_name' => ['autor', 'autoria', 'parlamentar'],
             'author_party' => ['partido', 'sigla_partidaria'],
             'object' => ['objeto', 'finalidade'],
+            'expense_destination' => ['destinacao_custeio_ou_investimento', 'destinacao', 'tipo_de_despesa'],
             'responsible_department' => ['secretaria_responsavel', 'orgao_responsavel', 'setor_responsavel'],
+            'beneficiary_location' => ['municipio_ou_localidade_beneficiada', 'localidade_beneficiada'],
             'transferegov_code' => ['codigo_transferegov', 'transferegov', 'codigo_do_plano'],
+            'legal_instrument' => ['instrumento_juridico'],
+            'administrative_process' => ['processo_administrativo', 'numero_do_processo'],
+            'bank_tracking_type' => ['rastreabilidade_bancaria', 'forma_de_rastreabilidade'],
+            'bank_account_number' => ['numero_da_conta_bancaria', 'conta_bancaria'],
+            'funding_source_code' => ['fonte_de_recursos', 'fonte_de_recurso'],
+            'application_code_fixed' => ['codigo_de_aplicacao_fixo'],
+            'application_code_variable' => ['codigo_de_aplicacao_variavel'],
             'expected_amount' => ['valor_previsto', 'valor_da_emenda', 'valor_indicado'],
             'received_amount' => ['valor_recebido', 'valor_transferido'],
             'status' => ['situacao', 'status'],
+            'cancellation_reason' => ['motivo_do_cancelamento'],
+            'cancelled_at' => ['data_do_cancelamento'],
             'indicated_at' => ['data_da_indicacao', 'data_indicacao'],
             'received_at' => ['data_do_recebimento', 'data_recebimento'],
             'communication_deadline' => ['prazo_de_comunicacao', 'prazo_comunicacao'],
             'communication_completed_at' => ['comunicacao_concluida_em', 'data_conclusao_comunicacao'],
             'execution_deadline' => ['prazo_de_execucao', 'prazo_execucao'],
+            'application_deadline' => ['prazo_de_aplicacao_dos_recursos', 'prazo_de_aplicacao'],
             'execution_completed_at' => ['execucao_concluida_em', 'data_conclusao_execucao'],
             'accountability_deadline' => ['prazo_de_prestacao_de_contas', 'prazo_prestacao_de_contas'],
             'accountability_completed_at' => ['prestacao_de_contas_concluida_em', 'data_conclusao_prestacao_de_contas'],
@@ -395,7 +422,11 @@ class AmendmentSpreadsheetImportService
         $nullableFields = [
             'author_party', 'transferegov_code', 'received_amount', 'received_at',
             'communication_completed_at', 'execution_completed_at',
-            'accountability_completed_at', 'notes',
+            'accountability_completed_at', 'notes', 'expense_destination',
+            'beneficiary_location', 'legal_instrument', 'administrative_process',
+            'bank_tracking_type', 'bank_account_number', 'funding_source_code',
+            'application_code_fixed', 'application_code_variable', 'application_deadline',
+            'cancellation_reason', 'cancelled_at',
         ];
         $normalized = [];
         foreach (array_keys(self::TEMPLATE_HEADERS) as $field) {
@@ -425,6 +456,14 @@ class AmendmentSpreadsheetImportService
             'fund_to_fund' => ['fundo_a_fundo'],
             'other' => ['outra', 'outra_modalidade', 'outro'],
         ]);
+        $normalized['expense_destination'] = $this->enumValue((string) $normalized['expense_destination'], [
+            'cost' => ['custeio', 'despesa_corrente'],
+            'investment' => ['investimento', 'despesa_de_capital'],
+        ]);
+        $normalized['bank_tracking_type'] = $this->enumValue((string) $normalized['bank_tracking_type'], [
+            'specific_account' => ['conta_especifica', 'conta_bancaria_especifica'],
+            'municipal_direct_codes' => ['execucao_direta_com_codigos', 'rastreabilidade_contabil'],
+        ]);
         $normalized['status'] = $this->enumValue((string) $normalized['status'], [
             ParliamentaryAmendment::STATUS_IDENTIFIED => ['identificada', 'identificado'],
             ParliamentaryAmendment::STATUS_PLAN_PENDING => ['plano_de_trabalho_pendente'],
@@ -435,6 +474,7 @@ class AmendmentSpreadsheetImportService
             ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING => ['prestacao_de_contas_pendente'],
             ParliamentaryAmendment::STATUS_COMPLETED => ['concluida', 'concluido'],
             ParliamentaryAmendment::STATUS_BLOCKED => ['com_impedimento', 'impedida', 'bloqueada'],
+            ParliamentaryAmendment::STATUS_CANCELLED => ['cancelada', 'cancelado'],
         ]);
 
         foreach (['expected_amount', 'received_amount'] as $field) {
@@ -444,6 +484,7 @@ class AmendmentSpreadsheetImportService
             'indicated_at', 'received_at', 'communication_deadline', 'communication_completed_at',
             'execution_deadline', 'execution_completed_at', 'accountability_deadline',
             'accountability_completed_at',
+            'application_deadline', 'cancelled_at',
         ] as $field) {
             $normalized[$field] = $this->date($normalized[$field]);
         }
@@ -463,21 +504,42 @@ class AmendmentSpreadsheetImportService
             'author_name' => ['required', 'string', 'max:255'],
             'author_party' => ['nullable', 'required_if:authorship_type,individual', 'string', 'max:20'],
             'object' => ['required', 'string', 'max:5000'],
+            'expense_destination' => ['nullable', 'required_if:government_sphere,municipal', Rule::in(array_keys(ParliamentaryAmendment::expenseDestinations()))],
             'responsible_department' => ['required', 'string', 'max:255'],
+            'beneficiary_location' => ['nullable', 'required_if:government_sphere,municipal', 'string', 'max:255'],
             'transferegov_code' => ['nullable', 'required_if:government_sphere,federal', 'string', 'max:100'],
+            'legal_instrument' => ['nullable', 'string', 'max:255'],
+            'administrative_process' => ['nullable', 'required_if:government_sphere,municipal', 'string', 'max:255'],
+            'bank_tracking_type' => ['nullable', 'required_if:government_sphere,municipal', Rule::in(array_keys(ParliamentaryAmendment::bankTrackingTypes()))],
+            'bank_account_number' => ['nullable', 'required_if:bank_tracking_type,specific_account', 'string', 'max:100'],
+            'funding_source_code' => ['nullable', 'required_if:bank_tracking_type,municipal_direct_codes', 'string', 'max:100'],
+            'application_code_fixed' => ['nullable', 'required_if:bank_tracking_type,municipal_direct_codes', 'string', 'max:100'],
+            'application_code_variable' => ['nullable', 'required_if:bank_tracking_type,municipal_direct_codes', 'string', 'max:100'],
             'expected_amount' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
             'received_amount' => ['nullable', 'required_if:status,resource_received,executing,accountability_pending,completed', 'numeric', 'min:0', 'max:9999999999999.99', 'lte:expected_amount'],
             'status' => ['required', Rule::in(array_keys(ParliamentaryAmendment::statuses()))],
+            'cancellation_reason' => ['nullable', 'required_if:status,cancelled', 'string', 'max:3000'],
+            'cancelled_at' => ['nullable', 'required_if:status,cancelled', 'date', 'after_or_equal:indicated_at', 'before_or_equal:today'],
             'indicated_at' => ['required', 'date', 'before_or_equal:today'],
             'received_at' => ['nullable', 'required_if:status,resource_received,executing,accountability_pending,completed', 'date', 'after_or_equal:indicated_at', 'before_or_equal:today'],
             'communication_deadline' => ['required', 'date', 'after_or_equal:indicated_at'],
             'communication_completed_at' => ['nullable', 'required_if:status,completed', 'date', 'after_or_equal:indicated_at', 'before_or_equal:today'],
             'execution_deadline' => ['required', 'date', 'after_or_equal:communication_deadline'],
+            'application_deadline' => ['nullable', 'required_if:government_sphere,municipal', 'date', 'after_or_equal:indicated_at'],
             'execution_completed_at' => ['nullable', 'required_if:status,completed', 'date', 'after_or_equal:indicated_at', 'before_or_equal:today'],
             'accountability_deadline' => ['required', 'date', 'after_or_equal:execution_deadline'],
             'accountability_completed_at' => ['nullable', 'required_if:status,completed', 'date', 'after_or_equal:indicated_at', 'before_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:10000'],
         ], [
+            'expense_destination.required_if' => 'Informe se a destinação municipal é custeio ou investimento.',
+            'beneficiary_location.required_if' => 'Informe o município ou a localidade beneficiada.',
+            'administrative_process.required_if' => 'Informe o processo administrativo municipal.',
+            'bank_tracking_type.required_if' => 'Informe como os recursos serão rastreados.',
+            'bank_account_number.required_if' => 'Informe a conta bancária específica.',
+            'funding_source_code.required_if' => 'Informe a Fonte de Recursos da execução direta.',
+            'application_code_fixed.required_if' => 'Informe o Código de Aplicação Fixo.',
+            'application_code_variable.required_if' => 'Informe o Código de Aplicação Variável.',
+            'application_deadline.required_if' => 'Informe o prazo para aplicação dos recursos.',
             'author_party.required_if' => 'Informe o partido quando a autoria for individual.',
             'transferegov_code.required_if' => 'Informe o código Transferegov para emendas federais.',
             'received_amount.required_if' => 'Informe o valor recebido para a situação selecionada.',
@@ -503,7 +565,13 @@ class AmendmentSpreadsheetImportService
             'accountability_deadline' => 'prazo de prestação de contas',
         ]);
 
-        return array_values(array_unique($validator->errors()->all()));
+        $errors = $validator->errors()->all();
+        if ($data['bank_tracking_type'] === 'municipal_direct_codes'
+            && $data['transfer_type'] !== 'direct_execution') {
+            $errors[] = 'A dispensa de conta individualizada só pode ser usada na execução direta pela Prefeitura.';
+        }
+
+        return array_values(array_unique($errors));
     }
 
     /** @param array<string, array<int, string>> $map */

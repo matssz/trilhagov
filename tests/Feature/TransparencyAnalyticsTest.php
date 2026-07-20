@@ -2,13 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Models\AmendmentTransparencyEvent;
 use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
+use App\Services\IntegrityAlertService;
+use App\Services\MunicipalTransparencyTrail;
+use App\Services\MunicipalWorkItemService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use LogicException;
 use Tests\TestCase;
 
 class TransparencyAnalyticsTest extends TestCase
@@ -162,6 +167,102 @@ class TransparencyAnalyticsTest extends TestCase
             'action' => 'report_exported',
         ]);
 
+    }
+
+    public function test_public_detail_contains_the_municipal_minimum_list_and_change_history(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->update([
+            'transparency_enabled' => true,
+            'transparency_slug' => 'municipio-artigo-tres',
+            'transparency_updated_at' => now(),
+        ]);
+        $amendment = $this->amendment($municipality, $manager, [
+            'reference' => 'EM-MUN-2026-010',
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'expense_destination' => 'investment',
+            'beneficiary_location' => 'Distrito Municipal Central',
+            'administrative_process' => 'PROC-ADM-010/2026',
+            'legal_instrument' => 'Decreto Municipal 25/2026',
+            'bank_tracking_type' => 'municipal_direct_codes',
+            'funding_source_code' => '08',
+            'application_code_fixed' => '100.0000',
+            'application_code_variable' => '010',
+            'application_deadline' => '2026-12-31',
+            'notes' => 'Anotação reservada da controladoria.',
+        ]);
+        $plan = $amendment->municipalWorkPlan()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'beneficiary_name' => 'Secretaria Municipal de Saúde',
+        ]);
+        $plan->stages()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'title' => 'Aquisição dos equipamentos',
+            'physical_delivery' => 'Entrega e instalação de dez equipamentos.',
+            'planned_amount' => 100000,
+            'planned_start_at' => '2026-08-01',
+            'planned_end_at' => '2026-10-31',
+        ]);
+        app(MunicipalTransparencyTrail::class)->recordCreation($amendment);
+
+        $this->get(route('transparency.detail', [$municipality->transparency_slug, $amendment]))
+            ->assertOk()
+            ->assertSee('EM-MUN-2026-010')
+            ->assertSee('PROC-ADM-010/2026')
+            ->assertSee('Decreto Municipal 25/2026')
+            ->assertSee('Código de Aplicação Fixo')
+            ->assertSee('100.0000')
+            ->assertSee('Aquisição dos equipamentos')
+            ->assertSee('Emenda cadastrada')
+            ->assertDontSee('Anotação reservada da controladoria')
+            ->assertDontSee($manager->name);
+    }
+
+    public function test_value_reduction_is_published_and_the_public_history_is_immutable(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, ['expected_amount' => 200000]);
+        $before = $amendment->getOriginal();
+        $amendment->update(['expected_amount' => 175000]);
+
+        app(MunicipalTransparencyTrail::class)->recordAmendmentChanges($amendment, $before);
+
+        $event = AmendmentTransparencyEvent::query()->firstOrFail();
+        $this->assertSame('value_reduced', $event->event_type);
+        $this->assertSame('R$ 200.000,00', $event->changes['Valor autorizado']['anterior']);
+        $this->assertSame('R$ 175.000,00', $event->changes['Valor autorizado']['atual']);
+
+        $this->expectException(LogicException::class);
+        $event->update(['title' => 'Histórico adulterado']);
+    }
+
+    public function test_incomplete_municipal_publication_generates_alert_and_work_action(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->update(['state' => 'SP', 'ibge_code' => '3500105']);
+        $amendment = $this->amendment($municipality, $manager, [
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'responsible_user_id' => $manager->id,
+        ]);
+
+        app(IntegrityAlertService::class)->sync($municipality->fresh());
+        app(MunicipalWorkItemService::class)->synchronize($municipality->fresh());
+
+        $this->assertDatabaseHas('integrity_alerts', [
+            'parliamentary_amendment_id' => $amendment->id,
+            'alert_key' => 'transparency:minimum-list',
+            'status' => 'open',
+        ]);
+        $this->assertDatabaseHas('municipal_work_items', [
+            'parliamentary_amendment_id' => $amendment->id,
+            'source_key' => "amendment:{$amendment->id}:transparency:minimum-list",
+            'category' => 'transparency',
+        ]);
     }
 
     /** @return array{User, Municipality} */

@@ -87,6 +87,23 @@
 
         <div class="col-lg-4">
             @if ($amendment->government_sphere === 'municipal')
+                <section class="content-panel mb-4">
+                    <div class="content-panel-header d-flex align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2"><i data-lucide="scan-search" aria-hidden="true"></i><h2 class="h5 mb-0">Transparência municipal</h2></div>
+                        <span class="badge {{ $transparencyReadiness['complete'] ? 'text-bg-success' : 'text-bg-warning' }}">{{ $transparencyReadiness['complete'] ? 'Completa' : count($transparencyReadiness['missing']).' pendências' }}</span>
+                    </div>
+                    <div class="content-panel-body">
+                        @if ($transparencyReadiness['complete'])
+                            <p class="normative-clear"><i data-lucide="circle-check" aria-hidden="true"></i>Rol mínimo preenchido para publicação.</p>
+                        @else
+                            <ul class="small mb-3 ps-3">@foreach($transparencyReadiness['missing'] as $item)<li class="mb-1">{{ $item }}</li>@endforeach</ul>
+                        @endif
+                        <small class="d-block text-secondary">Limite de atualização: {{ $transparencyReadiness['publication_deadline']->format('d/m/Y') }}, primeiro dia útil após o ato.</small>
+                        @if ($amendment->municipality->transparency_enabled)
+                            <a class="normative-source-link mt-3" href="{{ route('transparency.detail', [$amendment->municipality->transparency_slug, $amendment]) }}" target="_blank" rel="noopener">Abrir publicação<i data-lucide="external-link" aria-hidden="true"></i></a>
+                        @endif
+                    </div>
+                </section>
                 <section class="content-panel normative-amendment-panel mb-4">
                     <div class="content-panel-header d-flex align-items-center justify-content-between gap-2">
                         <div class="d-flex align-items-center gap-2"><i data-lucide="landmark" aria-hidden="true"></i><h2 class="h5 mb-0">Regra municipal</h2></div>

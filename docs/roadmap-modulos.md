@@ -48,6 +48,24 @@ controladoria, contabilidade e Câmara de um município piloto.
 Próxima validação: conferir a apuração agregada da saúde com a contabilidade e o
 controle interno de um município piloto.
 
+## Entregue - transparência municipal conforme Resolução TCESP nº 17/2025
+
+- Rol mínimo do artigo 3º no cadastro, detalhe público e CSV aberto.
+- Valores autorizado, liberado e executado apresentados separadamente.
+- Conta específica ou exceção da execução direta com Fonte de Recursos e Códigos
+  de Aplicação Fixo e Variável.
+- Instrumento jurídico, processo administrativo, localidade, destinação e prazo de
+  aplicação.
+- Cronograma físico-financeiro derivado do plano de trabalho municipal.
+- Histórico público imutável de alterações, acréscimos, reduções, cancelamentos,
+  pagamentos e mudanças de cronograma.
+- Diagnóstico interno, alerta e ação de trabalho com limite no dia útil seguinte.
+- Importação municipal bloqueada quando os dados mínimos estiverem incompletos.
+- Proteção de notas internas, usuários, fornecedores e documentos privados.
+
+Próxima validação: controle interno e procuradoria do Município piloto devem conferir
+os campos publicados e a aplicação da exceção bancária em um caso real anonimizado.
+
 ## Módulo 0 - Identidade municipal
 
 Situação: base concluída nesta etapa.
@@ -299,7 +317,8 @@ municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
 10. Migrar o inventário existente por importação assistida.
 11. Parametrizar a legislação e os prazos de cada município.
 12. Aplicar os parâmetros vigentes nos alertas e na admissibilidade.
-13. Completar a transparência exigida e validar a remessa Audesp.
+13. Validar a transparência entregue com o Município piloto.
+14. Implementar e homologar a remessa Audesp.
 
 ## Itens fora do escopo atual
 

@@ -19,6 +19,7 @@ class AmendmentAnalyticsService
                 'responsibleUser',
                 'executionStages',
                 'financialCommitments.payments',
+                'municipalWorkPlan.stages',
                 'accountabilityProcess.requirements',
                 'accountabilityProcess.diligences',
             ])

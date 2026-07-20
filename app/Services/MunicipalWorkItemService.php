@@ -21,6 +21,7 @@ class MunicipalWorkItemService
     public function __construct(
         private readonly MunicipalWorkPlanService $workPlanService,
         private readonly MunicipalRuleApplicationService $municipalRules,
+        private readonly MunicipalTransparencyReadiness $transparencyReadiness,
     ) {}
 
     /** @return array{active: int, created: int, reopened: int, completed: int} */
@@ -35,6 +36,7 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'transparencyEvents',
             'regulatoryProfile',
             'technicalImpediments.diligences',
             'technicalImpediments.remappings',
@@ -160,6 +162,22 @@ class MunicipalWorkItemService
         }
 
         if ($amendment->supportsTcespCompliance()) {
+            $transparency = $this->transparencyReadiness->evaluate($amendment);
+            if (! $transparency['complete']) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:transparency:minimum-list",
+                    'transparency',
+                    'Completar transparência da emenda',
+                    'Preencha o rol mínimo municipal: '.implode(', ', $transparency['missing']).'.',
+                    route('emendas.edit', $amendment, false),
+                    $transparency['publication_deadline'],
+                    $transparency['publication_deadline']->isBefore(now())
+                        ? MunicipalWorkItem::PRIORITY_CRITICAL
+                        : MunicipalWorkItem::PRIORITY_HIGH,
+                    $amendment->responsible_user_id,
+                );
+            }
+
             $plan = $amendment->municipalWorkPlan;
 
             if ($plan === null) {

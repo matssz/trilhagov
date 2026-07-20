@@ -223,6 +223,26 @@ class MunicipalRuleApplicationTest extends TestCase
         $this->assertSame('compliant', $portfolio['status']);
     }
 
+    public function test_bank_account_exception_requires_direct_execution_and_accounting_codes(): void
+    {
+        [$manager, $municipality] = $this->context();
+        $this->activeProfile($municipality, $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->post(route('emendas.store'), $this->payload('amendment-create', [
+                'transfer_type' => 'special',
+                'bank_tracking_type' => 'municipal_direct_codes',
+            ]))
+            ->assertSessionHasErrors('bank_tracking_type');
+
+        $this->post(route('emendas.store'), $this->payload('amendment-create', [
+            'reference' => 'EM-2026-CONTA',
+            'bank_tracking_type' => 'specific_account',
+            'bank_account_number' => null,
+        ]))->assertSessionHasErrors('bank_account_number');
+    }
+
     /** @return array{User, Municipality} */
     private function context(): array
     {
@@ -272,9 +292,18 @@ class MunicipalRuleApplicationTest extends TestCase
             'author_name' => 'Vereadora Ana Souza',
             'author_party' => 'PSD',
             'object' => 'Aquisição de equipamentos para unidade municipal de saúde',
+            'expense_destination' => 'investment',
             'responsible_department' => 'Secretaria Municipal de Saúde',
+            'beneficiary_location' => 'Município de Teste',
             'responsible_user_id' => auth()->id(),
             'transferegov_code' => null,
+            'legal_instrument' => null,
+            'administrative_process' => 'PROC-2026-001',
+            'bank_tracking_type' => 'municipal_direct_codes',
+            'bank_account_number' => null,
+            'funding_source_code' => '08',
+            'application_code_fixed' => '100.0000',
+            'application_code_variable' => '001',
             'expected_amount' => 60000,
             'received_amount' => null,
             'status' => ParliamentaryAmendment::STATUS_IDENTIFIED,
@@ -283,6 +312,7 @@ class MunicipalRuleApplicationTest extends TestCase
             'communication_deadline' => '2026-08-01',
             'communication_completed_at' => null,
             'execution_deadline' => '2027-06-30',
+            'application_deadline' => '2027-06-30',
             'execution_completed_at' => null,
             'accountability_deadline' => '2027-12-31',
             'accountability_completed_at' => null,
