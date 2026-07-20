@@ -3,8 +3,9 @@
         && ! request()->routeIs('municipalities.*')
         && ! request()->routeIs('invitations.*')
         && ! request()->routeIs('transparency.*');
+    $activeMunicipality = $workspaceLayout ? request()->attributes->get('active_municipality') : null;
     $activeRole = $workspaceLayout
-        ? auth()->user()->roleForMunicipality((int) session('active_municipality_id'))
+        ? ($activeMunicipality?->pivot?->role ?? auth()->user()->roleForMunicipality((int) session('active_municipality_id')))
         : null;
     $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
     $canManageUsers = $activeRole === 'manager';
@@ -50,6 +51,12 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        @if ($activeMunicipality?->supportsTcespAudesp())
+                            <a class="sidebar-link {{ request()->routeIs('audesp-homologations.*') ? 'active' : '' }}" href="{{ route('audesp-homologations.index') }}">
+                                <i data-lucide="package-check" aria-hidden="true"></i>
+                                <span>Homologação Audesp</span>
+                            </a>
+                        @endif
                         @if ($canEditAmendments)
                             <a class="sidebar-link {{ request()->routeIs('spreadsheet-imports.*') ? 'active' : '' }}" href="{{ route('spreadsheet-imports.index') }}">
                                 <i data-lucide="file-spreadsheet" aria-hidden="true"></i>

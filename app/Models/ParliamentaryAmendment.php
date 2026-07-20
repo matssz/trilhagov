@@ -45,8 +45,6 @@ class ParliamentaryAmendment extends Model
 
     public const RISK_CRITICAL = 'critical';
 
-    private const SAO_PAULO_CAPITAL_IBGE_CODE = '3550308';
-
     protected $fillable = [
         'created_by',
         'municipal_regulatory_profile_id',
@@ -208,8 +206,7 @@ class ParliamentaryAmendment extends Model
             : $this->municipality()->first(['state', 'ibge_code']);
 
         return $this->government_sphere === 'municipal'
-            && $municipality?->state === 'SP'
-            && (string) $municipality?->ibge_code !== self::SAO_PAULO_CAPITAL_IBGE_CODE;
+            && $municipality?->supportsTcespAudesp();
     }
 
     public function riskLabel(): string
@@ -287,6 +284,13 @@ class ParliamentaryAmendment extends Model
     public function audespRegistration(): HasOne
     {
         return $this->hasOne(AudespAmendmentRegistration::class);
+    }
+
+    public function audespHomologationItems(): HasMany
+    {
+        return $this->hasMany(AudespHomologationItem::class)
+            ->latest('audesp_homologation_batch_id')
+            ->latest('id');
     }
 
     public function transparencyEvents(): HasMany

@@ -27,6 +27,7 @@
             <p class="text-secondary mb-0">{{ $amendment->reference }} · {{ $amendment->object }}</p>
         </div>
         <div class="audesp-heading-actions">
+            <a class="btn btn-outline-primary" href="{{ route('audesp-homologations.index') }}"><i data-lucide="package-check" aria-hidden="true"></i>Homologar remessa</a>
             <a class="btn btn-outline-primary" href="{{ route('emendas.audesp.diagnostic', $amendment) }}"><i data-lucide="file-spreadsheet" aria-hidden="true"></i>Exportar diagnóstico</a>
             @if ($canEdit && $readiness['ready'])
                 <form method="POST" action="{{ route('emendas.audesp.preview', $amendment) }}">

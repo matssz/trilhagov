@@ -9,6 +9,7 @@ use App\Http\Controllers\AmendmentComplianceController;
 use App\Http\Controllers\AmendmentDocumentController;
 use App\Http\Controllers\AmendmentExecutionController;
 use App\Http\Controllers\AmendmentRemappingController;
+use App\Http\Controllers\AudespHomologationController;
 use App\Http\Controllers\AudespRegistrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -72,6 +73,11 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
     Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
     Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
+    Route::get('/audesp/homologacoes', [AudespHomologationController::class, 'index'])->name('audesp-homologations.index');
+    Route::get('/audesp/homologacoes/{batch}', [AudespHomologationController::class, 'show'])->name('audesp-homologations.show');
+    Route::get('/audesp/homologacoes/{batch}/arquivo', [AudespHomologationController::class, 'source'])->name('audesp-homologations.source');
+    Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');
+    Route::get('/audesp/homologacoes/{batch}/eventos/{event}/evidencia', [AudespHomologationController::class, 'evidence'])->name('audesp-homologations.evidence');
     Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
     Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
@@ -117,6 +123,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/audesp/homologacoes', [AudespHomologationController::class, 'store'])->name('audesp-homologations.store')->block(20, 10);
+        Route::post('/audesp/homologacoes/{batch}/reconferir', [AudespHomologationController::class, 'recheck'])->name('audesp-homologations.recheck')->block(20, 10);
+        Route::post('/audesp/homologacoes/{batch}/transmissao', [AudespHomologationController::class, 'recordSubmission'])->name('audesp-homologations.submission')->block(20, 10);
+        Route::post('/audesp/homologacoes/{batch}/retorno', [AudespHomologationController::class, 'recordReturn'])->name('audesp-homologations.return')->block(20, 10);
         Route::get('/importacoes/planilhas', [SpreadsheetImportController::class, 'index'])->name('spreadsheet-imports.index');
         Route::get('/importacoes/planilhas/modelo.csv', [SpreadsheetImportController::class, 'template'])->name('spreadsheet-imports.template');
         Route::post('/importacoes/planilhas/pre-visualizar', [SpreadsheetImportController::class, 'preview'])->name('spreadsheet-imports.preview')->block(20, 20);

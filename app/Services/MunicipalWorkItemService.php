@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\AccountabilityProcess;
 use App\Models\AccountabilityRequirement;
+use App\Models\AudespHomologationBatch;
+use App\Models\AudespHomologationItem;
 use App\Models\ExecutionStage;
 use App\Models\ExternalFinancialReconciliation;
 use App\Models\FinancialCommitment;
@@ -46,6 +48,7 @@ class MunicipalWorkItemService
             'financialCommitments.liquidations.payments',
             'financialPayments',
             'audespRegistration',
+            'audespHomologationItems.batch',
             'accountabilityProcess.requirements',
             'accountabilityProcess.diligences',
             'externalCandidates.latestFinancialReconciliation',
@@ -190,6 +193,36 @@ class MunicipalWorkItemService
                     'Preparar cadastro contábil Audesp',
                     collect($audesp['blockers'])->take(2)->join(' '),
                     route('emendas.audesp', $amendment, false),
+                    null,
+                    MunicipalWorkItem::PRIORITY_CRITICAL,
+                    $amendment->responsible_user_id,
+                );
+            }
+
+            $latestHomologationItem = $amendment->audespHomologationItems->first();
+            if ($latestHomologationItem?->batch?->status === AudespHomologationBatch::STATUS_UNDER_REVIEW
+                && $latestHomologationItem->status !== AudespHomologationItem::STATUS_MATCHED) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:audesp-homologation:{$latestHomologationItem->batch->id}",
+                    'financial',
+                    'Corrigir divergência do XML Audesp',
+                    $latestHomologationItem->status === AudespHomologationItem::STATUS_UNMATCHED
+                        ? 'O registro do Siafic não encontrou cadastro correspondente no TrilhaGov.'
+                        : count($latestHomologationItem->differences ?? []).' campo(s) divergem entre o Siafic e o cadastro municipal.',
+                    route('audesp-homologations.show', $latestHomologationItem->batch, false),
+                    null,
+                    MunicipalWorkItem::PRIORITY_CRITICAL,
+                    $amendment->responsible_user_id,
+                );
+            }
+
+            if ($latestHomologationItem?->batch?->status === AudespHomologationBatch::STATUS_REJECTED) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:audesp-rejection:{$latestHomologationItem->batch->id}",
+                    'financial',
+                    'Tratar rejeição do Audesp',
+                    'Analise o retorno anexado, corrija a origem com a contabilidade e registre um novo lote vinculado à tentativa rejeitada.',
+                    route('audesp-homologations.show', $latestHomologationItem->batch, false),
                     null,
                     MunicipalWorkItem::PRIORITY_CRITICAL,
                     $amendment->responsible_user_id,

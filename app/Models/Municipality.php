@@ -16,6 +16,8 @@ class Municipality extends Model
     /** @use HasFactory<MunicipalityFactory> */
     use HasFactory;
 
+    private const SAO_PAULO_CAPITAL_IBGE_CODE = '3550308';
+
     protected $fillable = [
         'name',
         'state',
@@ -41,6 +43,12 @@ class Municipality extends Model
             ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'],
             ['Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal', 'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Pará', 'Paraíba', 'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro', 'Rio Grande do Norte', 'Rio Grande do Sul', 'Rondônia', 'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'],
         );
+    }
+
+    public function supportsTcespAudesp(): bool
+    {
+        return $this->state === 'SP'
+            && (string) $this->ibge_code !== self::SAO_PAULO_CAPITAL_IBGE_CODE;
     }
 
     public function users(): BelongsToMany
@@ -109,6 +117,16 @@ class Municipality extends Model
     public function audespAmendmentRegistrations(): HasMany
     {
         return $this->hasMany(AudespAmendmentRegistration::class);
+    }
+
+    public function audespHomologationBatches(): HasMany
+    {
+        return $this->hasMany(AudespHomologationBatch::class);
+    }
+
+    public function audespHomologationItems(): HasMany
+    {
+        return $this->hasMany(AudespHomologationItem::class);
     }
 
     public function accountabilityProcesses(): HasMany

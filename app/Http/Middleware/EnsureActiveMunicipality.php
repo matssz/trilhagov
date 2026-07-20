@@ -34,11 +34,15 @@ class EnsureActiveMunicipality
         $activeId = (int) $request->session()->get('active_municipality_id');
 
         if ($municipalities->contains('id', $activeId)) {
+            $request->attributes->set('active_municipality', $municipalities->firstWhere('id', $activeId));
+
             return $next($request);
         }
 
         if ($municipalities->count() === 1) {
-            $this->currentMunicipality->activate($request, $municipalities->first());
+            $municipality = $municipalities->first();
+            $this->currentMunicipality->activate($request, $municipality);
+            $request->attributes->set('active_municipality', $municipality);
 
             return $next($request);
         }

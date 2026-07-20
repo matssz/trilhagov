@@ -9,6 +9,11 @@ class CurrentMunicipality
 {
     public function get(Request $request): Municipality
     {
+        $activeMunicipality = $request->attributes->get('active_municipality');
+        if ($activeMunicipality instanceof Municipality) {
+            return $activeMunicipality;
+        }
+
         $municipalityId = (int) $request->session()->get('active_municipality_id');
 
         return $request->user()

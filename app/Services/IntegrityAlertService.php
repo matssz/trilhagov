@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AudespHomologationBatch;
+use App\Models\AudespHomologationItem;
 use App\Models\IntegrityAlert;
 use App\Models\Municipality;
 use App\Models\MunicipalityAlertSetting;
@@ -51,6 +53,7 @@ class IntegrityAlertService
             'amendments.financialCommitments.liquidations.payments',
             'amendments.financialPayments',
             'amendments.audespRegistration',
+            'amendments.audespHomologationItems.batch',
             'amendments.accountabilityProcess.requirements',
             'amendments.accountabilityProcess.diligences',
             'amendments.technicalImpediments.diligences',
@@ -284,18 +287,38 @@ class IntegrityAlertService
         }
 
         $readiness = $this->audespTraceability->evaluate($amendment);
-        if ($readiness['ready']) {
-            return;
+        if (! $readiness['ready']) {
+            $effectiveFrom = Carbon::create(2026, 4, 1)->startOfDay();
+            $this->addDetection($detections, $amendment, 'audesp:registration-readiness', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => $effectiveFrom->isPast() ? IntegrityAlert::SEVERITY_CRITICAL : IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Cadastro Audesp com bloqueios',
+                'message' => collect($readiness['blockers'])->take(3)->join(' '),
+                'due_at' => null,
+            ]);
         }
 
-        $effectiveFrom = Carbon::create(2026, 4, 1)->startOfDay();
-        $this->addDetection($detections, $amendment, 'audesp:registration-readiness', [
-            'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
-            'severity' => $effectiveFrom->isPast() ? IntegrityAlert::SEVERITY_CRITICAL : IntegrityAlert::SEVERITY_WARNING,
-            'title' => 'Cadastro Audesp com bloqueios',
-            'message' => collect($readiness['blockers'])->take(3)->join(' '),
-            'due_at' => null,
-        ]);
+        $latestItem = $amendment->audespHomologationItems->first();
+        if ($latestItem?->batch?->status === AudespHomologationBatch::STATUS_UNDER_REVIEW
+            && $latestItem->status !== AudespHomologationItem::STATUS_MATCHED) {
+            $this->addDetection($detections, $amendment, 'audesp:homologation:'.$latestItem->batch->id, [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'XML Audesp com divergência',
+                'message' => count($latestItem->differences ?? []).' campo(s) divergem entre o arquivo do Siafic e o cadastro municipal.',
+                'due_at' => null,
+            ]);
+        }
+
+        if ($latestItem?->batch?->status === AudespHomologationBatch::STATUS_REJECTED) {
+            $this->addDetection($detections, $amendment, 'audesp:rejection:'.$latestItem->batch->id, [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Remessa Audesp rejeitada',
+                'message' => 'Consulte o retorno anexado, corrija a origem e registre uma nova tentativa vinculada ao lote rejeitado.',
+                'due_at' => null,
+            ]);
+        }
     }
 
     /** @param array<int, array<string, mixed>> $detections */
