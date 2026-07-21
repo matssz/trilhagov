@@ -82,6 +82,7 @@ class MunicipalWorkItem extends Model
             'execution' => 'Execução',
             'financial' => 'Financeiro',
             'accountability' => 'Prestação de contas',
+            'control' => 'Controle Interno',
         ];
     }
 

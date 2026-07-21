@@ -9,6 +9,7 @@ use App\Models\AudespHomologationItem;
 use App\Models\ExecutionStage;
 use App\Models\ExternalFinancialReconciliation;
 use App\Models\FinancialCommitment;
+use App\Models\MunicipalInternalControlAction;
 use App\Models\Municipality;
 use App\Models\MunicipalWorkItem;
 use App\Models\MunicipalWorkPlan;
@@ -39,6 +40,7 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'internalControlReviews.actions',
             'transparencyEvents',
             'regulatoryProfile',
             'technicalImpediments.diligences',
@@ -266,6 +268,26 @@ class MunicipalWorkItemService
                     route('emendas.work-plan', $amendment, false).'#parecer',
                     $amendment->communication_deadline,
                     MunicipalWorkItem::PRIORITY_HIGH,
+                );
+            }
+
+            foreach ($amendment->internalControlReviews->flatMap->actions as $controlAction) {
+                if ($controlAction->status === MunicipalInternalControlAction::STATUS_RESOLVED) {
+                    continue;
+                }
+
+                $awaitingValidation = $controlAction->status === MunicipalInternalControlAction::STATUS_RESPONDED;
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:internal-control-action:{$controlAction->id}",
+                    'control',
+                    $awaitingValidation ? 'Validar saneamento do Controle Interno' : 'Responder apontamento do Controle Interno',
+                    $awaitingValidation
+                        ? 'Confira a resposta e a evidência; encerre a providência ou devolva-a com fundamentação e novo prazo.'
+                        : $controlAction->instructions,
+                    route('emendas.internal-control', $amendment, false).'#providencia-'.$controlAction->id,
+                    $controlAction->due_at,
+                    $controlAction->isOverdue() ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
+                    $awaitingValidation ? null : $controlAction->responsible_user_id,
                 );
             }
         }

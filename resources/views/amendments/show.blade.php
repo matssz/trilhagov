@@ -30,6 +30,7 @@
                 <a class="btn btn-outline-primary" href="{{ route('emendas.work-plan', $amendment) }}"><i data-lucide="clipboard-list" aria-hidden="true"></i>Plano de trabalho</a>
                 <a class="btn btn-outline-primary" href="{{ route('emendas.audesp', $amendment) }}"><i data-lucide="database-zap" aria-hidden="true"></i>Preparar Audesp</a>
                 <a class="btn btn-outline-primary" href="{{ route('emendas.compliance', $amendment) }}"><i data-lucide="badge-check" aria-hidden="true"></i>Conferir TCESP</a>
+                <a class="btn btn-outline-primary" href="{{ route('emendas.internal-control', $amendment) }}"><i data-lucide="shield-check" aria-hidden="true"></i>Controle Interno</a>
             @endif
             <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="gauge" aria-hidden="true"></i>Acompanhar execução</a>
             @if ($canEdit)
@@ -48,6 +49,7 @@
         @if ($amendment->supportsTcespCompliance())
             <a href="{{ route('emendas.audesp', $amendment) }}">Audesp</a>
             <a href="{{ route('emendas.compliance', $amendment) }}">Conformidade TCESP</a>
+            <a href="{{ route('emendas.internal-control', $amendment) }}">Controle Interno</a>
         @endif
         <a href="{{ route('emendas.accountability', $amendment) }}">Prestação de contas</a>
     </nav>

@@ -371,6 +371,17 @@ class ParliamentaryAmendment extends Model
         return $this->hasMany(MunicipalAdmissibilityReview::class);
     }
 
+    public function internalControlReviews(): HasMany
+    {
+        return $this->hasMany(MunicipalInternalControlReview::class)
+            ->latest('sequence');
+    }
+
+    public function internalControlActions(): HasMany
+    {
+        return $this->hasMany(MunicipalInternalControlAction::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

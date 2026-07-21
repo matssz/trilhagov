@@ -23,6 +23,7 @@ use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
+use App\Http\Controllers\MunicipalInternalControlController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
 use App\Http\Controllers\MunicipalReportDispatchController;
@@ -105,6 +106,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
     Route::get('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'index'])->name('emendas.impediments');
     Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
+    Route::get('/emendas/{emenda}/controle-interno', [MunicipalInternalControlController::class, 'index'])->name('emendas.internal-control');
+    Route::get('/controle-interno/pareceres/{review}/documento.pdf', [MunicipalInternalControlController::class, 'pdf'])->name('internal-control-reviews.pdf');
+    Route::get('/controle-interno/pareceres/{review}/evidencia', [MunicipalInternalControlController::class, 'reviewEvidence'])->name('internal-control-reviews.evidence');
+    Route::get('/controle-interno/eventos/{event}/evidencia', [MunicipalInternalControlController::class, 'actionEvidence'])->name('internal-control-actions.evidence');
     Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
     Route::get('/emendas/{emenda}/audesp', [AudespRegistrationController::class, 'index'])->name('emendas.audesp');
     Route::get('/emendas/{emenda}/audesp/diagnostico.csv', [AudespRegistrationController::class, 'diagnostic'])->name('emendas.audesp.diagnostic');
@@ -134,7 +139,13 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::patch('/configuracoes/tipos-documento/{documentType}', [DocumentTypeController::class, 'update'])->name('document-types.update')->block(10, 10);
     });
 
+    Route::middleware('municipality.role:manager,auditor')->group(function () {
+        Route::post('/emendas/{emenda}/controle-interno/pareceres', [MunicipalInternalControlController::class, 'store'])->name('internal-control-reviews.store')->block(20, 10);
+        Route::post('/controle-interno/providencias/{action}/decidir', [MunicipalInternalControlController::class, 'decide'])->name('internal-control-actions.decide')->block(20, 10);
+    });
+
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/controle-interno/providencias/{action}/responder', [MunicipalInternalControlController::class, 'respond'])->name('internal-control-actions.respond')->block(20, 10);
         Route::post('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'store'])->name('governance-reports.store')->block(10, 10);
         Route::patch('/relatorios/governanca/{report}/atualizar', [MunicipalGovernanceReportController::class, 'refresh'])->name('governance-reports.refresh')->block(10, 10);
         Route::post('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'store'])->name('report-dispatches.store')->block(10, 10);

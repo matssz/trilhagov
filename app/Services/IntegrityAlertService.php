@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
 use App\Models\IntegrityAlert;
+use App\Models\MunicipalInternalControlAction;
 use App\Models\Municipality;
 use App\Models\MunicipalityAlertSetting;
 use App\Models\ParliamentaryAmendment;
@@ -60,6 +61,7 @@ class IntegrityAlertService
             'amendments.technicalImpediments.remappings',
             'amendments.regulatoryProfile',
             'amendments.municipalWorkPlan.stages',
+            'amendments.internalControlReviews.actions',
             'amendments.transparencyEvents',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
@@ -82,6 +84,7 @@ class IntegrityAlertService
             $this->detectNormativeControls($amendment, $detections);
             $this->detectTransparencyControls($amendment, $detections);
             $this->detectAudespControls($amendment, $detections);
+            $this->detectInternalControlActions($amendment, $settings, $detections);
         }
 
         $stats = DB::transaction(function () use ($municipality, $detections): array {
@@ -720,6 +723,48 @@ class IntegrityAlertService
                 'message' => $readiness['blockers']->first(),
                 'due_at' => $process->due_at,
             ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectInternalControlActions(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+    ): void {
+        foreach ($amendment->internalControlReviews->flatMap->actions as $action) {
+            if ($action->status === MunicipalInternalControlAction::STATUS_RESOLVED) {
+                continue;
+            }
+
+            if ($action->status === MunicipalInternalControlAction::STATUS_RESPONDED) {
+                $this->addDetection($detections, $amendment, "internal-control:decision:{$action->id}", [
+                    'assigned_user_id' => $action->review->reviewed_by,
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => IntegrityAlert::SEVERITY_WARNING,
+                    'title' => 'Saneamento aguardando validação',
+                    'message' => 'A equipe respondeu ao apontamento do Controle Interno. Confira a evidência e registre a decisão.',
+                    'due_at' => $action->due_at,
+                ]);
+
+                continue;
+            }
+
+            $daysUntil = (int) today()->diffInDays($action->due_at, false);
+            if ($daysUntil > $settings->deadline_warning_days) {
+                continue;
+            }
+
+            $this->detectOperationalDeadline(
+                $amendment,
+                $settings,
+                $detections,
+                "internal-control:{$action->id}",
+                'Providência do Controle Interno',
+                $action->title,
+                $action->due_at,
+                $action->responsible_user_id,
+            );
         }
     }
 

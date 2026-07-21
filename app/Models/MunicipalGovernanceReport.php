@@ -95,4 +95,9 @@ class MunicipalGovernanceReport extends Model
     {
         return $this->hasMany(MunicipalReportDispatch::class);
     }
+
+    public function internalControlReviews(): HasMany
+    {
+        return $this->hasMany(MunicipalInternalControlReview::class);
+    }
 }
