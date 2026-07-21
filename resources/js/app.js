@@ -34,7 +34,9 @@ import {
     FileText,
     FileWarning,
     Fingerprint,
+    FileChartColumn,
     Gauge,
+    HeartPulse,
     History,
     Info,
     AlarmClock,
@@ -88,6 +90,7 @@ import {
     ShieldCheck,
     ScanSearch,
     Sparkles,
+    Archive,
     createIcons,
 } from 'lucide';
 
@@ -126,7 +129,9 @@ createIcons({
         FileText,
         FileWarning,
         Fingerprint,
+        FileChartColumn,
         Gauge,
+        HeartPulse,
         History,
         Info,
         AlarmClock,
@@ -180,6 +185,7 @@ createIcons({
         ShieldCheck,
         ScanSearch,
         Sparkles,
+        Archive,
     },
 });
 

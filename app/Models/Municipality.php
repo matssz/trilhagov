@@ -221,6 +221,11 @@ class Municipality extends Model
         return $this->hasMany(MunicipalGovernanceReport::class);
     }
 
+    public function specializedReports(): HasMany
+    {
+        return $this->hasMany(MunicipalSpecializedReport::class);
+    }
+
     public function reportDispatches(): HasMany
     {
         return $this->hasMany(MunicipalReportDispatch::class);

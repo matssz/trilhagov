@@ -60,6 +60,10 @@
                                 <i data-lucide="scroll-text" aria-hidden="true"></i>
                                 <span>Relatórios mensais</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('specialized-reports.*') ? 'active' : '' }}" href="{{ route('specialized-reports.index') }}">
+                                <i data-lucide="file-chart-column" aria-hidden="true"></i>
+                                <span>Relatórios especiais</span>
+                            </a>
                             <a class="sidebar-link {{ request()->routeIs('audit-plans.*') || request()->routeIs('audit-plan-items.*') ? 'active' : '' }}" href="{{ route('audit-plans.index') }}">
                                 <i data-lucide="calendar-check-2" aria-hidden="true"></i>
                                 <span>Plano de auditoria</span>

@@ -31,14 +31,14 @@ flowchart LR
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: Relatórios Municipais Especializados.**
+**Próximo foco: Saúde e LC 141.**
 
 ```mermaid
 flowchart LR
     A["Programa de Auditoria<br/>1ª versão entregue"]
     B["Comunicações Oficiais<br/>1ª versão entregue"]
-    C["Relatórios Especializados<br/>PRÓXIMO FOCO"]
-    D["Saúde e LC 141<br/>Planejado"]
+    C["Relatórios Especializados<br/>1ª versão entregue"]
+    D["Saúde e LC 141<br/>PRÓXIMO FOCO"]
     E["Obras e Licitações<br/>Planejado"]
     F["Integrações reais<br/>Planejado"]
     G["LGPD e comercialização<br/>Planejado"]
@@ -48,9 +48,9 @@ flowchart LR
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
     classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class A,B delivered;
-    class C focus;
-    class D,E,F,G planned;
+    class A,B,C delivered;
+    class D focus;
+    class E,F,G planned;
 ```
 
 ### Programa de Auditoria e Papéis de Trabalho
@@ -88,8 +88,8 @@ flowchart TB
     E2["2. Regras locais no fluxo<br/>Técnico entregue; validar dados reais"]
     E3["3. Transparência municipal<br/>Técnico entregue; validar publicação"]
     E4["4. Audesp e contabilidade<br/>Técnico entregue; homologar arquivo real"]
-    E5["5. Relatórios para controle e Câmara<br/>Parcialmente entregue"]
-    E6["6. Saúde, obras e terceiro setor<br/>Planejado"]
+    E5["5. Relatórios para controle e Câmara<br/>Técnico entregue; validar em campo"]
+    E6["6. Saúde, obras e terceiro setor<br/>Em andamento"]
     E7["7. Integrações graduais<br/>Planejado"]
     E8["8. Segurança, LGPD e continuidade<br/>Planejado"]
     E9["9. Piloto e expansão comercial<br/>Planejado"]
@@ -99,9 +99,9 @@ flowchart TB
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:1px;
     classDef progress fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:2px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class E1,E2,E3,E4 delivered;
-    class E5 progress;
-    class E6,E7,E8,E9 planned;
+    class E1,E2,E3,E4,E5 delivered;
+    class E6 progress;
+    class E7,E8,E9 planned;
 ```
 
 ### Entregas dos relatórios municipais
@@ -110,9 +110,11 @@ flowchart TB
 - [x] Protocolo e histórico de remessas entre órgãos.
 - [x] Parecer formal do controle interno com evidências.
 - [x] Plano anual de auditoria orientado por risco.
-- [ ] Relatório consolidado de reserva e execução em saúde.
-- [ ] Relatório de divergências entre orçamento, financeiro e entrega física.
-- [ ] Dossiê anual para controle interno, Câmara e prestação de contas.
+- [x] Relatório consolidado de reserva e execução em saúde.
+- [x] Relatório de divergências entre orçamento, financeiro e entrega física.
+- [x] Dossiê anual para controle interno, Câmara e prestação de contas.
+- [ ] Validar os três produtos e suas ressalvas com Contabilidade, Câmara e
+  Controle Interno de um Município piloto.
 
 Regra de atualização: ao concluir uma entrega, marcar o item neste arquivo e
 mover o destaque `focus` da sequência de desenvolvimento somente quando os

@@ -30,6 +30,7 @@ use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalOfficialDocumentController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
 use App\Http\Controllers\MunicipalReportDispatchController;
+use App\Http\Controllers\MunicipalSpecializedReportController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
@@ -79,6 +80,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/relatorios/governanca/{report}', [MunicipalGovernanceReportController::class, 'show'])->name('governance-reports.show');
     Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
     Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
+    Route::get('/relatorios/especializados', [MunicipalSpecializedReportController::class, 'index'])->name('specialized-reports.index');
+    Route::get('/relatorios/especializados/{report}', [MunicipalSpecializedReportController::class, 'show'])->name('specialized-reports.show');
+    Route::get('/relatorios/especializados/{report}/documento.pdf', [MunicipalSpecializedReportController::class, 'pdf'])->name('specialized-reports.pdf');
+    Route::get('/relatorios/especializados/{report}/dados.csv', [MunicipalSpecializedReportController::class, 'csv'])->name('specialized-reports.csv');
     Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
     Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
     Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
@@ -137,6 +142,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/comunicacoes-oficiais/{document}/emitir', [MunicipalOfficialDocumentController::class, 'issue'])->name('official-documents.issue')->block(10, 10);
         Route::post('/comunicacoes-oficiais/{document}/cancelar', [MunicipalOfficialDocumentController::class, 'cancel'])->name('official-documents.cancel')->block(10, 10);
         Route::post('/relatorios/governanca/{report}/emitir', [MunicipalGovernanceReportController::class, 'issue'])->name('governance-reports.issue')->block(10, 10);
+        Route::post('/relatorios/especializados/{report}/emitir', [MunicipalSpecializedReportController::class, 'issue'])->name('specialized-reports.issue')->block(10, 10);
         Route::post('/relatorios/remessas/{dispatch}/cancelar', [MunicipalReportDispatchController::class, 'cancel'])->name('report-dispatches.cancel')->block(10, 10);
         Route::post('/emendas/{emenda}/plano-de-trabalho/parecer', [MunicipalAdmissibilityReviewController::class, 'store'])->name('emendas.work-plan.review')->block(10, 10);
         Route::patch('/transparencia/configuracao', TransparencySettingsController::class)->name('transparency.settings.update')->block(10, 10);
@@ -192,6 +198,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/controle-interno/providencias/{action}/responder', [MunicipalInternalControlController::class, 'respond'])->name('internal-control-actions.respond')->block(20, 10);
         Route::post('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'store'])->name('governance-reports.store')->block(10, 10);
         Route::patch('/relatorios/governanca/{report}/atualizar', [MunicipalGovernanceReportController::class, 'refresh'])->name('governance-reports.refresh')->block(10, 10);
+        Route::post('/relatorios/especializados', [MunicipalSpecializedReportController::class, 'store'])->name('specialized-reports.store')->block(10, 10);
+        Route::patch('/relatorios/especializados/{report}/atualizar', [MunicipalSpecializedReportController::class, 'refresh'])->name('specialized-reports.refresh')->block(10, 10);
         Route::post('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'store'])->name('report-dispatches.store')->block(10, 10);
         Route::post('/relatorios/remessas/{dispatch}/enviar', [MunicipalReportDispatchController::class, 'send'])->name('report-dispatches.send')->block(20, 10);
         Route::post('/relatorios/remessas/{dispatch}/retorno', [MunicipalReportDispatchController::class, 'recordReturn'])->name('report-dispatches.return')->block(20, 10);

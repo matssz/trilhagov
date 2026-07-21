@@ -12,6 +12,7 @@
 @import './audesp-homologations.css';
 @import './audit-programs.css';
 @import './official-documents.css';
+@import './specialized-reports.css';
 
 :root {
     --navy-950: #071f3d;
