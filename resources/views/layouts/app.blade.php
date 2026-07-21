@@ -56,6 +56,10 @@
                                 <i data-lucide="scroll-text" aria-hidden="true"></i>
                                 <span>Relatórios mensais</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('audit-plans.*') || request()->routeIs('audit-plan-items.*') ? 'active' : '' }}" href="{{ route('audit-plans.index') }}">
+                                <i data-lucide="calendar-check-2" aria-hidden="true"></i>
+                                <span>Plano de auditoria</span>
+                            </a>
                             <a class="sidebar-link {{ request()->routeIs('audesp-homologations.*') ? 'active' : '' }}" href="{{ route('audesp-homologations.index') }}">
                                 <i data-lucide="package-check" aria-hidden="true"></i>
                                 <span>Homologação Audesp</span>

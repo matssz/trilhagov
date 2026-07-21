@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MunicipalAuditPlan;
+use App\Models\MunicipalAuditPlanItem;
 use App\Models\MunicipalGovernanceReport;
 use App\Models\MunicipalInternalControlAction;
 use App\Models\MunicipalInternalControlActionEvent;
@@ -46,6 +48,7 @@ class MunicipalInternalControlController extends Controller
             ->with([
                 'reviewer:id,name,email',
                 'governanceReport:id,reference,fiscal_year,reference_month,version',
+                'auditPlanItem.plan:id,fiscal_year,version,status',
                 'actions.responsibleUser:id,name,email',
                 'actions.responder:id,name',
                 'actions.resolver:id,name',
@@ -78,6 +81,14 @@ class MunicipalInternalControlController extends Controller
             'governanceReports' => $canIssue
                 ? $municipality->governanceReports()->where('status', MunicipalGovernanceReport::STATUS_ISSUED)->latest('fiscal_year')->latest('reference_month')->take(18)->get()
                 : collect(),
+            'auditPlanItems' => $canIssue
+                ? $amendment->auditPlanItems()
+                    ->whereIn('status', [MunicipalAuditPlanItem::STATUS_PLANNED, MunicipalAuditPlanItem::STATUS_IN_PROGRESS, MunicipalAuditPlanItem::STATUS_RESCHEDULED])
+                    ->whereHas('plan', fn ($query) => $query->where('status', MunicipalAuditPlan::STATUS_ISSUED))
+                    ->with('plan:id,fiscal_year,version,status')
+                    ->orderBy('planned_at')
+                    ->get()
+                : collect(),
         ]);
     }
 
@@ -93,7 +104,7 @@ class MunicipalInternalControlController extends Controller
         $amendment = $this->amendment($municipality, $emenda);
         $criteriaDefinitions = $controlService->criteria();
         $validated = $request->validate($this->reviewRules($municipality, $criteriaDefinitions), [
-            'annual_audit_plan_reference.required' => 'Informe o item do Plano Anual de Auditoria que fundamenta esta verificação.',
+            'annual_audit_plan_reference.required_without' => 'Selecione um item emitido do Plano Anual de Auditoria ou informe uma referência externa.',
             'responsible_user_id.required_unless' => 'Defina quem será responsável por tratar o apontamento.',
             'corrective_due_at.required_unless' => 'Defina o prazo municipal para a providência.',
         ]);
@@ -116,11 +127,29 @@ class MunicipalInternalControlController extends Controller
                 $request, $municipality, $amendment, $validated, $controlService, $storedEvidence, $auditTrail
             ): MunicipalInternalControlReview {
                 $locked = ParliamentaryAmendment::query()->lockForUpdate()->findOrFail($amendment->id);
+                $auditPlanItem = null;
+                if (! empty($validated['municipal_audit_plan_item_id'])) {
+                    $auditPlanItem = MunicipalAuditPlanItem::query()
+                        ->where('municipality_id', $municipality->id)
+                        ->where('parliamentary_amendment_id', $locked->id)
+                        ->whereIn('status', [MunicipalAuditPlanItem::STATUS_PLANNED, MunicipalAuditPlanItem::STATUS_IN_PROGRESS, MunicipalAuditPlanItem::STATUS_RESCHEDULED])
+                        ->whereHas('plan', fn ($query) => $query->where('status', MunicipalAuditPlan::STATUS_ISSUED))
+                        ->with('plan')
+                        ->lockForUpdate()
+                        ->find($validated['municipal_audit_plan_item_id']);
+
+                    if ($auditPlanItem === null || $auditPlanItem->phase !== $validated['phase']) {
+                        throw ValidationException::withMessages([
+                            'municipal_audit_plan_item_id' => 'O item deve pertencer a um plano emitido, estar ativo e corresponder à fase escolhida.',
+                        ]);
+                    }
+                }
                 $sequence = ((int) $locked->internalControlReviews()->max('sequence')) + 1;
                 $snapshot = $controlService->snapshot($locked);
                 $review = $locked->internalControlReviews()->create([
                     'municipality_id' => $municipality->id,
                     'municipal_governance_report_id' => $validated['municipal_governance_report_id'] ?? null,
+                    'municipal_audit_plan_item_id' => $auditPlanItem?->id,
                     'reviewed_by' => $request->user()->id,
                     'sequence' => $sequence,
                     'reference' => sprintf('PCI-%d-%05d-%03d', $locked->fiscal_year, $locked->id, $sequence),
@@ -130,13 +159,33 @@ class MunicipalInternalControlController extends Controller
                     'summary' => $validated['summary'],
                     'findings' => $validated['findings'] ?? null,
                     'recommendations' => $validated['recommendations'] ?? null,
-                    'annual_audit_plan_reference' => $validated['annual_audit_plan_reference'],
+                    'annual_audit_plan_reference' => $auditPlanItem?->formalReference() ?? $validated['annual_audit_plan_reference'],
                     'legal_basis' => $validated['legal_basis'],
                     'snapshot' => $snapshot,
                     'snapshot_sha256' => $controlService->hash($snapshot),
                     ...($storedEvidence ?? []),
                     'issued_at' => now(),
                 ]);
+
+                if ($auditPlanItem !== null) {
+                    $fromStatus = $auditPlanItem->status;
+                    $auditPlanItem->update([
+                        'status' => MunicipalAuditPlanItem::STATUS_COMPLETED,
+                        'completed_by' => $request->user()->id,
+                        'completed_at' => now(),
+                        'status_notes' => "Concluída pelo parecer {$review->reference}.",
+                    ]);
+                    $auditPlanItem->events()->create([
+                        'municipality_id' => $municipality->id,
+                        'user_id' => $request->user()->id,
+                        'actor_name' => $request->user()->name,
+                        'event_type' => 'completed',
+                        'from_status' => $fromStatus,
+                        'to_status' => MunicipalAuditPlanItem::STATUS_COMPLETED,
+                        'description' => "Item concluído automaticamente pela emissão do parecer {$review->reference}.",
+                        'metadata' => ['internal_control_review_id' => $review->id, 'reference' => $review->reference],
+                    ]);
+                }
 
                 if ($review->conclusion !== MunicipalInternalControlReview::CONCLUSION_REGULAR) {
                     $action = $review->actions()->create([
@@ -332,7 +381,12 @@ class MunicipalInternalControlController extends Controller
             'summary' => ['required', 'string', 'min:20', 'max:5000'],
             'findings' => ['nullable', 'required_unless:conclusion,regular', 'string', 'max:5000'],
             'recommendations' => ['nullable', 'required_unless:conclusion,regular', 'string', 'max:5000'],
-            'annual_audit_plan_reference' => ['required', 'string', 'min:3', 'max:255'],
+            'municipal_audit_plan_item_id' => [
+                'nullable', 'integer',
+                Rule::exists('municipal_audit_plan_items', 'id')->where(fn ($query) => $query
+                    ->where('municipality_id', $municipality->id)),
+            ],
+            'annual_audit_plan_reference' => ['nullable', 'required_without:municipal_audit_plan_item_id', 'string', 'min:3', 'max:255'],
             'legal_basis' => ['required', 'string', 'min:5', 'max:2000'],
             'municipal_governance_report_id' => [
                 'nullable', 'integer',

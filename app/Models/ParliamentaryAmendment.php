@@ -382,6 +382,11 @@ class ParliamentaryAmendment extends Model
         return $this->hasMany(MunicipalInternalControlAction::class);
     }
 
+    public function auditPlanItems(): HasMany
+    {
+        return $this->hasMany(MunicipalAuditPlanItem::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas(

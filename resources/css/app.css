@@ -2422,6 +2422,617 @@ h6 {
     }
 }
 
+/* Annual municipal audit plan */
+.audit-plan-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+}
+
+.audit-plan-heading h1,
+.audit-plan-issue h2 {
+    letter-spacing: 0;
+}
+
+.audit-plan-heading-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+}
+
+.audit-plan-basis {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid #d5c58b;
+    border-left: 4px solid #b38a08;
+    background: #fffdf6;
+}
+
+.audit-plan-basis > span,
+.audit-plan-metrics article > span,
+.audit-plan-issue > div > span {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: #7a5b00;
+    background: #f4e8bb;
+}
+
+.audit-plan-basis svg,
+.audit-plan-metrics svg,
+.audit-plan-issue svg {
+    width: 20px;
+    height: 20px;
+}
+
+.audit-plan-basis strong,
+.audit-plan-basis p {
+    display: block;
+}
+
+.audit-plan-basis p {
+    margin: .15rem 0 0;
+    color: #596b7d;
+}
+
+.audit-plan-basis small {
+    color: #755b09;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.audit-plan-panel-header {
+    align-items: center;
+}
+
+.audit-plan-form,
+.audit-plan-item-create {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.audit-plan-form .span-2,
+.audit-plan-item-create .span-2 {
+    grid-column: span 2;
+}
+
+.audit-plan-form .span-3,
+.audit-plan-item-create .span-3 {
+    grid-column: 1 / -1;
+}
+
+.audit-plan-submit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line-soft);
+}
+
+.audit-plan-submit > div {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+}
+
+.audit-plan-submit svg {
+    width: 22px;
+    color: #1a7552;
+}
+
+.audit-plan-submit span,
+.audit-plan-submit small {
+    display: block;
+}
+
+.audit-plan-submit small {
+    color: var(--text-secondary);
+}
+
+.audit-plan-form-action {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.audit-plan-list > article {
+    display: grid;
+    grid-template-columns: 92px minmax(240px, 1fr) minmax(180px, 260px) 38px;
+    align-items: center;
+    gap: 1.15rem;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.audit-plan-list > article:last-child {
+    border-bottom: 0;
+}
+
+.audit-plan-year {
+    padding-right: 1rem;
+    border-right: 1px solid var(--line-soft);
+}
+
+.audit-plan-year small,
+.audit-plan-year span,
+.audit-plan-list-main small,
+.audit-plan-list-progress small {
+    display: block;
+    color: var(--text-secondary);
+}
+
+.audit-plan-year strong {
+    display: block;
+    color: #0b3156;
+    font-size: 1.45rem;
+}
+
+.audit-plan-list-main > div {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.audit-plan-list-main h3 {
+    margin: .25rem 0;
+    font-size: .98rem;
+    letter-spacing: 0;
+}
+
+.audit-plan-status,
+.audit-plan-item-tags > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: .2rem .5rem;
+    border-radius: 4px;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.audit-plan-status.status-draft,
+.audit-plan-status.status-planned {
+    color: #765900;
+    background: #f6eac0;
+}
+
+.audit-plan-status.status-issued,
+.audit-plan-status.status-completed {
+    color: #106340;
+    background: #d9f1e6;
+}
+
+.audit-plan-status.status-in_progress,
+.audit-plan-status.status-rescheduled {
+    color: #075a88;
+    background: #dcedf7;
+}
+
+.audit-plan-status.status-cancelled {
+    color: #68727c;
+    background: #e9edf0;
+}
+
+.audit-plan-list-progress > div {
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: .4rem;
+    background: #e5e9ed;
+}
+
+.audit-plan-list-progress > div > span {
+    display: block;
+    height: 100%;
+    background: #1c8b60;
+}
+
+.audit-plan-list-progress strong {
+    margin-right: .35rem;
+    color: #123b5e;
+}
+
+.audit-plan-seal {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) minmax(220px, 38%);
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    color: #ecf5fb;
+    background: #082d51;
+    border-left: 4px solid #d3ad35;
+}
+
+.audit-plan-seal > svg {
+    color: #e1bd4a;
+}
+
+.audit-plan-seal p {
+    margin: .1rem 0 0;
+    color: #b9cad8;
+}
+
+.audit-plan-seal code {
+    overflow-wrap: anywhere;
+    color: #d9e5ef;
+    font-size: .72rem;
+}
+
+.audit-plan-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.audit-plan-metrics article {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    min-width: 0;
+    padding: 1rem;
+    border-right: 1px solid var(--line-soft);
+}
+
+.audit-plan-metrics article:last-child {
+    border-right: 0;
+}
+
+.audit-plan-metrics article > span {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    color: #0c5e88;
+    background: #e2f0f7;
+}
+
+.audit-plan-metrics article.has-risk > span {
+    color: #a42f28;
+    background: #f8dfdc;
+}
+
+.audit-plan-metrics small,
+.audit-plan-metrics strong,
+.audit-plan-metrics p {
+    display: block;
+}
+
+.audit-plan-metrics small {
+    color: var(--text-secondary);
+}
+
+.audit-plan-metrics strong {
+    margin: .05rem 0;
+    color: #0a3155;
+    font-size: 1.45rem;
+}
+
+.audit-plan-metrics p {
+    overflow: hidden;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: .77rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.audit-risk-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-bottom: 1px solid var(--line-soft);
+    background: #f7f9fb;
+}
+
+.audit-risk-strip > div {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: .15rem .65rem;
+    padding: .9rem 1rem;
+    border-right: 1px solid var(--line-soft);
+}
+
+.audit-risk-strip > div:last-child {
+    border-right: 0;
+}
+
+.risk-score {
+    display: grid;
+    grid-row: span 2;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    color: #fff;
+    background: #267856;
+    font-size: .8rem;
+    font-weight: 800;
+}
+
+.risk-score.risk-medium { background: #a67b00; }
+.risk-score.risk-high { background: #b33b32; }
+
+.audit-risk-strip strong {
+    overflow: hidden;
+    color: #153753;
+    font-size: .82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.audit-risk-strip small {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-size: .7rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.audit-plan-schedule > article {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 1rem;
+    padding: 1.15rem 1.2rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.audit-plan-schedule > article:last-child {
+    border-bottom: 0;
+}
+
+.audit-plan-schedule > article.status-completed {
+    border-left: 3px solid #26805b;
+}
+
+.audit-plan-schedule > article.status-cancelled {
+    opacity: .72;
+}
+
+.audit-plan-date {
+    align-self: start;
+    padding: .5rem;
+    color: #0b3156;
+    background: #eef3f7;
+    text-align: center;
+}
+
+.audit-plan-date small,
+.audit-plan-date strong,
+.audit-plan-date span {
+    display: block;
+}
+
+.audit-plan-date small {
+    color: #8a6800;
+    font-size: .68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.audit-plan-date strong {
+    font-size: 1.35rem;
+    line-height: 1.2;
+}
+
+.audit-plan-date span { font-size: .7rem; }
+
+.audit-plan-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+
+.audit-plan-item-tags > span:not(.audit-plan-status) {
+    color: #53677a;
+    background: #edf1f4;
+}
+
+.audit-plan-item-tags > .priority-critical {
+    color: #a42f28;
+    background: #f8dfdc;
+}
+
+.audit-plan-item-tags > .priority-high {
+    color: #765900;
+    background: #f6eac0;
+}
+
+.audit-plan-item-main h3 {
+    margin: .5rem 0 .25rem;
+    font-size: .95rem;
+    letter-spacing: 0;
+}
+
+.audit-plan-item-main p {
+    margin: 0 0 .4rem;
+    color: var(--text-secondary);
+}
+
+.audit-plan-item-main > small {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    color: #52697d;
+}
+
+.audit-plan-item-main > small svg {
+    width: 14px;
+    height: 14px;
+}
+
+.audit-plan-status-note {
+    margin-top: .65rem;
+    padding: .55rem .7rem;
+    border-left: 3px solid #4d7899;
+    color: #455e73;
+    background: #f1f5f8;
+    font-size: .8rem;
+}
+
+.audit-plan-item-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: .35rem;
+}
+
+.audit-plan-item-actions > form { margin: 0; }
+.audit-plan-item-actions .icon-button.is-danger { color: #a42f28; }
+.audit-plan-item-actions details { position: relative; }
+.audit-plan-item-actions details > summary { list-style: none; }
+.audit-plan-item-actions details > summary::-webkit-details-marker { display: none; }
+
+.audit-plan-item-actions details > form {
+    position: absolute;
+    z-index: 15;
+    top: 44px;
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+    gap: .8rem;
+    width: min(520px, calc(100vw - 3rem));
+    padding: 1rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+}
+
+.audit-plan-item-actions details > form .span-2 { grid-column: 1 / -1; }
+.audit-plan-item-actions details > form button { justify-self: start; }
+
+.audit-plan-history {
+    grid-column: 2 / -1;
+    margin-top: -.35rem;
+}
+
+.audit-plan-history > summary {
+    color: #1d638c;
+    cursor: pointer;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.audit-plan-history > div {
+    margin-top: .65rem;
+    padding-left: 1rem;
+    border-left: 2px solid #d6dee5;
+}
+
+.audit-plan-history p {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr) auto;
+    gap: .65rem;
+    margin: 0;
+    padding: .45rem 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: .78rem;
+}
+
+.audit-plan-history p:last-child { border-bottom: 0; }
+.audit-plan-history time { color: var(--text-secondary); }
+
+.audit-plan-issue {
+    padding: 1.35rem;
+    color: #ecf4fa;
+    background: #082d51;
+    border-top: 4px solid #cba637;
+}
+
+.audit-plan-issue > div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.audit-plan-issue h2 { margin: 0; font-size: 1.2rem; }
+.audit-plan-issue p { margin: .2rem 0 0; color: #b9cad8; }
+.audit-plan-issue ul { margin: 1rem 0; padding: 0; list-style: none; }
+.audit-plan-issue li { display: flex; align-items: center; gap: .45rem; margin-top: .4rem; color: #ffd6d1; }
+.audit-plan-issue li svg { width: 16px; height: 16px; }
+
+.audit-plan-issue form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, .18);
+}
+
+.audit-plan-issue label {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+}
+
+@media (max-width: 1199.98px) {
+    .audit-plan-list > article { grid-template-columns: 82px minmax(220px, 1fr) 180px 38px; }
+    .audit-risk-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .audit-risk-strip > div:nth-child(2) { border-right: 0; }
+    .audit-risk-strip > div:nth-child(-n+2) { border-bottom: 1px solid var(--line-soft); }
+}
+
+@media (max-width: 991.98px) {
+    .audit-plan-form,
+    .audit-plan-item-create { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .audit-plan-form .span-3,
+    .audit-plan-item-create .span-3 { grid-column: 1 / -1; }
+    .audit-plan-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .audit-plan-metrics article:nth-child(2) { border-right: 0; }
+    .audit-plan-metrics article:nth-child(-n+2) { border-bottom: 1px solid var(--line-soft); }
+    .audit-plan-seal { grid-template-columns: 36px minmax(0, 1fr); }
+    .audit-plan-seal code { grid-column: 2; }
+    .audit-plan-list > article { grid-template-columns: 74px minmax(0, 1fr) 38px; }
+    .audit-plan-list-progress { grid-column: 2; }
+    .audit-plan-list > article > .icon-button { grid-column: 3; grid-row: 1 / span 2; }
+}
+
+@media (max-width: 767.98px) {
+    .audit-plan-heading { align-items: flex-start; flex-direction: column; }
+    .audit-plan-basis { grid-template-columns: 44px minmax(0, 1fr); }
+    .audit-plan-basis small { grid-column: 2; white-space: normal; }
+    .audit-plan-form,
+    .audit-plan-item-create { grid-template-columns: 1fr; padding: 1rem; }
+    .audit-plan-form .span-2,
+    .audit-plan-form .span-3,
+    .audit-plan-item-create .span-2,
+    .audit-plan-item-create .span-3 { grid-column: auto; }
+    .audit-plan-submit { align-items: stretch; flex-direction: column; }
+    .audit-plan-submit button { width: 100%; }
+    .audit-plan-form-action { justify-content: flex-start; }
+    .audit-plan-schedule > article { grid-template-columns: 54px minmax(0, 1fr); padding: 1rem; }
+    .audit-plan-item-actions { grid-column: 2; }
+    .audit-plan-history { grid-column: 1 / -1; }
+    .audit-plan-item-actions details > form { position: fixed; top: auto; right: 1rem; bottom: 1rem; left: 1rem; width: auto; max-height: calc(100vh - 2rem); overflow-y: auto; }
+    .audit-plan-issue form { align-items: stretch; flex-direction: column; }
+}
+
+@media (max-width: 575.98px) {
+    .audit-plan-metrics { grid-template-columns: 1fr; }
+    .audit-plan-metrics article,
+    .audit-plan-metrics article:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--line-soft); }
+    .audit-plan-metrics article:last-child { border-bottom: 0; }
+    .audit-risk-strip { grid-template-columns: 1fr; }
+    .audit-risk-strip > div,
+    .audit-risk-strip > div:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--line-soft); }
+    .audit-risk-strip > div:last-child { border-bottom: 0; }
+    .audit-plan-list > article { grid-template-columns: 64px minmax(0, 1fr) 36px; gap: .75rem; padding: 1rem; }
+    .audit-plan-year { padding-right: .65rem; }
+    .audit-plan-list-main h3 { font-size: .88rem; }
+    .audit-plan-history p { grid-template-columns: 1fr; gap: .2rem; }
+    .audit-plan-item-actions details > form { grid-template-columns: 1fr; }
+    .audit-plan-item-actions details > form .span-2 { grid-column: auto; }
+    .audit-plan-seal { padding: 1rem; }
+}
+
 /* Municipal internal control */
 .internal-control-heading {
     display: flex;

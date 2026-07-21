@@ -26,7 +26,7 @@ class MunicipalInternalControlReview extends Model
     public const CONCLUSION_IRREGULAR = 'irregular';
 
     protected $fillable = [
-        'municipality_id', 'parliamentary_amendment_id', 'municipal_governance_report_id',
+        'municipality_id', 'parliamentary_amendment_id', 'municipal_governance_report_id', 'municipal_audit_plan_item_id',
         'reviewed_by', 'sequence', 'reference', 'phase', 'conclusion', 'criteria',
         'summary', 'findings', 'recommendations', 'annual_audit_plan_reference',
         'legal_basis', 'snapshot', 'snapshot_sha256', 'evidence_path',
@@ -96,6 +96,11 @@ class MunicipalInternalControlReview extends Model
     public function governanceReport(): BelongsTo
     {
         return $this->belongsTo(MunicipalGovernanceReport::class, 'municipal_governance_report_id');
+    }
+
+    public function auditPlanItem(): BelongsTo
+    {
+        return $this->belongsTo(MunicipalAuditPlanItem::class, 'municipal_audit_plan_item_id');
     }
 
     public function reviewer(): BelongsTo

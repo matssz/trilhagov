@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
 use App\Models\IntegrityAlert;
+use App\Models\MunicipalAuditPlan;
+use App\Models\MunicipalAuditPlanItem;
 use App\Models\MunicipalInternalControlAction;
 use App\Models\Municipality;
 use App\Models\MunicipalityAlertSetting;
@@ -61,6 +63,7 @@ class IntegrityAlertService
             'amendments.technicalImpediments.remappings',
             'amendments.regulatoryProfile',
             'amendments.municipalWorkPlan.stages',
+            'amendments.auditPlanItems.plan',
             'amendments.internalControlReviews.actions',
             'amendments.transparencyEvents',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
@@ -85,6 +88,7 @@ class IntegrityAlertService
             $this->detectTransparencyControls($amendment, $detections);
             $this->detectAudespControls($amendment, $detections);
             $this->detectInternalControlActions($amendment, $settings, $detections);
+            $this->detectAuditPlanItems($amendment, $settings, $detections);
         }
 
         $stats = DB::transaction(function () use ($municipality, $detections): array {
@@ -764,6 +768,31 @@ class IntegrityAlertService
                 $action->title,
                 $action->due_at,
                 $action->responsible_user_id,
+            );
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectAuditPlanItems(
+        ParliamentaryAmendment $amendment,
+        MunicipalityAlertSetting $settings,
+        array &$detections,
+    ): void {
+        foreach ($amendment->auditPlanItems as $item) {
+            if ($item->plan->status !== MunicipalAuditPlan::STATUS_ISSUED
+                || in_array($item->status, [MunicipalAuditPlanItem::STATUS_COMPLETED, MunicipalAuditPlanItem::STATUS_CANCELLED], true)) {
+                continue;
+            }
+
+            $this->detectOperationalDeadline(
+                $amendment,
+                $settings,
+                $detections,
+                "audit-plan:{$item->id}",
+                'Verificação do Plano Anual',
+                $item->formalReference().' · '.$item->phaseLabel(),
+                $item->planned_at,
+                $item->assigned_user_id,
             );
         }
     }

@@ -236,6 +236,11 @@ class Municipality extends Model
         return $this->hasMany(MunicipalInternalControlAction::class);
     }
 
+    public function auditPlans(): HasMany
+    {
+        return $this->hasMany(MunicipalAuditPlan::class);
+    }
+
     public function scopeComplete(Builder $query): Builder
     {
         return $query

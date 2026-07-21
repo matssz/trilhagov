@@ -22,6 +22,7 @@ use App\Http\Controllers\FinancialLiquidationController;
 use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
+use App\Http\Controllers\MunicipalAuditPlanController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
 use App\Http\Controllers\MunicipalInternalControlController;
 use App\Http\Controllers\MunicipalitySelectionController;
@@ -77,6 +78,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
     Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
     Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
+    Route::get('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'index'])->name('audit-plans.index');
+    Route::get('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'show'])->name('audit-plans.show');
+    Route::get('/controle-interno/plano-anual/{plan}/documento.pdf', [MunicipalAuditPlanController::class, 'pdf'])->name('audit-plans.pdf');
     Route::get('/relatorios/remessas/{dispatch}', [MunicipalReportDispatchController::class, 'show'])->name('report-dispatches.show');
     Route::get('/relatorios/remessas/{dispatch}/recibo.pdf', [MunicipalReportDispatchController::class, 'receipt'])->name('report-dispatches.receipt');
     Route::get('/relatorios/remessas/{dispatch}/eventos/{event}/comprovante', [MunicipalReportDispatchController::class, 'evidence'])->name('report-dispatches.evidence');
@@ -140,6 +144,13 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,auditor')->group(function () {
+        Route::post('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'store'])->name('audit-plans.store')->block(10, 10);
+        Route::patch('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'update'])->name('audit-plans.update')->block(10, 10);
+        Route::post('/controle-interno/plano-anual/{plan}/itens', [MunicipalAuditPlanController::class, 'addItem'])->name('audit-plan-items.store')->block(10, 10);
+        Route::patch('/controle-interno/plano-anual/itens/{item}', [MunicipalAuditPlanController::class, 'updateItem'])->name('audit-plan-items.update')->block(10, 10);
+        Route::delete('/controle-interno/plano-anual/itens/{item}', [MunicipalAuditPlanController::class, 'removeItem'])->name('audit-plan-items.destroy')->block(10, 10);
+        Route::post('/controle-interno/plano-anual/{plan}/emitir', [MunicipalAuditPlanController::class, 'issue'])->name('audit-plans.issue')->block(10, 10);
+        Route::patch('/controle-interno/plano-anual/itens/{item}/andamento', [MunicipalAuditPlanController::class, 'progress'])->name('audit-plan-items.progress')->block(10, 10);
         Route::post('/emendas/{emenda}/controle-interno/pareceres', [MunicipalInternalControlController::class, 'store'])->name('internal-control-reviews.store')->block(20, 10);
         Route::post('/controle-interno/providencias/{action}/decidir', [MunicipalInternalControlController::class, 'decide'])->name('internal-control-actions.decide')->block(20, 10);
     });

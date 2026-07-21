@@ -9,6 +9,8 @@ use App\Models\AudespHomologationItem;
 use App\Models\ExecutionStage;
 use App\Models\ExternalFinancialReconciliation;
 use App\Models\FinancialCommitment;
+use App\Models\MunicipalAuditPlan;
+use App\Models\MunicipalAuditPlanItem;
 use App\Models\MunicipalInternalControlAction;
 use App\Models\Municipality;
 use App\Models\MunicipalWorkItem;
@@ -40,6 +42,7 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'auditPlanItems.plan',
             'internalControlReviews.actions',
             'transparencyEvents',
             'regulatoryProfile',
@@ -288,6 +291,26 @@ class MunicipalWorkItemService
                     $controlAction->due_at,
                     $controlAction->isOverdue() ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
                     $awaitingValidation ? null : $controlAction->responsible_user_id,
+                );
+            }
+
+            foreach ($amendment->auditPlanItems as $auditPlanItem) {
+                if ($auditPlanItem->plan->status !== MunicipalAuditPlan::STATUS_ISSUED
+                    || in_array($auditPlanItem->status, [MunicipalAuditPlanItem::STATUS_COMPLETED, MunicipalAuditPlanItem::STATUS_CANCELLED], true)) {
+                    continue;
+                }
+
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:audit-plan-item:{$auditPlanItem->id}",
+                    'control',
+                    $auditPlanItem->status === MunicipalAuditPlanItem::STATUS_IN_PROGRESS
+                        ? 'Concluir verificação do Plano Anual'
+                        : 'Executar verificação do Plano Anual',
+                    $auditPlanItem->scope_notes,
+                    route('audit-plans.show', $auditPlanItem->plan, false).'#item-'.$auditPlanItem->id,
+                    $auditPlanItem->planned_at,
+                    $auditPlanItem->isOverdue() ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
+                    $auditPlanItem->assigned_user_id,
                 );
             }
         }
