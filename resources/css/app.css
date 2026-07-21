@@ -268,17 +268,17 @@ a:hover {
 }
 
 .sidebar-actions .btn-primary {
-    --bs-btn-color: var(--navy-950);
-    --bs-btn-bg: var(--metal-gold);
-    --bs-btn-border-color: #b98d19;
-    --bs-btn-hover-color: var(--navy-950);
-    --bs-btn-hover-bg: #e1bd50;
-    --bs-btn-hover-border-color: #aa7f12;
-    --bs-btn-active-color: var(--navy-950);
-    --bs-btn-active-bg: #c99d29;
-    --bs-btn-active-border-color: #9c7410;
-    background-image: linear-gradient(180deg, #efd574 0%, #c89a25 54%, #b98513 100%);
-    box-shadow: 0 4px 10px rgba(117, 83, 5, .18), inset 0 1px 0 rgba(255, 255, 255, .55);
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: var(--navy-900);
+    --bs-btn-border-color: #08294e;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: var(--navy-800);
+    --bs-btn-hover-border-color: var(--navy-950);
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: var(--navy-950);
+    --bs-btn-active-border-color: #04172d;
+    background-image: linear-gradient(180deg, #184d80 0%, var(--navy-900) 52%, #08294e 100%);
+    box-shadow: 0 4px 10px rgba(7, 31, 61, .2), inset 0 1px 0 rgba(255, 255, 255, .24);
 }
 
 .sidebar-actions svg {
