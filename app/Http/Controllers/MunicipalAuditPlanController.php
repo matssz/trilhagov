@@ -51,7 +51,8 @@ class MunicipalAuditPlanController extends Controller
         }
 
         $plan = DB::transaction(function () use ($request, $municipality, $validated, $audit): MunicipalAuditPlan {
-            $version = ((int) $municipality->auditPlans()->where('fiscal_year', $validated['fiscal_year'])->lockForUpdate()->max('version')) + 1;
+            Municipality::query()->whereKey($municipality->id)->lockForUpdate()->firstOrFail();
+            $version = ((int) $municipality->auditPlans()->where('fiscal_year', $validated['fiscal_year'])->max('version')) + 1;
             $plan = $municipality->auditPlans()->create([
                 ...$validated,
                 'created_by' => $request->user()->id,
