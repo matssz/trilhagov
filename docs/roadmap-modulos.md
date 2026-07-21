@@ -3,6 +3,73 @@
 Este documento organiza a evolução técnica e comercial. A ordem considera risco,
 dependências e capacidade de validar cada entrega com usuários municipais.
 
+## Mapa visual do produto
+
+O fluxo abaixo representa o caminho operacional de uma emenda dentro do
+TrilhaGov. Ele deve continuar simples para equipes municipais pequenas, mesmo
+quando novos controles forem adicionados.
+
+```mermaid
+flowchart LR
+    A[Normas municipais] --> B[Inventário da emenda]
+    B --> C[Plano de trabalho]
+    C --> D{Admissível?}
+    D -->|Sim| E[Execução física e financeira]
+    D -->|Ajustes| C
+    D -->|Impedimento| F[Diligência e remanejamento]
+    F --> C
+    E --> G[Prestação de contas]
+    G --> H[Transparência e relatórios]
+    H --> I[Audesp e controle interno]
+    I --> J[Plano anual de auditoria]
+
+    classDef base fill:#eaf0f6,stroke:#123f70,color:#071f3d,stroke-width:1px;
+    classDef decision fill:#faf5e7,stroke:#b98910,color:#071f3d,stroke-width:2px;
+    class A,B,C,E,F,G,H,I,J base;
+    class D decision;
+```
+
+## Sequência de implantação
+
+**Foco atual: Etapa 5 - Relatórios para controle interno e Câmara.**
+
+```mermaid
+flowchart TB
+    E1["1. Município piloto e base normativa<br/>Técnico entregue; validar em campo"]
+    E2["2. Regras locais no fluxo<br/>Técnico entregue; validar dados reais"]
+    E3["3. Transparência municipal<br/>Técnico entregue; validar publicação"]
+    E4["4. Audesp e contabilidade<br/>Técnico entregue; homologar arquivo real"]
+    E5["5. Relatórios para controle e Câmara<br/>EM DESENVOLVIMENTO"]
+    E6["6. Saúde, obras e terceiro setor<br/>Planejado"]
+    E7["7. Integrações graduais<br/>Planejado"]
+    E8["8. Segurança, LGPD e continuidade<br/>Planejado"]
+    E9["9. Piloto e expansão comercial<br/>Planejado"]
+
+    E1 --> E2 --> E3 --> E4 --> E5 --> E6 --> E7 --> E8 --> E9
+
+    classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:1px;
+    classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
+    classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
+    class E1,E2,E3,E4 delivered;
+    class E5 focus;
+    class E6,E7,E8,E9 planned;
+```
+
+### Entregas do foco atual
+
+- [x] Relatório mensal de governança municipal.
+- [x] Protocolo e histórico de remessas entre órgãos.
+- [x] Parecer formal do controle interno com evidências.
+- [x] Plano anual de auditoria orientado por risco.
+- [ ] Relatório consolidado de reserva e execução em saúde.
+- [ ] Relatório de divergências entre orçamento, financeiro e entrega física.
+- [ ] Dossiê anual para controle interno, Câmara e prestação de contas.
+
+Regra de atualização: ao concluir uma entrega, marcar o item neste arquivo e
+mover o destaque `focus` somente quando todos os critérios da etapa tiverem sido
+verificados. O detalhamento completo das etapas permanece no
+[roteiro de implantação municipal](roteiro-implantacao-municipal.md).
+
 ## Entregue - planejamento de emendas impositivas municipais
 
 - Plano de trabalho estruturado conforme o Manual TCESP de julho de 2026.
@@ -305,20 +372,18 @@ municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
 
 ## Ordem recomendada
 
-1. Concluir identidade municipal e robustez.
-2. Validar o inventário com usuários reais.
-3. Concluir perfis, convites e trilha de auditoria.
-4. Concluir a primeira versão de documentos e checklists.
-5. Construir execução física e financeira.
-6. Gerar transparência e prestação de contas.
-7. Adicionar alertas.
-8. Integrar fontes oficiais.
-9. Consolidar as próximas ações na Central de Trabalho.
-10. Migrar o inventário existente por importação assistida.
-11. Parametrizar a legislação e os prazos de cada município.
-12. Aplicar os parâmetros vigentes nos alertas e na admissibilidade.
-13. Validar a transparência entregue com o Município piloto.
-14. Implementar e homologar a remessa Audesp.
+A sequência visual no início deste documento é a referência atual:
+
+1. concluir os três relatórios pendentes da Etapa 5;
+2. validar as Etapas 1 a 5 com um município piloto e dados anonimizados;
+3. construir os controles especializados da Etapa 6;
+4. avançar nas integrações graduais da Etapa 7;
+5. homologar segurança, LGPD e continuidade na Etapa 8;
+6. executar o piloto acompanhado e a expansão comercial da Etapa 9.
+
+As validações de campo podem ocorrer em paralelo ao desenvolvimento, mas uma
+etapa não deve ser tratada como comercialmente concluída apenas porque sua
+implementação técnica foi entregue.
 
 ## Itens fora do escopo atual
 

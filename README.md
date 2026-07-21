@@ -133,7 +133,7 @@ hora sem repetir o mesmo envio.
 - [Evidência e hipótese](docs/evidencia-e-hipotese.md)
 - [Modelagem inicial](docs/modelagem-inicial.md)
 - [Roteiro de entrevista municipal](docs/roteiro-entrevista-municipal.md)
-- [Roadmap de módulos](docs/roadmap-modulos.md)
+- [Roadmap visual de módulos e foco atual](docs/roadmap-modulos.md)
 - [Identidade visual](docs/identidade-visual.md)
 - [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)
 - [Alertas e notificações](docs/alertas-e-notificacoes.md)
