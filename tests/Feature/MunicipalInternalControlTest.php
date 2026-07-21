@@ -24,6 +24,24 @@ class MunicipalInternalControlTest extends TestCase
     public function test_auditor_issues_immutable_regular_review_with_snapshot_and_pdf(): void
     {
         [$manager, $auditor, $municipality, $amendment] = $this->context();
+        $documentType = $municipality->documentTypes()->create([
+            'created_by' => $manager->id,
+            'name' => 'Memória de cálculo',
+            'is_required' => true,
+            'is_active' => true,
+            'sort_order' => 10,
+        ]);
+        $amendment->documents()->create([
+            'municipality_id' => $municipality->id,
+            'document_type_id' => $documentType->id,
+            'uploaded_by' => $manager->id,
+            'uploader_name' => $manager->name,
+            'original_name' => 'memoria-calculo.pdf',
+            'storage_path' => 'tests/memoria-calculo.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 2048,
+            'version' => 1,
+        ]);
 
         $this->actingAs($auditor)
             ->withSession(['active_municipality_id' => $municipality->id])
@@ -38,6 +56,8 @@ class MunicipalInternalControlTest extends TestCase
         $this->assertSame('PCI-2026-'.str_pad((string) $amendment->id, 5, '0', STR_PAD_LEFT).'-001', $review->reference);
         $this->assertSame(MunicipalInternalControlReview::CONCLUSION_REGULAR, $review->conclusion);
         $this->assertSame(MunicipalInternalControlService::FRAMEWORK_VERSION, $review->snapshot['framework_version']);
+        $this->assertSame(2048, $review->snapshot['controls']['documents'][0]['size_bytes']);
+        $this->assertSame('memoria-calculo.pdf', $review->snapshot['controls']['documents'][0]['original_name']);
         $this->assertSame(64, strlen($review->snapshot_sha256));
         $this->assertDatabaseCount('municipal_internal_control_actions', 0);
 

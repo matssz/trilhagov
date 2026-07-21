@@ -79,7 +79,7 @@ class MunicipalInternalControlService
             'regulatoryProfile:id,reference,status,version',
             'municipalWorkPlan.stages',
             'municipalWorkPlan.reviews',
-            'documents:id,parliamentary_amendment_id,original_name,version,sha256',
+            'documents:id,parliamentary_amendment_id,original_name,version,size_bytes,created_at',
             'executionStages:id,parliamentary_amendment_id,title,status,progress_percentage,planned_end_at',
             'financialCommitments.liquidations.payments',
             'financialPayments:id,parliamentary_amendment_id,amount,paid_at',
@@ -124,7 +124,10 @@ class MunicipalInternalControlService
             ],
             'controls' => [
                 'document_count' => $amendment->documents->count(),
-                'documents' => $amendment->documents->map->only(['original_name', 'version', 'sha256'])->values()->all(),
+                'documents' => $amendment->documents
+                    ->map->only(['id', 'original_name', 'version', 'size_bytes', 'created_at'])
+                    ->values()
+                    ->all(),
                 'open_alerts' => $amendment->integrityAlerts->map->only(['alert_key', 'severity', 'title', 'due_at'])->values()->all(),
                 'audesp_status' => $amendment->audespRegistration?->status,
             ],
