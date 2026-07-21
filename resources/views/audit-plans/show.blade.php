@@ -83,6 +83,26 @@
                         <div class="audit-plan-date"><small>{{ $item->planned_at->translatedFormat('M') }}</small><strong>{{ $item->planned_at->format('d') }}</strong><span>{{ $item->planned_at->format('Y') }}</span></div>
                         <div class="audit-plan-item-main"><div class="audit-plan-item-tags"><span class="audit-plan-status status-{{ $item->status }}">{{ $item->statusLabel() }}</span><span class="priority-{{ $item->priority }}">{{ $item->priorityLabel() }}</span><span>{{ $item->phaseLabel() }}</span></div><h3>{{ $item->amendment->reference }} · {{ $item->amendment->object }}</h3><p>{{ $item->scope_notes }}</p><small><i data-lucide="user-round" aria-hidden="true"></i>{{ $item->assignedUser->name }} · {{ $item->frequencyLabel() }}</small>@if($item->status_notes)<div class="audit-plan-status-note">{{ $item->status_notes }}</div>@endif</div>
                         <div class="audit-plan-item-actions">
+                            @if($item->program)
+                                <a class="btn btn-sm btn-outline-primary" href="{{ route('audit-programs.show', $item->program) }}" title="Abrir Programa de Auditoria"><i data-lucide="clipboard-list" aria-hidden="true"></i>Programa</a>
+                            @elseif(!$plan->isDraft() && $canManage && isset($programCreateTokens[$item->id]))
+                                <details class="audit-program-launch">
+                                    <summary class="btn btn-sm btn-primary"><i data-lucide="play" aria-hidden="true"></i>Iniciar programa</summary>
+                                    <form method="POST" action="{{ route('audit-programs.store', $item) }}">
+                                        @csrf
+                                        <input name="_submission_token" type="hidden" value="{{ $programCreateTokens[$item->id] }}">
+                                        <label class="form-label">Supervisor independente <span class="required-mark">*</span>
+                                            <select class="form-select" name="supervisor_id" required>
+                                                <option value="">Selecione</option>
+                                                @foreach($auditors as $auditor)
+                                                    @if($auditor->id !== $item->assigned_user_id)<option value="{{ $auditor->id }}">{{ $auditor->name }}</option>@endif
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <button class="btn btn-primary" type="submit"><i data-lucide="clipboard-plus" aria-hidden="true"></i>Criar programa</button>
+                                    </form>
+                                </details>
+                            @endif
                             <a class="icon-button" href="{{ route('emendas.internal-control', $item->amendment) }}#emitir-parecer" title="Abrir Controle Interno" aria-label="Abrir Controle Interno"><i data-lucide="shield-check" aria-hidden="true"></i></a>
                             @if($plan->isDraft() && $canManage)
                                 <details><summary class="icon-button" title="Editar item" aria-label="Editar item"><i data-lucide="pencil" aria-hidden="true"></i></summary><form method="POST" action="{{ route('audit-plan-items.update', $item) }}">@csrf @method('PATCH')<input name="_submission_token" type="hidden" value="{{ $itemUpdateTokens[$item->id] }}"><input name="parliamentary_amendment_id" type="hidden" value="{{ $item->parliamentary_amendment_id }}"><label class="form-label">Responsável<select class="form-select" name="assigned_user_id" required>@foreach($auditors as $auditor)<option value="{{ $auditor->id }}" @selected($item->assigned_user_id === $auditor->id)>{{ $auditor->name }}</option>@endforeach</select></label><label class="form-label">Fase<select class="form-select" name="phase" required>@foreach($phases as $value => $label)<option value="{{ $value }}" @selected($item->phase === $value)>{{ $label }}</option>@endforeach</select></label><label class="form-label">Prioridade<select class="form-select" name="priority" required>@foreach($priorities as $value => $label)<option value="{{ $value }}" @selected($item->priority === $value)>{{ $label }}</option>@endforeach</select></label><label class="form-label">Frequência<select class="form-select" name="frequency" required>@foreach($frequencies as $value => $label)<option value="{{ $value }}" @selected($item->frequency === $value)>{{ $label }}</option>@endforeach</select></label><label class="form-label">Data<input class="form-control" name="planned_at" type="date" value="{{ $item->planned_at->format('Y-m-d') }}" required></label><label class="form-label span-2">Escopo<textarea class="form-control" name="scope_notes" rows="2" required>{{ $item->scope_notes }}</textarea></label><button class="btn btn-primary" type="submit"><i data-lucide="save" aria-hidden="true"></i>Salvar</button></form></details>

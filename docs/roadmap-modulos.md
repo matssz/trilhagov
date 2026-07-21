@@ -29,9 +29,43 @@ flowchart LR
     class D decision;
 ```
 
-## Sequência de implantação
+## Sequência atual de desenvolvimento
 
-**Foco atual: Etapa 5 - Relatórios para controle interno e Câmara.**
+**Próximo foco: Comunicações e Documentos Oficiais.**
+
+```mermaid
+flowchart LR
+    A["Programa de Auditoria<br/>1ª versão entregue"]
+    B["Comunicações Oficiais<br/>PRÓXIMO FOCO"]
+    C["Relatórios Especializados<br/>Planejado"]
+    D["Saúde e LC 141<br/>Planejado"]
+    E["Obras e Licitações<br/>Planejado"]
+    F["Integrações reais<br/>Planejado"]
+    G["LGPD e comercialização<br/>Planejado"]
+
+    A --> B --> C --> D --> E --> F --> G
+
+    classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
+    classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
+    classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
+    class A delivered;
+    class B focus;
+    class C,D,E,F,G planned;
+```
+
+### Programa de Auditoria e Papéis de Trabalho
+
+- [x] Programa executável vinculado ao item emitido do Plano Anual.
+- [x] Estratégia, materialidade, população e amostra documentadas.
+- [x] Procedimentos, testes e resultados por papel de trabalho.
+- [x] Evidências privadas, imutáveis e identificadas por SHA-256.
+- [x] Achados estruturados com critério, condição, causa, efeito e recomendação.
+- [x] Segregação entre auditor líder e supervisor.
+- [x] Devolução, aprovação e conclusão formal com fotografia SHA-256.
+- [x] Encerramento integrado ao Plano Anual, alertas e Central de Trabalho.
+- [ ] Validar os papéis de trabalho com um controlador municipal.
+
+## Sequência de implantação municipal
 
 ```mermaid
 flowchart TB
@@ -39,7 +73,7 @@ flowchart TB
     E2["2. Regras locais no fluxo<br/>Técnico entregue; validar dados reais"]
     E3["3. Transparência municipal<br/>Técnico entregue; validar publicação"]
     E4["4. Audesp e contabilidade<br/>Técnico entregue; homologar arquivo real"]
-    E5["5. Relatórios para controle e Câmara<br/>EM DESENVOLVIMENTO"]
+    E5["5. Relatórios para controle e Câmara<br/>Parcialmente entregue"]
     E6["6. Saúde, obras e terceiro setor<br/>Planejado"]
     E7["7. Integrações graduais<br/>Planejado"]
     E8["8. Segurança, LGPD e continuidade<br/>Planejado"]
@@ -48,14 +82,14 @@ flowchart TB
     E1 --> E2 --> E3 --> E4 --> E5 --> E6 --> E7 --> E8 --> E9
 
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:1px;
-    classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
+    classDef progress fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:2px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
     class E1,E2,E3,E4 delivered;
-    class E5 focus;
+    class E5 progress;
     class E6,E7,E8,E9 planned;
 ```
 
-### Entregas do foco atual
+### Entregas dos relatórios municipais
 
 - [x] Relatório mensal de governança municipal.
 - [x] Protocolo e histórico de remessas entre órgãos.
@@ -66,7 +100,8 @@ flowchart TB
 - [ ] Dossiê anual para controle interno, Câmara e prestação de contas.
 
 Regra de atualização: ao concluir uma entrega, marcar o item neste arquivo e
-mover o destaque `focus` somente quando todos os critérios da etapa tiverem sido
+mover o destaque `focus` da sequência de desenvolvimento somente quando os
+critérios técnicos da entrega tiverem sido
 verificados. O detalhamento completo das etapas permanece no
 [roteiro de implantação municipal](roteiro-implantacao-municipal.md).
 
@@ -374,12 +409,13 @@ municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
 
 A sequência visual no início deste documento é a referência atual:
 
-1. concluir os três relatórios pendentes da Etapa 5;
-2. validar as Etapas 1 a 5 com um município piloto e dados anonimizados;
-3. construir os controles especializados da Etapa 6;
-4. avançar nas integrações graduais da Etapa 7;
-5. homologar segurança, LGPD e continuidade na Etapa 8;
-6. executar o piloto acompanhado e a expansão comercial da Etapa 9.
+1. validar a primeira versão do Programa de Auditoria;
+2. construir Comunicações e Documentos Oficiais;
+3. concluir os Relatórios Municipais Especializados;
+4. construir Saúde e LC 141;
+5. avançar em Obras Públicas e Licitações e Contratos;
+6. homologar integrações reais com Siafic, Audesp e Câmara;
+7. concluir LGPD, continuidade e administração comercial do SaaS.
 
 As validações de campo podem ocorrer em paralelo ao desenvolvimento, mas uma
 etapa não deve ser tratada como comercialmente concluída apenas porque sua

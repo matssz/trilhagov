@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MunicipalAuditPlanItem extends Model
 {
@@ -120,6 +121,11 @@ class MunicipalAuditPlanItem extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(MunicipalInternalControlReview::class);
+    }
+
+    public function program(): HasOne
+    {
+        return $this->hasOne(MunicipalAuditProgram::class);
     }
 
     public function events(): HasMany

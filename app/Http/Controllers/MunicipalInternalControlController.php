@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MunicipalAuditPlan;
 use App\Models\MunicipalAuditPlanItem;
+use App\Models\MunicipalAuditProgram;
 use App\Models\MunicipalGovernanceReport;
 use App\Models\MunicipalInternalControlAction;
 use App\Models\MunicipalInternalControlActionEvent;
@@ -134,13 +135,19 @@ class MunicipalInternalControlController extends Controller
                         ->where('parliamentary_amendment_id', $locked->id)
                         ->whereIn('status', [MunicipalAuditPlanItem::STATUS_PLANNED, MunicipalAuditPlanItem::STATUS_IN_PROGRESS, MunicipalAuditPlanItem::STATUS_RESCHEDULED])
                         ->whereHas('plan', fn ($query) => $query->where('status', MunicipalAuditPlan::STATUS_ISSUED))
-                        ->with('plan')
+                        ->with(['plan', 'program'])
                         ->lockForUpdate()
                         ->find($validated['municipal_audit_plan_item_id']);
 
                     if ($auditPlanItem === null || $auditPlanItem->phase !== $validated['phase']) {
                         throw ValidationException::withMessages([
                             'municipal_audit_plan_item_id' => 'O item deve pertencer a um plano emitido, estar ativo e corresponder à fase escolhida.',
+                        ]);
+                    }
+                    if ($auditPlanItem->program !== null
+                        && $auditPlanItem->program->status !== MunicipalAuditProgram::STATUS_CONCLUDED) {
+                        throw ValidationException::withMessages([
+                            'municipal_audit_plan_item_id' => 'Conclua a execução e a revisão do Programa de Auditoria antes de emitir o parecer final deste item.',
                         ]);
                     }
                 }

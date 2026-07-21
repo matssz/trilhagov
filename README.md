@@ -74,6 +74,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Diagnóstico da regra `47.4.63`, reclassificação de saldos anteriores e prévia XML interna sem transmissão automática.
 - Homologação do XML produzido pelo Siafic com comparação campo a campo, hash e armazenamento privado.
 - Registro auditável da transmissão pelo Coletor, recibos, rejeições e reenvios vinculados, sem usar credenciais do TCESP.
+- Programa de Auditoria executável com estratégia de amostragem, procedimentos, testes e papéis de trabalho.
+- Evidências privadas com SHA-256, achados estruturados, revisão independente e conclusão formal integrada ao Plano Anual.
 
 ## Stack
 
@@ -145,6 +147,7 @@ hora sem repetir o mesmo envio.
 - [Impedimentos, diligências e remanejamento](docs/impedimentos-diligencias-remanejamento.md)
 - [Audesp e rastreabilidade contábil municipal](docs/audesp-rastreabilidade-municipal.md)
 - [Homologação Audesp municipal](docs/homologacao-audesp-municipal.md)
+- [Programa de Auditoria e papéis de trabalho](docs/programa-auditoria-papeis-trabalho.md)
 - [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
 - [Deploy gratuito com Render e Supabase](docs/deploy-gratuito.md)
 

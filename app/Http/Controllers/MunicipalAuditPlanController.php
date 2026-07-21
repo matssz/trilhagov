@@ -73,7 +73,7 @@ class MunicipalAuditPlanController extends Controller
         $municipality = $currentMunicipality->get($request);
         $this->ensureScope($municipality);
         $plan = $this->plan($municipality, $plan);
-        $plan->load(['creator:id,name', 'issuer:id,name', 'items.amendment', 'items.assignedUser:id,name,email', 'items.reviews', 'items.events']);
+        $plan->load(['creator:id,name', 'issuer:id,name', 'items.amendment', 'items.assignedUser:id,name,email', 'items.reviews', 'items.events', 'items.program']);
         $canManage = $this->canManage($request, $municipality);
 
         return view('audit-plans.show', [
@@ -88,6 +88,10 @@ class MunicipalAuditPlanController extends Controller
             'itemUpdateTokens' => $plan->isDraft() && $canManage ? $plan->items->mapWithKeys(fn ($item) => [$item->id => $forms->issue($request, "municipal-audit-plan-item-update-{$item->id}")]) : collect(),
             'itemDeleteTokens' => $plan->isDraft() && $canManage ? $plan->items->mapWithKeys(fn ($item) => [$item->id => $forms->issue($request, "municipal-audit-plan-item-delete-{$item->id}")]) : collect(),
             'progressTokens' => ! $plan->isDraft() && $canManage ? $plan->items->whereNotIn('status', ['completed', 'cancelled'])->mapWithKeys(fn ($item) => [$item->id => $forms->issue($request, "municipal-audit-plan-item-progress-{$item->id}")]) : collect(),
+            'programCreateTokens' => ! $plan->isDraft() && $canManage ? $plan->items
+                ->whereNull('program')
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->mapWithKeys(fn ($item) => [$item->id => $forms->issue($request, "audit-program-create-{$item->id}")]) : collect(),
             'blockers' => $plan->isDraft() ? $service->readiness($plan) : [],
             'phases' => MunicipalInternalControlReview::phases(),
             'priorities' => MunicipalAuditPlanItem::priorities(),

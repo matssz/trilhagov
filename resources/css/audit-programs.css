@@ -1,0 +1,432 @@
+.audit-program-heading,
+.audit-program-heading-actions,
+.audit-program-panel-header,
+.audit-program-review-copy,
+.audit-program-submit,
+.audit-program-conclusion,
+.audit-program-history summary {
+    display: flex;
+    align-items: center;
+}
+
+.audit-program-heading,
+.audit-program-panel-header {
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.audit-program-heading h1 {
+    margin: .25rem 0;
+    font-size: 1.65rem;
+}
+
+.audit-program-heading p:last-child {
+    margin: 0;
+    color: var(--muted);
+}
+
+.audit-program-heading-actions {
+    flex: 0 0 auto;
+    gap: .65rem;
+}
+
+.audit-program-status,
+.audit-procedure-status,
+.audit-finding-severity {
+    display: inline-flex;
+    min-height: 25px;
+    align-items: center;
+    padding: .2rem .48rem;
+    border-radius: 4px;
+    background: #e8eff7;
+    color: var(--navy-800);
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.audit-program-status.status-under_review,
+.audit-program-status.status-returned,
+.audit-procedure-status.status-exception {
+    background: #fff2cd;
+    color: #7a5300;
+}
+
+.audit-program-status.status-approved,
+.audit-program-status.status-concluded,
+.audit-procedure-status.status-compliant {
+    background: #e5f4ed;
+    color: var(--success);
+}
+
+.audit-program-flow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: linear-gradient(120deg, #fff, #f5f8f9 72%, #f6f2e8);
+    box-shadow: var(--shadow-soft);
+}
+
+.audit-program-flow > div {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: .35rem;
+    color: #8a96a5;
+}
+
+.audit-program-flow > div:not(:last-child)::after {
+    position: absolute;
+    z-index: 0;
+    top: 18px;
+    left: calc(50% + 18px);
+    width: calc(100% - 36px);
+    height: 2px;
+    background: #d7dee6;
+    content: "";
+}
+
+.audit-program-flow span {
+    z-index: 1;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 2px solid #cbd4dd;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.audit-program-flow svg { width: 17px; height: 17px; }
+.audit-program-flow small { font-size: .72rem; font-weight: 750; }
+.audit-program-flow .is-complete { color: var(--success); }
+.audit-program-flow .is-complete span { border-color: var(--success); background: #e8f6ef; }
+.audit-program-flow .is-complete::after { background: var(--success) !important; }
+.audit-program-flow .is-current { color: var(--navy-900); }
+.audit-program-flow .is-current span { border-color: var(--navy-800); background: var(--navy-100); }
+
+.audit-program-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.audit-program-metrics article {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: .75rem;
+    padding: .95rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: linear-gradient(145deg, #fff, #f8fafb 72%, #f5f1e8);
+    box-shadow: var(--shadow-soft);
+}
+
+.audit-program-metrics article > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--navy-100);
+    color: var(--navy-800);
+}
+
+.audit-program-metrics article > span svg { width: 19px; height: 19px; }
+.audit-program-metrics article > div { display: grid; min-width: 0; }
+.audit-program-metrics small { color: var(--muted); font-size: .68rem; font-weight: 750; text-transform: uppercase; }
+.audit-program-metrics strong { margin: .1rem 0; color: var(--navy-950); font-size: 1.1rem; }
+.audit-program-metrics p { margin: 0; overflow-wrap: anywhere; color: var(--muted); font-size: .7rem; }
+.audit-program-metrics .has-attention { box-shadow: inset 0 3px 0 var(--gold-500), var(--shadow-soft); }
+
+.audit-program-panel-header h2 { font-size: 1rem; }
+.audit-program-panel-header > span { color: var(--muted); font-size: .76rem; }
+
+.audit-program-strategy,
+.audit-procedure-create,
+.audit-finding-create {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+    padding: 1.15rem;
+}
+
+.audit-program-strategy label,
+.audit-procedure-create label,
+.audit-finding-create label,
+.audit-program-decision label {
+    min-width: 0;
+}
+
+.audit-program-strategy .span-2,
+.audit-finding-create .span-2 { grid-column: span 2; }
+.audit-program-strategy .span-full { grid-column: 1 / -1; }
+.audit-procedure-create { grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); background: #f8fafb; }
+.audit-procedure-create button,
+.audit-finding-create button { align-self: end; min-height: 42px; }
+
+.audit-program-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+}
+
+.audit-program-summary > div {
+    padding: 1rem 1.15rem;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.audit-program-summary dt,
+.audit-procedure-copy dt,
+.audit-finding-list dt {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.audit-program-summary dd,
+.audit-procedure-copy dd,
+.audit-finding-list dd { margin: .2rem 0 0; white-space: pre-line; }
+
+.audit-procedure-list,
+.audit-finding-list { display: grid; }
+
+.audit-procedure-list > article {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.audit-procedure-list > article:last-child,
+.audit-finding-list > article:last-child { border-bottom: 0; }
+.audit-procedure-list > article.status-exception { box-shadow: inset 4px 0 0 var(--warning); }
+.audit-procedure-list > article.status-compliant { box-shadow: inset 4px 0 0 var(--success); }
+
+.audit-procedure-code {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 1px solid #cbd5df;
+    border-radius: 6px;
+    background: #eef3f7;
+    color: var(--navy-900);
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+.audit-procedure-copy { min-width: 0; }
+.audit-procedure-copy > div:first-child { display: flex; align-items: center; gap: .65rem; }
+.audit-procedure-copy h3,
+.audit-finding-list h3 { margin: 0; font-size: .96rem; }
+.audit-procedure-copy > p { margin: .6rem 0; color: var(--muted); font-size: .82rem; }
+
+.audit-procedure-copy dl,
+.audit-finding-list dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .7rem;
+    margin: .75rem 0;
+    padding: .75rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    background: rgba(247, 249, 250, .75);
+}
+
+.audit-procedure-copy dl .span-full,
+.audit-finding-list dl .span-full { grid-column: 1 / -1; }
+.audit-procedure-copy dd,
+.audit-finding-list dd { color: #354158; font-size: .78rem; }
+.audit-procedure-copy > small { color: var(--muted); font-size: .7rem; }
+
+.audit-evidence-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .75rem;
+}
+
+.audit-evidence-list a {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .6rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    font-size: .74rem;
+    text-decoration: none;
+}
+
+.audit-evidence-list svg { width: 15px; height: 15px; }
+.audit-evidence-list span { display: grid; min-width: 0; }
+.audit-evidence-list small { overflow-wrap: anywhere; color: var(--muted); font-size: .65rem; }
+
+.audit-procedure-forms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-top: .9rem;
+}
+
+.audit-procedure-forms details { flex: 1 1 260px; }
+.audit-procedure-forms summary {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--navy-800);
+    font-size: .76rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+.audit-procedure-forms summary::-webkit-details-marker { display: none; }
+.audit-procedure-forms summary svg { width: 15px; height: 15px; }
+.audit-procedure-forms details > form {
+    display: grid;
+    grid-template-columns: minmax(160px, .7fr) minmax(260px, 1.4fr) auto;
+    gap: .75rem;
+    align-items: end;
+    margin-top: .65rem;
+    padding: .8rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f8fafb;
+}
+.audit-procedure-forms details > form .span-2 { grid-column: auto; }
+
+.audit-finding-create { border-bottom: 1px solid var(--line); background: #f8fafb; }
+.audit-finding-list > article {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr) 38px;
+    gap: .9rem;
+    align-items: start;
+    padding: 1.05rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+.audit-finding-list > article.severity-critical,
+.audit-finding-list > article.severity-high { box-shadow: inset 4px 0 0 var(--danger); }
+.audit-finding-list > article.severity-moderate { box-shadow: inset 4px 0 0 var(--warning); }
+.audit-finding-list > article > div > small { color: var(--muted); font-size: .68rem; }
+.audit-finding-list h3 { margin-top: .18rem; }
+.audit-finding-list dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.audit-program-review {
+    padding: 1.2rem;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--navy-800);
+    border-radius: 7px;
+    background: linear-gradient(120deg, #fff, #f4f7f9 72%, #f5f1e6);
+    box-shadow: var(--shadow-soft);
+}
+.audit-program-review.status-returned { border-left-color: var(--warning); }
+.audit-program-review.status-approved,
+.audit-program-review.status-concluded { border-left-color: var(--success); }
+.audit-program-review-copy { gap: .85rem; }
+.audit-program-review-copy > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 6px; background: var(--navy-100); color: var(--navy-800); }
+.audit-program-review-copy svg { width: 21px; height: 21px; }
+.audit-program-review-copy h2 { margin: 0; font-size: 1.05rem; }
+.audit-program-review-copy p:last-child { margin: .2rem 0 0; color: var(--muted); font-size: .78rem; }
+
+.audit-program-blockers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem 1rem; margin: 1rem 0; padding: .85rem 1rem; background: #fff5f5; color: var(--danger); font-size: .76rem; list-style: none; }
+.audit-program-blockers li { display: flex; align-items: flex-start; gap: .4rem; }
+.audit-program-blockers svg { width: 15px; height: 15px; flex: 0 0 15px; }
+.audit-program-submit { justify-content: space-between; gap: 1rem; margin-top: 1rem; }
+.audit-program-submit label,
+.audit-program-conclusion > label:nth-child(2) { display: flex; align-items: center; gap: .45rem; font-size: .78rem; }
+
+.audit-program-decision {
+    display: grid;
+    grid-template-columns: minmax(180px, .7fr) minmax(280px, 1.5fr) auto;
+    gap: .75rem;
+    align-items: end;
+    margin-top: 1rem;
+}
+.audit-program-decision .span-2 { grid-column: auto; }
+.audit-program-conclusion { align-items: flex-end; gap: 1rem; margin-top: 1rem; }
+.audit-program-conclusion > label:first-of-type { min-width: 0; flex: 1; }
+.audit-supervisor-note,
+.audit-program-final { margin-top: 1rem; padding: .85rem; border-left: 3px solid var(--navy-800); background: #f1f5f8; }
+.audit-supervisor-note p,
+.audit-program-final p { margin: .25rem 0 0; white-space: pre-line; font-size: .82rem; }
+.audit-program-final { display: grid; gap: .35rem; border-left-color: var(--success); }
+.audit-program-final code { overflow-wrap: anywhere; color: #315f4e; font-size: .66rem; }
+.audit-program-final small { color: var(--muted); font-size: .7rem; }
+
+.audit-program-history { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+.audit-program-history summary { gap: .45rem; padding: .85rem 1rem; color: var(--navy-800); font-size: .78rem; font-weight: 750; cursor: pointer; }
+.audit-program-history summary svg { width: 16px; height: 16px; }
+.audit-program-history > div { padding: 0 1rem .85rem; }
+.audit-program-history p { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: .75rem; margin: 0; padding: .55rem 0; border-top: 1px solid var(--line-soft); font-size: .72rem; }
+.audit-program-history time { color: var(--muted); white-space: nowrap; }
+
+.audit-program-launch { position: relative; }
+.audit-program-launch > summary { list-style: none; cursor: pointer; }
+.audit-program-launch > summary::-webkit-details-marker { display: none; }
+.audit-program-launch > form {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + .4rem);
+    right: 0;
+    width: min(330px, 80vw);
+    padding: .85rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(7, 31, 61, .14);
+}
+.audit-program-launch > form .btn { width: 100%; margin-top: .65rem; }
+
+@media (max-width: 1199.98px) {
+    .audit-program-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .audit-program-strategy,
+    .audit-procedure-create,
+    .audit-finding-create { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .audit-procedure-create button,
+    .audit-finding-create button { width: fit-content; }
+}
+
+@media (max-width: 767.98px) {
+    .audit-program-heading { align-items: flex-start; flex-direction: column; }
+    .audit-program-heading-actions { width: 100%; justify-content: space-between; }
+    .audit-program-flow { padding-inline: .65rem; }
+    .audit-program-flow small { font-size: .62rem; }
+    .audit-program-strategy,
+    .audit-procedure-create,
+    .audit-finding-create,
+    .audit-program-summary,
+    .audit-program-decision { grid-template-columns: 1fr; }
+    .audit-program-strategy .span-2,
+    .audit-program-strategy .span-full,
+    .audit-finding-create .span-2 { grid-column: auto; }
+    .audit-procedure-list > article { grid-template-columns: 42px minmax(0, 1fr); gap: .7rem; }
+    .audit-procedure-code { width: 40px; height: 40px; }
+    .audit-procedure-copy dl,
+    .audit-finding-list dl { grid-template-columns: 1fr; }
+    .audit-procedure-copy dl .span-full,
+    .audit-finding-list dl .span-full { grid-column: auto; }
+    .audit-procedure-forms details > form { grid-template-columns: 1fr; }
+    .audit-finding-list > article { grid-template-columns: minmax(0, 1fr) 38px; }
+    .audit-finding-severity { grid-column: 1; width: fit-content; }
+    .audit-finding-list > article > div { grid-column: 1; }
+    .audit-finding-list > article > form { grid-column: 2; grid-row: 1; }
+    .audit-program-blockers { grid-template-columns: 1fr; }
+    .audit-program-submit,
+    .audit-program-conclusion { align-items: stretch; flex-direction: column; }
+    .audit-program-submit .btn,
+    .audit-program-conclusion .btn { width: 100%; }
+    .audit-program-history p { grid-template-columns: 1fr; gap: .15rem; }
+}
+
+@media (max-width: 479.98px) {
+    .audit-program-metrics { grid-template-columns: 1fr; }
+    .audit-program-flow span { width: 30px; height: 30px; }
+    .audit-program-flow > div:not(:last-child)::after { top: 15px; left: calc(50% + 15px); width: calc(100% - 30px); }
+}
