@@ -31,13 +31,13 @@ flowchart LR
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: Comunicações e Documentos Oficiais.**
+**Próximo foco: Relatórios Municipais Especializados.**
 
 ```mermaid
 flowchart LR
     A["Programa de Auditoria<br/>1ª versão entregue"]
-    B["Comunicações Oficiais<br/>PRÓXIMO FOCO"]
-    C["Relatórios Especializados<br/>Planejado"]
+    B["Comunicações Oficiais<br/>1ª versão entregue"]
+    C["Relatórios Especializados<br/>PRÓXIMO FOCO"]
     D["Saúde e LC 141<br/>Planejado"]
     E["Obras e Licitações<br/>Planejado"]
     F["Integrações reais<br/>Planejado"]
@@ -48,9 +48,9 @@ flowchart LR
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
     classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class A delivered;
-    class B focus;
-    class C,D,E,F,G planned;
+    class A,B delivered;
+    class C focus;
+    class D,E,F,G planned;
 ```
 
 ### Programa de Auditoria e Papéis de Trabalho
@@ -64,6 +64,21 @@ flowchart LR
 - [x] Devolução, aprovação e conclusão formal com fotografia SHA-256.
 - [x] Encerramento integrado ao Plano Anual, alertas e Central de Trabalho.
 - [ ] Validar os papéis de trabalho com um controlador municipal.
+
+### Comunicações e Documentos Oficiais
+
+- [x] Seis modelos iniciais: ofício de impedimento, notificação, diligência,
+  despacho, parecer e termo de encaminhamento.
+- [x] Modelos configuráveis e versionados por Município.
+- [x] Geração assistida com dados da emenda, impedimento, diligência ou parecer.
+- [x] Revisão de minuta antes da emissão.
+- [x] Numeração sequencial por tipo e exercício.
+- [x] Conteúdo emitido imutável com fotografia e SHA-256.
+- [x] Protocolo, canal, comprovante privado e confirmação ou devolução.
+- [x] Correções por nova versão, sem apagar o documento anterior.
+- [x] Permissões e isolamento entre Municípios.
+- [ ] Validar a redação e a numeração com Câmara, Procuradoria e Controle Interno
+  de um Município piloto.
 
 ## Sequência de implantação municipal
 

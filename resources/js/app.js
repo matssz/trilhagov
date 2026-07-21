@@ -403,6 +403,36 @@ document.querySelectorAll('[data-copy-target]').forEach((button) => {
     });
 });
 
+const officialAmendment = document.querySelector('[data-official-amendment]');
+const officialSources = document.querySelectorAll('[data-official-source]');
+
+function syncOfficialSources() {
+    if (!(officialAmendment instanceof HTMLSelectElement)) {
+        return;
+    }
+
+    officialSources.forEach((source) => {
+        if (!(source instanceof HTMLSelectElement)) {
+            return;
+        }
+
+        Array.from(source.options).forEach((option) => {
+            if (option.value === '') {
+                return;
+            }
+            const visible = officialAmendment.value !== '' && option.dataset.amendmentId === officialAmendment.value;
+            option.hidden = !visible;
+            option.disabled = !visible;
+            if (!visible && option.selected) {
+                source.value = '';
+            }
+        });
+    });
+}
+
+officialAmendment?.addEventListener('change', syncOfficialSources);
+syncOfficialSources();
+
 document.addEventListener('submit', (event) => {
     const form = event.target;
 

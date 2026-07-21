@@ -203,3 +203,8 @@
     .impediment-record-main { padding: 1rem; }
     .impediment-status { white-space: normal; }
 }
+.impediment-record-tools {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+}

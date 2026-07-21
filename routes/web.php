@@ -27,6 +27,7 @@ use App\Http\Controllers\MunicipalAuditProgramController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
 use App\Http\Controllers\MunicipalInternalControlController;
 use App\Http\Controllers\MunicipalitySelectionController;
+use App\Http\Controllers\MunicipalOfficialDocumentController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
 use App\Http\Controllers\MunicipalReportDispatchController;
 use App\Http\Controllers\MunicipalUserController;
@@ -79,6 +80,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
     Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
     Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
+    Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
+    Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
+    Route::get('/comunicacoes-oficiais/{document}/documento.pdf', [MunicipalOfficialDocumentController::class, 'pdf'])->name('official-documents.pdf');
+    Route::get('/comunicacoes-oficiais/{document}/eventos/{event}/comprovante', [MunicipalOfficialDocumentController::class, 'evidence'])->name('official-documents.evidence');
     Route::get('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'index'])->name('audit-plans.index');
     Route::get('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'show'])->name('audit-plans.show');
     Route::get('/controle-interno/plano-anual/{plan}/documento.pdf', [MunicipalAuditPlanController::class, 'pdf'])->name('audit-plans.pdf');
@@ -127,6 +132,10 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
 
     Route::middleware('municipality.role:manager')->group(function () {
+        Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);
+        Route::post('/comunicacoes-oficiais/modelos/{template}/revisar', [MunicipalOfficialDocumentController::class, 'reviseTemplate'])->name('official-document-templates.revise')->block(10, 10);
+        Route::post('/comunicacoes-oficiais/{document}/emitir', [MunicipalOfficialDocumentController::class, 'issue'])->name('official-documents.issue')->block(10, 10);
+        Route::post('/comunicacoes-oficiais/{document}/cancelar', [MunicipalOfficialDocumentController::class, 'cancel'])->name('official-documents.cancel')->block(10, 10);
         Route::post('/relatorios/governanca/{report}/emitir', [MunicipalGovernanceReportController::class, 'issue'])->name('governance-reports.issue')->block(10, 10);
         Route::post('/relatorios/remessas/{dispatch}/cancelar', [MunicipalReportDispatchController::class, 'cancel'])->name('report-dispatches.cancel')->block(10, 10);
         Route::post('/emendas/{emenda}/plano-de-trabalho/parecer', [MunicipalAdmissibilityReviewController::class, 'store'])->name('emendas.work-plan.review')->block(10, 10);
@@ -145,6 +154,14 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/configuracoes/tipos-documento', [DocumentTypeController::class, 'index'])->name('document-types.index');
         Route::post('/configuracoes/tipos-documento', [DocumentTypeController::class, 'store'])->name('document-types.store')->block(10, 10);
         Route::patch('/configuracoes/tipos-documento/{documentType}', [DocumentTypeController::class, 'update'])->name('document-types.update')->block(10, 10);
+    });
+
+    Route::middleware('municipality.role:manager,editor,auditor')->group(function () {
+        Route::post('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'store'])->name('official-documents.store')->block(10, 10);
+        Route::patch('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'update'])->name('official-documents.update')->block(10, 10);
+        Route::post('/comunicacoes-oficiais/{document}/protocolar', [MunicipalOfficialDocumentController::class, 'send'])->name('official-documents.send')->block(20, 10);
+        Route::post('/comunicacoes-oficiais/{document}/retorno', [MunicipalOfficialDocumentController::class, 'recordReturn'])->name('official-documents.return')->block(20, 10);
+        Route::post('/comunicacoes-oficiais/{document}/nova-versao', [MunicipalOfficialDocumentController::class, 'revise'])->name('official-documents.revise')->block(10, 10);
     });
 
     Route::middleware('municipality.role:manager,auditor')->group(function () {

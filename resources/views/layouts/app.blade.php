@@ -51,6 +51,10 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        <a class="sidebar-link {{ request()->routeIs('official-documents.*') || request()->routeIs('official-document-templates.*') ? 'active' : '' }}" href="{{ route('official-documents.index') }}">
+                            <i data-lucide="send" aria-hidden="true"></i>
+                            <span>Comunicações</span>
+                        </a>
                         @if ($activeMunicipality?->supportsTcespAudesp())
                             <a class="sidebar-link {{ request()->routeIs('governance-reports.*') ? 'active' : '' }}" href="{{ route('governance-reports.index') }}">
                                 <i data-lucide="scroll-text" aria-hidden="true"></i>

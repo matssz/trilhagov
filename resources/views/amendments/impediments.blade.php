@@ -75,7 +75,10 @@
                                 <h3>{{ $impediment->title }}</h3>
                             </div>
                         </div>
-                        <span class="impediment-status status-{{ $impediment->status }}">{{ $impediment->statusLabel() }}</span>
+                        <div class="impediment-record-tools">
+                            @if($canEdit)<a class="icon-button" href="{{ route('official-documents.index', ['amendment' => $amendment->id, 'impediment' => $impediment->id]).'#nova-comunicacao' }}" title="Gerar comunicação oficial" aria-label="Gerar comunicação oficial"><i data-lucide="send" aria-hidden="true"></i></a>@endif
+                            <span class="impediment-status status-{{ $impediment->status }}">{{ $impediment->statusLabel() }}</span>
+                        </div>
                     </div>
 
                     <p class="impediment-description">{{ $impediment->description }}</p>
@@ -168,6 +171,7 @@
                                             @if ($diligence->response_notes)
                                                 <p class="diligence-response"><strong>Resposta:</strong> {{ $diligence->response_notes }} <small>{{ $diligence->response_protocol ? '· '.$diligence->response_protocol : '' }}</small></p>
                                             @endif
+                                            @if($canEdit)<a class="btn btn-sm btn-outline-primary mt-2" href="{{ route('official-documents.index', ['amendment' => $amendment->id, 'diligence' => $diligence->id]).'#nova-comunicacao' }}"><i data-lucide="send" aria-hidden="true"></i>Gerar documento</a>@endif
                                         </div>
                                         @if ($canEdit)
                                             <form method="POST" action="{{ route('emendas.impediments.diligences.update', [$amendment, $impediment, $diligence]) }}">
