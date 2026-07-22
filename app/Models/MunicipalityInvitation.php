@@ -17,6 +17,10 @@ class MunicipalityInvitation extends Model
         'expires_at',
         'accepted_at',
         'revoked_at',
+        'legislative_name',
+        'legislative_party',
+        'legislative_term_start',
+        'legislative_term_end',
     ];
 
     protected function casts(): array
@@ -25,6 +29,8 @@ class MunicipalityInvitation extends Model
             'expires_at' => 'datetime',
             'accepted_at' => 'datetime',
             'revoked_at' => 'datetime',
+            'legislative_term_start' => 'date',
+            'legislative_term_end' => 'date',
         ];
     }
 

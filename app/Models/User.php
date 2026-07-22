@@ -27,6 +27,10 @@ class User extends Authenticatable
 
     public const ROLE_AUDITOR = 'auditor';
 
+    public const ROLE_COUNCILOR = 'councilor';
+
+    public const ROLE_LEGISLATIVE_REVIEWER = 'legislative_reviewer';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -70,6 +74,10 @@ class User extends Authenticatable
                 'notify_email',
                 'notify_deadlines',
                 'notify_integrity',
+                'legislative_name',
+                'legislative_party',
+                'legislative_term_start',
+                'legislative_term_end',
             ])
             ->withTimestamps();
     }
@@ -112,6 +120,8 @@ class User extends Authenticatable
             self::ROLE_EDITOR => 'Editor',
             self::ROLE_VIEWER => 'Consulta',
             self::ROLE_AUDITOR => 'Auditoria',
+            self::ROLE_COUNCILOR => 'Vereador',
+            self::ROLE_LEGISLATIVE_REVIEWER => 'Análise legislativa',
         ];
     }
 
@@ -137,5 +147,24 @@ class User extends Authenticatable
             [self::ROLE_MANAGER, self::ROLE_EDITOR],
             true,
         );
+    }
+
+    public function usesLegislativeWorkspace(int $municipalityId): bool
+    {
+        return in_array(
+            $this->roleForMunicipality($municipalityId),
+            [self::ROLE_COUNCILOR, self::ROLE_LEGISLATIVE_REVIEWER],
+            true,
+        );
+    }
+
+    public function landingRouteName(int $municipalityId): string
+    {
+        return $this->usesLegislativeWorkspace($municipalityId) ? 'legislative.index' : 'dashboard';
+    }
+
+    public function legislativeProposals(): HasMany
+    {
+        return $this->hasMany(LegislativeProposal::class, 'submitted_by');
     }
 }

@@ -9,6 +9,9 @@
         : null;
     $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
     $canManageUsers = $activeRole === 'manager';
+    $legislativeWorkspace = in_array($activeRole, ['councilor', 'legislative_reviewer'], true);
+    $canAccessLegislative = in_array($activeRole, ['manager', 'editor', 'councilor', 'legislative_reviewer'], true);
+    $homeRoute = $legislativeWorkspace ? 'legislative.index' : 'dashboard';
     $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
     $unreadNotificationCount = $workspaceLayout
         ? auth()->user()->unreadNotifications()
@@ -32,7 +35,7 @@
             <div class="app-shell">
                 <aside class="offcanvas-lg offcanvas-start app-sidebar" id="appSidebar" tabindex="-1" aria-labelledby="appSidebarLabel">
                     <div class="sidebar-header">
-                        <a class="brand-lockup" href="{{ route('dashboard') }}" aria-label="TrilhaGov - Painel">
+                        <a class="brand-lockup" href="{{ route($homeRoute) }}" aria-label="TrilhaGov - Painel">
                             <img class="brand-symbol" src="{{ asset('images/trilhagov-symbol.svg') }}" alt="">
                             <span class="brand-copy" id="appSidebarLabel">
                                 <span class="brand-name">Trilha<span>Gov</span></span>
@@ -43,6 +46,13 @@
                     </div>
 
                     <nav class="sidebar-nav" aria-label="Navegação principal">
+                        @if ($canAccessLegislative)
+                            <a class="sidebar-link {{ request()->routeIs('legislative.*') ? 'active' : '' }}" href="{{ route('legislative.index') }}">
+                                <i data-lucide="landmark" aria-hidden="true"></i>
+                                <span>Portal Legislativo</span>
+                            </a>
+                        @endif
+                        @if (! $legislativeWorkspace)
                         <a class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                             <i data-lucide="layout-dashboard" aria-hidden="true"></i>
                             <span>Painel</span>
@@ -116,9 +126,17 @@
                                 <span>Checklist</span>
                             </a>
                         @endif
+                        @endif
                     </nav>
 
-                    @if ($canEditAmendments)
+                    @if ($activeRole === 'councilor')
+                        <div class="sidebar-actions">
+                            <a class="btn btn-primary w-100" href="{{ route('legislative.create') }}">
+                                <i data-lucide="plus" aria-hidden="true"></i>
+                                <span>Nova proposta</span>
+                            </a>
+                        </div>
+                    @elseif ($canEditAmendments)
                         <div class="sidebar-actions">
                             <a class="btn btn-primary w-100" href="{{ route('emendas.create') }}">
                                 <i data-lucide="plus" aria-hidden="true"></i>
@@ -157,9 +175,9 @@
                         <button class="icon-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Abrir menu" title="Abrir menu">
                             <i data-lucide="menu" aria-hidden="true"></i>
                         </button>
-                        <form class="topbar-search" method="GET" action="{{ route('emendas.index') }}" role="search">
+                        <form class="topbar-search" method="GET" action="{{ route($legislativeWorkspace ? 'legislative.index' : 'emendas.index') }}" role="search">
                             <i data-lucide="search" aria-hidden="true"></i>
-                            <input name="search" type="search" value="{{ request('search') }}" placeholder="Pesquisar emendas, autores ou objetos" aria-label="Pesquisar emendas">
+                            <input name="search" type="search" value="{{ request('search') }}" placeholder="{{ $legislativeWorkspace ? 'Pesquisar propostas, objetos ou beneficiários' : 'Pesquisar emendas, autores ou objetos' }}" aria-label="Pesquisar">
                         </form>
                         <a class="notification-button" href="{{ route('notifications.index') }}" title="Notificações" aria-label="Notificações{{ $unreadNotificationCount > 0 ? ': '.$unreadNotificationCount.' não lidas' : '' }}">
                             <i data-lucide="bell" aria-hidden="true"></i>
@@ -170,7 +188,7 @@
                         <div class="topbar-user">
                             <span>
                                 <strong>{{ auth()->user()->name }}</strong>
-                                <small>TrilhaGov Emendas</small>
+                                <small>{{ $legislativeWorkspace ? 'TrilhaGov Legislativo' : 'TrilhaGov Emendas' }}</small>
                             </span>
                             <span class="user-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                         </div>

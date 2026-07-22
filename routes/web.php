@@ -22,6 +22,7 @@ use App\Http\Controllers\FinancialLiquidationController;
 use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\HealthAspsController;
 use App\Http\Controllers\InvitationAcceptanceController;
+use App\Http\Controllers\LegislativeProposalController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalAuditPlanController;
 use App\Http\Controllers\MunicipalAuditProgramController;
@@ -50,9 +51,15 @@ use App\Http\Controllers\WorkCenterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    $municipalityId = (int) session('active_municipality_id');
+
+    return $municipalityId > 0
+        ? redirect()->route(auth()->user()->landingRouteName($municipalityId))
+        : redirect()->route('municipalities.select');
 });
 
 Route::get('/convites/{token}', [InvitationAcceptanceController::class, 'show'])->name('invitations.show');
@@ -76,46 +83,48 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'municipality'])->group(function () {
-    Route::get('/painel', DashboardController::class)->name('dashboard');
-    Route::get('/relatorios/emendas.csv', ReportExportController::class)->name('reports.export');
-    Route::get('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'index'])->name('governance-reports.index');
-    Route::get('/relatorios/governanca/{report}', [MunicipalGovernanceReportController::class, 'show'])->name('governance-reports.show');
-    Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
-    Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
-    Route::get('/relatorios/especializados', [MunicipalSpecializedReportController::class, 'index'])->name('specialized-reports.index');
-    Route::get('/relatorios/especializados/{report}', [MunicipalSpecializedReportController::class, 'show'])->name('specialized-reports.show');
-    Route::get('/relatorios/especializados/{report}/documento.pdf', [MunicipalSpecializedReportController::class, 'pdf'])->name('specialized-reports.pdf');
-    Route::get('/relatorios/especializados/{report}/dados.csv', [MunicipalSpecializedReportController::class, 'csv'])->name('specialized-reports.csv');
-    Route::get('/saude-lc141', [HealthAspsController::class, 'index'])->name('health-asps.index');
-    Route::get('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'show'])->name('health-asps.show');
-    Route::get('/saude-lc141/pareceres/{assessment}/documento.pdf', [HealthAspsController::class, 'pdf'])->name('health-asps.pdf');
-    Route::get('/obras-contratos', [MunicipalContractController::class, 'index'])->name('municipal-contracts.index');
-    Route::get('/obras-contratos/{contract}', [MunicipalContractController::class, 'show'])->name('municipal-contracts.show');
-    Route::get('/obras-contratos/{contract}/dossie.pdf', [MunicipalContractController::class, 'pdf'])->name('municipal-contracts.pdf');
-    Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
-    Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
-    Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
-    Route::get('/comunicacoes-oficiais/{document}/documento.pdf', [MunicipalOfficialDocumentController::class, 'pdf'])->name('official-documents.pdf');
-    Route::get('/comunicacoes-oficiais/{document}/eventos/{event}/comprovante', [MunicipalOfficialDocumentController::class, 'evidence'])->name('official-documents.evidence');
-    Route::get('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'index'])->name('audit-plans.index');
-    Route::get('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'show'])->name('audit-plans.show');
-    Route::get('/controle-interno/plano-anual/{plan}/documento.pdf', [MunicipalAuditPlanController::class, 'pdf'])->name('audit-plans.pdf');
-    Route::get('/controle-interno/programas/{program}', [MunicipalAuditProgramController::class, 'show'])->name('audit-programs.show');
-    Route::get('/controle-interno/programas/{program}/documento.pdf', [MunicipalAuditProgramController::class, 'pdf'])->name('audit-programs.pdf');
-    Route::get('/controle-interno/programas/evidencias/{evidence}', [MunicipalAuditProgramController::class, 'evidence'])->name('audit-program-evidences.download');
-    Route::get('/relatorios/remessas/{dispatch}', [MunicipalReportDispatchController::class, 'show'])->name('report-dispatches.show');
-    Route::get('/relatorios/remessas/{dispatch}/recibo.pdf', [MunicipalReportDispatchController::class, 'receipt'])->name('report-dispatches.receipt');
-    Route::get('/relatorios/remessas/{dispatch}/eventos/{event}/comprovante', [MunicipalReportDispatchController::class, 'evidence'])->name('report-dispatches.evidence');
-    Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
-    Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
-    Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
-    Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
-    Route::get('/audesp/homologacoes', [AudespHomologationController::class, 'index'])->name('audesp-homologations.index');
-    Route::get('/audesp/homologacoes/{batch}', [AudespHomologationController::class, 'show'])->name('audesp-homologations.show');
-    Route::get('/audesp/homologacoes/{batch}/arquivo', [AudespHomologationController::class, 'source'])->name('audesp-homologations.source');
-    Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');
-    Route::get('/audesp/homologacoes/{batch}/eventos/{event}/evidencia', [AudespHomologationController::class, 'evidence'])->name('audesp-homologations.evidence');
-    Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
+    Route::middleware('municipality.role:manager,editor,viewer,auditor')->group(function () {
+        Route::get('/painel', DashboardController::class)->name('dashboard');
+        Route::get('/relatorios/emendas.csv', ReportExportController::class)->name('reports.export');
+        Route::get('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'index'])->name('governance-reports.index');
+        Route::get('/relatorios/governanca/{report}', [MunicipalGovernanceReportController::class, 'show'])->name('governance-reports.show');
+        Route::get('/relatorios/governanca/{report}/documento.pdf', [MunicipalGovernanceReportController::class, 'pdf'])->name('governance-reports.pdf');
+        Route::get('/relatorios/governanca/{report}/dados.csv', [MunicipalGovernanceReportController::class, 'csv'])->name('governance-reports.csv');
+        Route::get('/relatorios/especializados', [MunicipalSpecializedReportController::class, 'index'])->name('specialized-reports.index');
+        Route::get('/relatorios/especializados/{report}', [MunicipalSpecializedReportController::class, 'show'])->name('specialized-reports.show');
+        Route::get('/relatorios/especializados/{report}/documento.pdf', [MunicipalSpecializedReportController::class, 'pdf'])->name('specialized-reports.pdf');
+        Route::get('/relatorios/especializados/{report}/dados.csv', [MunicipalSpecializedReportController::class, 'csv'])->name('specialized-reports.csv');
+        Route::get('/saude-lc141', [HealthAspsController::class, 'index'])->name('health-asps.index');
+        Route::get('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'show'])->name('health-asps.show');
+        Route::get('/saude-lc141/pareceres/{assessment}/documento.pdf', [HealthAspsController::class, 'pdf'])->name('health-asps.pdf');
+        Route::get('/obras-contratos', [MunicipalContractController::class, 'index'])->name('municipal-contracts.index');
+        Route::get('/obras-contratos/{contract}', [MunicipalContractController::class, 'show'])->name('municipal-contracts.show');
+        Route::get('/obras-contratos/{contract}/dossie.pdf', [MunicipalContractController::class, 'pdf'])->name('municipal-contracts.pdf');
+        Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
+        Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
+        Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
+        Route::get('/comunicacoes-oficiais/{document}/documento.pdf', [MunicipalOfficialDocumentController::class, 'pdf'])->name('official-documents.pdf');
+        Route::get('/comunicacoes-oficiais/{document}/eventos/{event}/comprovante', [MunicipalOfficialDocumentController::class, 'evidence'])->name('official-documents.evidence');
+        Route::get('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'index'])->name('audit-plans.index');
+        Route::get('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'show'])->name('audit-plans.show');
+        Route::get('/controle-interno/plano-anual/{plan}/documento.pdf', [MunicipalAuditPlanController::class, 'pdf'])->name('audit-plans.pdf');
+        Route::get('/controle-interno/programas/{program}', [MunicipalAuditProgramController::class, 'show'])->name('audit-programs.show');
+        Route::get('/controle-interno/programas/{program}/documento.pdf', [MunicipalAuditProgramController::class, 'pdf'])->name('audit-programs.pdf');
+        Route::get('/controle-interno/programas/evidencias/{evidence}', [MunicipalAuditProgramController::class, 'evidence'])->name('audit-program-evidences.download');
+        Route::get('/relatorios/remessas/{dispatch}', [MunicipalReportDispatchController::class, 'show'])->name('report-dispatches.show');
+        Route::get('/relatorios/remessas/{dispatch}/recibo.pdf', [MunicipalReportDispatchController::class, 'receipt'])->name('report-dispatches.receipt');
+        Route::get('/relatorios/remessas/{dispatch}/eventos/{event}/comprovante', [MunicipalReportDispatchController::class, 'evidence'])->name('report-dispatches.evidence');
+        Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
+        Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
+        Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
+        Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
+        Route::get('/audesp/homologacoes', [AudespHomologationController::class, 'index'])->name('audesp-homologations.index');
+        Route::get('/audesp/homologacoes/{batch}', [AudespHomologationController::class, 'show'])->name('audesp-homologations.show');
+        Route::get('/audesp/homologacoes/{batch}/arquivo', [AudespHomologationController::class, 'source'])->name('audesp-homologations.source');
+        Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');
+        Route::get('/audesp/homologacoes/{batch}/eventos/{event}/evidencia', [AudespHomologationController::class, 'evidence'])->name('audesp-homologations.evidence');
+        Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
+    });
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
     Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
     Route::patch('/notificacoes/{notification}/ler', [NotificationCenterController::class, 'markAsRead'])->name('notifications.read')->block(10, 10);
@@ -127,22 +136,46 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
     });
 
-    Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
-    Route::get('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'index'])->name('emendas.work-plan');
-    Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
-    Route::get('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'index'])->name('emendas.impediments');
-    Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
-    Route::get('/emendas/{emenda}/controle-interno', [MunicipalInternalControlController::class, 'index'])->name('emendas.internal-control');
-    Route::get('/controle-interno/pareceres/{review}/documento.pdf', [MunicipalInternalControlController::class, 'pdf'])->name('internal-control-reviews.pdf');
-    Route::get('/controle-interno/pareceres/{review}/evidencia', [MunicipalInternalControlController::class, 'reviewEvidence'])->name('internal-control-reviews.evidence');
-    Route::get('/controle-interno/eventos/{event}/evidencia', [MunicipalInternalControlController::class, 'actionEvidence'])->name('internal-control-actions.evidence');
-    Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
-    Route::get('/emendas/{emenda}/audesp', [AudespRegistrationController::class, 'index'])->name('emendas.audesp');
-    Route::get('/emendas/{emenda}/audesp/diagnostico.csv', [AudespRegistrationController::class, 'diagnostic'])->name('emendas.audesp.diagnostic');
-    Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
-    Route::get('/emendas/{emenda}/prestacao-de-contas/dossie.pdf', [AccountabilityDossierController::class, 'pdf'])->name('emendas.accountability.dossier.pdf');
-    Route::get('/emendas/{emenda}/prestacao-de-contas/pacote.zip', [AccountabilityDossierController::class, 'package'])->name('emendas.accountability.dossier.package');
-    Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
+    Route::middleware('municipality.role:manager,editor,viewer,auditor')->group(function () {
+        Route::get('/emendas/{emenda}', [ParliamentaryAmendmentController::class, 'show'])->name('emendas.show');
+        Route::get('/emendas/{emenda}/plano-de-trabalho', [MunicipalWorkPlanController::class, 'index'])->name('emendas.work-plan');
+        Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
+        Route::get('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'index'])->name('emendas.impediments');
+        Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
+        Route::get('/emendas/{emenda}/controle-interno', [MunicipalInternalControlController::class, 'index'])->name('emendas.internal-control');
+        Route::get('/controle-interno/pareceres/{review}/documento.pdf', [MunicipalInternalControlController::class, 'pdf'])->name('internal-control-reviews.pdf');
+        Route::get('/controle-interno/pareceres/{review}/evidencia', [MunicipalInternalControlController::class, 'reviewEvidence'])->name('internal-control-reviews.evidence');
+        Route::get('/controle-interno/eventos/{event}/evidencia', [MunicipalInternalControlController::class, 'actionEvidence'])->name('internal-control-actions.evidence');
+        Route::get('/emendas/{emenda}/execucao', AmendmentExecutionController::class)->name('emendas.execution');
+        Route::get('/emendas/{emenda}/audesp', [AudespRegistrationController::class, 'index'])->name('emendas.audesp');
+        Route::get('/emendas/{emenda}/audesp/diagnostico.csv', [AudespRegistrationController::class, 'diagnostic'])->name('emendas.audesp.diagnostic');
+        Route::get('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'index'])->name('emendas.accountability');
+        Route::get('/emendas/{emenda}/prestacao-de-contas/dossie.pdf', [AccountabilityDossierController::class, 'pdf'])->name('emendas.accountability.dossier.pdf');
+        Route::get('/emendas/{emenda}/prestacao-de-contas/pacote.zip', [AccountabilityDossierController::class, 'package'])->name('emendas.accountability.dossier.package');
+        Route::get('/emendas/{emenda}/documentos/{documento}/download', [AmendmentDocumentController::class, 'download'])->name('emendas.documents.download');
+    });
+
+    Route::middleware('municipality.role:manager,editor,councilor,legislative_reviewer')->group(function () {
+        Route::get('/legislativo', [LegislativeProposalController::class, 'index'])->name('legislative.index');
+        Route::get('/legislativo/propostas/{proposal}', [LegislativeProposalController::class, 'show'])->name('legislative.show');
+    });
+
+    Route::middleware('municipality.role:councilor')->group(function () {
+        Route::get('/legislativo/nova-proposta', [LegislativeProposalController::class, 'create'])->name('legislative.create');
+        Route::post('/legislativo/propostas', [LegislativeProposalController::class, 'store'])->name('legislative.store')->block(10, 10);
+        Route::patch('/legislativo/propostas/{proposal}', [LegislativeProposalController::class, 'update'])->name('legislative.update')->block(10, 10);
+        Route::post('/legislativo/propostas/{proposal}/enviar', [LegislativeProposalController::class, 'submit'])->name('legislative.submit')->block(10, 10);
+    });
+
+    Route::middleware('municipality.role:manager,legislative_reviewer')->group(function () {
+        Route::post('/legislativo/propostas/{proposal}/analisar', [LegislativeProposalController::class, 'review'])->name('legislative.review')->block(10, 10);
+        Route::post('/legislativo/propostas/{proposal}/protocolar', [LegislativeProposalController::class, 'protocol'])->name('legislative.protocol')->block(10, 10);
+    });
+
+    Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/legislativo/propostas/{proposal}/receber', [LegislativeProposalController::class, 'receive'])->name('legislative.receive')->block(10, 10);
+        Route::post('/legislativo/propostas/{proposal}/reservar', [LegislativeProposalController::class, 'reserve'])->name('legislative.reserve')->block(10, 10);
+    });
 
     Route::middleware('municipality.role:manager')->group(function () {
         Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);
@@ -165,6 +198,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
         Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);
         Route::patch('/usuarios/{user}/perfil', [MunicipalUserController::class, 'updateRole'])->name('users.role.update')->block(10, 10);
+        Route::patch('/usuarios/{user}/identidade-legislativa', [MunicipalUserController::class, 'updateLegislativeIdentity'])->name('users.legislative-identity.update')->block(10, 10);
         Route::get('/configuracoes/tipos-documento', [DocumentTypeController::class, 'index'])->name('document-types.index');
         Route::post('/configuracoes/tipos-documento', [DocumentTypeController::class, 'store'])->name('document-types.store')->block(10, 10);
         Route::patch('/configuracoes/tipos-documento/{documentType}', [DocumentTypeController::class, 'update'])->name('document-types.update')->block(10, 10);

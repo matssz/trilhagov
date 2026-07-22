@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
         if ($municipalities->count() === 1) {
             $currentMunicipality->activate($request, $municipalities->first());
 
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route($request->user()->landingRouteName($municipalities->first()->id)));
         }
 
         return redirect()->route('municipalities.select');

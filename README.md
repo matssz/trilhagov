@@ -76,6 +76,8 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Registro auditável da transmissão pelo Coletor, recibos, rejeições e reenvios vinculados, sem usar credenciais do TCESP.
 - Programa de Auditoria executável com estratégia de amostragem, procedimentos, testes e papéis de trabalho.
 - Evidências privadas com SHA-256, achados estruturados, revisão independente e conclusão formal integrada ao Plano Anual.
+- Portal Legislativo com cota por vereador, reserva de saúde, análise prévia e protocolo Câmara–Executivo imutável.
+- Recebimento executivo idempotente, reserva orçamentária e continuidade automática no Plano de Trabalho.
 
 ## Stack
 
@@ -150,6 +152,7 @@ hora sem repetir o mesmo envio.
 - [Programa de Auditoria e papéis de trabalho](docs/programa-auditoria-papeis-trabalho.md)
 - [Saúde e LC 141](docs/saude-lc141.md)
 - [Obras públicas e contratos municipais](docs/obras-contratos-municipais.md)
+- [Portal Legislativo e integração Câmara–Executivo](docs/portal-legislativo.md)
 - [Deploy no Laravel Cloud](docs/deploy-laravel-cloud.md)
 - [Deploy gratuito com Render e Supabase](docs/deploy-gratuito.md)
 

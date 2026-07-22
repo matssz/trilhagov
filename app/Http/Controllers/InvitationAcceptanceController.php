@@ -83,7 +83,13 @@ class InvitationAcceptanceController extends Controller
             }
 
             $lockedInvitation->municipality->users()->syncWithoutDetaching([
-                $user->id => ['role' => $lockedInvitation->role],
+                $user->id => [
+                    'role' => $lockedInvitation->role,
+                    'legislative_name' => $lockedInvitation->legislative_name,
+                    'legislative_party' => $lockedInvitation->legislative_party,
+                    'legislative_term_start' => $lockedInvitation->legislative_term_start,
+                    'legislative_term_end' => $lockedInvitation->legislative_term_end,
+                ],
             ]);
             $lockedInvitation->update(['accepted_at' => now()]);
 
@@ -98,7 +104,7 @@ class InvitationAcceptanceController extends Controller
         $currentMunicipality->activate($request, $municipality);
 
         return redirect()
-            ->route('dashboard')
+            ->route($user->landingRouteName($municipality->id))
             ->with('status', "Acesso a {$municipality->name} ativado.");
     }
 }

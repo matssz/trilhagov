@@ -7,7 +7,7 @@
         <div>
             <p class="page-kicker mb-2">{{ $municipality->name }} / {{ $municipality->state }}</p>
             <h1 class="h3 mb-1">Usuários e acessos</h1>
-            <p class="text-secondary mb-0">Controle quem pode operar, consultar e auditar os dados municipais.</p>
+            <p class="text-secondary mb-0">Controle quem opera o Executivo e quem atua no fluxo legislativo municipal.</p>
         </div>
     </div>
 
@@ -53,6 +53,26 @@
                     </select>
                     @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
+                <div>
+                    <label class="form-label" for="legislative_name">Nome parlamentar</label>
+                    <input class="form-control @error('legislative_name') is-invalid @enderror" id="legislative_name" name="legislative_name" value="{{ old('legislative_name') }}" maxlength="255" placeholder="Obrigatório para vereador">
+                    @error('legislative_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div>
+                    <label class="form-label" for="legislative_party">Partido</label>
+                    <input class="form-control @error('legislative_party') is-invalid @enderror" id="legislative_party" name="legislative_party" value="{{ old('legislative_party') }}" maxlength="30" placeholder="Obrigatório para vereador">
+                    @error('legislative_party')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div>
+                    <label class="form-label" for="legislative_term_start">Início do mandato</label>
+                    <input class="form-control @error('legislative_term_start') is-invalid @enderror" id="legislative_term_start" name="legislative_term_start" type="date" value="{{ old('legislative_term_start') }}">
+                    @error('legislative_term_start')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div>
+                    <label class="form-label" for="legislative_term_end">Fim do mandato</label>
+                    <input class="form-control @error('legislative_term_end') is-invalid @enderror" id="legislative_term_end" name="legislative_term_end" type="date" value="{{ old('legislative_term_end') }}">
+                    @error('legislative_term_end')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
                 <button class="btn btn-primary invitation-submit" type="submit">
                     <i data-lucide="user-plus" aria-hidden="true"></i>Criar convite
                 </button>
@@ -72,6 +92,7 @@
                         <th>Usuário</th>
                         <th>E-mail</th>
                         <th>Perfil</th>
+                        <th>Vínculo legislativo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,6 +122,29 @@
                                     </form>
                                 @endif
                             </td>
+                            <td>
+                                @if ($member->pivot->role === App\Models\User::ROLE_COUNCILOR)
+                                    <details class="legislative-identity-editor">
+                                        <summary>
+                                            <span><strong>{{ $member->pivot->legislative_name ?: 'Cadastro incompleto' }}</strong><small>{{ $member->pivot->legislative_party ?: 'Partido não informado' }}</small></span>
+                                            <i data-lucide="pencil" aria-hidden="true"></i>
+                                        </summary>
+                                        <form method="POST" action="{{ route('users.legislative-identity.update', $member) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <label><span>Nome parlamentar</span><input class="form-control form-control-sm" name="legislative_name" value="{{ $member->pivot->legislative_name }}" required></label>
+                                            <label><span>Partido</span><input class="form-control form-control-sm" name="legislative_party" value="{{ $member->pivot->legislative_party }}" required></label>
+                                            <label><span>Início</span><input class="form-control form-control-sm" name="legislative_term_start" type="date" value="{{ $member->pivot->legislative_term_start }}" required></label>
+                                            <label><span>Fim</span><input class="form-control form-control-sm" name="legislative_term_end" type="date" value="{{ $member->pivot->legislative_term_end }}" required></label>
+                                            <button class="btn btn-sm btn-primary" type="submit">Salvar identificação</button>
+                                        </form>
+                                    </details>
+                                @elseif ($member->pivot->role === App\Models\User::ROLE_LEGISLATIVE_REVIEWER)
+                                    <span class="badge text-bg-light">Comissão técnica</span>
+                                @else
+                                    <span class="text-secondary">Não se aplica</span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -123,6 +167,7 @@
                             <th>E-mail</th>
                             <th>Perfil</th>
                             <th>Validade</th>
+                            <th>Identificação</th>
                             <th class="text-end">Ação</th>
                         </tr>
                     </thead>
@@ -138,6 +183,7 @@
                                         {{ $invitation->expires_at->format('d/m/Y \à\s H:i') }}
                                     @endif
                                 </td>
+                                <td>{{ $invitation->legislative_name ? $invitation->legislative_name.' · '.$invitation->legislative_party : 'Não se aplica' }}</td>
                                 <td class="text-end">
                                     <form method="POST" action="{{ route('users.invitations.destroy', $invitation) }}">
                                         @csrf

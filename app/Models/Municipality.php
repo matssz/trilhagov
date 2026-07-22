@@ -231,6 +231,11 @@ class Municipality extends Model
         return $this->hasMany(HealthAspsAssessment::class);
     }
 
+    public function legislativeProposals(): HasMany
+    {
+        return $this->hasMany(LegislativeProposal::class);
+    }
+
     public function municipalContracts(): HasMany
     {
         return $this->hasMany(MunicipalContract::class);

@@ -38,7 +38,10 @@ class MunicipalUserController extends Controller
             'roles' => User::municipalityRoles(),
             'invitableRoles' => array_intersect_key(
                 User::municipalityRoles(),
-                array_flip([User::ROLE_EDITOR, User::ROLE_VIEWER, User::ROLE_AUDITOR]),
+                array_flip([
+                    User::ROLE_EDITOR, User::ROLE_VIEWER, User::ROLE_AUDITOR,
+                    User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER,
+                ]),
             ),
             'submissionToken' => $formSubmission->issue($request, 'municipality-invitation-create'),
         ]);
@@ -53,7 +56,19 @@ class MunicipalUserController extends Controller
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
             'email' => ['required', 'email', 'max:255'],
-            'role' => ['required', Rule::in([User::ROLE_EDITOR, User::ROLE_VIEWER, User::ROLE_AUDITOR])],
+            'role' => ['required', Rule::in([
+                User::ROLE_EDITOR, User::ROLE_VIEWER, User::ROLE_AUDITOR,
+                User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER,
+            ])],
+            'legislative_name' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'string', 'min:3', 'max:255'],
+            'legislative_party' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'string', 'min:2', 'max:30'],
+            'legislative_term_start' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'date'],
+            'legislative_term_end' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'date', 'after_or_equal:legislative_term_start'],
+        ], [
+            'legislative_name.required_if' => 'Informe o nome parlamentar do vereador.',
+            'legislative_party.required_if' => 'Informe o partido do vereador.',
+            'legislative_term_start.required_if' => 'Informe o início do mandato.',
+            'legislative_term_end.required_if' => 'Informe o fim do mandato.',
         ]);
 
         if (! $formSubmission->consume($request, 'municipality-invitation-create')) {
@@ -84,6 +99,10 @@ class MunicipalUserController extends Controller
                 'role' => $validated['role'],
                 'token_hash' => hash('sha256', $token),
                 'expires_at' => now()->addDays(7),
+                'legislative_name' => filled($validated['legislative_name'] ?? null) ? trim($validated['legislative_name']) : null,
+                'legislative_party' => filled($validated['legislative_party'] ?? null) ? mb_strtoupper(trim($validated['legislative_party'])) : null,
+                'legislative_term_start' => $validated['legislative_term_start'] ?? null,
+                'legislative_term_end' => $validated['legislative_term_end'] ?? null,
             ]);
         });
 
@@ -137,6 +156,42 @@ class MunicipalUserController extends Controller
         });
 
         return back()->with('status', "Perfil de {$member->name} atualizado.");
+    }
+
+    public function updateLegislativeIdentity(
+        Request $request,
+        int $user,
+        CurrentMunicipality $currentMunicipality,
+        AuditTrail $auditTrail,
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'legislative_name' => ['required', 'string', 'min:3', 'max:255'],
+            'legislative_party' => ['required', 'string', 'min:2', 'max:30'],
+            'legislative_term_start' => ['required', 'date'],
+            'legislative_term_end' => ['required', 'date', 'after_or_equal:legislative_term_start'],
+        ]);
+        $municipality = $currentMunicipality->get($request);
+        $member = $municipality->users()->wherePivot('role', User::ROLE_COUNCILOR)->findOrFail($user);
+        $before = [
+            'legislative_name' => $member->pivot->legislative_name,
+            'legislative_party' => $member->pivot->legislative_party,
+            'legislative_term_start' => $member->pivot->legislative_term_start,
+            'legislative_term_end' => $member->pivot->legislative_term_end,
+        ];
+        $values = [
+            'legislative_name' => trim($validated['legislative_name']),
+            'legislative_party' => mb_strtoupper(trim($validated['legislative_party'])),
+            'legislative_term_start' => $validated['legislative_term_start'],
+            'legislative_term_end' => $validated['legislative_term_end'],
+        ];
+        DB::transaction(function () use ($request, $municipality, $member, $before, $values, $auditTrail): void {
+            $municipality->users()->updateExistingPivot($member->id, $values);
+            $auditTrail->recordMunicipalityOperation($request, $municipality, 'legislative_identity_updated', [
+                'user_id' => $member->id, ...$values,
+            ], $before);
+        });
+
+        return back()->with('status', "Identificação parlamentar de {$member->name} atualizada.");
     }
 
     public function revokeInvitation(

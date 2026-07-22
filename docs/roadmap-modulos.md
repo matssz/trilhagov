@@ -11,7 +11,8 @@ quando novos controles forem adicionados.
 
 ```mermaid
 flowchart LR
-    A[Normas municipais] --> B[Inventário da emenda]
+    L[Proposta na Câmara] --> A[Normas municipais]
+    A --> B[Inventário da emenda]
     B --> C[Plano de trabalho]
     C --> D{Admissível?}
     D -->|Sim| E[Execução física e financeira]
@@ -25,13 +26,13 @@ flowchart LR
 
     classDef base fill:#eaf0f6,stroke:#123f70,color:#071f3d,stroke-width:1px;
     classDef decision fill:#faf5e7,stroke:#b98910,color:#071f3d,stroke-width:2px;
-    class A,B,C,E,F,G,H,I,J base;
+    class L,A,B,C,E,F,G,H,I,J base;
     class D decision;
 ```
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: Integrações reais com Siafic, Audesp e Câmara.**
+**Próximo foco: homologação real com Siafic e Audesp, após a entrega do Portal Legislativo.**
 
 ```mermaid
 flowchart LR
@@ -40,18 +41,32 @@ flowchart LR
     C["Relatórios Especializados<br/>1ª versão entregue"]
     D["Saúde e LC 141<br/>1ª versão entregue"]
     E["Obras e Licitações<br/>1ª versão entregue"]
-    F["Integrações reais<br/>PRÓXIMO FOCO"]
-    G["LGPD e comercialização<br/>Planejado"]
+    F["Portal Legislativo<br/>1ª versão entregue"]
+    G["Siafic e Audesp reais<br/>PRÓXIMO FOCO"]
+    H["LGPD e comercialização<br/>Planejado"]
 
-    A --> B --> C --> D --> E --> F --> G
+    A --> B --> C --> D --> E --> F --> G --> H
 
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
     classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class A,B,C,D,E delivered;
-    class F focus;
-    class G planned;
+    class A,B,C,D,E,F delivered;
+    class G focus;
+    class H planned;
 ```
+
+### Portal Legislativo e integração Câmara–Executivo
+
+- [x] Perfis próprios para vereador e análise legislativa.
+- [x] Proposta iniciada na Câmara com beneficiário, natureza, valor e saúde.
+- [x] Cota global sobre a RCL dividida pelas cadeiras da Câmara.
+- [x] Reserva de saúde apurada na carteira individual.
+- [x] Análise técnica prévia antes do protocolo.
+- [x] Fotografia e SHA-256 do encaminhamento ao Executivo.
+- [x] Recebimento idempotente, criação da emenda e reserva orçamentária.
+- [x] Acompanhamento legislativo integrado ao fluxo executivo.
+- [ ] Validar fórmula, formulário, protocolo e permissões com uma Câmara piloto.
+- [ ] Conferir a reserva real com o Siafic municipal.
 
 ### Programa de Auditoria e Papéis de Trabalho
 

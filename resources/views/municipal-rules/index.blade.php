@@ -58,9 +58,9 @@
                 <small>{{ $profile->instruments->pluck('type')->unique()->count() }} tipos registrados</small>
             </div>
             <div class="rules-metric">
-                <span>Teto calculado</span>
+                <span>Teto global da Câmara</span>
                 <strong>{{ $diagnostic['ceiling'] === null ? 'Pendente' : 'R$ '.number_format($diagnostic['ceiling'], 2, ',', '.') }}</strong>
-                <small>RCL anterior × percentual validado</small>
+                <small>Dividido igualmente entre {{ $profile->councilor_seats ?: 'cadeiras ainda não informadas' }}</small>
             </div>
         </section>
 
@@ -185,7 +185,8 @@
                     <div class="rules-fields">
                         <label><span>Situação local <b>*</b></span><select class="form-select" name="regime_status" required>@foreach(App\Models\MunicipalRegulatoryProfile::regimeStatuses() as $value => $label)<option value="{{ $value }}" @selected(old('regime_status', $profile->regime_status) === $value)>{{ $label }}</option>@endforeach</select></label>
                         <label><span>RCL do exercício anterior (R$)</span><input class="form-control" name="previous_year_rcl" type="number" min="0" step="0.01" value="{{ old('previous_year_rcl', $profile->previous_year_rcl) }}"></label>
-                        <label><span>Limite individual (%)</span><input class="form-control" name="individual_limit_percentage" type="number" min="0.0001" max="10" step="0.0001" value="{{ old('individual_limit_percentage', $profile->individual_limit_percentage) }}"></label>
+                        <label><span>Limite global da Câmara (%)</span><input class="form-control" name="individual_limit_percentage" type="number" min="0.0001" max="10" step="0.0001" value="{{ old('individual_limit_percentage', $profile->individual_limit_percentage) }}"></label>
+                        <label><span>Número de vereadores</span><input class="form-control" name="councilor_seats" type="number" min="1" max="1000" value="{{ old('councilor_seats', $profile->councilor_seats) }}"></label>
                         <label><span>Reserva para saúde (%)</span><input class="form-control" name="health_reserve_percentage" type="number" min="0" max="100" step="0.0001" value="{{ old('health_reserve_percentage', $profile->health_reserve_percentage) }}"></label>
                         <label><span>Aplicação da reserva</span><select class="form-select" name="health_reserve_method"><option value="">A confirmar</option>@foreach(App\Models\MunicipalRegulatoryProfile::healthReserveMethods() as $value => $label)<option value="{{ $value }}" @selected(old('health_reserve_method', $profile->health_reserve_method) === $value)>{{ $label }}</option>@endforeach</select></label>
                         <label><span>Máximo por vereador</span><input class="form-control" name="amendments_per_councilor_limit" type="number" min="1" max="1000" value="{{ old('amendments_per_councilor_limit', $profile->amendments_per_councilor_limit) }}"></label>

@@ -237,9 +237,13 @@ class MunicipalRuleApplicationService
 
     private function ceiling(MunicipalRegulatoryProfile $profile): ?float
     {
-        return $profile->previous_year_rcl !== null && $profile->individual_limit_percentage !== null
-            ? (float) $profile->previous_year_rcl * (float) $profile->individual_limit_percentage / 100
-            : null;
+        if ($profile->previous_year_rcl === null || $profile->individual_limit_percentage === null) {
+            return null;
+        }
+
+        $global = (float) $profile->previous_year_rcl * (float) $profile->individual_limit_percentage / 100;
+
+        return $profile->councilor_seats ? $global / $profile->councilor_seats : $global;
     }
 
     private function authorQuery(MunicipalRegulatoryProfile $profile, string $authorName, ?int $ignoreId = null): Builder

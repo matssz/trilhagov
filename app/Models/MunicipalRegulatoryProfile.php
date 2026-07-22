@@ -24,7 +24,7 @@ class MunicipalRegulatoryProfile extends Model
     protected $fillable = [
         'municipality_id', 'created_by', 'updated_by', 'activated_by',
         'audesp_responsible_user_id', 'fiscal_year', 'version', 'status',
-        'regime_status', 'previous_year_rcl', 'individual_limit_percentage',
+        'regime_status', 'previous_year_rcl', 'individual_limit_percentage', 'councilor_seats',
         'health_reserve_percentage', 'health_reserve_method',
         'amendments_per_councilor_limit', 'minimum_amendment_amount',
         'generic_amendments_prohibited', 'prior_technical_review_required',
@@ -126,6 +126,11 @@ class MunicipalRegulatoryProfile extends Model
     public function amendments(): HasMany
     {
         return $this->hasMany(ParliamentaryAmendment::class);
+    }
+
+    public function legislativeProposals(): HasMany
+    {
+        return $this->hasMany(LegislativeProposal::class);
     }
 
     public function technicalImpediments(): HasMany

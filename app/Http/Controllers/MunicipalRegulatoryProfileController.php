@@ -297,6 +297,7 @@ class MunicipalRegulatoryProfileController extends Controller
             'regime_status' => ['required', Rule::in(array_keys(MunicipalRegulatoryProfile::regimeStatuses()))],
             'previous_year_rcl' => ['nullable', 'numeric', 'min:0', 'max:9999999999999999.99'],
             'individual_limit_percentage' => ['nullable', 'numeric', 'gt:0', 'max:10'],
+            'councilor_seats' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'health_reserve_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'health_reserve_method' => ['nullable', Rule::in(array_keys(MunicipalRegulatoryProfile::healthReserveMethods()))],
             'amendments_per_councilor_limit' => ['nullable', 'integer', 'min:1', 'max:1000'],

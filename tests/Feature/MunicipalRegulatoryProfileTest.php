@@ -163,6 +163,7 @@ class MunicipalRegulatoryProfileTest extends TestCase
             'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,
             'previous_year_rcl' => 100000000,
             'individual_limit_percentage' => 1.55,
+            'councilor_seats' => 10,
             'health_reserve_percentage' => 50,
             'health_reserve_method' => 'global',
             'generic_amendments_prohibited' => true,

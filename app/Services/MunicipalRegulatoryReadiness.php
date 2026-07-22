@@ -25,6 +25,7 @@ class MunicipalRegulatoryReadiness
 
             $this->check($checks, $blockers, $profile->previous_year_rcl !== null, 'RCL do exercício anterior informada');
             $this->check($checks, $blockers, $profile->individual_limit_percentage !== null, 'Percentual-limite validado');
+            $this->check($checks, $blockers, $profile->councilor_seats !== null, 'Número de cadeiras da Câmara informado');
             $this->check($checks, $blockers, $profile->health_reserve_percentage !== null && $profile->health_reserve_method !== null, 'Reserva da saúde parametrizada');
             $this->check($checks, $blockers, $profile->prior_technical_review_required !== null, 'Análise técnica prévia definida');
             $this->check($checks, $blockers, $profile->generic_amendments_prohibited !== null, 'Tratamento de objetos genéricos definido');
@@ -50,6 +51,11 @@ class MunicipalRegulatoryReadiness
         }
         if (! $types->contains('regulation')) {
             $warnings[] = 'Nenhum decreto ou ato regulamentador foi vinculado.';
+        }
+        if ($profile->municipality?->state === 'SP'
+            && $profile->individual_limit_percentage !== null
+            && (float) $profile->individual_limit_percentage > 1.55) {
+            $warnings[] = 'O Manual TCESP 2026 recomenda revisar percentuais acima de 1,55% da RCL para Câmaras unicamerais.';
         }
         if ($profile->document_retention_years === null) {
             $warnings[] = 'A política municipal de retenção documental ainda não foi definida.';

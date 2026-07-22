@@ -56,6 +56,7 @@ class ParliamentaryAmendment extends Model
         'author_name',
         'author_party',
         'object',
+        'indicated_for_health',
         'expense_destination',
         'responsible_department',
         'beneficiary_location',
@@ -103,6 +104,7 @@ class ParliamentaryAmendment extends Model
             'accountability_completed_at' => 'date',
             'risk_score' => 'integer',
             'risk_reasons' => 'array',
+            'indicated_for_health' => 'boolean',
             'risk_calculated_at' => 'datetime',
         ];
     }
@@ -355,6 +357,11 @@ class ParliamentaryAmendment extends Model
     {
         return $this->hasMany(HealthAspsAssessment::class)
             ->latest('version');
+    }
+
+    public function legislativeProposal(): HasOne
+    {
+        return $this->hasOne(LegislativeProposal::class);
     }
 
     public function municipalContracts(): HasMany
