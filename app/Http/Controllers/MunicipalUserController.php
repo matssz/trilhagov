@@ -108,16 +108,22 @@ class MunicipalUserController extends Controller
 
         $acceptUrl = route('invitations.show', $token);
 
-        try {
-            Notification::route('mail', $invitation->email)
-                ->notify(new MunicipalityInvitationNotification($invitation->load('municipality'), $acceptUrl));
-        } catch (Throwable $exception) {
-            report($exception);
+        $mailStatus = 'unavailable';
+        if (! in_array(config('mail.default'), ['log', 'array'], true)) {
+            try {
+                Notification::route('mail', $invitation->email)
+                    ->notify(new MunicipalityInvitationNotification($invitation->load('municipality'), $acceptUrl));
+                $mailStatus = 'sent';
+            } catch (Throwable $exception) {
+                report($exception);
+                $mailStatus = 'failed';
+            }
         }
 
         return redirect()
             ->route('users.index')
-            ->with('invitation_link', $acceptUrl);
+            ->with('invitation_link', $acceptUrl)
+            ->with('invitation_mail_status', $mailStatus);
     }
 
     public function updateRole(

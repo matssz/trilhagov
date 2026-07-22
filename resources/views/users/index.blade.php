@@ -18,7 +18,13 @@
             <i data-lucide="circle-check" aria-hidden="true"></i>
             <div class="flex-grow-1 min-width-0">
                 <strong>Convite pronto para envio.</strong>
-                <div class="small mb-2">O link também foi enviado por e-mail quando o serviço de mensagens está configurado.</div>
+                @if (session('invitation_mail_status') === 'sent')
+                    <div class="small mb-2">O convite foi enviado ao e-mail informado. O link abaixo também pode ser compartilhado diretamente.</div>
+                @elseif (session('invitation_mail_status') === 'failed')
+                    <div class="small text-danger mb-2">Não foi possível enviar o e-mail. Copie e compartilhe o link abaixo com o usuário convidado.</div>
+                @else
+                    <div class="small text-warning-emphasis mb-2">O envio de e-mail ainda não está configurado neste ambiente. Copie e compartilhe o link abaixo.</div>
+                @endif
                 <div class="invitation-link-box">
                     <input class="form-control" id="invitationLink" type="text" value="{{ session('invitation_link') }}" readonly aria-label="Link do convite">
                     <button class="icon-button copy-link-button" type="button" data-copy-target="#invitationLink" title="Copiar link" aria-label="Copiar link">

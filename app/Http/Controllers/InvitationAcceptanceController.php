@@ -19,17 +19,16 @@ class InvitationAcceptanceController extends Controller
         $invitation = MunicipalityInvitation::findAvailableByToken($token)->load('municipality');
         $existingUser = User::query()->where('email', $invitation->email)->first();
 
+        if ($request->user() && (! $existingUser || ! $request->user()->is($existingUser))) {
+            return view('invitations.account-mismatch', [
+                'invitation' => $invitation,
+                'token' => $token,
+            ]);
+        }
+
         if ($existingUser && ! $request->user()) {
             return redirect()->guest(route('login'))
                 ->with('status', 'Entre com o e-mail convidado para continuar.');
-        }
-
-        if ($existingUser && ! $request->user()->is($existingUser)) {
-            abort(403);
-        }
-
-        if (! $existingUser && $request->user()) {
-            abort(403);
         }
 
         return view('invitations.accept', [
@@ -37,6 +36,19 @@ class InvitationAcceptanceController extends Controller
             'token' => $token,
             'needsRegistration' => $existingUser === null,
         ]);
+    }
+
+    public function switchAccount(Request $request, string $token): RedirectResponse
+    {
+        MunicipalityInvitation::findAvailableByToken($token);
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('invitations.show', $token)
+            ->with('status', 'Sessão encerrada. Continue com o e-mail que recebeu o convite.');
     }
 
     public function accept(

@@ -64,6 +64,7 @@ Route::get('/', function () {
 
 Route::get('/convites/{token}', [InvitationAcceptanceController::class, 'show'])->name('invitations.show');
 Route::post('/convites/{token}', [InvitationAcceptanceController::class, 'accept'])->name('invitations.accept')->block(10, 10);
+Route::post('/convites/{token}/trocar-conta', [InvitationAcceptanceController::class, 'switchAccount'])->name('invitations.switch-account')->block(10, 10);
 Route::get('/transparencia/{municipality:transparency_slug}', [PublicTransparencyController::class, 'show'])->name('transparency.show');
 Route::get('/transparencia/{municipality:transparency_slug}/emendas.csv', [PublicTransparencyController::class, 'export'])->name('transparency.export');
 Route::get('/transparencia/{municipality:transparency_slug}/emendas/{emenda}', [PublicTransparencyController::class, 'detail'])->name('transparency.detail');

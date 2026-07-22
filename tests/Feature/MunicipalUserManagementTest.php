@@ -36,6 +36,7 @@ class MunicipalUserManagementTest extends TestCase
     public function test_manager_can_create_secure_invitation_and_repeated_submission_is_ignored(): void
     {
         Notification::fake();
+        config(['mail.default' => 'smtp']);
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
         $submissionToken = $this->submissionToken('municipality-invitation-create');
 
@@ -47,7 +48,9 @@ class MunicipalUserManagementTest extends TestCase
                 'role' => User::ROLE_EDITOR,
             ]);
 
-        $response->assertRedirect(route('users.index'))->assertSessionHas('invitation_link');
+        $response->assertRedirect(route('users.index'))
+            ->assertSessionHas('invitation_link')
+            ->assertSessionHas('invitation_mail_status', 'sent');
         $acceptUrl = session('invitation_link');
         $rawToken = basename((string) parse_url($acceptUrl, PHP_URL_PATH));
         $invitation = MunicipalityInvitation::firstOrFail();
@@ -64,6 +67,51 @@ class MunicipalUserManagementTest extends TestCase
         ])->assertSessionHas('warning');
 
         $this->assertDatabaseCount('municipality_invitations', 1);
+    }
+
+    public function test_log_mailer_keeps_manual_link_without_claiming_email_delivery(): void
+    {
+        Notification::fake();
+        config(['mail.default' => 'log']);
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->post(route('users.invitations.store'), [
+                '_submission_token' => $this->submissionToken('municipality-invitation-create'),
+                'email' => 'vereador@municipio.test',
+                'role' => User::ROLE_COUNCILOR,
+                'legislative_name' => 'Vereador Teste',
+                'legislative_party' => 'ABC',
+                'legislative_term_start' => '2025-01-01',
+                'legislative_term_end' => '2028-12-31',
+            ])
+            ->assertSessionHas('invitation_link')
+            ->assertSessionHas('invitation_mail_status', 'unavailable');
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_signed_in_manager_can_safely_switch_accounts_to_accept_new_user_invitation(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        [, $token] = $this->invitation($municipality, $manager, 'vereador@municipio.test', User::ROLE_COUNCILOR);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('invitations.show', $token))
+            ->assertOk()
+            ->assertSee('Este convite pertence a outra conta')
+            ->assertSee('Sair e continuar com o convite');
+
+        $this->post(route('invitations.switch-account', $token))
+            ->assertRedirect(route('invitations.show', $token));
+
+        $this->assertGuest();
+        $this->get(route('invitations.show', $token))
+            ->assertOk()
+            ->assertSee('Aceitar convite')
+            ->assertSee('vereador@municipio.test');
     }
 
     public function test_new_user_can_accept_invitation_only_once(): void
