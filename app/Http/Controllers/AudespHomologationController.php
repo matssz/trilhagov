@@ -101,7 +101,12 @@ class AudespHomologationController extends Controller
             ]);
         }
 
-        $inspection = $homologation->inspect($contents, $municipality);
+        $inspection = $homologation->inspect(
+            $contents,
+            $municipality,
+            (int) $validated['fiscal_year'],
+            (int) $validated['reference_month'],
+        );
         $directory = "audesp-homologations/{$municipality->id}/sources";
         $storagePath = Storage::putFileAs($directory, $file, Str::uuid().'.xml');
         if (! $storagePath) {
@@ -120,6 +125,7 @@ class AudespHomologationController extends Controller
                     'source_system' => trim($validated['source_system']),
                     'source_version' => filled($validated['source_version'] ?? null) ? trim($validated['source_version']) : null,
                     'schema_version' => AudespAmendmentRegistration::SCHEMA_VERSION,
+                    'source_document_type' => $inspection['document_type'],
                     'status' => $stats['total'] > 0 && $stats['matched'] === $stats['total']
                         ? AudespHomologationBatch::STATUS_READY
                         : AudespHomologationBatch::STATUS_UNDER_REVIEW,
@@ -140,8 +146,10 @@ class AudespHomologationController extends Controller
                     'created_by' => $request->user()->id,
                     'type' => 'source_imported',
                     'occurred_at' => now(),
-                    'message' => 'XML do Siafic registrado e comparado com os cadastros do TrilhaGov.',
-                    'metadata' => $stats,
+                    'message' => $inspection['document_type'] === AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL
+                        ? 'Movimento mensal do Siafic registrado e conciliado com a execução das emendas no TrilhaGov.'
+                        : 'XML do Siafic registrado e comparado com os cadastros do TrilhaGov.',
+                    'metadata' => [...$stats, 'document_type' => $inspection['document_type']],
                 ]);
                 $auditTrail->recordMunicipalityOperation($request, $municipality, 'audesp_homologation_created', [
                     'batch_reference' => $batch->reference,
@@ -222,7 +230,12 @@ class AudespHomologationController extends Controller
         abort_unless($batch->isEditable(), 409);
         abort_unless(Storage::exists($batch->source_storage_path), 404);
 
-        $inspection = $homologation->inspect((string) Storage::get($batch->source_storage_path), $municipality);
+        $inspection = $homologation->inspect(
+            (string) Storage::get($batch->source_storage_path),
+            $municipality,
+            $batch->fiscal_year,
+            $batch->reference_month,
+        );
         DB::transaction(function () use ($request, $batch, $inspection, $municipality, $auditTrail): void {
             $locked = AudespHomologationBatch::query()->lockForUpdate()->findOrFail($batch->id);
             abort_unless($locked->isEditable(), 409);
@@ -233,6 +246,7 @@ class AudespHomologationController extends Controller
                 'status' => $stats['total'] > 0 && $stats['matched'] === $stats['total']
                     ? AudespHomologationBatch::STATUS_READY
                     : AudespHomologationBatch::STATUS_UNDER_REVIEW,
+                'source_document_type' => $inspection['document_type'],
                 'item_count' => $stats['total'],
                 'matched_count' => $stats['matched'],
                 'divergent_count' => $stats['divergent'],

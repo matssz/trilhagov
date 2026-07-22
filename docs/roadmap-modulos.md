@@ -32,7 +32,7 @@ flowchart LR
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: homologação real com Siafic e Audesp, após a entrega do Portal Legislativo.**
+**Foco atual: validar a conciliação Siafic/Audesp com contador, fornecedor e arquivos reais do Município piloto.**
 
 ```mermaid
 flowchart LR
@@ -42,7 +42,7 @@ flowchart LR
     D["Saúde e LC 141<br/>1ª versão entregue"]
     E["Obras e Licitações<br/>1ª versão entregue"]
     F["Portal Legislativo<br/>1ª versão entregue"]
-    G["Siafic e Audesp reais<br/>PRÓXIMO FOCO"]
+    G["Siafic e Audesp<br/>CONCILIADOR ENTREGUE; VALIDAR EM CAMPO"]
     H["LGPD e comercialização<br/>Planejado"]
 
     A --> B --> C --> D --> E --> F --> G --> H
@@ -65,6 +65,7 @@ flowchart LR
 - [x] Fotografia e SHA-256 do encaminhamento ao Executivo.
 - [x] Recebimento idempotente, criação da emenda e reserva orçamentária.
 - [x] Acompanhamento legislativo integrado ao fluxo executivo.
+- [x] Conciliação técnica da reserva, empenho, liquidação e pagamento por Código de Aplicação.
 - [ ] Validar fórmula, formulário, protocolo e permissões com uma Câmara piloto.
 - [ ] Conferir a reserva real com o Siafic municipal.
 

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\AudespAmendmentRegistration;
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
+use App\Models\FinancialCommitment;
+use App\Models\LegislativeProposal;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -95,6 +97,100 @@ class AudespHomologationTest extends TestCase
         $this->assertDatabaseHas('municipal_work_items', [
             'source_key' => "amendment:{$registration->parliamentary_amendment_id}:audesp-homologation:{$batch->id}",
             'status' => 'completed',
+        ]);
+    }
+
+    public function test_monthly_financial_xml_reconciles_portal_reservation_and_execution_events(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $registration = $this->registration($municipality, $manager);
+        $this->financialExecution($registration->amendment, $municipality, $manager);
+        $token = $this->sessionFor($municipality, 'audesp-homologation-upload');
+
+        $response = $this->actingAs($manager)->post(route('audesp-homologations.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+            'source_system' => 'Siafic Municipal',
+            'source_file' => UploadedFile::fake()->createWithContent('movimento-mensal.xml', $this->monthlyFinancialXml()),
+        ]);
+
+        $batch = AudespHomologationBatch::firstOrFail();
+        $response->assertRedirect(route('audesp-homologations.show', $batch));
+        $this->assertSame(AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL, $batch->source_document_type);
+        $this->assertSame(AudespHomologationBatch::STATUS_READY, $batch->status);
+        $this->assertSame(1, $batch->matched_count);
+        $item = $batch->items()->firstOrFail();
+        $this->assertSame($registration->id, $item->audesp_amendment_registration_id);
+        $this->assertSame('1000.00', $item->source_snapshot['pre_commitment_amount']);
+        $this->assertSame('800.00', $item->local_snapshot['committed_amount']);
+        $this->assertNull($item->differences);
+        $this->get(route('audesp-homologations.show', $batch))
+            ->assertOk()
+            ->assertSee('Movimento contábil mensal')
+            ->assertSee('Execução financeira da emenda');
+    }
+
+    public function test_monthly_financial_xml_flags_unknown_application_code_without_guessing_a_link(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->registration($municipality, $manager);
+        $token = $this->sessionFor($municipality, 'audesp-homologation-upload');
+
+        $this->actingAs($manager)->post(route('audesp-homologations.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+            'source_system' => 'Siafic Municipal',
+            'source_file' => UploadedFile::fake()->createWithContent(
+                'codigo-sem-vinculo.xml',
+                $this->monthlyFinancialXml('8999'),
+            ),
+        ])->assertRedirect();
+
+        $batch = AudespHomologationBatch::firstOrFail();
+        $this->assertSame(AudespHomologationBatch::STATUS_UNDER_REVIEW, $batch->status);
+        $this->assertSame(1, $batch->unmatched_count);
+        $this->assertDatabaseHas('audesp_homologation_items', [
+            'audesp_homologation_batch_id' => $batch->id,
+            'parliamentary_amendment_id' => null,
+            'status' => AudespHomologationItem::STATUS_UNMATCHED,
+            'source_amendment_number' => 'Cód. 8999',
+        ]);
+    }
+
+    public function test_monthly_financial_divergence_creates_municipal_work_and_integrity_alert(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $registration = $this->registration($municipality, $manager);
+        $this->financialExecution($registration->amendment, $municipality, $manager);
+        $token = $this->sessionFor($municipality, 'audesp-homologation-upload');
+
+        $this->actingAs($manager)->post(route('audesp-homologations.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+            'source_system' => 'Siafic Municipal',
+            'source_file' => UploadedFile::fake()->createWithContent(
+                'movimento-divergente.xml',
+                $this->monthlyFinancialXml('8001', 750),
+            ),
+        ])->assertRedirect();
+
+        $batch = AudespHomologationBatch::firstOrFail();
+        $this->assertSame(AudespHomologationBatch::STATUS_UNDER_REVIEW, $batch->status);
+        $this->assertSame('committed_amount', $batch->items()->firstOrFail()->differences[0]['field']);
+        $this->assertDatabaseHas('municipal_work_items', [
+            'source_key' => "amendment:{$registration->parliamentary_amendment_id}:audesp-homologation:{$batch->id}",
+            'title' => 'Conciliar execução financeira com o Siafic',
+        ]);
+        $this->assertDatabaseHas('integrity_alerts', [
+            'alert_key' => "audesp:homologation:{$batch->id}",
+            'title' => 'Execução financeira Audesp divergente',
+            'severity' => 'critical',
         ]);
     }
 
@@ -275,6 +371,101 @@ class AudespHomologationTest extends TestCase
         ]);
 
         return $batch;
+    }
+
+    private function financialExecution(ParliamentaryAmendment $amendment, Municipality $municipality, User $user): void
+    {
+        $municipality->legislativeProposals()->create([
+            'submitted_by' => $user->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'reference' => 'LEG-2026-010',
+            'fiscal_year' => 2026,
+            'author_name' => 'Vereador João Municipal',
+            'author_party' => 'PSD',
+            'object' => 'Modernização da unidade básica de saúde municipal.',
+            'justification' => 'Ampliar o atendimento municipal.',
+            'priority' => 'high',
+            'beneficiary_type' => 'municipal_body',
+            'beneficiary_name' => 'Secretaria Municipal de Saúde',
+            'beneficiary_location' => 'Centro',
+            'expense_destination' => 'investment',
+            'transfer_type' => 'direct_execution',
+            'health_related' => true,
+            'responsible_department' => 'Secretaria Municipal de Saúde',
+            'public_need' => 'Modernizar o atendimento da atenção básica.',
+            'estimated_amount' => 1000,
+            'estimate_source' => 'Pesquisa municipal de preços',
+            'status' => LegislativeProposal::STATUS_RESERVED,
+            'budget_reservation_number' => 'RES-2026-010',
+            'budget_reserved_amount' => 1000,
+            'budget_reserved_at' => '2026-07-02',
+        ]);
+        $commitment = $amendment->financialCommitments()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $user->id,
+            'commitment_number' => '2026NE0001',
+            'supplier_name' => 'Fornecedor Municipal Ltda',
+            'procurement_process' => 'PROC-2026-010',
+            'object_description' => 'Equipamentos para a unidade municipal.',
+            'committed_amount' => 800,
+            'committed_at' => '2026-07-10',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ]);
+        $liquidation = $commitment->liquidations()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $user->id,
+            'liquidation_reference' => '2026NL0001',
+            'amount' => 600,
+            'liquidated_at' => '2026-07-20',
+            'supporting_document' => 'NF-100',
+            'acceptance_reference' => 'ATESTO-100',
+        ]);
+        $commitment->payments()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'financial_liquidation_id' => $liquidation->id,
+            'created_by' => $user->id,
+            'payment_reference' => '2026OB0001',
+            'amount' => 500,
+            'paid_at' => '2026-07-25',
+        ]);
+    }
+
+    private function monthlyFinancialXml(string $applicationCode = '8001', float $committedAmount = 800): string
+    {
+        return <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<DetalheMovimentoMensal xmlns="http://www.tce.sp.gov.br/audesp/xml/dadoscontabeis">
+  <Descritor><AnoExercicio>2026</AnoExercicio><MesReferencia>7</MesReferencia></Descritor>
+  <ContasCorrentes>
+    <DotacaoOrcamentaria>
+      <CodigoAplicacao>0001</CodigoAplicacao><ContaContabil>522110100</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>50000</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>50000</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </DotacaoOrcamentaria>
+    <DotacaoOrcamentaria>
+      <CodigoAplicacao>{$applicationCode}</CodigoAplicacao><ContaContabil>522910100</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>1000</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>1000</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </DotacaoOrcamentaria>
+    <EmissaoEmpenho>
+      <EntidadeOrcamentaria>1</EntidadeOrcamentaria><CodigoAplicacao>{$applicationCode}</CodigoAplicacao><NumeroEmpenho>2026NE0001</NumeroEmpenho><ContaContabil>522920101</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>{$committedAmount}</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>{$committedAmount}</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </EmissaoEmpenho>
+    <EmissaoEmpenho>
+      <EntidadeOrcamentaria>1</EntidadeOrcamentaria><CodigoAplicacao>{$applicationCode}</CodigoAplicacao><NumeroEmpenho>2026NE0001</NumeroEmpenho><ContaContabil>853210000</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>{$committedAmount}</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>{$committedAmount}</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </EmissaoEmpenho>
+    <LiquidacaoEmpenho>
+      <EntidadeOrcamentaria>1</EntidadeOrcamentaria><NumeroEmpenho>2026NE0001</NumeroEmpenho><ContaContabil>622920103</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>600</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>600</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </LiquidacaoEmpenho>
+    <PagamentoEmpenho>
+      <EntidadeOrcamentaria>1</EntidadeOrcamentaria><NumeroEmpenho>2026NE0001</NumeroEmpenho><ContaContabil>622920104</ContaContabil>
+      <MovimentoContabil><SaldoInicial>0</SaldoInicial><NatInicial>D</NatInicial><MovimentoCredito>500</MovimentoCredito><MovimentoDebito>0</MovimentoDebito><SaldoFinal>500</SaldoFinal><NatFinal>D</NatFinal></MovimentoContabil>
+    </PagamentoEmpenho>
+  </ContasCorrentes>
+</DetalheMovimentoMensal>
+XML;
     }
 
     private function xml(): string

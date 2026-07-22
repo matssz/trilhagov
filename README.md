@@ -73,6 +73,7 @@ análise jurídica. Ele funciona como camada de controle operacional e evidênci
 - Cadeia municipal empenho, liquidação e pagamento, com registros imutáveis e bloqueio de pagamento sem liquidação.
 - Diagnóstico da regra `47.4.63`, reclassificação de saldos anteriores e prévia XML interna sem transmissão automática.
 - Homologação do XML produzido pelo Siafic com comparação campo a campo, hash e armazenamento privado.
+- Conciliação do Movimento Mensal Audesp com reserva legislativa, empenho, liquidação e pagamento por Código de Aplicação.
 - Registro auditável da transmissão pelo Coletor, recibos, rejeições e reenvios vinculados, sem usar credenciais do TCESP.
 - Programa de Auditoria executável com estratégia de amostragem, procedimentos, testes e papéis de trabalho.
 - Evidências privadas com SHA-256, achados estruturados, revisão independente e conclusão formal integrada ao Plano Anual.

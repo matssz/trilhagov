@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AudespHomologationBatch extends Model
 {
+    public const TYPE_AMENDMENT_REGISTRY = 'amendment_registry';
+
+    public const TYPE_MONTHLY_FINANCIAL = 'monthly_financial';
+
     public const STATUS_UNDER_REVIEW = 'under_review';
 
     public const STATUS_READY = 'ready_for_submission';
@@ -32,6 +36,7 @@ class AudespHomologationBatch extends Model
         'source_system',
         'source_version',
         'schema_version',
+        'source_document_type',
         'status',
         'source_original_name',
         'source_storage_path',
@@ -75,6 +80,20 @@ class AudespHomologationBatch extends Model
             self::STATUS_REJECTED => 'Rejeitado',
             self::STATUS_STORED => 'Armazenado',
         ];
+    }
+
+    /** @return array<string, string> */
+    public static function documentTypes(): array
+    {
+        return [
+            self::TYPE_AMENDMENT_REGISTRY => 'Cadastro de emendas',
+            self::TYPE_MONTHLY_FINANCIAL => 'Movimento contábil mensal',
+        ];
+    }
+
+    public function documentTypeLabel(): string
+    {
+        return self::documentTypes()[$this->source_document_type] ?? $this->source_document_type;
     }
 
     /** @return array<string, string> */

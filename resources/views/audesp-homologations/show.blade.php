@@ -12,6 +12,13 @@
             default => 1,
         };
         $rejected = $batch->status === \App\Models\AudespHomologationBatch::STATUS_REJECTED;
+        $isFinancial = $batch->source_document_type === \App\Models\AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL;
+        $financialLabels = [
+            'pre_commitment_amount' => 'Pré-empenho / reserva',
+            'committed_amount' => 'Empenhado líquido',
+            'liquidated_amount' => 'Liquidado líquido',
+            'paid_amount' => 'Pago líquido',
+        ];
     @endphp
 
     <a class="back-link mb-3" href="{{ route('audesp-homologations.index') }}"><i data-lucide="arrow-left" aria-hidden="true"></i>Voltar para homologações</a>
@@ -21,6 +28,7 @@
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <p class="page-kicker mb-0">Lote {{ Str::limit($batch->reference, 18, '') }}</p>
                 <span class="homologation-status status-{{ $batch->status }}">{{ $batch->statusLabel() }}</span>
+                <span class="small text-secondary">{{ $batch->documentTypeLabel() }}</span>
             </div>
             <h1 class="h3 mb-1">{{ str_pad((string) $batch->reference_month, 2, '0', STR_PAD_LEFT) }}/{{ $batch->fiscal_year }} · {{ $batch->source_system }}</h1>
             <p class="text-secondary mb-0">{{ $batch->source_original_name }} · SHA-256 {{ Str::limit($batch->source_sha256, 16, '') }}</p>
@@ -46,7 +54,7 @@
     @endif
 
     <div class="homologation-metrics mb-4">
-        <article><span><i data-lucide="file-text" aria-hidden="true"></i></span><div><small>Registros no XML</small><strong>{{ $batch->item_count }}</strong></div></article>
+        <article><span><i data-lucide="file-text" aria-hidden="true"></i></span><div><small>{{ $isFinancial ? 'Emendas conciliadas' : 'Registros no XML' }}</small><strong>{{ $batch->item_count }}</strong></div></article>
         <article class="is-success"><span><i data-lucide="circle-check" aria-hidden="true"></i></span><div><small>Coincidentes</small><strong>{{ $batch->matched_count }}</strong></div></article>
         <article class="{{ $batch->divergent_count ? 'has-risk' : '' }}"><span><i data-lucide="git-compare-arrows" aria-hidden="true"></i></span><div><small>Divergentes</small><strong>{{ $batch->divergent_count }}</strong></div></article>
         <article class="{{ $batch->unmatched_count ? 'has-risk' : '' }}"><span><i data-lucide="link-2" aria-hidden="true"></i></span><div><small>Sem vínculo</small><strong>{{ $batch->unmatched_count }}</strong></div></article>
@@ -54,7 +62,7 @@
 
     <section class="content-panel mb-4">
         <div class="content-panel-header homologation-panel-header">
-            <div class="d-flex align-items-center gap-2"><i data-lucide="scan-search" aria-hidden="true"></i><h2 class="h5 mb-0">Conferência Siafic × TrilhaGov</h2></div>
+            <div class="d-flex align-items-center gap-2"><i data-lucide="scan-search" aria-hidden="true"></i><h2 class="h5 mb-0">{{ $isFinancial ? 'Execução financeira da emenda' : 'Conferência Siafic × TrilhaGov' }}</h2></div>
             @if ($canEdit && $batch->isEditable())
                 <form method="POST" action="{{ route('audesp-homologations.recheck', $batch) }}">@csrf<input name="_submission_token" type="hidden" value="{{ $recheckToken }}"><button class="btn btn-sm btn-outline-primary" type="submit"><i data-lucide="refresh-cw" aria-hidden="true"></i>Reconferir</button></form>
             @else
@@ -66,20 +74,28 @@
                 <details class="homologation-item status-{{ $item->status }}" @if ($item->status !== 'matched') open @endif>
                     <summary>
                         <span class="item-result"><i data-lucide="{{ $item->status === 'matched' ? 'circle-check' : ($item->status === 'unmatched' ? 'link-2' : 'git-compare-arrows') }}" aria-hidden="true"></i></span>
-                        <span><strong>{{ $item->source_amendment_number ?: 'Sem número no XML' }}/{{ $item->source_amendment_year ?: '—' }}</strong><small>{{ $item->amendment ? 'Vinculada a '.$item->amendment->reference : 'Cadastro não localizado no município' }}</small></span>
+                        <span><strong>@if ($isFinancial)Código {{ $item->source_snapshot['application_code'] ?? 'não informado' }}@else{{ $item->source_amendment_number ?: 'Sem número no XML' }}/{{ $item->source_amendment_year ?: '—' }}@endif</strong><small>{{ $item->amendment ? 'Vinculada a '.$item->amendment->reference : 'Cadastro não localizado no município' }}</small></span>
                         <span class="item-result-label">{{ $item->status === 'matched' ? 'Coincidente' : ($item->status === 'unmatched' ? 'Sem vínculo' : count($item->differences ?? []).' divergência(s)') }}</span>
                         <i data-lucide="chevron-down" aria-hidden="true"></i>
                     </summary>
                     @if ($item->status === 'unmatched')
-                        <p class="homologation-item-note">Crie ou revise o cadastro Audesp no TrilhaGov usando o mesmo âmbito, número e exercício informados pelo Siafic.</p>
+                        <p class="homologation-item-note">{{ $isFinancial ? 'Cadastre ou revise o Código de Aplicação da emenda. O TrilhaGov não cria vínculos financeiros por semelhança de nome ou valor.' : 'Crie ou revise o cadastro Audesp no TrilhaGov usando o mesmo âmbito, número e exercício informados pelo Siafic.' }}</p>
                     @elseif ($item->differences)
                         <div class="homologation-differences">
                             <div class="difference-head"><span>Campo</span><span>Siafic</span><span>TrilhaGov</span></div>
                             @foreach ($item->differences as $difference)
-                                <div><strong>{{ $difference['label'] }}</strong><span>{{ is_array($difference['source']) ? implode(', ', $difference['source']) : ($difference['source'] ?: 'Não informado') }}</span><span>{{ is_array($difference['local']) ? implode(', ', $difference['local']) : ($difference['local'] ?: 'Não informado') }}</span></div>
+                                <div><strong>{{ $difference['label'] }}</strong><span data-label="Siafic">{{ is_array($difference['source']) ? implode(', ', $difference['source']) : ($difference['source'] ?: 'Não informado') }}</span><span data-label="TrilhaGov">{{ is_array($difference['local']) ? implode(', ', $difference['local']) : ($difference['local'] ?: 'Não informado') }}</span></div>
                             @endforeach
                         </div>
-                        @if ($item->amendment)<a class="difference-action" href="{{ route('emendas.audesp', $item->amendment) }}"><i data-lucide="pencil" aria-hidden="true"></i>Revisar cadastro da emenda</a>@endif
+                        @if ($item->amendment)<a class="difference-action" href="{{ $isFinancial ? route('emendas.execution', $item->amendment) : route('emendas.audesp', $item->amendment) }}"><i data-lucide="pencil" aria-hidden="true"></i>{{ $isFinancial ? 'Revisar execução da emenda' : 'Revisar cadastro da emenda' }}</a>@endif
+                    @elseif ($isFinancial)
+                        <div class="homologation-differences">
+                            <div class="difference-head"><span>Etapa</span><span>Siafic</span><span>TrilhaGov</span></div>
+                            @foreach ($financialLabels as $field => $label)
+                                <div><strong>{{ $label }}</strong><span data-label="Siafic">R$ {{ number_format((float) ($item->source_snapshot[$field] ?? 0), 2, ',', '.') }}</span><span data-label="TrilhaGov">R$ {{ number_format((float) ($item->local_snapshot[$field] ?? 0), 2, ',', '.') }}</span></div>
+                            @endforeach
+                        </div>
+                        <p class="homologation-item-note is-success">Os movimentos líquidos da competência coincidem pelo Código de Aplicação.</p>
                     @else
                         <p class="homologation-item-note is-success">Todos os campos controlados coincidem com o cadastro municipal preparado no TrilhaGov.</p>
                     @endif

@@ -18,7 +18,7 @@
         <div>
             <p class="page-kicker mb-2">Contabilidade municipal · evidências de remessa</p>
             <h1 class="h3 mb-1">Homologação Audesp</h1>
-            <p class="text-secondary mb-0">Confronte o XML do Siafic, registre a transmissão oficial e preserve cada retorno do TCESP.</p>
+            <p class="text-secondary mb-0">Confronte cadastros e movimentos mensais do Siafic, registre a transmissão oficial e preserve cada retorno do TCESP.</p>
         </div>
         <a class="btn btn-outline-primary" href="https://www.tce.sp.gov.br/audesp/coletor" target="_blank" rel="noopener noreferrer">
             <i data-lucide="external-link" aria-hidden="true"></i>Coletor Audesp
@@ -31,7 +31,7 @@
         <i data-lucide="shield-check" aria-hidden="true"></i>
         <div>
             <strong>Controle de homologação, não canal de transmissão</strong>
-            <p>O envio permanece no Coletor Audesp e exige permissão do órgão. O TrilhaGov guarda o arquivo, compara os cadastros e organiza protocolos, rejeições e reenvios.</p>
+            <p>O envio permanece no Coletor Audesp e exige permissão do órgão. O TrilhaGov guarda o arquivo, compara cadastros ou execução financeira e organiza protocolos, rejeições e reenvios.</p>
         </div>
         <span>XSD {{ \App\Models\AudespAmendmentRegistration::SCHEMA_VERSION }}</span>
     </div>
@@ -47,7 +47,7 @@
         <section class="content-panel mb-4" id="novo-lote">
             <div class="content-panel-header homologation-panel-header">
                 <div class="d-flex align-items-center gap-2"><i data-lucide="file-input" aria-hidden="true"></i><h2 class="h5 mb-0">Novo lote de conferência</h2></div>
-                <span class="small text-secondary">XML gerado pelo Siafic · limite de 5 MB</span>
+                <span class="small text-secondary">Cadastro de Emendas ou Movimento Mensal · limite de 5 MB</span>
             </div>
             <form class="homologation-upload-form" method="POST" action="{{ route('audesp-homologations.store') }}" enctype="multipart/form-data" novalidate>
                 @csrf
@@ -77,7 +77,7 @@
                     @error('source_version')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">
-                    <label class="form-label" for="source_file">Arquivo XML <span class="required-mark">*</span></label>
+                    <label class="form-label" for="source_file">Arquivo XML Audesp <span class="required-mark">*</span></label>
                     <input class="form-control @error('source_file') is-invalid @enderror" id="source_file" name="source_file" type="file" accept=".xml,application/xml,text/xml" required>
                     @error('source_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
@@ -115,7 +115,7 @@
                     <tbody>
                         @foreach ($batches as $batch)
                             <tr>
-                                <td><strong>{{ Str::limit($batch->reference, 13, '') }}</strong>@if ($batch->retry_of_id)<small>Reenvio vinculado</small>@endif</td>
+                                <td><strong>{{ Str::limit($batch->reference, 13, '') }}</strong><small>{{ $batch->documentTypeLabel() }}</small>@if ($batch->retry_of_id)<small>Reenvio vinculado</small>@endif</td>
                                 <td>{{ str_pad((string) $batch->reference_month, 2, '0', STR_PAD_LEFT) }}/{{ $batch->fiscal_year }}</td>
                                 <td><strong>{{ $batch->source_system }}</strong><small>{{ $batch->source_version ?: 'Versão não informada' }}</small></td>
                                 <td><strong>{{ $batch->matched_count }}/{{ $batch->item_count }}</strong><small>{{ $batch->divergent_count + $batch->unmatched_count }} pendência(s)</small></td>

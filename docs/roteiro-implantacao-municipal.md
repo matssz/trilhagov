@@ -74,9 +74,13 @@ alertas, ações operacionais e prévia XML marcada como interna e não transmis
 O novo fluxo também importa o XML do Siafic sem alterar a contabilidade, compara
 campos, preserva hash e arquivo privado, registra transmissão externa, recibos,
 retornos, rejeições e tentativas de reenvio encadeadas.
+Também reconhece o Detalhe do Movimento Mensal 2026, vincula a execução pelo
+Código de Aplicação e confronta pré-empenho, empenho líquido, liquidação e
+pagamento com a competência registrada no TrilhaGov. Divergências vinculadas
+geram alerta de integridade e ação crítica na Central de Trabalho.
 
-Pendente: confirmar o descritor e as operações do arquivo completo produzido pelo
-Siafic, validar os formatos reais de recibo e retorno e homologar um balancete sem
+Pendente: confirmar o descritor, a interpretação contábil do pré-empenho e as
+operações do arquivo completo produzido pelo Siafic, validar os formatos reais de recibo e retorno e homologar um balancete sem
 permitir que o TrilhaGov altere a contabilidade municipal.
 
 Saída: arquivo de homologação aceito e procedimento operacional documentado.

@@ -215,10 +215,14 @@ class MunicipalWorkItemService
                 $items[] = $this->specification(
                     "amendment:{$amendment->id}:audesp-homologation:{$latestHomologationItem->batch->id}",
                     'financial',
-                    'Corrigir divergência do XML Audesp',
+                    $latestHomologationItem->batch->source_document_type === AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL
+                        ? 'Conciliar execução financeira com o Siafic'
+                        : 'Corrigir divergência do XML Audesp',
                     $latestHomologationItem->status === AudespHomologationItem::STATUS_UNMATCHED
                         ? 'O registro do Siafic não encontrou cadastro correspondente no TrilhaGov.'
-                        : count($latestHomologationItem->differences ?? []).' campo(s) divergem entre o Siafic e o cadastro municipal.',
+                        : ($latestHomologationItem->batch->source_document_type === AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL
+                            ? count($latestHomologationItem->differences ?? []).' etapa(s) financeira(s) divergem entre a competência do Siafic e a execução registrada.'
+                            : count($latestHomologationItem->differences ?? []).' campo(s) divergem entre o Siafic e o cadastro municipal.'),
                     route('audesp-homologations.show', $latestHomologationItem->batch, false),
                     null,
                     MunicipalWorkItem::PRIORITY_CRITICAL,

@@ -414,8 +414,12 @@ class IntegrityAlertService
             $this->addDetection($detections, $amendment, 'audesp:homologation:'.$latestItem->batch->id, [
                 'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
                 'severity' => IntegrityAlert::SEVERITY_CRITICAL,
-                'title' => 'XML Audesp com divergência',
-                'message' => count($latestItem->differences ?? []).' campo(s) divergem entre o arquivo do Siafic e o cadastro municipal.',
+                'title' => $latestItem->batch->source_document_type === AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL
+                    ? 'Execução financeira Audesp divergente'
+                    : 'XML Audesp com divergência',
+                'message' => $latestItem->batch->source_document_type === AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL
+                    ? count($latestItem->differences ?? []).' etapa(s) financeira(s) divergem entre a competência do Siafic e o TrilhaGov.'
+                    : count($latestItem->differences ?? []).' campo(s) divergem entre o arquivo do Siafic e o cadastro municipal.',
                 'due_at' => null,
             ]);
         }
