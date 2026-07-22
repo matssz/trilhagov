@@ -357,6 +357,22 @@ class ParliamentaryAmendment extends Model
             ->latest('version');
     }
 
+    public function municipalContracts(): HasMany
+    {
+        return $this->hasMany(MunicipalContract::class)
+            ->latest('created_at');
+    }
+
+    public function contractMeasurements(): HasMany
+    {
+        return $this->hasMany(ContractMeasurement::class);
+    }
+
+    public function contractAddenda(): HasMany
+    {
+        return $this->hasMany(ContractAddendum::class);
+    }
+
     public function technicalImpediments(): HasMany
     {
         return $this->hasMany(TechnicalImpediment::class)->latest('identified_at')->latest('id');

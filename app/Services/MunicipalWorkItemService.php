@@ -29,6 +29,7 @@ class MunicipalWorkItemService
         private readonly MunicipalRuleApplicationService $municipalRules,
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
         private readonly AudespTraceabilityService $audespTraceability,
+        private readonly MunicipalContractFramework $contractFramework,
     ) {}
 
     /** @return array{active: int, created: int, reopened: int, completed: int} */
@@ -44,6 +45,8 @@ class MunicipalWorkItemService
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
             'healthAspsAssessments',
+            'municipalContracts.measurements',
+            'municipalContracts.addenda',
             'auditPlanItems.plan',
             'internalControlReviews.actions',
             'transparencyEvents',
@@ -538,6 +541,81 @@ class MunicipalWorkItemService
                     $diligence->due_at,
                     MunicipalWorkItem::PRIORITY_HIGH,
                     $diligence->assigned_user_id ?? $process->responsible_user_id ?? $amendment->responsible_user_id,
+                );
+            }
+        }
+
+        foreach ($amendment->municipalContracts as $contract) {
+            if (in_array($contract->status, ['completed', 'cancelled'], true)) {
+                continue;
+            }
+            $diagnostic = $this->contractFramework->evaluate($contract);
+            $actionUrl = route('municipal-contracts.show', $contract, false);
+
+            if ($diagnostic['blockers'] !== []) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:contract:{$contract->id}:readiness",
+                    'contract',
+                    'Completar controles do contrato '.$contract->code(),
+                    implode(' ', array_slice($diagnostic['blockers'], 0, 2)),
+                    $actionUrl,
+                    $contract->effective_start_at,
+                    in_array($contract->status, ['contracted', 'executing', 'suspended'], true)
+                        ? MunicipalWorkItem::PRIORITY_CRITICAL
+                        : MunicipalWorkItem::PRIORITY_HIGH,
+                    $contract->contract_manager_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            if ($diagnostic['variance'] > 15) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:contract:{$contract->id}:physical-financial-variance",
+                    'contract',
+                    'Conferir divergência físico-financeira',
+                    'A medição financeira supera o avanço físico em '.$diagnostic['variance'].' pontos percentuais. Confira boletim, quantitativos e ateste.',
+                    $actionUrl.'#medicoes',
+                    null,
+                    $diagnostic['variance'] > 30 ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
+                    $contract->contract_inspector_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            if ($contract->status === 'suspended' && $this->contractFramework->suspensionDays($contract) > 30) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:contract:{$contract->id}:suspension-notice",
+                    'contract',
+                    'Publicar aviso da obra paralisada',
+                    'A paralisação ultrapassou um mês. Registre o aviso oficial, o motivo, o responsável e a previsão de reinício.',
+                    $actionUrl,
+                    $contract->suspended_at?->copy()->addMonth(),
+                    MunicipalWorkItem::PRIORITY_CRITICAL,
+                    $contract->contract_manager_id ?? $amendment->responsible_user_id,
+                );
+            }
+
+            foreach ($contract->measurements->where('status', 'draft') as $measurement) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:contract:{$contract->id}:measurement:{$measurement->id}",
+                    'contract',
+                    'Atestar medição '.$measurement->sequence,
+                    'Confira o período, os quantitativos, a evidência e o avanço físico antes de aprovar ou rejeitar.',
+                    $actionUrl.'#medicoes',
+                    $measurement->measured_at?->copy()->addDays(5),
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                    $contract->contract_inspector_id,
+                );
+            }
+
+            foreach ($contract->addenda->where('status', 'draft') as $addendum) {
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:contract:{$contract->id}:addendum:{$addendum->id}",
+                    'contract',
+                    'Decidir termo aditivo '.$addendum->sequence,
+                    'Confira justificativa, fundamento técnico, tempestividade, publicidade e limite acumulado antes da formalização.',
+                    $actionUrl.'#aditivos',
+                    $addendum->effective_at,
+                    MunicipalWorkItem::PRIORITY_HIGH,
+                    $contract->contract_manager_id ?? $amendment->responsible_user_id,
                 );
             }
         }

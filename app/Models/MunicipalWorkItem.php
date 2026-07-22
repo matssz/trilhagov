@@ -79,6 +79,7 @@ class MunicipalWorkItem extends Model
             'planning' => 'Planejamento',
             'normative' => 'Normas municipais',
             'health' => 'Saúde e LC 141',
+            'contract' => 'Obras e contratos',
             'impediment' => 'Impedimentos',
             'execution' => 'Execução',
             'financial' => 'Financeiro',

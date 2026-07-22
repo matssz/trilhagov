@@ -31,7 +31,7 @@ flowchart LR
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: Obras Públicas e Licitações.**
+**Próximo foco: Integrações reais com Siafic, Audesp e Câmara.**
 
 ```mermaid
 flowchart LR
@@ -39,8 +39,8 @@ flowchart LR
     B["Comunicações Oficiais<br/>1ª versão entregue"]
     C["Relatórios Especializados<br/>1ª versão entregue"]
     D["Saúde e LC 141<br/>1ª versão entregue"]
-    E["Obras e Licitações<br/>PRÓXIMO FOCO"]
-    F["Integrações reais<br/>Planejado"]
+    E["Obras e Licitações<br/>1ª versão entregue"]
+    F["Integrações reais<br/>PRÓXIMO FOCO"]
     G["LGPD e comercialização<br/>Planejado"]
 
     A --> B --> C --> D --> E --> F --> G
@@ -48,9 +48,9 @@ flowchart LR
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
     classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class A,B,C,D delivered;
-    class E focus;
-    class F,G planned;
+    class A,B,C,D,E delivered;
+    class F focus;
+    class G planned;
 ```
 
 ### Programa de Auditoria e Papéis de Trabalho
@@ -128,6 +128,22 @@ flowchart TB
 - [ ] Validar categorias, fontes, códigos de aplicação e redação dos pareceres
   com Contabilidade, Fundo de Saúde e Controle Interno do Município piloto.
 - [ ] Conciliar o percentual constitucional completo com SIOPS e RREO reais.
+
+### Obras Públicas e Licitações
+
+- [x] Central municipal de processos, obras e contratos vinculados às emendas.
+- [x] Checklist da fase preparatória, forma de contratação e regime de execução.
+- [x] Cadastro de gestor, fiscal, responsável técnico, ART/RRT, vigência e
+  publicidade.
+- [x] Bloqueios de transição entre planejamento, seleção, contrato, execução,
+  paralisação e recebimento.
+- [x] Medições com evidência, ateste, avanço físico e fotografia imutável.
+- [x] Termos aditivos com justificativa, publicidade e controle acumulado dos
+  limites do art. 125 da Lei 14.133.
+- [x] Alertas, Central de Trabalho, divergência físico-financeira e dossiê PDF.
+- [ ] Validar checklist, papéis, modelos de boletim e termos de recebimento com
+  Engenharia, Licitações, Procuradoria e Controle Interno do Município piloto.
+- [ ] Confrontar contratos e aditivos reais com PNCP, Siafic e sistema municipal.
 
 Regra de atualização: ao concluir uma entrega, marcar o item neste arquivo e
 mover o destaque `focus` da sequência de desenvolvimento somente quando os
@@ -443,7 +459,7 @@ A sequência visual no início deste documento é a referência atual:
 2. manter a primeira versão de Comunicações e Documentos Oficiais;
 3. manter os Relatórios Municipais Especializados;
 4. manter e homologar Saúde e LC 141 com dados reais;
-5. avançar em Obras Públicas e Licitações e Contratos;
+5. manter e homologar Obras Públicas e Licitações com processos reais;
 6. homologar integrações reais com Siafic, Audesp e Câmara;
 7. concluir LGPD, continuidade e administração comercial do SaaS.
 

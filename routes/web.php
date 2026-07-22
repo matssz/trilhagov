@@ -25,6 +25,7 @@ use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalAuditPlanController;
 use App\Http\Controllers\MunicipalAuditProgramController;
+use App\Http\Controllers\MunicipalContractController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
 use App\Http\Controllers\MunicipalInternalControlController;
 use App\Http\Controllers\MunicipalitySelectionController;
@@ -88,6 +89,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/saude-lc141', [HealthAspsController::class, 'index'])->name('health-asps.index');
     Route::get('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'show'])->name('health-asps.show');
     Route::get('/saude-lc141/pareceres/{assessment}/documento.pdf', [HealthAspsController::class, 'pdf'])->name('health-asps.pdf');
+    Route::get('/obras-contratos', [MunicipalContractController::class, 'index'])->name('municipal-contracts.index');
+    Route::get('/obras-contratos/{contract}', [MunicipalContractController::class, 'show'])->name('municipal-contracts.show');
+    Route::get('/obras-contratos/{contract}/dossie.pdf', [MunicipalContractController::class, 'pdf'])->name('municipal-contracts.pdf');
     Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
     Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
     Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
@@ -170,6 +174,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'save'])->name('health-asps.save')->block(10, 10);
         Route::post('/saude-lc141/pareceres/{assessment}/enviar', [HealthAspsController::class, 'submit'])->name('health-asps.submit')->block(10, 10);
         Route::post('/saude-lc141/pareceres/{assessment}/revisar', [HealthAspsController::class, 'revise'])->name('health-asps.revise')->block(10, 10);
+        Route::post('/obras-contratos/medicoes/{measurement}/decidir', [MunicipalContractController::class, 'decideMeasurement'])->name('contract-measurements.decide')->block(10, 10);
         Route::post('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'store'])->name('official-documents.store')->block(10, 10);
         Route::patch('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'update'])->name('official-documents.update')->block(10, 10);
         Route::post('/comunicacoes-oficiais/{document}/protocolar', [MunicipalOfficialDocumentController::class, 'send'])->name('official-documents.send')->block(20, 10);
@@ -179,6 +184,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager,auditor')->group(function () {
         Route::post('/saude-lc141/pareceres/{assessment}/decidir', [HealthAspsController::class, 'decision'])->name('health-asps.decision')->block(10, 10);
+        Route::post('/obras-contratos/aditivos/{addendum}/decidir', [MunicipalContractController::class, 'decideAddendum'])->name('contract-addenda.decide')->block(10, 10);
         Route::post('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'store'])->name('audit-plans.store')->block(10, 10);
         Route::patch('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'update'])->name('audit-plans.update')->block(10, 10);
         Route::post('/controle-interno/plano-anual/{plan}/itens', [MunicipalAuditPlanController::class, 'addItem'])->name('audit-plan-items.store')->block(10, 10);
@@ -203,6 +209,11 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,editor')->group(function () {
+        Route::post('/obras-contratos', [MunicipalContractController::class, 'store'])->name('municipal-contracts.store')->block(10, 10);
+        Route::patch('/obras-contratos/{contract}', [MunicipalContractController::class, 'update'])->name('municipal-contracts.update')->block(10, 10);
+        Route::post('/obras-contratos/{contract}/etapa', [MunicipalContractController::class, 'transition'])->name('municipal-contracts.transition')->block(10, 10);
+        Route::post('/obras-contratos/{contract}/medicoes', [MunicipalContractController::class, 'storeMeasurement'])->name('contract-measurements.store')->block(10, 10);
+        Route::post('/obras-contratos/{contract}/aditivos', [MunicipalContractController::class, 'storeAddendum'])->name('contract-addenda.store')->block(10, 10);
         Route::post('/controle-interno/providencias/{action}/responder', [MunicipalInternalControlController::class, 'respond'])->name('internal-control-actions.respond')->block(20, 10);
         Route::post('/relatorios/governanca', [MunicipalGovernanceReportController::class, 'store'])->name('governance-reports.store')->block(10, 10);
         Route::patch('/relatorios/governanca/{report}/atualizar', [MunicipalGovernanceReportController::class, 'refresh'])->name('governance-reports.refresh')->block(10, 10);

@@ -26,6 +26,7 @@ class IntegrityAlertService
         private readonly MunicipalRuleApplicationService $municipalRules,
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
         private readonly AudespTraceabilityService $audespTraceability,
+        private readonly MunicipalContractFramework $contractFramework,
     ) {}
 
     /** @return array{created: int, updated: int, resolved: int, open: int}|null */
@@ -65,6 +66,8 @@ class IntegrityAlertService
             'amendments.regulatoryProfile',
             'amendments.municipalWorkPlan.stages',
             'amendments.healthAspsAssessments',
+            'amendments.municipalContracts.measurements',
+            'amendments.municipalContracts.addenda',
             'amendments.auditPlanItems.plan',
             'amendments.internalControlReviews.actions',
             'amendments.transparencyEvents',
@@ -88,6 +91,7 @@ class IntegrityAlertService
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
             $this->detectNormativeControls($amendment, $detections);
             $this->detectHealthAspsControls($amendment, $detections);
+            $this->detectContractControls($amendment, $detections);
             $this->detectTransparencyControls($amendment, $detections);
             $this->detectAudespControls($amendment, $detections);
             $this->detectInternalControlActions($amendment, $settings, $detections);
@@ -294,6 +298,72 @@ class IntegrityAlertService
                 'message' => 'O parecer emitido concluiu que a emenda não pode ser computada como ASPS. Não a inclua no consolidado sem nova análise formal.',
                 'due_at' => null,
             ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectContractControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        foreach ($amendment->municipalContracts as $contract) {
+            if (in_array($contract->status, ['planning', 'selection', 'completed', 'cancelled'], true)) {
+                continue;
+            }
+
+            if (blank($contract->publication_reference) || blank($contract->published_at)) {
+                $this->addDetection($detections, $amendment, "contract:{$contract->id}:publication", [
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                    'title' => 'Contrato sem publicidade comprovada',
+                    'message' => $contract->code().' está formalizado, mas a publicação exigida para sua eficácia não foi comprovada.',
+                    'due_at' => $contract->signed_at,
+                    'assigned_user_id' => $contract->contract_manager_id,
+                ]);
+            }
+
+            if ($contract->contract_inspector_id === null) {
+                $this->addDetection($detections, $amendment, "contract:{$contract->id}:inspector", [
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                    'title' => 'Fiscal do contrato não designado',
+                    'message' => $contract->code().' exige agente formalmente designado para acompanhar e registrar a execução.',
+                    'due_at' => $contract->effective_start_at,
+                    'assigned_user_id' => $contract->contract_manager_id,
+                ]);
+            }
+
+            $diagnostic = $this->contractFramework->evaluate($contract);
+            if ($diagnostic['variance'] > 15) {
+                $this->addDetection($detections, $amendment, "contract:{$contract->id}:physical-financial-variance", [
+                    'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                    'severity' => $diagnostic['variance'] > 30 ? IntegrityAlert::SEVERITY_CRITICAL : IntegrityAlert::SEVERITY_WARNING,
+                    'title' => 'Divergência físico-financeira no contrato',
+                    'message' => 'O financeiro medido supera o avanço físico em '.$diagnostic['variance'].' pontos percentuais no '.$contract->code().'.',
+                    'due_at' => null,
+                    'assigned_user_id' => $contract->contract_inspector_id,
+                ]);
+            }
+
+            if ($contract->status === 'suspended' && $this->contractFramework->suspensionDays($contract) > 30) {
+                $this->addDetection($detections, $amendment, "contract:{$contract->id}:suspended-over-month", [
+                    'category' => IntegrityAlert::CATEGORY_DEADLINE,
+                    'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                    'title' => 'Obra paralisada há mais de um mês',
+                    'message' => 'Registre e divulgue o motivo, o responsável pela inexecução temporária e a previsão de reinício.',
+                    'due_at' => $contract->suspended_at?->copy()->addMonth(),
+                    'assigned_user_id' => $contract->contract_manager_id,
+                ]);
+            }
+
+            if ($contract->effective_end_at && $contract->effective_end_at->between(today(), today()->addDays(30))) {
+                $this->addDetection($detections, $amendment, "contract:{$contract->id}:expiry", [
+                    'category' => IntegrityAlert::CATEGORY_DEADLINE,
+                    'severity' => IntegrityAlert::SEVERITY_WARNING,
+                    'title' => 'Vigência contratual próxima do fim',
+                    'message' => $contract->code().' encerra a vigência em '.$contract->effective_end_at->format('d/m/Y').'. Avalie entrega, recebimento ou alteração tempestiva.',
+                    'due_at' => $contract->effective_end_at,
+                    'assigned_user_id' => $contract->contract_manager_id,
+                ]);
+            }
         }
     }
 

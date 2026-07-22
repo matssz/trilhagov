@@ -77,6 +77,10 @@
                                 <span>Homologação Audesp</span>
                             </a>
                         @endif
+                        <a class="sidebar-link {{ request()->routeIs('municipal-contracts.*') || request()->routeIs('contract-measurements.*') || request()->routeIs('contract-addenda.*') ? 'active' : '' }}" href="{{ route('municipal-contracts.index') }}">
+                            <i data-lucide="hard-hat" aria-hidden="true"></i>
+                            <span>Obras e contratos</span>
+                        </a>
                         @if ($canEditAmendments)
                             <a class="sidebar-link {{ request()->routeIs('spreadsheet-imports.*') ? 'active' : '' }}" href="{{ route('spreadsheet-imports.index') }}">
                                 <i data-lucide="file-spreadsheet" aria-hidden="true"></i>
