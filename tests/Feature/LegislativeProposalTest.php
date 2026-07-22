@@ -184,6 +184,61 @@ class LegislativeProposalTest extends TestCase
         $this->assertSame(ParliamentaryAmendment::STATUS_PLAN_PENDING, $amendment->fresh()->status);
         $this->assertDatabaseHas('legislative_proposal_events', ['legislative_proposal_id' => $proposal->id, 'event_type' => 'budget_reserved']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'legislative_proposal_budget_reserved']);
+
+        $amendment->executionStages()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'title' => 'Entrega dos equipamentos municipais',
+            'status' => 'in_progress',
+            'progress_percentage' => 40,
+            'sort_order' => 10,
+        ]);
+        $commitment = $amendment->financialCommitments()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'commitment_number' => '2027NE0001',
+            'supplier_name' => 'Fornecedor Municipal Ltda',
+            'procurement_process' => 'PROC-2027-021',
+            'object_description' => 'Equipamentos vinculados à indicação legislativa.',
+            'committed_amount' => 80000,
+            'committed_at' => today(),
+            'status' => 'active',
+        ]);
+        $liquidation = $commitment->liquidations()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'liquidation_reference' => '2027NL0001',
+            'amount' => 60000,
+            'liquidated_at' => today(),
+            'supporting_document' => 'NF-2027-100',
+            'acceptance_reference' => 'ATESTO-2027-100',
+        ]);
+        $commitment->payments()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'financial_liquidation_id' => $liquidation->id,
+            'created_by' => $manager->id,
+            'payment_reference' => '2027OB0001',
+            'amount' => 50000,
+            'paid_at' => today(),
+        ]);
+
+        $this->actingAs($manager)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $proposal))
+            ->assertOk()
+            ->assertSee('Abrir fluxo executivo')
+            ->assertSee('R$ 80.000,00')
+            ->assertSee('R$ 60.000,00')
+            ->assertSee('R$ 50.000,00')
+            ->assertSee('40%');
+        $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $proposal))
+            ->assertOk()
+            ->assertSee('Cadastro Câmara')
+            ->assertSee('Análise executiva')
+            ->assertSee('Pagamento')
+            ->assertDontSee('Abrir fluxo executivo');
     }
 
     public function test_councilor_cannot_view_another_councilors_proposal_or_another_municipality(): void

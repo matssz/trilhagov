@@ -26,6 +26,13 @@ repetições e hesitações, sem mudar o sentido técnico:
 O áudio completo tem aproximadamente 3 minutos e 11 segundos. O trecho final
 não acrescenta requisito ao produto.
 
+Em uma confirmação posterior, o profissional reforçou que a Câmara deve acessar
+um módulo próprio para cadastrar as indicações com os requisitos mínimos. Depois
+do protocolo, a mesma emenda deve continuar dentro da plataforma no fluxo do
+Executivo, incluindo análise técnica, execução financeira e pagamento. Portanto,
+o Portal Legislativo é uma porta de entrada do TrilhaGov, não um produto separado
+nem um segundo inventário de emendas.
+
 ## Decisão de produto
 
 O TrilhaGov passa a controlar o ciclo antes de a emenda entrar no inventário do
@@ -36,7 +43,7 @@ existente.
 ```mermaid
 flowchart LR
     A[Vereador elabora] --> B[Validação de cota e saúde]
-    B --> C[Análise técnica da Câmara]
+    B --> C[Conferência mínima da Câmara]
     C -->|Ajustar| A
     C -->|Aprovar| D[Protocolo imutável]
     D --> E[Recebimento pelo Executivo]
@@ -60,6 +67,8 @@ flowchart LR
 - protocolo Câmara–Executivo com fotografia JSON e SHA-256;
 - recebimento idempotente que cria a emenda no inventário executivo;
 - reanálise e reserva integral antes do Plano de Trabalho;
+- acompanhamento compartilhado da execução física, empenho, liquidação, pagamento
+  e prestação de contas, sem expor as telas operacionais do Executivo ao vereador;
 - histórico imutável, auditoria e notificações internas ou por e-mail;
 - isolamento entre vereadores, municípios e ambientes Legislativo/Executivo.
 
@@ -92,8 +101,10 @@ Fontes primárias:
 - definir quais informações o vereador pode acompanhar após o recebimento;
 - validar modelos de devolução, impedimento e remanejamento entre os Poderes.
 
-## Próxima integração
+## Integração contábil
 
-O próximo passo é importar e homologar a reserva e os eventos financeiros reais
-do Siafic/Audesp. A proposta legislativa continua como origem; os dados oficiais
-entram como confirmação ou divergência, nunca como sobrescrita silenciosa.
+O conciliador técnico já importa a reserva e os eventos financeiros do Movimento
+Mensal Siafic/Audesp. A indicação legislativa continua como origem; os dados
+oficiais entram como confirmação ou divergência, nunca como sobrescrita
+silenciosa. Ainda falta homologar o fluxo com arquivos reais anonimizados do
+Município piloto, contador e fornecedor do Siafic.

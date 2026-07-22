@@ -7,10 +7,10 @@
         <div>
             <span class="eyebrow">{{ $municipality->name }} · Câmara e Executivo</span>
             <h1>Portal Legislativo</h1>
-            <p>{{ $role === App\Models\User::ROLE_COUNCILOR ? ($membership->legislative_name.' · '.$membership->legislative_party) : 'Propostas, análise prévia e protocolo institucional' }}</p>
+            <p>{{ $role === App\Models\User::ROLE_COUNCILOR ? ($membership->legislative_name.' · '.$membership->legislative_party) : 'Indicações da Câmara e acompanhamento da execução municipal' }}</p>
         </div>
         @if ($role === App\Models\User::ROLE_COUNCILOR)
-            <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
+            <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Cadastrar emenda</a>
         @endif
     </div>
 
@@ -44,7 +44,7 @@
     </form>
 
     <section class="content-panel legislative-list">
-        <div class="content-panel-header"><div><h2 class="h5 mb-1">Propostas do exercício</h2><p class="small text-secondary mb-0">{{ $proposals->total() }} registro(s)</p></div></div>
+        <div class="content-panel-header"><div><h2 class="h5 mb-1">Indicações do exercício</h2><p class="small text-secondary mb-0">{{ $proposals->total() }} registro(s)</p></div></div>
         @forelse($proposals as $proposal)
             <a class="legislative-row" href="{{ route('legislative.show', $proposal) }}">
                 <span class="legislative-row-code">{{ $proposal->reference }}</span>
@@ -55,7 +55,7 @@
                 <i data-lucide="chevron-right" aria-hidden="true"></i>
             </a>
         @empty
-            <div class="empty-state py-5">Nenhuma proposta encontrada neste exercício.</div>
+            <div class="empty-state py-5">Nenhuma indicação de emenda encontrada neste exercício.</div>
         @endforelse
         @if($proposals->hasPages())<div class="content-panel-body border-top">{{ $proposals->links() }}</div>@endif
     </section>

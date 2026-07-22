@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nova proposta legislativa | TrilhaGov')
+@section('title', 'Cadastrar emenda | TrilhaGov')
 
 @section('content')
     <div class="page-heading legislative-heading">
         <div>
             <span class="eyebrow">Câmara Municipal · exercício {{ $year }}</span>
-            <h1>Nova proposta de emenda</h1>
+            <h1>Cadastrar indicação de emenda</h1>
             <p>{{ $membership->legislative_name ?: auth()->user()->name }} · {{ $membership->legislative_party ?: 'identificação partidária pendente' }}</p>
         </div>
         <a class="btn btn-outline-secondary" href="{{ route('legislative.index', ['year' => $year]) }}"><i data-lucide="arrow-left" aria-hidden="true"></i>Voltar</a>

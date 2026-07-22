@@ -4,16 +4,28 @@
 
 @section('content')
     @php
+        $amendment = $proposal->amendment;
+        $commitments = $amendment?->financialCommitments ?? collect();
+        $liquidations = $commitments->flatMap->liquidations;
+        $payments = $commitments->flatMap->payments;
+        $committed = (float) $commitments->where('status', 'active')->sum('committed_amount');
+        $liquidated = (float) $liquidations->sum('amount');
+        $paid = (float) $payments->sum('amount');
+        $physicalProgress = $amendment?->physicalExecutionPercentage() ?? 0;
+        $executionStarted = $physicalProgress > 0
+            || $commitments->isNotEmpty()
+            || in_array($amendment?->status, ['executing', 'accountability_pending', 'completed'], true);
         $stepStatuses = [
             'proposal' => true,
-            'review' => in_array($proposal->status, ['approved', 'rejected', 'sent', 'received', 'reserved'], true),
             'protocol' => in_array($proposal->status, ['sent', 'received', 'reserved'], true),
-            'received' => in_array($proposal->status, ['received', 'reserved'], true),
-            'reserved' => $proposal->status === 'reserved',
+            'analysis' => $proposal->status === 'reserved',
+            'planning' => $amendment?->municipalWorkPlan !== null,
+            'execution' => $executionStarted,
+            'payment' => $paid > 0,
         ];
-        $commitments = $proposal->amendment?->financialCommitments ?? collect();
-        $committed = (float) $commitments->where('status', 'active')->sum('amount');
-        $paid = (float) $commitments->flatMap->payments->sum('amount');
+        $executionDate = $commitments->min('committed_at')
+            ?? $amendment?->executionStages?->min('planned_start_at');
+        $paymentDate = $payments->min('paid_at');
     @endphp
 
     <div class="legislative-detail-heading">
@@ -34,16 +46,17 @@
 
     <section class="legislative-flow" aria-label="Tramitação da proposta">
         @foreach([
-            ['proposal', 'Proposição', $proposal->created_at],
-            ['review', 'Análise prévia', $proposal->reviewed_at],
+            ['proposal', 'Cadastro Câmara', $proposal->created_at],
             ['protocol', 'Protocolo', $proposal->sent_at],
-            ['received', 'Recebimento', $proposal->received_at],
-            ['reserved', 'Reserva', $proposal->budget_reserved_at],
+            ['analysis', 'Análise executiva', $proposal->budget_reserved_at],
+            ['planning', 'Planejamento', $amendment?->municipalWorkPlan?->created_at],
+            ['execution', 'Execução', $executionDate],
+            ['payment', 'Pagamento', $paymentDate],
         ] as [$key, $label, $date])
             <div class="{{ $stepStatuses[$key] ? 'is-complete' : '' }}">
                 <span><i data-lucide="{{ $stepStatuses[$key] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i></span>
                 <strong>{{ $label }}</strong>
-                <small>{{ $date ? \Illuminate\Support\Carbon::parse($date)->format('d/m/Y') : 'Pendente' }}</small>
+                <small>{{ $date ? \Illuminate\Support\Carbon::parse($date)->format('d/m/Y') : ($stepStatuses[$key] ? 'Em andamento' : 'Pendente') }}</small>
             </div>
         @endforeach
     </section>
@@ -68,8 +81,8 @@
         </details>
 
         <section class="legislative-action-band">
-            <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><strong>Encaminhar à comissão técnica</strong><p>A proposta ficará bloqueada para edição até a conclusão da análise.</p></div></div>
-            <form method="POST" action="{{ route('legislative.submit', $proposal) }}" data-prevent-double-submit>@csrf<input name="_submission_token" type="hidden" value="{{ $submitToken }}"><button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Enviar para análise</button></form>
+            <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><strong>Encaminhar à conferência legislativa</strong><p>A indicação ficará bloqueada para edição até a conferência dos requisitos mínimos.</p></div></div>
+            <form method="POST" action="{{ route('legislative.submit', $proposal) }}" data-prevent-double-submit>@csrf<input name="_submission_token" type="hidden" value="{{ $submitToken }}"><button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Enviar para conferência</button></form>
         </section>
     @endif
 
@@ -96,7 +109,7 @@
 
             @if($canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED)
                 <section class="content-panel legislative-review-panel">
-                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Análise técnica prévia</h2><p class="small text-secondary mb-0">Comissão de Finanças e Orçamento ou unidade definida no Regimento</p></div></div>
+                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Conferência mínima da Câmara</h2><p class="small text-secondary mb-0">Comissão de Finanças e Orçamento ou unidade definida no Regimento</p></div></div>
                     <form class="content-panel-body" method="POST" action="{{ route('legislative.review', $proposal) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $reviewToken }}">
@@ -115,7 +128,7 @@
                 </section>
             @elseif($proposal->reviewed_at)
                 <section class="content-panel">
-                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Parecer da análise prévia</h2><p class="small text-secondary mb-0">{{ $proposal->reviewer?->name }} · {{ $proposal->reviewed_at->format('d/m/Y H:i') }}</p></div><span class="legislative-status status-{{ $proposal->status }}">{{ $proposal->statusLabel() }}</span></div>
+                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Registro da conferência legislativa</h2><p class="small text-secondary mb-0">{{ $proposal->reviewer?->name }} · {{ $proposal->reviewed_at->format('d/m/Y H:i') }}</p></div><span class="legislative-status status-{{ $proposal->status }}">{{ $proposal->statusLabel() }}</span></div>
                     <div class="content-panel-body"><p class="mb-0">{{ $proposal->review_notes }}</p></div>
                 </section>
             @endif
@@ -162,11 +175,13 @@
 
             @if($proposal->amendment)
                 <section class="content-panel legislative-execution-panel">
-                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Acompanhamento no Executivo</h2><p class="small text-secondary mb-0">Processo {{ $proposal->executive_process_number }}</p></div>@unless(in_array($role, [App\Models\User::ROLE_COUNCILOR, App\Models\User::ROLE_LEGISLATIVE_REVIEWER], true))<a class="btn btn-sm btn-outline-primary" href="{{ route('emendas.show', $proposal->amendment) }}">Abrir emenda</a>@endunless</div>
+                    <div class="content-panel-header"><div><h2 class="h5 mb-1">Acompanhamento no Executivo</h2><p class="small text-secondary mb-0">Processo {{ $proposal->executive_process_number }}</p></div>@unless(in_array($role, [App\Models\User::ROLE_COUNCILOR, App\Models\User::ROLE_LEGISLATIVE_REVIEWER], true))<a class="btn btn-sm btn-outline-primary" href="{{ route('emendas.show', $proposal->amendment) }}">Abrir fluxo executivo</a>@endunless</div>
                     <div class="legislative-execution-metrics">
                         <div><span>Situação</span><strong>{{ $proposal->amendment->statusLabel() }}</strong></div>
                         <div><span>Plano de trabalho</span><strong>{{ $proposal->amendment->municipalWorkPlan?->statusLabel() ?? 'Não iniciado' }}</strong></div>
+                        <div><span>Execução física</span><strong>{{ $physicalProgress }}%</strong></div>
                         <div><span>Empenhado</span><strong>R$ {{ number_format($committed, 2, ',', '.') }}</strong></div>
+                        <div><span>Liquidado</span><strong>R$ {{ number_format($liquidated, 2, ',', '.') }}</strong></div>
                         <div><span>Pago</span><strong>R$ {{ number_format($paid, 2, ',', '.') }}</strong></div>
                         <div><span>Prestação de contas</span><strong>{{ $proposal->amendment->accountabilityProcess?->statusLabel() ?? 'Não iniciada' }}</strong></div>
                     </div>

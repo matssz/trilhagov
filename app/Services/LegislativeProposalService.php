@@ -172,7 +172,7 @@ class LegislativeProposalService
         $proposal->loadMissing(['municipality', 'regulatoryProfile']);
         $blockers = [];
         if ($proposal->status !== LegislativeProposal::STATUS_APPROVED) {
-            $blockers[] = 'A análise legislativa ainda não aprovou a proposta.';
+            $blockers[] = 'A conferência legislativa ainda não liberou a indicação para protocolo.';
         }
         if (blank($proposal->protocol_number)) {
             $blockers[] = 'Informe o protocolo ou referência de encaminhamento da Câmara.';

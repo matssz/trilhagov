@@ -139,6 +139,7 @@ class LegislativeProposalController extends Controller
         $proposal = $this->proposal($request, $municipality, $proposal)->load([
             'regulatoryProfile', 'submitter:id,name,email', 'reviewer:id,name', 'receiver:id,name',
             'events.actor:id,name', 'amendment.municipalWorkPlan',
+            'amendment.executionStages',
             'amendment.financialCommitments.liquidations', 'amendment.financialCommitments.payments',
             'amendment.accountabilityProcess',
         ]);
@@ -212,11 +213,11 @@ class LegislativeProposalController extends Controller
         }
         $from = $proposal->status;
         $proposal->update(['status' => LegislativeProposal::STATUS_SUBMITTED, 'submitted_at' => now()]);
-        $this->event($proposal, $request->user()->id, 'submitted', $from, $proposal->status, 'Encaminhada à análise técnica da Câmara.');
+        $this->event($proposal, $request->user()->id, 'submitted', $from, $proposal->status, 'Encaminhada à conferência mínima da Câmara.');
         $auditTrail->recordMunicipalityOperation($request, $municipality, 'legislative_proposal_submitted', ['proposal_id' => $proposal->id, 'reference' => $proposal->reference]);
-        $notifications->roles($proposal, [User::ROLE_MANAGER, User::ROLE_LEGISLATIVE_REVIEWER], 'Nova proposta para análise legislativa', "{$proposal->author_name} enviou a proposta {$proposal->reference}.");
+        $notifications->roles($proposal, [User::ROLE_MANAGER, User::ROLE_LEGISLATIVE_REVIEWER], 'Nova indicação para conferência legislativa', "{$proposal->author_name} enviou a indicação {$proposal->reference}.");
 
-        return back()->with('status', 'Proposta enviada para a análise técnica da Câmara.');
+        return back()->with('status', 'Indicação enviada para a conferência mínima da Câmara.');
     }
 
     public function review(
