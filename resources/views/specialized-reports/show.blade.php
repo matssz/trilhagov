@@ -25,6 +25,13 @@
             <article><span>Pago em saúde</span><strong>{{ $money($summary['paid']) }}</strong><small>{{ $summary['average_physical_execution'] }}% físico médio</small></article>
         </div>
 
+        <div class="metric-strip report-metrics">
+            <article><span>ASPS elegível</span><strong>{{ $money($summary['asps_eligible_amount']) }}</strong><small>{{ $summary['asps_eligible_amendments'] }} parecer(es) favorável(is)</small></article>
+            <article><span>Pago com parecer ASPS</span><strong>{{ $money($summary['asps_eligible_paid']) }}</strong><small>Despesa classificada como computável</small></article>
+            <article class="{{ $summary['asps_pending_assessment'] > 0 ? 'metric-attention' : '' }}"><span>Sem parecer ASPS</span><strong>{{ $summary['asps_pending_assessment'] }}</strong><small>Exigem análise técnica</small></article>
+            <article class="{{ $summary['asps_ineligible_amendments'] > 0 ? 'metric-critical' : '' }}"><span>Não computável</span><strong>{{ $summary['asps_ineligible_amendments'] }}</strong><small>Parecer contrário emitido</small></article>
+        </div>
+
         @if ($summary['status'] !== 'compliant')
             <div class="report-callout is-warning"><i data-lucide="triangle-alert" aria-hidden="true"></i><div><strong>Conferência necessária</strong><span>{{ $summary['unclassified'] > 0 ? 'Classifique os planos de trabalho pendentes e confira a reserva com a contabilidade.' : 'A reserva calculada requer ajuste ou validação da regra municipal.' }}</span></div></div>
         @endif

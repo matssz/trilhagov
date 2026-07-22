@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AmendmentComplianceReview;
 use App\Models\FinancialCommitment;
+use App\Models\HealthAspsAssessment;
 use App\Models\Municipality;
 use App\Models\MunicipalWorkPlan;
 use App\Models\ParliamentaryAmendment;
@@ -31,6 +32,7 @@ class MunicipalGovernanceReportService
                 'financialCommitments.liquidations' => fn ($query) => $query->whereDate('liquidated_at', '<=', $periodEnd),
                 'financialCommitments.payments' => fn ($query) => $query->whereDate('paid_at', '<=', $periodEnd),
                 'municipalWorkPlan.stages',
+                'healthAspsAssessments',
                 'technicalImpediments',
                 'accountabilityProcess.diligences',
                 'complianceReviews',
@@ -122,6 +124,8 @@ class MunicipalGovernanceReportService
             $amendment->author_name, $amendment->object, $amendment->expected_amount,
             $amendment->responsible_department, $amendment->status, $amendment->indicated_at,
         ]);
+        $issuedAsps = $amendment->healthAspsAssessments
+            ->first(fn (HealthAspsAssessment $assessment) => $assessment->status === HealthAspsAssessment::STATUS_ISSUED);
 
         return [
             'id' => $amendment->id,
@@ -151,6 +155,9 @@ class MunicipalGovernanceReportService
             'work_plan_health_verified' => (bool) $amendment->municipalWorkPlan?->health_reserve_verified,
             'work_plan_planned_amount' => (float) ($amendment->municipalWorkPlan?->stages->sum('planned_amount') ?? 0),
             'execution_stage_count' => $amendment->executionStages->count(),
+            'health_asps_assessment' => $issuedAsps?->code(),
+            'health_asps_conclusion' => $issuedAsps?->conclusion,
+            'health_asps_conclusion_label' => $issuedAsps?->conclusionLabel() ?? 'Sem parecer emitido',
             'compliance_percentage' => $compliancePercentage,
             'compliance_pending' => max(0, $applicableTotal - $compliantTotal),
             'budget_reviewed' => $this->ruleCompliant($reviews, 'ORC-02'),

@@ -9,6 +9,7 @@ use App\Models\AudespHomologationItem;
 use App\Models\ExecutionStage;
 use App\Models\ExternalFinancialReconciliation;
 use App\Models\FinancialCommitment;
+use App\Models\HealthAspsAssessment;
 use App\Models\MunicipalAuditPlan;
 use App\Models\MunicipalAuditPlanItem;
 use App\Models\MunicipalInternalControlAction;
@@ -42,6 +43,7 @@ class MunicipalWorkItemService
             'municipality:id,state,ibge_code',
             'documents:id,parliamentary_amendment_id,document_type_id',
             'municipalWorkPlan.stages',
+            'healthAspsAssessments',
             'auditPlanItems.plan',
             'internalControlReviews.actions',
             'transparencyEvents',
@@ -272,6 +274,34 @@ class MunicipalWorkItemService
                     $amendment->communication_deadline,
                     MunicipalWorkItem::PRIORITY_HIGH,
                 );
+            }
+
+            if ($plan?->health_related) {
+                $issuedAsps = $amendment->healthAspsAssessments
+                    ->first(fn (HealthAspsAssessment $assessment) => $assessment->status === HealthAspsAssessment::STATUS_ISSUED);
+                if (! $issuedAsps) {
+                    $items[] = $this->specification(
+                        "amendment:{$amendment->id}:health-asps:assessment",
+                        'health',
+                        'Concluir enquadramento ASPS',
+                        'Classifique a despesa pelos arts. 2º a 4º da LC 141 e submeta o parecer ao Controle Interno.',
+                        route('health-asps.show', $amendment, false),
+                        $amendment->communication_deadline,
+                        MunicipalWorkItem::PRIORITY_HIGH,
+                        $amendment->responsible_user_id,
+                    );
+                } elseif ($issuedAsps->conclusion === HealthAspsAssessment::CONCLUSION_INELIGIBLE) {
+                    $items[] = $this->specification(
+                        "amendment:{$amendment->id}:health-asps:ineligible:{$issuedAsps->id}",
+                        'health',
+                        'Tratar despesa não computável como ASPS',
+                        'O parecer emitido identificou impedimento ao cômputo em ASPS. Revise o objeto, a fonte ou a classificação antes do consolidado.',
+                        route('health-asps.show', $amendment, false),
+                        null,
+                        MunicipalWorkItem::PRIORITY_CRITICAL,
+                        $amendment->responsible_user_id,
+                    );
+                }
             }
 
             foreach ($amendment->internalControlReviews->flatMap->actions as $controlAction) {

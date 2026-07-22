@@ -351,6 +351,12 @@ class ParliamentaryAmendment extends Model
         return $this->hasOne(MunicipalWorkPlan::class);
     }
 
+    public function healthAspsAssessments(): HasMany
+    {
+        return $this->hasMany(HealthAspsAssessment::class)
+            ->latest('version');
+    }
+
     public function technicalImpediments(): HasMany
     {
         return $this->hasMany(TechnicalImpediment::class)->latest('identified_at')->latest('id');

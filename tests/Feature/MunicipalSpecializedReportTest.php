@@ -47,9 +47,11 @@ class MunicipalSpecializedReportTest extends TestCase
         $this->assertEquals(50000.0, $report->snapshot['summary']['required_health_reserve']);
         $this->assertEquals(60000.0, $report->snapshot['summary']['reserved_for_health']);
         $this->assertEquals(0.0, $report->snapshot['summary']['shortfall']);
+        $this->assertEquals(0.0, $report->snapshot['summary']['asps_eligible_amount']);
+        $this->assertSame(1, $report->snapshot['summary']['asps_pending_assessment']);
         $this->assertSame(64, strlen($report->snapshot_sha256));
         $this->assertDatabaseHas('audit_logs', ['action' => 'specialized_report_created']);
-        $this->get(route('specialized-reports.show', $report))->assertOk()->assertSee('RMS-2026-07-V1')->assertSee('Reserva por autor');
+        $this->get(route('specialized-reports.show', $report))->assertOk()->assertSee('RMS-2026-07-V1')->assertSee('Reserva por autor')->assertSee('ASPS elegível');
         $this->get(route('specialized-reports.csv', $report))->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
         $this->get(route('specialized-reports.pdf', $report))->assertOk()->assertHeader('content-type', 'application/pdf');
     }

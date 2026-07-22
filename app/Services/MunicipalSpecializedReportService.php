@@ -51,6 +51,8 @@ class MunicipalSpecializedReportService
             ->values();
         $classified = $rows->filter(fn (array $row) => $row['work_plan_health_related'] !== null);
         $health = $rows->where('work_plan_health_related', true)->values();
+        $eligibleAsps = $health->where('health_asps_conclusion', 'eligible')->values();
+        $ineligibleAsps = $health->where('health_asps_conclusion', 'ineligible')->values();
         $percentage = (float) ($profile?->health_reserve_percentage ?? 0);
         $required = round(((float) $rows->sum('expected')) * ($percentage / 100), 2);
         $reserved = (float) $health->sum('expected');
@@ -99,11 +101,17 @@ class MunicipalSpecializedReportService
                 'committed' => (float) $health->sum('committed'),
                 'liquidated' => (float) $health->sum('liquidated'),
                 'paid' => (float) $health->sum('paid'),
+                'asps_eligible_amendments' => $eligibleAsps->count(),
+                'asps_eligible_amount' => (float) $eligibleAsps->sum('expected'),
+                'asps_eligible_paid' => (float) $eligibleAsps->sum('paid'),
+                'asps_ineligible_amendments' => $ineligibleAsps->count(),
+                'asps_pending_assessment' => $health->count() - $eligibleAsps->count() - $ineligibleAsps->count(),
                 'average_physical_execution' => $health->isEmpty() ? 0 : (int) round($health->avg('physical_execution')),
                 'unverified_plans' => $health->where('work_plan_health_verified', false)->count(),
             ],
             'authors' => $authors->all(),
             'rows' => $health->all(),
+            'asps_rows' => $eligibleAsps->all(),
             'unclassified_rows' => $rows->whereNull('work_plan_health_related')->values()->all(),
             'specific_disclaimer' => 'Este relatório demonstra a reserva definida na regra local e a execução das emendas classificadas como saúde. Não certifica, isoladamente, o cômputo de ASPS ou o cumprimento da LC 141, que dependem da contabilidade e da validação do Controle Interno.',
         ]);

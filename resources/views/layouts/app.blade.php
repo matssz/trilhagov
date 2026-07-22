@@ -64,6 +64,10 @@
                                 <i data-lucide="file-chart-column" aria-hidden="true"></i>
                                 <span>Relatórios especiais</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('health-asps.*') ? 'active' : '' }}" href="{{ route('health-asps.index') }}">
+                                <i data-lucide="heart-pulse" aria-hidden="true"></i>
+                                <span>Saúde e LC 141</span>
+                            </a>
                             <a class="sidebar-link {{ request()->routeIs('audit-plans.*') || request()->routeIs('audit-plan-items.*') ? 'active' : '' }}" href="{{ route('audit-plans.index') }}">
                                 <i data-lucide="calendar-check-2" aria-hidden="true"></i>
                                 <span>Plano de auditoria</span>

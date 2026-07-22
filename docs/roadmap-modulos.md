@@ -31,15 +31,15 @@ flowchart LR
 
 ## Sequência atual de desenvolvimento
 
-**Próximo foco: Saúde e LC 141.**
+**Próximo foco: Obras Públicas e Licitações.**
 
 ```mermaid
 flowchart LR
     A["Programa de Auditoria<br/>1ª versão entregue"]
     B["Comunicações Oficiais<br/>1ª versão entregue"]
     C["Relatórios Especializados<br/>1ª versão entregue"]
-    D["Saúde e LC 141<br/>PRÓXIMO FOCO"]
-    E["Obras e Licitações<br/>Planejado"]
+    D["Saúde e LC 141<br/>1ª versão entregue"]
+    E["Obras e Licitações<br/>PRÓXIMO FOCO"]
     F["Integrações reais<br/>Planejado"]
     G["LGPD e comercialização<br/>Planejado"]
 
@@ -48,9 +48,9 @@ flowchart LR
     classDef delivered fill:#e8f4ee,stroke:#157f57,color:#123b2d,stroke-width:2px;
     classDef focus fill:#e8eff7,stroke:#0a2f5a,color:#071f3d,stroke-width:3px;
     classDef planned fill:#f5f7f9,stroke:#8995a5,color:#3e4a5d,stroke-width:1px;
-    class A,B,C delivered;
-    class D focus;
-    class E,F,G planned;
+    class A,B,C,D delivered;
+    class E focus;
+    class F,G planned;
 ```
 
 ### Programa de Auditoria e Papéis de Trabalho
@@ -115,6 +115,19 @@ flowchart TB
 - [x] Dossiê anual para controle interno, Câmara e prestação de contas.
 - [ ] Validar os três produtos e suas ressalvas com Contabilidade, Câmara e
   Controle Interno de um Município piloto.
+
+### Saúde e LC 141
+
+- [x] Central municipal das emendas destinadas à saúde.
+- [x] Conferência separada entre reserva local e enquadramento em ASPS.
+- [x] Matriz dos critérios dos arts. 2º e 3º e das vedações do art. 4º da LC 141.
+- [x] Parecer favorável ou contrário, revisão por perfil autorizado e histórico
+  imutável por versão.
+- [x] PDF do parecer, alertas de risco e ações na Central de Trabalho.
+- [x] Indicadores ASPS no relatório especializado de saúde.
+- [ ] Validar categorias, fontes, códigos de aplicação e redação dos pareceres
+  com Contabilidade, Fundo de Saúde e Controle Interno do Município piloto.
+- [ ] Conciliar o percentual constitucional completo com SIOPS e RREO reais.
 
 Regra de atualização: ao concluir uma entrega, marcar o item neste arquivo e
 mover o destaque `focus` da sequência de desenvolvimento somente quando os
@@ -426,10 +439,10 @@ municípios antes de adicionar `.xlsx` ou mapeamento manual de colunas.
 
 A sequência visual no início deste documento é a referência atual:
 
-1. validar a primeira versão do Programa de Auditoria;
-2. construir Comunicações e Documentos Oficiais;
-3. concluir os Relatórios Municipais Especializados;
-4. construir Saúde e LC 141;
+1. validar em campo Programa de Auditoria, Comunicações, Relatórios e Saúde;
+2. manter a primeira versão de Comunicações e Documentos Oficiais;
+3. manter os Relatórios Municipais Especializados;
+4. manter e homologar Saúde e LC 141 com dados reais;
 5. avançar em Obras Públicas e Licitações e Contratos;
 6. homologar integrações reais com Siafic, Audesp e Câmara;
 7. concluir LGPD, continuidade e administração comercial do SaaS.

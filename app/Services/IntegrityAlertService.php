@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
+use App\Models\HealthAspsAssessment;
 use App\Models\IntegrityAlert;
 use App\Models\MunicipalAuditPlan;
 use App\Models\MunicipalAuditPlanItem;
@@ -63,6 +64,7 @@ class IntegrityAlertService
             'amendments.technicalImpediments.remappings',
             'amendments.regulatoryProfile',
             'amendments.municipalWorkPlan.stages',
+            'amendments.healthAspsAssessments',
             'amendments.auditPlanItems.plan',
             'amendments.internalControlReviews.actions',
             'amendments.transparencyEvents',
@@ -85,6 +87,7 @@ class IntegrityAlertService
             $this->detectTechnicalImpedimentControls($amendment, $settings, $detections);
             $this->detectAssignment($amendment, $operationalUserIds, $detections);
             $this->detectNormativeControls($amendment, $detections);
+            $this->detectHealthAspsControls($amendment, $detections);
             $this->detectTransparencyControls($amendment, $detections);
             $this->detectAudespControls($amendment, $detections);
             $this->detectInternalControlActions($amendment, $settings, $detections);
@@ -259,6 +262,36 @@ class IntegrityAlertService
                     : IntegrityAlert::SEVERITY_WARNING,
                 'title' => $violation['title'],
                 'message' => $violation['message'],
+                'due_at' => null,
+            ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectHealthAspsControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        if (! $amendment->municipalWorkPlan?->health_related) {
+            return;
+        }
+        $issued = $amendment->healthAspsAssessments
+            ->first(fn (HealthAspsAssessment $assessment) => $assessment->status === HealthAspsAssessment::STATUS_ISSUED);
+        if (! $issued) {
+            $this->addDetection($detections, $amendment, 'health-asps:assessment-pending', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_WARNING,
+                'title' => 'Enquadramento ASPS pendente',
+                'message' => 'A emenda foi destinada à saúde, mas ainda não possui parecer emitido conforme os critérios da LC 141.',
+                'due_at' => null,
+            ]);
+
+            return;
+        }
+        if ($issued->conclusion === HealthAspsAssessment::CONCLUSION_INELIGIBLE) {
+            $this->addDetection($detections, $amendment, 'health-asps:ineligible', [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => IntegrityAlert::SEVERITY_CRITICAL,
+                'title' => 'Despesa não computável como ASPS',
+                'message' => 'O parecer emitido concluiu que a emenda não pode ser computada como ASPS. Não a inclua no consolidado sem nova análise formal.',
                 'due_at' => null,
             ]);
         }

@@ -20,6 +20,7 @@ use App\Http\Controllers\ExternalIntegrationController;
 use App\Http\Controllers\FinancialCommitmentController;
 use App\Http\Controllers\FinancialLiquidationController;
 use App\Http\Controllers\FinancialPaymentController;
+use App\Http\Controllers\HealthAspsController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
 use App\Http\Controllers\MunicipalAuditPlanController;
@@ -84,6 +85,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::get('/relatorios/especializados/{report}', [MunicipalSpecializedReportController::class, 'show'])->name('specialized-reports.show');
     Route::get('/relatorios/especializados/{report}/documento.pdf', [MunicipalSpecializedReportController::class, 'pdf'])->name('specialized-reports.pdf');
     Route::get('/relatorios/especializados/{report}/dados.csv', [MunicipalSpecializedReportController::class, 'csv'])->name('specialized-reports.csv');
+    Route::get('/saude-lc141', [HealthAspsController::class, 'index'])->name('health-asps.index');
+    Route::get('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'show'])->name('health-asps.show');
+    Route::get('/saude-lc141/pareceres/{assessment}/documento.pdf', [HealthAspsController::class, 'pdf'])->name('health-asps.pdf');
     Route::get('/relatorios/governanca/{report}/remessas', [MunicipalReportDispatchController::class, 'index'])->name('report-dispatches.index');
     Route::get('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'index'])->name('official-documents.index');
     Route::get('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'show'])->name('official-documents.show');
@@ -163,6 +167,9 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,editor,auditor')->group(function () {
+        Route::post('/emendas/{emenda}/saude-lc141', [HealthAspsController::class, 'save'])->name('health-asps.save')->block(10, 10);
+        Route::post('/saude-lc141/pareceres/{assessment}/enviar', [HealthAspsController::class, 'submit'])->name('health-asps.submit')->block(10, 10);
+        Route::post('/saude-lc141/pareceres/{assessment}/revisar', [HealthAspsController::class, 'revise'])->name('health-asps.revise')->block(10, 10);
         Route::post('/comunicacoes-oficiais', [MunicipalOfficialDocumentController::class, 'store'])->name('official-documents.store')->block(10, 10);
         Route::patch('/comunicacoes-oficiais/{document}', [MunicipalOfficialDocumentController::class, 'update'])->name('official-documents.update')->block(10, 10);
         Route::post('/comunicacoes-oficiais/{document}/protocolar', [MunicipalOfficialDocumentController::class, 'send'])->name('official-documents.send')->block(20, 10);
@@ -171,6 +178,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager,auditor')->group(function () {
+        Route::post('/saude-lc141/pareceres/{assessment}/decidir', [HealthAspsController::class, 'decision'])->name('health-asps.decision')->block(10, 10);
         Route::post('/controle-interno/plano-anual', [MunicipalAuditPlanController::class, 'store'])->name('audit-plans.store')->block(10, 10);
         Route::patch('/controle-interno/plano-anual/{plan}', [MunicipalAuditPlanController::class, 'update'])->name('audit-plans.update')->block(10, 10);
         Route::post('/controle-interno/plano-anual/{plan}/itens', [MunicipalAuditPlanController::class, 'addItem'])->name('audit-plan-items.store')->block(10, 10);
