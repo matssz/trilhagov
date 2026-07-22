@@ -253,9 +253,10 @@ class MunicipalContractController extends Controller
             return back()->with('warning', 'Esta medição já foi cadastrada.');
         }
         $measurement = DB::transaction(function () use ($request, $municipality, $contract, $validated): ContractMeasurement {
-            $sequence = ((int) $contract->measurements()->lockForUpdate()->max('sequence')) + 1;
+            $lockedContract = MunicipalContract::query()->lockForUpdate()->findOrFail($contract->id);
+            $sequence = ((int) $lockedContract->measurements()->max('sequence')) + 1;
 
-            return $contract->measurements()->create([
+            return $lockedContract->measurements()->create([
                 ...$validated, 'municipality_id' => $municipality->id,
                 'parliamentary_amendment_id' => $contract->parliamentary_amendment_id,
                 'created_by' => $request->user()->id, 'sequence' => $sequence,
@@ -341,9 +342,10 @@ class MunicipalContractController extends Controller
             return back()->with('warning', 'Este termo aditivo já foi cadastrado.');
         }
         $addendum = DB::transaction(function () use ($request, $municipality, $contract, $validated): ContractAddendum {
-            $sequence = ((int) $contract->addenda()->lockForUpdate()->max('sequence')) + 1;
+            $lockedContract = MunicipalContract::query()->lockForUpdate()->findOrFail($contract->id);
+            $sequence = ((int) $lockedContract->addenda()->max('sequence')) + 1;
 
-            return $contract->addenda()->create([
+            return $lockedContract->addenda()->create([
                 ...$validated, 'municipality_id' => $municipality->id,
                 'parliamentary_amendment_id' => $contract->parliamentary_amendment_id,
                 'created_by' => $request->user()->id, 'sequence' => $sequence,
