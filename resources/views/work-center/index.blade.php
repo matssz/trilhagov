@@ -13,6 +13,10 @@
             'execution' => 'gauge',
             'financial' => 'receipt-text',
             'accountability' => 'clipboard-check',
+            'normative' => 'landmark',
+            'health' => 'heart-pulse',
+            'contract' => 'hard-hat',
+            'control' => 'shield-check',
         ];
     @endphp
 

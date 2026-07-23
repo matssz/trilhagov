@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\DocumentType;
+use App\Models\AmendmentComplianceReview;
 use App\Models\Municipality;
 use App\Models\MunicipalWorkItem;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\MunicipalWorkItemService;
+use App\Services\TcespComplianceFramework;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -120,6 +122,48 @@ class WorkCenterTest extends TestCase
         $this->assertDatabaseHas('municipal_work_item_events', [
             'municipal_work_item_id' => MunicipalWorkItem::where('source_key', $communicationKey)->value('id'),
             'event_type' => 'reopened',
+        ]);
+    }
+
+    public function test_tcesp_manual_pending_items_create_and_resolve_work_actions(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->update(['state' => 'SP', 'ibge_code' => '3522307']);
+        $amendment = $this->amendment($municipality, $manager, [
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'responsible_user_id' => $manager->id,
+            'communication_deadline' => today()->addDays(20),
+        ]);
+        $service = app(MunicipalWorkItemService::class);
+
+        $service->synchronize($municipality);
+        $sourceKey = "amendment:{$amendment->id}:tcesp-compliance:NORM-01";
+
+        $this->assertDatabaseHas('municipal_work_items', [
+            'source_key' => $sourceKey,
+            'category' => 'normative',
+            'title' => 'Revisar item TCESP: NORM-01',
+            'priority' => MunicipalWorkItem::PRIORITY_HIGH,
+            'status' => MunicipalWorkItem::STATUS_PENDING,
+            'action_url' => route('emendas.compliance', $amendment, false).'#regra-NORM-01',
+        ]);
+
+        $amendment->complianceReviews()->create([
+            'municipality_id' => $municipality->id,
+            'framework_version' => TcespComplianceFramework::VERSION,
+            'rule_code' => 'NORM-01',
+            'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
+            'evidence_notes' => 'Lei Orgânica, LDO e regulamentação municipal conferidas.',
+            'reviewed_by' => $manager->id,
+            'reviewed_at' => now(),
+        ]);
+        $service->synchronize($municipality);
+
+        $this->assertDatabaseHas('municipal_work_items', [
+            'source_key' => $sourceKey,
+            'status' => MunicipalWorkItem::STATUS_COMPLETED,
+            'completion_reason' => 'Resolvida após atualização dos dados de origem.',
         ]);
     }
 

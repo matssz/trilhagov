@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AccountabilityProcess;
 use App\Models\AccountabilityRequirement;
+use App\Models\AmendmentComplianceReview;
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
 use App\Models\ExecutionStage;
@@ -30,6 +31,7 @@ class MunicipalWorkItemService
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
         private readonly AudespTraceabilityService $audespTraceability,
         private readonly MunicipalContractFramework $contractFramework,
+        private readonly TcespComplianceFramework $tcespCompliance,
     ) {}
 
     /** @return array{active: int, created: int, reopened: int, completed: int} */
@@ -59,6 +61,7 @@ class MunicipalWorkItemService
             'financialPayments',
             'audespRegistration',
             'audespHomologationItems.batch',
+            'complianceReviews',
             'accountabilityProcess.requirements',
             'accountabilityProcess.diligences',
             'externalCandidates.latestFinancialReconciliation',
@@ -205,6 +208,30 @@ class MunicipalWorkItemService
                     route('emendas.audesp', $amendment, false),
                     null,
                     MunicipalWorkItem::PRIORITY_CRITICAL,
+                    $amendment->responsible_user_id,
+                );
+            }
+
+            foreach ($this->tcespCompliance->matrix($amendment) as $complianceItem) {
+                if (! $complianceItem['critical']
+                    || in_array($complianceItem['status'], [
+                        AmendmentComplianceReview::STATUS_COMPLIANT,
+                        AmendmentComplianceReview::STATUS_NOT_APPLICABLE,
+                    ], true)) {
+                    continue;
+                }
+
+                $isNonCompliant = $complianceItem['status'] === AmendmentComplianceReview::STATUS_NON_COMPLIANT;
+                $items[] = $this->specification(
+                    "amendment:{$amendment->id}:tcesp-compliance:{$complianceItem['code']}",
+                    $this->workCategoryForCompliance($complianceItem['category']),
+                    ($isNonCompliant ? 'Sanear item TCESP: ' : 'Revisar item TCESP: ').$complianceItem['code'],
+                    $isNonCompliant
+                        ? "Item essencial não atendido: {$complianceItem['title']}. {$complianceItem['guidance']}"
+                        : "Item essencial pendente de evidência: {$complianceItem['title']}. {$complianceItem['guidance']}",
+                    route('emendas.compliance', $amendment, false).'#regra-'.$complianceItem['code'],
+                    $nextDeadline,
+                    $isNonCompliant ? MunicipalWorkItem::PRIORITY_CRITICAL : MunicipalWorkItem::PRIORITY_HIGH,
                     $amendment->responsible_user_id,
                 );
             }
@@ -663,6 +690,19 @@ class MunicipalWorkItemService
         }
 
         return $basePriority;
+    }
+
+    private function workCategoryForCompliance(string $category): string
+    {
+        return match ($category) {
+            'normative' => 'normative',
+            'budget', 'viability', 'work_plan' => 'planning',
+            'beneficiary' => 'health',
+            'impediments' => 'impediment',
+            'traceability' => 'financial',
+            'control' => 'control',
+            default => 'control',
+        };
     }
 
     private function hasReceivedResources(ParliamentaryAmendment $amendment): bool
