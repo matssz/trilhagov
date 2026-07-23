@@ -89,7 +89,7 @@
 
 .legislative-filters {
     display: grid;
-    grid-template-columns: 150px 240px minmax(260px, 1fr) auto;
+    grid-template-columns: 190px 220px minmax(260px, 1fr) auto;
     gap: 12px;
     align-items: end;
     margin-bottom: 18px;
@@ -848,7 +848,7 @@
     }
 
     .legislative-filters {
-        grid-template-columns: 140px 1fr;
+        grid-template-columns: 180px 1fr;
     }
 
     .legislative-filters .search {

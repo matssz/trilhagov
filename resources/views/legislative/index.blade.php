@@ -9,13 +9,15 @@
             <h1>Portal Legislativo</h1>
             <p>{{ $role === App\Models\User::ROLE_COUNCILOR ? ($membership->legislative_name.' · '.$membership->legislative_party) : 'Indicações da Câmara e acompanhamento da execução municipal' }}</p>
         </div>
-        @if ($role === App\Models\User::ROLE_COUNCILOR)
+        @if ($role === App\Models\User::ROLE_COUNCILOR && $profile)
             <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Cadastrar emenda</a>
+        @elseif ($role === App\Models\User::ROLE_COUNCILOR)
+            <button class="btn btn-outline-secondary" type="button" disabled title="A configuração normativa precisa estar vigente"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Cadastro indisponível</button>
         @endif
     </div>
 
     @if (! $profile)
-        <div class="legislative-notice is-danger"><i data-lucide="circle-alert" aria-hidden="true"></i><div><strong>Configuração de {{ $year }} não ativada</strong><p>As cotas e a reserva de saúde não podem ser calculadas sem a versão normativa vigente.</p></div></div>
+        <div class="legislative-notice is-danger"><i data-lucide="circle-alert" aria-hidden="true"></i><div><strong>Configuração de {{ $year }} não ativada</strong><p>As cotas e a reserva de saúde não podem ser calculadas sem a versão normativa vigente.@if($activeYears !== []) Selecione um dos exercícios ativos no filtro abaixo.@else O gestor municipal precisa preparar e ativar as regras do exercício.@endif</p></div></div>
     @elseif ($quota && $quota['legacy_ceiling'])
         <div class="legislative-notice is-warning"><i data-lucide="triangle-alert" aria-hidden="true"></i><div><strong>Cota individual provisória</strong><p>Informe o número de vereadores na configuração municipal para dividir corretamente o teto global da Câmara.</p></div></div>
     @endif
@@ -37,7 +39,7 @@
     @endif
 
     <form class="legislative-filters" method="GET">
-        <label><span>Exercício</span><input class="form-control" name="year" type="number" min="2000" max="{{ now()->year + 2 }}" value="{{ $year }}"></label>
+        <label><span>Exercício</span><select class="form-select" name="year">@foreach(collect([$year, ...$activeYears])->unique()->sortDesc() as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}{{ in_array($availableYear, $activeYears, true) ? ' · ativo' : ' · sem regra ativa' }}</option>@endforeach</select></label>
         <label><span>Situação</span><select class="form-select" name="status"><option value="">Todas</option>@foreach($statuses as $value => $label)<option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>@endforeach</select></label>
         <label class="search"><span>Busca</span><input class="form-control" name="search" value="{{ $search }}" placeholder="Referência, autor, objeto ou beneficiário"></label>
         <button class="btn btn-outline-primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i>Filtrar</button>

@@ -129,7 +129,7 @@
                         @endif
                     </nav>
 
-                    @if ($activeRole === 'councilor')
+                    @if ($activeRole === 'councilor' && ! request()->routeIs('legislative.index'))
                         <div class="sidebar-actions">
                             <a class="btn btn-primary w-100" href="{{ route('legislative.create') }}">
                                 <i data-lucide="plus" aria-hidden="true"></i>

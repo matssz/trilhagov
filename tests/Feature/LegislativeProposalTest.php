@@ -68,6 +68,41 @@ class LegislativeProposalTest extends TestCase
         $this->get(route('dashboard'))->assertForbidden();
     }
 
+    public function test_portal_uses_available_active_year_instead_of_unconfigured_next_year(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->profile($municipality, $manager, now()->year);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Exercício Atual',
+            'legislative_party' => 'ABC',
+        ]);
+
+        $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index'))
+            ->assertOk()
+            ->assertViewHas('year', now()->year)
+            ->assertSee(now()->year.' · ativo')
+            ->assertDontSee('Cadastro indisponível');
+
+        $this->get(route('legislative.create'))
+            ->assertOk()
+            ->assertViewHas('year', now()->year);
+    }
+
+    public function test_create_redirects_with_human_message_when_no_active_year_exists(): void
+    {
+        [, $municipality] = $this->member(User::ROLE_MANAGER);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Sem Regra',
+            'legislative_party' => 'XYZ',
+        ]);
+
+        $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.create'))
+            ->assertRedirect(route('legislative.index', ['year' => now()->year + 1]))
+            ->assertSessionHas('warning');
+    }
+
     public function test_submission_blocks_amount_above_councilor_quota(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
@@ -275,13 +310,13 @@ class LegislativeProposalTest extends TestCase
         return $user;
     }
 
-    private function profile(Municipality $municipality, User $manager): MunicipalRegulatoryProfile
+    private function profile(Municipality $municipality, User $manager, ?int $year = null): MunicipalRegulatoryProfile
     {
         return $municipality->regulatoryProfiles()->create([
             'created_by' => $manager->id,
             'updated_by' => $manager->id,
             'activated_by' => $manager->id,
-            'fiscal_year' => now()->year + 1,
+            'fiscal_year' => $year ?? now()->year + 1,
             'version' => 1,
             'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
             'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,

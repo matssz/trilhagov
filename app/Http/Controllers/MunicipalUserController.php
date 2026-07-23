@@ -25,16 +25,18 @@ class MunicipalUserController extends Controller
         FormSubmission $formSubmission,
     ): View {
         $municipality = $currentMunicipality->get($request);
+        $members = $municipality->users()->orderBy('name')->get();
+        $invitations = MunicipalityInvitation::query()
+            ->where('municipality_id', $municipality->id)
+            ->whereNull('accepted_at')
+            ->whereNull('revoked_at')
+            ->latest()
+            ->get();
 
         return view('users.index', [
             'municipality' => $municipality,
-            'members' => $municipality->users()->orderBy('name')->get(),
-            'invitations' => MunicipalityInvitation::query()
-                ->where('municipality_id', $municipality->id)
-                ->whereNull('accepted_at')
-                ->whereNull('revoked_at')
-                ->latest()
-                ->get(),
+            'members' => $members,
+            'invitations' => $invitations,
             'roles' => User::municipalityRoles(),
             'invitableRoles' => array_intersect_key(
                 User::municipalityRoles(),
@@ -44,6 +46,12 @@ class MunicipalUserController extends Controller
                 ]),
             ),
             'submissionToken' => $formSubmission->issue($request, 'municipality-invitation-create'),
+            'memberRemovalTokens' => $members->mapWithKeys(fn (User $member): array => [
+                $member->id => $formSubmission->issue($request, "municipality-member-remove-{$member->id}"),
+            ]),
+            'invitationRevokeTokens' => $invitations->mapWithKeys(fn (MunicipalityInvitation $invitation): array => [
+                $invitation->id => $formSubmission->issue($request, "municipality-invitation-revoke-{$invitation->id}"),
+            ]),
         ]);
     }
 
@@ -204,6 +212,7 @@ class MunicipalUserController extends Controller
         Request $request,
         int $invitation,
         CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $pendingInvitation = MunicipalityInvitation::query()
@@ -211,8 +220,49 @@ class MunicipalUserController extends Controller
             ->whereNull('accepted_at')
             ->whereNull('revoked_at')
             ->findOrFail($invitation);
+        $request->validate(['_submission_token' => ['required', 'string']]);
+        if (! $formSubmission->consume($request, "municipality-invitation-revoke-{$pendingInvitation->id}")) {
+            return back()->with('warning', 'Este cancelamento já foi processado.');
+        }
         $pendingInvitation->update(['revoked_at' => now()]);
 
-        return back()->with('status', 'Convite revogado.');
+        return back()->with('status', 'Convite cancelado. Agora você pode criar um novo convite para esse e-mail.');
+    }
+
+    public function removeAccess(
+        Request $request,
+        int $user,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        AuditTrail $auditTrail,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $member = $municipality->users()->findOrFail($user);
+
+        if ($member->is($request->user())) {
+            return back()->withErrors(['user' => 'Você não pode remover o próprio acesso.']);
+        }
+
+        if ($member->pivot->role === User::ROLE_MANAGER
+            && $municipality->users()->wherePivot('role', User::ROLE_MANAGER)->count() <= 1) {
+            return back()->withErrors(['user' => 'O município precisa manter pelo menos um gestor.']);
+        }
+
+        $request->validate(['_submission_token' => ['required', 'string']]);
+        if (! $formSubmission->consume($request, "municipality-member-remove-{$member->id}")) {
+            return back()->with('warning', 'Esta remoção já foi processada.');
+        }
+
+        DB::transaction(function () use ($request, $municipality, $member, $auditTrail): void {
+            $auditTrail->recordMunicipalityOperation($request, $municipality, 'municipal_user_access_removed', [
+                'removed_user_id' => $member->id,
+                'removed_user_name' => $member->name,
+                'removed_user_email' => $member->email,
+                'removed_role' => $member->pivot->role,
+            ]);
+            $municipality->users()->detach($member->id);
+        });
+
+        return back()->with('status', "Acesso de {$member->name} removido. A conta e o histórico institucional foram preservados.");
     }
 }

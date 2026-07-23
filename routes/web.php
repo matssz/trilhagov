@@ -198,6 +198,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/usuarios', [MunicipalUserController::class, 'index'])->name('users.index');
         Route::post('/usuarios/convites', [MunicipalUserController::class, 'invite'])->name('users.invitations.store')->block(10, 10);
         Route::delete('/usuarios/convites/{invitation}', [MunicipalUserController::class, 'revokeInvitation'])->name('users.invitations.destroy')->block(10, 10);
+        Route::delete('/usuarios/{user}', [MunicipalUserController::class, 'removeAccess'])->name('users.destroy')->block(10, 10);
         Route::patch('/usuarios/{user}/perfil', [MunicipalUserController::class, 'updateRole'])->name('users.role.update')->block(10, 10);
         Route::patch('/usuarios/{user}/identidade-legislativa', [MunicipalUserController::class, 'updateLegislativeIdentity'])->name('users.legislative-identity.update')->block(10, 10);
         Route::get('/configuracoes/tipos-documento', [DocumentTypeController::class, 'index'])->name('document-types.index');

@@ -60,6 +60,10 @@ class Municipality extends Model
                 'notify_email',
                 'notify_deadlines',
                 'notify_integrity',
+                'legislative_name',
+                'legislative_party',
+                'legislative_term_start',
+                'legislative_term_end',
             ])
             ->withTimestamps();
     }

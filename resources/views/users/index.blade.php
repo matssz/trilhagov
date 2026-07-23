@@ -92,26 +92,27 @@
             <p class="small text-secondary mb-0">{{ $members->count() }} {{ $members->count() === 1 ? 'usuário com acesso' : 'usuários com acesso' }}</p>
         </div>
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
+            <table class="table align-middle mb-0 access-management-table user-access-table">
                 <thead>
                     <tr>
                         <th>Usuário</th>
                         <th>E-mail</th>
                         <th>Perfil</th>
                         <th>Vínculo legislativo</th>
+                        <th class="text-end">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($members as $member)
                         <tr>
-                            <td>
+                            <td data-label="Usuário">
                                 <span class="fw-semibold">{{ $member->name }}</span>
                                 @if ($member->is(auth()->user()))
                                     <span class="badge text-bg-light ms-1">Você</span>
                                 @endif
                             </td>
-                            <td>{{ $member->email }}</td>
-                            <td class="role-cell">
+                            <td data-label="E-mail">{{ $member->email }}</td>
+                            <td class="role-cell" data-label="Perfil">
                                 @if ($member->is(auth()->user()))
                                     <span class="badge text-bg-primary">{{ $roles[$member->pivot->role] ?? $member->pivot->role }}</span>
                                 @else
@@ -128,7 +129,7 @@
                                     </form>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Vínculo">
                                 @if ($member->pivot->role === App\Models\User::ROLE_COUNCILOR)
                                     <details class="legislative-identity-editor">
                                         <summary>
@@ -140,8 +141,8 @@
                                             @method('PATCH')
                                             <label><span>Nome parlamentar</span><input class="form-control form-control-sm" name="legislative_name" value="{{ $member->pivot->legislative_name }}" required></label>
                                             <label><span>Partido</span><input class="form-control form-control-sm" name="legislative_party" value="{{ $member->pivot->legislative_party }}" required></label>
-                                            <label><span>Início</span><input class="form-control form-control-sm" name="legislative_term_start" type="date" value="{{ $member->pivot->legislative_term_start }}" required></label>
-                                            <label><span>Fim</span><input class="form-control form-control-sm" name="legislative_term_end" type="date" value="{{ $member->pivot->legislative_term_end }}" required></label>
+                                            <label><span>Início</span><input class="form-control form-control-sm" name="legislative_term_start" type="date" value="{{ $member->pivot->legislative_term_start ? Illuminate\Support\Carbon::parse($member->pivot->legislative_term_start)->toDateString() : '' }}" required></label>
+                                            <label><span>Fim</span><input class="form-control form-control-sm" name="legislative_term_end" type="date" value="{{ $member->pivot->legislative_term_end ? Illuminate\Support\Carbon::parse($member->pivot->legislative_term_end)->toDateString() : '' }}" required></label>
                                             <button class="btn btn-sm btn-primary" type="submit">Salvar identificação</button>
                                         </form>
                                     </details>
@@ -150,6 +151,18 @@
                                 @else
                                     <span class="text-secondary">Não se aplica</span>
                                 @endif
+                            </td>
+                            <td class="text-end user-access-actions" data-label="Ações">
+                                @unless($member->is(auth()->user()))
+                                    <form method="POST" action="{{ route('users.destroy', $member) }}" onsubmit="return confirm({{ Illuminate\Support\Js::from('Remover o acesso de '.$member->name.' a este município? A conta e o histórico serão preservados.') }})">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input name="_submission_token" type="hidden" value="{{ $memberRemovalTokens[$member->id] }}">
+                                        <button class="icon-button is-danger" type="submit" title="Remover acesso" aria-label="Remover acesso de {{ $member->name }}">
+                                            <i data-lucide="user-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                @endunless
                             </td>
                         </tr>
                     @endforeach
@@ -161,13 +174,13 @@
     <div class="content-panel">
         <div class="content-panel-header">
             <h2 class="h5 mb-1">Convites pendentes</h2>
-            <p class="small text-secondary mb-0">Revogue um convite caso ele tenha sido enviado à pessoa errada.</p>
+            <p class="small text-secondary mb-0">Cancele um convite para invalidar o link e permitir um novo envio.</p>
         </div>
         @if ($invitations->isEmpty())
             <div class="empty-state">Nenhum convite pendente.</div>
         @else
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
+                <table class="table align-middle mb-0 access-management-table invitation-access-table">
                     <thead>
                         <tr>
                             <th>E-mail</th>
@@ -180,22 +193,23 @@
                     <tbody>
                         @foreach ($invitations as $invitation)
                             <tr>
-                                <td>{{ $invitation->email }}</td>
-                                <td>{{ $invitation->roleLabel() }}</td>
-                                <td>
+                                <td data-label="E-mail">{{ $invitation->email }}</td>
+                                <td data-label="Perfil">{{ $invitation->roleLabel() }}</td>
+                                <td data-label="Validade">
                                     @if ($invitation->expires_at->isPast())
                                         <span class="badge text-bg-secondary">Expirado</span>
                                     @else
                                         {{ $invitation->expires_at->format('d/m/Y \à\s H:i') }}
                                     @endif
                                 </td>
-                                <td>{{ $invitation->legislative_name ? $invitation->legislative_name.' · '.$invitation->legislative_party : 'Não se aplica' }}</td>
-                                <td class="text-end">
+                                <td data-label="Identificação">{{ $invitation->legislative_name ? $invitation->legislative_name.' · '.$invitation->legislative_party : 'Não se aplica' }}</td>
+                                <td class="text-end" data-label="Ação">
                                     <form method="POST" action="{{ route('users.invitations.destroy', $invitation) }}">
                                         @csrf
                                         @method('DELETE')
+                                        <input name="_submission_token" type="hidden" value="{{ $invitationRevokeTokens[$invitation->id] }}">
                                         <button class="btn btn-sm btn-outline-danger" type="submit">
-                                            <i data-lucide="trash-2" aria-hidden="true"></i>Revogar
+                                            <i data-lucide="x" aria-hidden="true"></i>Cancelar convite
                                         </button>
                                     </form>
                                 </td>

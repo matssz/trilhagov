@@ -10,6 +10,30 @@ use App\Models\User;
 
 class LegislativeProposalService
 {
+    /** @return array<int, int> */
+    public function activeYears(Municipality $municipality): array
+    {
+        return $municipality->regulatoryProfiles()
+            ->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)
+            ->whereBetween('fiscal_year', [now()->year, now()->year + 2])
+            ->orderByDesc('fiscal_year')
+            ->pluck('fiscal_year')
+            ->map(fn ($year): int => (int) $year)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function defaultYear(Municipality $municipality): int
+    {
+        $target = now()->year + 1;
+        $years = collect($this->activeYears($municipality));
+
+        return (int) ($years
+            ->sort(fn (int $first, int $second): int => [abs($target - $first), -$first] <=> [abs($target - $second), -$second])
+            ->first() ?? $target);
+    }
+
     /** @return array<string, array{label: string, guidance: string}> */
     public function reviewChecklist(): array
     {

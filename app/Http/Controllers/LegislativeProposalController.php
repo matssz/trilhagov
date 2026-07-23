@@ -27,7 +27,7 @@ class LegislativeProposalController extends Controller
     ): View {
         $municipality = $currentMunicipality->get($request);
         $role = $request->user()->roleForMunicipality($municipality->id);
-        $year = ctype_digit((string) $request->query('year')) ? (int) $request->query('year') : now()->year + 1;
+        $year = ctype_digit((string) $request->query('year')) ? (int) $request->query('year') : $service->defaultYear($municipality);
         $status = (string) $request->query('status');
         $search = trim((string) $request->query('search'));
         $membership = $request->user()->municipalities()->whereKey($municipality->id)->firstOrFail()->pivot;
@@ -44,7 +44,7 @@ class LegislativeProposalController extends Controller
             }));
         $summaryQuery = clone $query;
         $profile = $service->profile($municipality, $year);
-        $quota = $role === User::ROLE_COUNCILOR
+        $quota = $role === User::ROLE_COUNCILOR && $profile
             ? $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name))
             : null;
 
@@ -56,6 +56,7 @@ class LegislativeProposalController extends Controller
             'selectedStatus' => $status,
             'search' => $search,
             'statuses' => LegislativeProposal::statuses(),
+            'activeYears' => $service->activeYears($municipality),
             'profile' => $profile,
             'quota' => $quota,
             'proposals' => $query->latest('id')->paginate(12)->withQueryString(),
@@ -73,10 +74,16 @@ class LegislativeProposalController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         LegislativeProposalService $service,
-    ): View {
+    ): View|RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         abort_unless($request->user()->roleForMunicipality($municipality->id) === User::ROLE_COUNCILOR, 403);
-        $year = ctype_digit((string) $request->query('year')) ? (int) $request->query('year') : now()->year + 1;
+        $year = ctype_digit((string) $request->query('year')) ? (int) $request->query('year') : $service->defaultYear($municipality);
+
+        if (! $service->profile($municipality, $year)) {
+            return redirect()
+                ->route('legislative.index', ['year' => $year])
+                ->with('warning', 'O cadastro está indisponível porque não existe uma configuração normativa vigente para este exercício.');
+        }
 
         return view('legislative.create', [
             ...$this->formOptions($municipality, $request, $service, $year),
@@ -470,6 +477,7 @@ class LegislativeProposalController extends Controller
         $profile = $service->profile($municipality, $year);
 
         return [
+            'municipality' => $municipality,
             'profile' => $profile,
             'membership' => $membership,
             'year' => $year,

@@ -202,7 +202,9 @@ a:hover {
     display: grid;
     min-height: 0;
     flex: 1 1 auto;
+    align-content: start;
     gap: .35rem;
+    grid-auto-rows: max-content;
     padding: 1.1rem .8rem;
     overflow-x: hidden;
     overflow-y: auto;
@@ -2108,6 +2110,101 @@ h6 {
     grid-template-columns: minmax(150px, 220px) 76px;
     gap: .5rem;
     align-items: center;
+}
+
+.user-access-table {
+    min-width: 980px;
+    table-layout: fixed;
+}
+
+.user-access-table th:nth-child(1) { width: 16%; }
+.user-access-table th:nth-child(2) { width: 21%; }
+.user-access-table th:nth-child(3) { width: 31%; }
+.user-access-table th:nth-child(4) { width: 27%; }
+.user-access-table th:nth-child(5) { width: 5%; }
+
+.user-access-table td {
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.user-access-table .role-cell {
+    width: auto;
+}
+
+.user-access-table .legislative-identity-editor form {
+    width: 100%;
+    min-width: 0;
+}
+
+.user-access-actions .icon-button {
+    margin-left: auto;
+}
+
+@media (max-width: 767.98px) {
+    .content-panel:has(.access-management-table) .table-responsive {
+        overflow: visible;
+    }
+
+    .access-management-table,
+    .access-management-table tbody,
+    .access-management-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .access-management-table {
+        min-width: 0;
+        table-layout: auto;
+    }
+
+    .access-management-table thead {
+        display: none;
+    }
+
+    .access-management-table tr {
+        padding: .65rem 0;
+        border-bottom: 1px solid var(--line-soft);
+    }
+
+    .access-management-table tr:last-child {
+        border-bottom: 0;
+    }
+
+    .access-management-table td,
+    .access-management-table .role-cell {
+        display: grid;
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: .75rem;
+        align-items: start;
+        padding: .5rem 1rem;
+        border: 0;
+        text-align: left !important;
+    }
+
+    .access-management-table td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: .68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .access-management-table td > form,
+    .access-management-table td > details,
+    .access-management-table td > span:not(.badge) {
+        min-width: 0;
+    }
+
+    .access-management-table .role-form {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .access-management-table .user-access-actions .icon-button {
+        margin: 0;
+    }
 }
 
 .invitation-summary {

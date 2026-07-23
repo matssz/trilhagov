@@ -226,6 +226,82 @@ class MunicipalUserManagementTest extends TestCase
         $this->assertNull($otherInvitation->fresh()->revoked_at);
     }
 
+    public function test_manager_can_cancel_invitation_and_invite_same_email_again(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        [$invitation] = $this->invitation($municipality, $manager, 'vereador@municipio.test', User::ROLE_COUNCILOR);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->delete(route('users.invitations.destroy', $invitation), [
+                '_submission_token' => $this->submissionToken("municipality-invitation-revoke-{$invitation->id}"),
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertNotNull($invitation->fresh()->revoked_at);
+
+        $this->post(route('users.invitations.store'), [
+            '_submission_token' => $this->submissionToken('municipality-invitation-create'),
+            'email' => 'vereador@municipio.test',
+            'role' => User::ROLE_VIEWER,
+        ])->assertSessionHas('invitation_link');
+
+        $this->assertDatabaseHas('municipality_invitations', [
+            'municipality_id' => $municipality->id,
+            'email' => 'vereador@municipio.test',
+            'revoked_at' => null,
+        ]);
+    }
+
+    public function test_manager_removes_municipal_access_without_deleting_account_or_history(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $councilor = User::factory()->create();
+        $municipality->users()->attach($councilor, [
+            'role' => User::ROLE_COUNCILOR,
+            'legislative_name' => 'Vereadora Maria Teste',
+            'legislative_party' => 'ABC',
+            'legislative_term_start' => '2025-01-01',
+            'legislative_term_end' => '2028-12-31',
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('Vereadora Maria Teste')
+            ->assertSee('ABC')
+            ->assertSee('value="2025-01-01"', false)
+            ->assertSee('value="2028-12-31"', false);
+
+        $this->delete(route('users.destroy', $councilor), [
+            '_submission_token' => $this->submissionToken("municipality-member-remove-{$councilor->id}"),
+        ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('municipality_user', [
+            'municipality_id' => $municipality->id,
+            'user_id' => $councilor->id,
+        ]);
+        $this->assertDatabaseHas('users', ['id' => $councilor->id]);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'municipal_user_access_removed']);
+    }
+
+    public function test_manager_cannot_remove_own_access(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->delete(route('users.destroy', $manager))
+            ->assertSessionHasErrors('user');
+
+        $this->assertDatabaseHas('municipality_user', [
+            'municipality_id' => $municipality->id,
+            'user_id' => $manager->id,
+        ]);
+    }
+
     /** @return array{User, Municipality} */
     private function memberWithMunicipality(string $role): array
     {
