@@ -70,6 +70,62 @@
         <span style="width: {{ $summary['percentage'] }}%"></span>
     </div>
 
+    <section class="content-panel compliance-package-readiness mb-4" aria-labelledby="pacote-tcesp">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Pre-fiscalizacao</p>
+                <h2 class="h5 mb-0" id="pacote-tcesp">Prontidao do pacote TCESP</h2>
+            </div>
+            <span class="package-readiness-badge {{ $packageReadiness['ready'] ? 'is-ready' : 'is-pending' }}">
+                {{ $packageReadiness['ready'] ? 'Pronto para conferencia' : 'Revisao recomendada' }}
+            </span>
+        </div>
+
+        <div class="package-readiness-grid">
+            <div>
+                <small>Documentos anexados</small>
+                <strong>{{ $packageReadiness['documents_total'] }}</strong>
+                <span>{{ $packageReadiness['linked_documents'] }} vinculado(s) a regra</span>
+            </div>
+            <div>
+                <small>Revisoes documentadas</small>
+                <strong>{{ $packageReadiness['documented_reviews'] }}</strong>
+                <span>com arquivo no pacote</span>
+            </div>
+            <div>
+                <small>So com justificativa</small>
+                <strong>{{ $packageReadiness['justified_only_reviews'] }}</strong>
+                <span>sem anexo direto</span>
+            </div>
+            <div>
+                <small>Essenciais abertos</small>
+                <strong>{{ $packageReadiness['critical_open']->count() }}</strong>
+                <span>antes de enviar ao controle</span>
+            </div>
+        </div>
+
+        @if ($packageReadiness['next_issue'])
+            <div class="package-readiness-alert">
+                <i data-lucide="file-warning" aria-hidden="true"></i>
+                <div>
+                    <strong>Antes de usar o pacote como evidencia oficial, revise {{ $packageReadiness['next_issue']['code'] }}.</strong>
+                    <p>{{ $packageReadiness['next_issue']['title'] }} - {{ $packageReadiness['next_issue']['review']?->amendment_document_id ? 'ha documento vinculado, mas a situacao ainda precisa de revisao.' : 'registre ou vincule um documento de suporte.' }}</p>
+                </div>
+                <a class="btn btn-outline-primary" href="#regra-{{ $packageReadiness['next_issue']['code'] }}">
+                    <i data-lucide="arrow-down-circle" aria-hidden="true"></i>Ir para item
+                </a>
+            </div>
+        @else
+            <div class="package-readiness-clear">
+                <i data-lucide="archive-check" aria-hidden="true"></i>
+                <div>
+                    <strong>Pacote sem pendencia essencial aparente</strong>
+                    <p>Baixe o pacote TCESP e mantenha o manifesto junto ao processo administrativo da emenda.</p>
+                </div>
+            </div>
+        @endif
+    </section>
+
     <section class="content-panel compliance-remediation mb-4" aria-labelledby="saneamento-tcesp">
         <div class="content-panel-header">
             <div>

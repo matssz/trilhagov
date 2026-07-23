@@ -51,6 +51,7 @@ class AmendmentComplianceController extends Controller
             'remediationItems' => $remediationItems,
             'nextRemediationItem' => $remediationItems->first(),
             'summary' => $framework->summary($matrix),
+            'packageReadiness' => $framework->packageReadiness($matrix, $amendment),
             'categories' => $framework->categories(),
             'statuses' => AmendmentComplianceReview::statuses(),
             'canEdit' => $canEdit,

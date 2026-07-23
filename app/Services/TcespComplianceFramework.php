@@ -110,6 +110,54 @@ class TcespComplianceFramework
         ];
     }
 
+    /** @return array<string, mixed> */
+    public function packageReadiness(Collection $matrix, ParliamentaryAmendment $amendment): array
+    {
+        $linkedDocumentIds = $matrix
+            ->pluck('review')
+            ->filter()
+            ->pluck('amendment_document_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $criticalOpen = $matrix
+            ->filter(fn (array $item) => $item['critical']
+                && ! in_array($item['status'], [
+                    AmendmentComplianceReview::STATUS_COMPLIANT,
+                    AmendmentComplianceReview::STATUS_NOT_APPLICABLE,
+                ], true))
+            ->values();
+
+        $documented = $matrix
+            ->filter(fn (array $item) => $item['review']?->amendment_document_id !== null)
+            ->count();
+
+        $justifiedOnly = $matrix
+            ->filter(fn (array $item) => $item['review'] !== null
+                && $item['review']->amendment_document_id === null
+                && filled($item['review']->evidence_notes))
+            ->count();
+
+        $criticalWithoutAttachment = $matrix
+            ->filter(fn (array $item) => $item['critical']
+                && $item['status'] === AmendmentComplianceReview::STATUS_COMPLIANT
+                && $item['review']?->amendment_document_id === null)
+            ->values();
+
+        return [
+            'ready' => $criticalOpen->isEmpty() && $criticalWithoutAttachment->isEmpty(),
+            'documents_total' => $amendment->documents->count(),
+            'linked_documents' => $linkedDocumentIds->count(),
+            'unlinked_documents' => $amendment->documents->whereNotIn('id', $linkedDocumentIds)->count(),
+            'documented_reviews' => $documented,
+            'justified_only_reviews' => $justifiedOnly,
+            'critical_open' => $criticalOpen,
+            'critical_without_attachment' => $criticalWithoutAttachment,
+            'next_issue' => $criticalOpen->first() ?? $criticalWithoutAttachment->first(),
+        ];
+    }
+
     /** @return array<int, string> */
     private function evidenceExamples(string $code, string $category): array
     {

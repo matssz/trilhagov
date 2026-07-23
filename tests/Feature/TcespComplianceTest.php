@@ -62,12 +62,83 @@ class TcespComplianceTest extends TestCase
             ->get(route('emendas.compliance', $amendment))
             ->assertOk()
             ->assertSee('Saneamento guiado')
+            ->assertSee('Prontidao do pacote TCESP')
+            ->assertSee('Revisao recomendada')
+            ->assertSee('Essenciais abertos')
             ->assertSee('Resolver agora')
             ->assertSee('Dossie TCESP')
             ->assertSee('Pacote TCESP')
             ->assertSee('Evidencias que costumam resolver este item')
             ->assertSee('Lei Organica atualizada')
             ->assertSee('essencial(is) em aberto');
+    }
+
+    public function test_package_readiness_warns_when_essential_item_has_no_document(): void
+    {
+        [$user, $municipality, $amendment] = $this->context();
+        $amendment->complianceReviews()->create([
+            'municipality_id' => $municipality->id,
+            'framework_version' => TcespComplianceFramework::VERSION,
+            'rule_code' => 'NORM-01',
+            'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
+            'evidence_notes' => 'Lei Organica conferida no processo fisico.',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance', $amendment))
+            ->assertOk()
+            ->assertSee('Revisao recomendada')
+            ->assertSee('registre ou vincule um documento de suporte.')
+            ->assertSee('So com justificativa');
+    }
+
+    public function test_package_readiness_is_clear_when_all_essential_items_are_documented_or_not_applicable(): void
+    {
+        Storage::fake('local');
+        [$user, $municipality, $amendment] = $this->context();
+        $documentType = $municipality->documentTypes()->create([
+            'created_by' => $user->id,
+            'name' => 'Evidencia TCESP',
+            'is_active' => true,
+        ]);
+        Storage::put('documents/tcesp/evidencia.pdf', 'conteudo');
+        $document = $amendment->documents()->create([
+            'municipality_id' => $municipality->id,
+            'document_type_id' => $documentType->id,
+            'uploaded_by' => $user->id,
+            'uploader_name' => $user->name,
+            'original_name' => 'evidencia.pdf',
+            'storage_path' => 'documents/tcesp/evidencia.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 8,
+            'version' => 1,
+        ]);
+
+        foreach ((new TcespComplianceFramework)->rules() as $rule) {
+            $amendment->complianceReviews()->create([
+                'municipality_id' => $municipality->id,
+                'framework_version' => TcespComplianceFramework::VERSION,
+                'rule_code' => $rule['code'],
+                'status' => $rule['critical']
+                    ? AmendmentComplianceReview::STATUS_COMPLIANT
+                    : AmendmentComplianceReview::STATUS_NOT_APPLICABLE,
+                'evidence_notes' => $rule['critical'] ? 'Evidencia vinculada ao pacote.' : 'Nao se aplica ao caso.',
+                'amendment_document_id' => $rule['critical'] ? $document->id : null,
+                'reviewed_by' => $user->id,
+                'reviewed_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance', $amendment))
+            ->assertOk()
+            ->assertSee('Pronto para conferencia')
+            ->assertSee('Pacote sem pendencia essencial aparente')
+            ->assertSee('Baixe o pacote TCESP');
     }
 
     public function test_user_can_download_tcesp_dossier_for_municipal_amendment(): void
