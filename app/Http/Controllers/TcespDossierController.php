@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AmendmentComplianceReview;
+use App\Models\AmendmentDocument;
 use App\Models\IntegrityAlert;
 use App\Models\ParliamentaryAmendment;
 use App\Services\CurrentMunicipality;
@@ -46,18 +47,14 @@ class TcespDossierController extends Controller
         abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote TCESP.');
 
         $zip->addFromString('dossie/'.$this->baseFilename($amendment).'.pdf', $pdf->output());
-        $zip->addFromString('MANIFESTO.txt', implode(PHP_EOL, [
-            'TrilhaGov - Pacote TCESP',
-            'Emenda: '.$amendment->reference,
-            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
-            'Gerado em: '.now()->format('d/m/Y H:i:s'),
-            'Matriz: '.TcespComplianceFramework::VERSION,
-            'Documentos catalogados: '.$amendment->documents->count(),
-        ]).PHP_EOL);
         $temporaryDocuments = [];
+        $includedDocuments = [];
+        $skippedDocuments = [];
 
         foreach ($amendment->documents as $document) {
             if (! Storage::exists($document->storage_path)) {
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao encontrado no armazenamento');
+
                 continue;
             }
 
@@ -80,6 +77,7 @@ class TcespDossierController extends Controller
                 if (is_resource($source)) {
                     fclose($source);
                 }
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao pode ser lido');
 
                 continue;
             }
@@ -89,8 +87,10 @@ class TcespDossierController extends Controller
             $metadata = stream_get_meta_data($temporaryDocument);
             $temporaryDocuments[] = $temporaryDocument;
             $zip->addFile($metadata['uri'], $archiveName);
+            $includedDocuments[] = $this->manifestDocumentLine($document, $archiveName);
         }
 
+        $zip->addFromString('MANIFESTO.txt', $this->manifest($amendment, $includedDocuments, $skippedDocuments));
         $zip->close();
 
         foreach ($temporaryDocuments as $temporaryDocument) {
@@ -154,5 +154,45 @@ class TcespDossierController extends Controller
     private function baseFilename(ParliamentaryAmendment $amendment): string
     {
         return 'dossie-tcesp-'.(Str::slug($amendment->reference) ?: $amendment->id);
+    }
+
+    /** @param array<int, string> $includedDocuments @param array<int, string> $skippedDocuments */
+    private function manifest(ParliamentaryAmendment $amendment, array $includedDocuments, array $skippedDocuments): string
+    {
+        $lines = [
+            'TrilhaGov - Pacote TCESP',
+            'Emenda: '.$amendment->reference,
+            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Gerado em: '.now()->format('d/m/Y H:i:s'),
+            'Matriz: '.TcespComplianceFramework::VERSION,
+            'Documentos catalogados: '.$amendment->documents->count(),
+            'Documentos incluidos no pacote: '.count($includedDocuments),
+            'Documentos nao incluidos: '.count($skippedDocuments),
+            '',
+            'Arquivos incluidos:',
+            ...($includedDocuments === [] ? ['- nenhum anexo incluido'] : array_map(fn (string $line) => '- '.$line, $includedDocuments)),
+        ];
+
+        if ($skippedDocuments !== []) {
+            $lines = [
+                ...$lines,
+                '',
+                'Atencao: documentos catalogados que nao entraram no pacote:',
+                ...array_map(fn (string $line) => '- '.$line, $skippedDocuments),
+            ];
+        }
+
+        return implode(PHP_EOL, $lines).PHP_EOL;
+    }
+
+    private function manifestDocumentLine(AmendmentDocument $document, string $detail): string
+    {
+        return sprintf(
+            '%s | tipo: %s | v%d | %s',
+            $document->original_name,
+            $document->documentType->name,
+            $document->version,
+            $detail,
+        );
     }
 }

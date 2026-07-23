@@ -14,12 +14,14 @@
             <h1 class="h3 mb-1">Matriz de conformidade</h1>
             <p class="text-secondary mb-0">Emenda {{ $amendment->reference }} · {{ $amendment->municipality->name }}/SP</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-outline-primary" href="{{ route('emendas.compliance.dossier.pdf', $amendment) }}">
-                <i data-lucide="file-down" aria-hidden="true"></i>Dossie TCESP
+        <div class="compliance-actions">
+            <a class="btn btn-outline-primary compliance-action" href="{{ route('emendas.compliance.dossier.pdf', $amendment) }}">
+                <i data-lucide="file-text" aria-hidden="true"></i>
+                <span><strong>PDF executivo</strong><small>Dossie para leitura</small></span>
             </a>
-            <a class="btn btn-primary" href="{{ route('emendas.compliance.dossier.package', $amendment) }}">
-                <i data-lucide="package" aria-hidden="true"></i>Pacote TCESP
+            <a class="btn btn-primary compliance-action" href="{{ route('emendas.compliance.dossier.package', $amendment) }}">
+                <i data-lucide="package" aria-hidden="true"></i>
+                <span><strong>Pacote com anexos</strong><small>ZIP com manifesto</small></span>
             </a>
             <a class="btn btn-outline-primary" href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">
                 <i data-lucide="external-link" aria-hidden="true"></i>Consultar fonte oficial
@@ -104,16 +106,40 @@
             </div>
         </div>
 
+        @if ($packageReadiness['missing_documents']->isNotEmpty())
+            <div class="package-readiness-missing">
+                <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                <div>
+                    <strong>{{ $packageReadiness['missing_documents']->count() }} documento(s) catalogado(s) sem arquivo no armazenamento</strong>
+                    <p>O pacote ZIP pode ser baixado, mas o manifesto indicara exatamente quais anexos nao entraram.</p>
+                    <ul>
+                        @foreach ($packageReadiness['missing_documents']->take(4) as $missingDocument)
+                            <li>{{ $missingDocument->documentType->name }} - {{ $missingDocument->original_name }} - v{{ $missingDocument->version }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         @if ($packageReadiness['next_issue'])
             <div class="package-readiness-alert">
                 <i data-lucide="file-warning" aria-hidden="true"></i>
                 <div>
                     <strong>Antes de usar o pacote como evidencia oficial, revise {{ $packageReadiness['next_issue']['code'] }}.</strong>
-                    <p>{{ $packageReadiness['next_issue']['title'] }} - {{ $packageReadiness['next_issue']['review']?->amendment_document_id ? 'ha documento vinculado, mas a situacao ainda precisa de revisao.' : 'registre ou vincule um documento de suporte.' }}</p>
+                    <p>
+                        {{ $packageReadiness['next_issue']['title'] }} -
+                        @if ($packageReadiness['next_issue']['code'] === 'DOC')
+                            reenvie o arquivo ausente ou registre uma nova versao do documento.
+                        @else
+                            {{ $packageReadiness['next_issue']['review']?->amendment_document_id ? 'ha documento vinculado, mas a situacao ainda precisa de revisao.' : 'registre ou vincule um documento de suporte.' }}
+                        @endif
+                    </p>
                 </div>
-                <a class="btn btn-outline-primary" href="#regra-{{ $packageReadiness['next_issue']['code'] }}">
-                    <i data-lucide="arrow-down-circle" aria-hidden="true"></i>Ir para item
-                </a>
+                @if ($packageReadiness['next_issue']['code'] !== 'DOC')
+                    <a class="btn btn-outline-primary" href="#regra-{{ $packageReadiness['next_issue']['code'] }}">
+                        <i data-lucide="arrow-down-circle" aria-hidden="true"></i>Ir para item
+                    </a>
+                @endif
             </div>
         @else
             <div class="package-readiness-clear">

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AmendmentComplianceReview;
 use App\Models\ParliamentaryAmendment;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class TcespComplianceFramework
 {
@@ -144,17 +145,23 @@ class TcespComplianceFramework
                 && $item['status'] === AmendmentComplianceReview::STATUS_COMPLIANT
                 && $item['review']?->amendment_document_id === null)
             ->values();
+        $missingDocuments = $amendment->documents
+            ->filter(fn ($document) => ! Storage::exists($document->storage_path))
+            ->values();
 
         return [
-            'ready' => $criticalOpen->isEmpty() && $criticalWithoutAttachment->isEmpty(),
+            'ready' => $criticalOpen->isEmpty() && $criticalWithoutAttachment->isEmpty() && $missingDocuments->isEmpty(),
             'documents_total' => $amendment->documents->count(),
             'linked_documents' => $linkedDocumentIds->count(),
             'unlinked_documents' => $amendment->documents->whereNotIn('id', $linkedDocumentIds)->count(),
             'documented_reviews' => $documented,
             'justified_only_reviews' => $justifiedOnly,
+            'missing_documents' => $missingDocuments,
             'critical_open' => $criticalOpen,
             'critical_without_attachment' => $criticalWithoutAttachment,
-            'next_issue' => $criticalOpen->first() ?? $criticalWithoutAttachment->first(),
+            'next_issue' => $missingDocuments->isNotEmpty()
+                ? ['code' => 'DOC', 'title' => 'Documento catalogado sem arquivo no armazenamento', 'review' => null]
+                : ($criticalOpen->first() ?? $criticalWithoutAttachment->first()),
         ];
     }
 

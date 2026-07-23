@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
+use ZipArchive;
 
 class TcespComplianceTest extends TestCase
 {
@@ -66,8 +67,10 @@ class TcespComplianceTest extends TestCase
             ->assertSee('Revisao recomendada')
             ->assertSee('Essenciais abertos')
             ->assertSee('Resolver agora')
-            ->assertSee('Dossie TCESP')
-            ->assertSee('Pacote TCESP')
+            ->assertSee('PDF executivo')
+            ->assertSee('Dossie para leitura')
+            ->assertSee('Pacote com anexos')
+            ->assertSee('ZIP com manifesto')
             ->assertSee('Evidencias que costumam resolver este item')
             ->assertSee('Lei Organica atualizada')
             ->assertSee('essencial(is) em aberto');
@@ -93,6 +96,36 @@ class TcespComplianceTest extends TestCase
             ->assertSee('Revisao recomendada')
             ->assertSee('registre ou vincule um documento de suporte.')
             ->assertSee('So com justificativa');
+    }
+
+    public function test_package_readiness_warns_when_cataloged_file_is_missing_from_storage(): void
+    {
+        Storage::fake('local');
+        [$user, $municipality, $amendment] = $this->context();
+        $documentType = $municipality->documentTypes()->create([
+            'created_by' => $user->id,
+            'name' => 'Parecer tecnico',
+            'is_active' => true,
+        ]);
+        $amendment->documents()->create([
+            'municipality_id' => $municipality->id,
+            'document_type_id' => $documentType->id,
+            'uploaded_by' => $user->id,
+            'uploader_name' => $user->name,
+            'original_name' => 'parecer-ausente.pdf',
+            'storage_path' => 'documents/tcesp/parecer-ausente.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 100,
+            'version' => 1,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance', $amendment))
+            ->assertOk()
+            ->assertSee('documento(s) catalogado(s) sem arquivo no armazenamento')
+            ->assertSee('parecer-ausente.pdf')
+            ->assertSee('reenvie o arquivo ausente ou registre uma nova versao do documento.');
     }
 
     public function test_package_readiness_is_clear_when_all_essential_items_are_documented_or_not_applicable(): void
@@ -192,6 +225,60 @@ class TcespComplianceTest extends TestCase
         $response->assertOk();
         $this->assertSame('application/zip', $response->headers->get('content-type'));
         $this->assertStringContainsString('dossie-tcesp-', (string) $response->headers->get('content-disposition'));
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($response->baseResponse->getFile()->getPathname()));
+        $manifest = $zip->getFromName('MANIFESTO.txt');
+        $this->assertIsString($manifest);
+        $this->assertStringContainsString('Documentos catalogados: 1', $manifest);
+        $this->assertStringContainsString('Documentos incluidos no pacote: 1', $manifest);
+        $this->assertStringContainsString('Documentos nao incluidos: 0', $manifest);
+        $this->assertStringContainsString('parecer.pdf | tipo: Parecer tecnico | v1 | documentos/parecer-tecnico/', $manifest);
+        $zip->close();
+    }
+
+    public function test_tcesp_package_manifest_lists_cataloged_documents_not_included_in_zip(): void
+    {
+        Storage::fake('local');
+        [$user, $municipality, $amendment] = $this->context();
+        $documentType = $municipality->documentTypes()->create([
+            'created_by' => $user->id,
+            'name' => 'Parecer tecnico',
+            'is_active' => true,
+        ]);
+        Storage::put('documents/tcesp/presente.pdf', 'conteudo presente');
+        foreach ([
+            ['original_name' => 'presente.pdf', 'storage_path' => 'documents/tcesp/presente.pdf', 'size_bytes' => 16, 'version' => 1],
+            ['original_name' => 'ausente.pdf', 'storage_path' => 'documents/tcesp/ausente.pdf', 'size_bytes' => 100, 'version' => 2],
+        ] as $document) {
+            $amendment->documents()->create([
+                'municipality_id' => $municipality->id,
+                'document_type_id' => $documentType->id,
+                'uploaded_by' => $user->id,
+                'uploader_name' => $user->name,
+                'original_name' => $document['original_name'],
+                'storage_path' => $document['storage_path'],
+                'mime_type' => 'application/pdf',
+                'size_bytes' => $document['size_bytes'],
+                'version' => $document['version'],
+            ]);
+        }
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance.dossier.package', $amendment));
+
+        $response->assertOk();
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($response->baseResponse->getFile()->getPathname()));
+        $manifest = $zip->getFromName('MANIFESTO.txt');
+        $this->assertIsString($manifest);
+        $this->assertStringContainsString('Documentos catalogados: 2', $manifest);
+        $this->assertStringContainsString('Documentos incluidos no pacote: 1', $manifest);
+        $this->assertStringContainsString('Documentos nao incluidos: 1', $manifest);
+        $this->assertStringContainsString('Atencao: documentos catalogados que nao entraram no pacote:', $manifest);
+        $this->assertStringContainsString('ausente.pdf | tipo: Parecer tecnico | v2 | arquivo nao encontrado no armazenamento', $manifest);
+        $zip->close();
     }
 
     public function test_editor_can_record_compliance_with_evidence_and_audit(): void
