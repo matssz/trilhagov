@@ -34,6 +34,7 @@ use App\Http\Controllers\MunicipalOfficialDocumentController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
 use App\Http\Controllers\MunicipalReportDispatchController;
 use App\Http\Controllers\MunicipalSpecializedReportController;
+use App\Http\Controllers\MunicipalTcespAdherenceController;
 use App\Http\Controllers\MunicipalUserController;
 use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
@@ -125,6 +126,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');
         Route::get('/audesp/homologacoes/{batch}/eventos/{event}/evidencia', [AudespHomologationController::class, 'evidence'])->name('audesp-homologations.evidence');
         Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
+        Route::get('/conformidade-municipal-tcesp', MunicipalTcespAdherenceController::class)->name('municipal-tcesp-adherence.index');
     });
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
     Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
