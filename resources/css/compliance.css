@@ -440,6 +440,45 @@
     white-space: pre-line;
 }
 
+.compliance-evidence-guide {
+    margin-top: .75rem;
+    padding: .85rem 1rem;
+    border: 1px solid #d9e5ef;
+    border-radius: 6px;
+    background: #fbfdff;
+}
+
+.compliance-evidence-guide strong {
+    color: var(--navy-900);
+    font-size: .82rem;
+}
+
+.compliance-evidence-guide ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+    margin: .65rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.compliance-evidence-guide li {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: .4rem;
+    color: #44546a;
+    font-size: .76rem;
+    line-height: 1.35;
+}
+
+.compliance-evidence-guide li svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    color: var(--success);
+}
+
 .compliance-current-evidence {
     display: flex;
     align-items: flex-end;
@@ -560,6 +599,10 @@
 
     .compliance-rule-body {
         padding: 0 .75rem 1rem;
+    }
+
+    .compliance-evidence-guide ul {
+        grid-template-columns: 1fr;
     }
 
     .compliance-current-evidence {

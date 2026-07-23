@@ -62,6 +62,8 @@ class TcespComplianceTest extends TestCase
             ->assertOk()
             ->assertSee('Saneamento guiado')
             ->assertSee('Resolver agora')
+            ->assertSee('Evidencias que costumam resolver este item')
+            ->assertSee('Lei Organica atualizada')
             ->assertSee('essencial(is) em aberto');
     }
 

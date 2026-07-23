@@ -84,6 +84,7 @@ class TcespComplianceFramework
 
             return [
                 ...$rule,
+                'evidence_examples' => $this->evidenceExamples($rule['code'], $rule['category']),
                 'review' => $review,
                 'status' => $review?->status ?? AmendmentComplianceReview::STATUS_PENDING,
             ];
@@ -107,5 +108,46 @@ class TcespComplianceFramework
             'not_applicable' => $notApplicable,
             'percentage' => $applicable > 0 ? (int) round(($compliant / $applicable) * 100) : 0,
         ];
+    }
+
+    /** @return array<int, string> */
+    private function evidenceExamples(string $code, string $category): array
+    {
+        return match ($code) {
+            'NORM-01' => ['Lei Organica atualizada', 'LDO ou LOA do exercicio', 'ato municipal com limite, reserva da saude e hipoteses de impedimento'],
+            'NORM-02' => ['regimento interno da Camara', 'decreto ou instrucao normativa do Executivo', 'calendario oficial de analise e saneamento'],
+            'ORC-01' => ['descricao tecnica do objeto', 'justificativa da entrega publica', 'parecer que afaste objeto generico'],
+            'ORC-02' => ['vinculo com programa e acao da LOA', 'manifestacao da secretaria executora', 'classificacao orcamentaria sugerida'],
+            'ORC-03' => ['analise da natureza da despesa', 'declaracao de nao duplicidade', 'memoria da origem orcamentaria'],
+            'VIA-01' => ['meta fisica mensuravel', 'indicador de resultado', 'publico beneficiado e local da entrega'],
+            'VIA-02' => ['orcamento estimativo', 'pesquisa de precos', 'demonstracao de etapa util e funcional'],
+            'VIA-03' => ['projeto basico ou termo de referencia', 'licenca ou dispensa fundamentada', 'estimativa de custos acessorios'],
+            'VIA-04' => ['declaracao da secretaria sobre custeio futuro', 'plano de manutencao', 'impacto operacional previsto'],
+            'PLAN-01' => ['plano de trabalho assinado', 'identificacao do autor', 'dados do beneficiario ou orgao executor'],
+            'PLAN-02' => ['justificativa da necessidade publica', 'diagnostico local', 'relacao com politica publica municipal'],
+            'PLAN-03' => ['cronograma fisico-financeiro', 'etapas com datas', 'desembolsos previstos por fase'],
+            'PLAN-04' => ['plano de aplicacao', 'memoria de calculo', 'planilha de custos detalhada'],
+            'BEN-01' => ['CNPJ e atos constitutivos', 'certidoes de regularidade', 'comprovacao de capacidade tecnica'],
+            'BEN-02' => ['declaracao de inexistencia de nepotismo', 'comprovante de conta especifica', 'ata ou relacao de dirigentes'],
+            'SAU-01' => ['parecer ASPS', 'classificacao da despesa de saude', 'demonstrativo da reserva minima'],
+            'IMP-01' => ['parecer de admissibilidade da Camara', 'ata ou despacho legislativo', 'fundamentacao da aprovacao ou rejeicao'],
+            'IMP-02' => ['parecer tecnico do Executivo', 'classificacao do impedimento', 'documentos que comprovem o obice'],
+            'IMP-03' => ['oficio de notificacao', 'protocolo de ciencia', 'resposta do autor ou remanejamento aprovado'],
+            'TRA-01' => ['link do portal de transparencia', 'captura ou recibo de publicacao', 'historico de atualizacao'],
+            'TRA-02' => ['cadastro Audesp preparado', 'recibo ou protocolo de envio', 'retorno de homologacao'],
+            'TRA-03' => ['codigos contabeis individualizados', 'empenhos, liquidacoes e pagamentos', 'extrato ou justificativa de execucao direta'],
+            'CON-01' => ['contrato ou instrumento equivalente', 'nota fiscal, medicao ou ateste', 'termo de recebimento e comprovante de pagamento'],
+            'CON-02' => ['revisao do controle interno', 'providencias abertas e saneadas', 'relatorio conclusivo de acompanhamento'],
+            default => match ($category) {
+                'normative' => ['norma municipal aplicavel', 'ato de regulamentacao', 'parecer juridico'],
+                'budget' => ['classificacao orcamentaria', 'justificativa tecnica', 'documento da secretaria responsavel'],
+                'viability' => ['estudo tecnico', 'orcamento estimativo', 'manifestacao do setor executor'],
+                'work_plan' => ['plano de trabalho', 'cronograma', 'memoria de calculo'],
+                'beneficiary' => ['documentos do beneficiario', 'certidoes', 'parecer de regularidade'],
+                'impediments' => ['parecer tecnico', 'oficio de notificacao', 'protocolo de resposta'],
+                'traceability' => ['publicacao no portal', 'registro Audesp', 'rastreio contabil'],
+                default => ['relatorio de controle', 'documentos de execucao', 'parecer conclusivo'],
+            },
+        };
     }
 }

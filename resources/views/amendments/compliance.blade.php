@@ -66,7 +66,7 @@
         <div class="content-panel-header">
             <div>
                 <p class="panel-kicker">Saneamento guiado</p>
-                <h2 class="h5 mb-0" id="saneamento-tcesp">PrÃ³ximo passo TCESP</h2>
+                <h2 class="h5 mb-0" id="saneamento-tcesp">Proximo passo TCESP</h2>
             </div>
             <span>{{ $remediationItems->count() }} essencial(is) em aberto</span>
         </div>
@@ -75,7 +75,7 @@
                 <article class="compliance-next-action status-{{ $nextRemediationItem['status'] }}">
                     <span><i data-lucide="{{ $nextRemediationItem['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'shield-alert' : 'clipboard-check' }}" aria-hidden="true"></i></span>
                     <div>
-                        <small>{{ $nextRemediationItem['code'] }} Â· {{ $nextRemediationItem['source'] }}</small>
+                        <small>{{ $nextRemediationItem['code'] }} - {{ $nextRemediationItem['source'] }}</small>
                         <h3>{{ $nextRemediationItem['title'] }}</h3>
                         <p>{{ $nextRemediationItem['guidance'] }}</p>
                     </div>
@@ -89,8 +89,8 @@
                         <a href="#regra-{{ $item['code'] }}" class="compliance-remediation-step status-{{ $item['status'] }}">
                             <span>{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                             <div>
-                                <strong>{{ $item['code'] }} Â· {{ $item['title'] }}</strong>
-                                <small>{{ $item['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'Sanear constataÃ§Ã£o registrada' : 'Registrar evidÃªncia ou decisÃ£o' }}</small>
+                                <strong>{{ $item['code'] }} - {{ $item['title'] }}</strong>
+                                <small>{{ $item['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'Sanear constatacao registrada' : 'Registrar evidencia ou decisao' }}</small>
                             </div>
                             <i data-lucide="chevron-right" aria-hidden="true"></i>
                         </a>
@@ -100,8 +100,8 @@
                 <div class="compliance-clear-state">
                     <i data-lucide="shield-check" aria-hidden="true"></i>
                     <div>
-                        <strong>Itens essenciais sem pendÃªncia aberta</strong>
-                        <p>Mantenha os documentos vinculados e revise a matriz quando houver novo parecer, pagamento, impedimento ou alteraÃ§Ã£o no objeto.</p>
+                        <strong>Itens essenciais sem pendencia aberta</strong>
+                        <p>Mantenha os documentos vinculados e revise a matriz quando houver novo parecer, pagamento, impedimento ou alteracao no objeto.</p>
                     </div>
                 </div>
             @endif
@@ -147,6 +147,15 @@
                                 <div class="compliance-guidance">
                                     <strong>O que verificar</strong>
                                     <p>{{ $item['guidance'] }}</p>
+                                </div>
+
+                                <div class="compliance-evidence-guide">
+                                    <strong>Evidencias que costumam resolver este item</strong>
+                                    <ul>
+                                        @foreach ($item['evidence_examples'] as $example)
+                                            <li><i data-lucide="file-check-2" aria-hidden="true"></i>{{ $example }}</li>
+                                        @endforeach
+                                    </ul>
                                 </div>
 
                                 @if ($review && ($review->evidence_notes || $review->document))
