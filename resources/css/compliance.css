@@ -148,6 +148,153 @@
     transition: width .2s ease;
 }
 
+.compliance-remediation {
+    overflow: hidden;
+}
+
+.compliance-remediation .content-panel-header > span {
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 750;
+}
+
+.compliance-remediation-body {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.compliance-next-action {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #d8e3ee;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef5fb 100%);
+}
+
+.compliance-next-action.status-non_compliant {
+    border-color: #f0c8c8;
+    background: linear-gradient(135deg, #fff8f8 0%, #f8eeee 100%);
+}
+
+.compliance-next-action > span,
+.compliance-clear-state > svg {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.compliance-next-action.status-non_compliant > span {
+    background: #a51f25;
+}
+
+.compliance-next-action svg,
+.compliance-clear-state > svg {
+    width: 20px;
+    height: 20px;
+}
+
+.compliance-next-action small,
+.compliance-remediation-step small {
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.compliance-next-action h3 {
+    margin: .1rem 0 .25rem;
+    color: var(--navy-900);
+    font-size: 1rem;
+}
+
+.compliance-next-action p {
+    margin: 0;
+    color: #44546a;
+    font-size: .86rem;
+}
+
+.compliance-remediation-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.compliance-remediation-step {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: .65rem;
+    min-height: 82px;
+    padding: .8rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+}
+
+.compliance-remediation-step:hover {
+    border-color: var(--navy-300);
+    background: #f8fafc;
+}
+
+.compliance-remediation-step > span {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 50%;
+    background: #edf3f8;
+    color: var(--navy-800);
+    font-size: .72rem;
+    font-weight: 850;
+}
+
+.compliance-remediation-step.status-non_compliant > span {
+    background: #fff0ef;
+    color: #a51f25;
+}
+
+.compliance-remediation-step strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font-size: .8rem;
+}
+
+.compliance-remediation-step > svg {
+    width: 18px;
+    color: var(--muted);
+}
+
+.compliance-clear-state {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: 1rem;
+    border: 1px solid #cfe6da;
+    border-radius: 6px;
+    background: #f6fcf8;
+}
+
+.compliance-clear-state > svg {
+    background: var(--success);
+    flex: 0 0 42px;
+}
+
+.compliance-clear-state p {
+    margin: .2rem 0 0;
+    color: var(--muted);
+}
+
 .compliance-category-list {
     display: grid;
     gap: 1rem;
@@ -350,6 +497,20 @@
     .compliance-metrics {
         border-top: 1px solid var(--line);
         border-left: 0;
+    }
+
+    .compliance-next-action,
+    .compliance-remediation-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .compliance-next-action > span {
+        grid-row: 1;
+    }
+
+    .compliance-next-action .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 

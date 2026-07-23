@@ -35,11 +35,21 @@ class AmendmentComplianceController extends Controller
 
         $matrix = $framework->matrix($amendment);
         $canEdit = $request->user()->canEditMunicipality($amendment->municipality_id);
+        $remediationItems = $matrix
+            ->filter(fn (array $item) => $item['critical']
+                && ! in_array($item['status'], [
+                    AmendmentComplianceReview::STATUS_COMPLIANT,
+                    AmendmentComplianceReview::STATUS_NOT_APPLICABLE,
+                ], true))
+            ->sortBy(fn (array $item) => $item['status'] === AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 0 : 1)
+            ->values();
 
         return view('amendments.compliance', [
             'amendment' => $amendment,
             'matrix' => $matrix,
             'groupedMatrix' => $matrix->groupBy('category'),
+            'remediationItems' => $remediationItems,
+            'nextRemediationItem' => $remediationItems->first(),
             'summary' => $framework->summary($matrix),
             'categories' => $framework->categories(),
             'statuses' => AmendmentComplianceReview::statuses(),

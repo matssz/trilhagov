@@ -62,6 +62,52 @@
         <span style="width: {{ $summary['percentage'] }}%"></span>
     </div>
 
+    <section class="content-panel compliance-remediation mb-4" aria-labelledby="saneamento-tcesp">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Saneamento guiado</p>
+                <h2 class="h5 mb-0" id="saneamento-tcesp">PrÃ³ximo passo TCESP</h2>
+            </div>
+            <span>{{ $remediationItems->count() }} essencial(is) em aberto</span>
+        </div>
+        <div class="compliance-remediation-body">
+            @if ($nextRemediationItem)
+                <article class="compliance-next-action status-{{ $nextRemediationItem['status'] }}">
+                    <span><i data-lucide="{{ $nextRemediationItem['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'shield-alert' : 'clipboard-check' }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $nextRemediationItem['code'] }} Â· {{ $nextRemediationItem['source'] }}</small>
+                        <h3>{{ $nextRemediationItem['title'] }}</h3>
+                        <p>{{ $nextRemediationItem['guidance'] }}</p>
+                    </div>
+                    <a class="btn btn-primary" href="#regra-{{ $nextRemediationItem['code'] }}">
+                        <i data-lucide="arrow-down-circle" aria-hidden="true"></i>Resolver agora
+                    </a>
+                </article>
+
+                <div class="compliance-remediation-steps" aria-label="Ordem sugerida para saneamento">
+                    @foreach ($remediationItems->take(6) as $index => $item)
+                        <a href="#regra-{{ $item['code'] }}" class="compliance-remediation-step status-{{ $item['status'] }}">
+                            <span>{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <strong>{{ $item['code'] }} Â· {{ $item['title'] }}</strong>
+                                <small>{{ $item['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'Sanear constataÃ§Ã£o registrada' : 'Registrar evidÃªncia ou decisÃ£o' }}</small>
+                            </div>
+                            <i data-lucide="chevron-right" aria-hidden="true"></i>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="compliance-clear-state">
+                    <i data-lucide="shield-check" aria-hidden="true"></i>
+                    <div>
+                        <strong>Itens essenciais sem pendÃªncia aberta</strong>
+                        <p>Mantenha os documentos vinculados e revise a matriz quando houver novo parecer, pagamento, impedimento ou alteraÃ§Ã£o no objeto.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </section>
+
     <div class="compliance-category-list">
         @foreach ($categories as $categoryCode => $category)
             @php($items = $groupedMatrix->get($categoryCode, collect()))

@@ -52,6 +52,19 @@ class TcespComplianceTest extends TestCase
         $this->get(route('emendas.compliance', $amendment))->assertNotFound();
     }
 
+    public function test_matrix_shows_guided_remediation_for_open_essential_items(): void
+    {
+        [$user, $municipality, $amendment] = $this->context();
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance', $amendment))
+            ->assertOk()
+            ->assertSee('Saneamento guiado')
+            ->assertSee('Resolver agora')
+            ->assertSee('essencial(is) em aberto');
+    }
+
     public function test_editor_can_record_compliance_with_evidence_and_audit(): void
     {
         [$user, $municipality, $amendment] = $this->context(role: User::ROLE_EDITOR);
