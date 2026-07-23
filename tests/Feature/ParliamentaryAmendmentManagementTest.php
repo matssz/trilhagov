@@ -48,6 +48,24 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->assertSee('R$ 500.000,00');
     }
 
+    public function test_executive_amendment_creation_uses_consistent_new_amendment_label(): void
+    {
+        [$user] = $this->userAndMunicipality();
+
+        $this->actingAs($user)
+            ->get(route('emendas.create'))
+            ->assertOk()
+            ->assertSee('Nova emenda')
+            ->assertSee('Salvar nova emenda')
+            ->assertDontSee('Cadastrar emenda');
+
+        $this->get(route('emendas.index'))
+            ->assertOk()
+            ->assertSee('Nenhuma emenda encontrada.')
+            ->assertSee('Nova emenda')
+            ->assertDontSee('Cadastrar emenda');
+    }
+
     public function test_viewer_can_consult_but_cannot_create_or_edit_amendments(): void
     {
         $user = User::factory()->create();

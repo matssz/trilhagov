@@ -37,7 +37,7 @@
             <div class="empty-state">
                 <p class="mb-3">Nenhuma emenda encontrada.</p>
                 @if ($canEdit)
-                    <a class="btn btn-primary" href="{{ route('emendas.create') }}">Cadastrar emenda</a>
+                    <a class="btn btn-primary" href="{{ route('emendas.create') }}">Nova emenda</a>
                 @endif
             </div>
         @else
