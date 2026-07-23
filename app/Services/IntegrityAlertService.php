@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AudespHomologationBatch;
 use App\Models\AudespHomologationItem;
+use App\Models\AmendmentComplianceReview;
 use App\Models\HealthAspsAssessment;
 use App\Models\IntegrityAlert;
 use App\Models\MunicipalAuditPlan;
@@ -27,6 +28,7 @@ class IntegrityAlertService
         private readonly MunicipalTransparencyReadiness $transparencyReadiness,
         private readonly AudespTraceabilityService $audespTraceability,
         private readonly MunicipalContractFramework $contractFramework,
+        private readonly TcespComplianceFramework $tcespCompliance,
     ) {}
 
     /** @return array{created: int, updated: int, resolved: int, open: int}|null */
@@ -71,6 +73,7 @@ class IntegrityAlertService
             'amendments.auditPlanItems.plan',
             'amendments.internalControlReviews.actions',
             'amendments.transparencyEvents',
+            'amendments.complianceReviews',
             'documentTypes' => fn ($query) => $query->active()->orderBy('sort_order'),
             'users:id,name,email',
         ]);
@@ -94,6 +97,7 @@ class IntegrityAlertService
             $this->detectContractControls($amendment, $detections);
             $this->detectTransparencyControls($amendment, $detections);
             $this->detectAudespControls($amendment, $detections);
+            $this->detectTcespComplianceControls($amendment, $detections);
             $this->detectInternalControlActions($amendment, $settings, $detections);
             $this->detectAuditPlanItems($amendment, $settings, $detections);
         }
@@ -431,6 +435,36 @@ class IntegrityAlertService
                 'title' => 'Remessa Audesp rejeitada',
                 'message' => 'Consulte o retorno anexado, corrija a origem e registre uma nova tentativa vinculada ao lote rejeitado.',
                 'due_at' => null,
+            ]);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $detections */
+    private function detectTcespComplianceControls(ParliamentaryAmendment $amendment, array &$detections): void
+    {
+        if (! $amendment->supportsTcespCompliance()) {
+            return;
+        }
+
+        foreach ($this->tcespCompliance->matrix($amendment) as $item) {
+            if (! $item['critical']
+                || in_array($item['status'], [
+                    AmendmentComplianceReview::STATUS_COMPLIANT,
+                    AmendmentComplianceReview::STATUS_NOT_APPLICABLE,
+                ], true)) {
+                continue;
+            }
+
+            $isNonCompliant = $item['status'] === AmendmentComplianceReview::STATUS_NON_COMPLIANT;
+            $this->addDetection($detections, $amendment, "tcesp-compliance:{$item['code']}", [
+                'category' => IntegrityAlert::CATEGORY_CONSISTENCY,
+                'severity' => $isNonCompliant
+                    ? IntegrityAlert::SEVERITY_CRITICAL
+                    : IntegrityAlert::SEVERITY_WARNING,
+                'title' => ($isNonCompliant ? 'Item essencial TCESP não atendido: ' : 'Item essencial TCESP sem evidência: ').$item['code'],
+                'message' => $item['title'].'. '.$item['guidance'].' Fonte: '.$item['source'].'.',
+                'due_at' => null,
+                'assigned_user_id' => $amendment->responsible_user_id,
             ]);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AmendmentComplianceReview;
 use App\Models\IntegrityAlert;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Notifications\IntegrityAlertNotification;
 use App\Services\IntegrityAlertProcessor;
 use App\Services\IntegrityAlertService;
+use App\Services\TcespComplianceFramework;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -200,6 +202,46 @@ class IntegrityAlertTest extends TestCase
         ]);
         $this->assertSame(ParliamentaryAmendment::RISK_LOW, $amendment->fresh()->risk_level);
         $this->assertSame(0, $amendment->fresh()->risk_score);
+    }
+
+    public function test_tcesp_critical_matrix_items_create_and_resolve_integrity_alerts(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->update(['state' => 'SP', 'ibge_code' => '3522307']);
+        $amendment = $this->amendment($municipality, $manager, [
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'responsible_user_id' => $manager->id,
+        ]);
+        $service = app(IntegrityAlertService::class);
+
+        $service->sync($municipality->fresh());
+
+        $this->assertDatabaseHas('integrity_alerts', [
+            'parliamentary_amendment_id' => $amendment->id,
+            'alert_key' => 'tcesp-compliance:NORM-01',
+            'severity' => IntegrityAlert::SEVERITY_WARNING,
+            'status' => IntegrityAlert::STATUS_OPEN,
+            'assigned_user_id' => $manager->id,
+        ]);
+
+        $amendment->complianceReviews()->create([
+            'municipality_id' => $municipality->id,
+            'framework_version' => TcespComplianceFramework::VERSION,
+            'rule_code' => 'NORM-01',
+            'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
+            'evidence_notes' => 'Lei Orgânica, LDO e regulamentação municipal conferidas.',
+            'reviewed_by' => $manager->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $service->sync($municipality->fresh());
+
+        $this->assertDatabaseHas('integrity_alerts', [
+            'parliamentary_amendment_id' => $amendment->id,
+            'alert_key' => 'tcesp-compliance:NORM-01',
+            'status' => IntegrityAlert::STATUS_RESOLVED,
+        ]);
     }
 
     public function test_level_two_escalation_notifies_responsible_managers_and_editors(): void
