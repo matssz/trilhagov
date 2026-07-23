@@ -10,6 +10,7 @@
     $canEditAmendments = in_array($activeRole, ['manager', 'editor'], true);
     $canManageUsers = $activeRole === 'manager';
     $legislativeWorkspace = in_array($activeRole, ['councilor', 'legislative_reviewer'], true);
+    $readOnlyWorkspace = in_array($activeRole, ['viewer', 'auditor'], true);
     $canAccessLegislative = in_array($activeRole, ['manager', 'editor', 'councilor', 'legislative_reviewer'], true);
     $homeRoute = $legislativeWorkspace ? 'legislative.index' : 'dashboard';
     $activeRoleLabel = App\Models\User::municipalityRoles()[$activeRole] ?? 'Usuário municipal';
@@ -133,7 +134,7 @@
                         <div class="sidebar-actions">
                             <a class="btn btn-primary w-100" href="{{ route('legislative.create') }}">
                                 <i data-lucide="plus" aria-hidden="true"></i>
-                                <span>Cadastrar emenda</span>
+                                <span>Nova proposta</span>
                             </a>
                         </div>
                     @elseif ($canEditAmendments)
@@ -185,6 +186,12 @@
                                 <span>{{ min($unreadNotificationCount, 99) }}</span>
                             @endif
                         </a>
+                        @if ($readOnlyWorkspace)
+                            <span class="workspace-mode-pill" title="Este perfil consulta informações, mas não altera os registros.">
+                                <i data-lucide="eye" aria-hidden="true"></i>
+                                Somente leitura
+                            </span>
+                        @endif
                         <div class="topbar-user">
                             <span>
                                 <strong>{{ auth()->user()->name }}</strong>

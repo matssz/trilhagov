@@ -86,7 +86,19 @@
                 </div>
             </details>
         @empty
-            <div class="work-empty"><span><i data-lucide="clipboard-check" aria-hidden="true"></i></span><h2>{{ $lastEvaluatedAt ? 'Nenhuma ação neste filtro' : 'Plano ainda não avaliado' }}</h2><p>{{ $lastEvaluatedAt ? 'Ajuste os filtros para consultar outras ações.' : 'Atualize o plano para organizar as próximas ações do município.' }}</p></div>
+            <div class="work-empty">
+                <span><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
+                <h2>{{ $lastEvaluatedAt ? 'Nenhuma ação neste filtro' : 'Plano ainda não avaliado' }}</h2>
+                <p>
+                    @if ($lastEvaluatedAt)
+                        Ajuste os filtros para consultar outras ações.
+                    @elseif ($canEdit)
+                        Atualize o plano para organizar as próximas ações do município.
+                    @else
+                        Aguardando atualização do gestor municipal.
+                    @endif
+                </p>
+            </div>
         @endforelse
     </section>
 

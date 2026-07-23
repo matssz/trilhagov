@@ -82,11 +82,15 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertViewHas('year', now()->year)
             ->assertSee(now()->year.' · ativo')
-            ->assertDontSee('Cadastro indisponível');
+            ->assertSee('Nova proposta')
+            ->assertDontSee('Cadastro indisponível')
+            ->assertDontSee('Cadastrar emenda');
 
         $this->get(route('legislative.create'))
             ->assertOk()
-            ->assertViewHas('year', now()->year);
+            ->assertViewHas('year', now()->year)
+            ->assertSee('Nova proposta legislativa')
+            ->assertDontSee('Cadastrar emenda');
     }
 
     public function test_create_redirects_with_human_message_when_no_active_year_exists(): void

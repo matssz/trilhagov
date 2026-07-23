@@ -163,6 +163,55 @@ class User extends Authenticatable
         return $this->usesLegislativeWorkspace($municipalityId) ? 'legislative.index' : 'dashboard';
     }
 
+    /** @return array{label: string, description: string, icon: string, readonly: bool} */
+    public function workspaceContextForMunicipality(int $municipalityId): array
+    {
+        return match ($this->roleForMunicipality($municipalityId)) {
+            self::ROLE_MANAGER => [
+                'label' => 'Abre Painel municipal',
+                'description' => 'Gestão completa de emendas, normas, usuários e execução.',
+                'icon' => 'layout-dashboard',
+                'readonly' => false,
+            ],
+            self::ROLE_EDITOR => [
+                'label' => 'Abre Painel operacional',
+                'description' => 'Cadastro, acompanhamento e atualização da execução municipal.',
+                'icon' => 'clipboard-check',
+                'readonly' => false,
+            ],
+            self::ROLE_VIEWER => [
+                'label' => 'Abre Painel em modo consulta',
+                'description' => 'Leitura de dados e relatórios, sem alteração dos registros.',
+                'icon' => 'eye',
+                'readonly' => true,
+            ],
+            self::ROLE_AUDITOR => [
+                'label' => 'Abre auditoria em modo consulta',
+                'description' => 'Consulta técnica para conferência, riscos, evidências e trilha de controle.',
+                'icon' => 'shield-check',
+                'readonly' => true,
+            ],
+            self::ROLE_COUNCILOR => [
+                'label' => 'Abre Portal Legislativo',
+                'description' => 'Cadastro e acompanhamento das indicações legislativas.',
+                'icon' => 'landmark',
+                'readonly' => false,
+            ],
+            self::ROLE_LEGISLATIVE_REVIEWER => [
+                'label' => 'Abre conferência legislativa',
+                'description' => 'Análise, devolução e protocolo das propostas da Câmara.',
+                'icon' => 'badge-check',
+                'readonly' => false,
+            ],
+            default => [
+                'label' => 'Abre workspace municipal',
+                'description' => 'Área de trabalho vinculada ao município selecionado.',
+                'icon' => 'building-2',
+                'readonly' => false,
+            ],
+        };
+    }
+
     public function legislativeProposals(): HasMany
     {
         return $this->hasMany(LegislativeProposal::class, 'submitted_by');

@@ -154,6 +154,25 @@ class AuthenticationTest extends TestCase
             ->assertDontSee('Municipio A');
     }
 
+    public function test_municipality_selection_explains_destination_and_active_role(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+        $executive = Municipality::factory()->create(['name' => 'Itapetininga']);
+        $legislative = Municipality::factory()->create(['name' => 'Sorocaba']);
+        $executive->users()->attach($user, ['role' => User::ROLE_MANAGER]);
+        $legislative->users()->attach($user, ['role' => User::ROLE_COUNCILOR]);
+
+        $this->actingAs($user)
+            ->get(route('municipalities.select'))
+            ->assertOk()
+            ->assertSee('Escolha o vínculo correto')
+            ->assertSee('Gestor')
+            ->assertSee('Abre Painel municipal')
+            ->assertSee('Vereador')
+            ->assertSee('Abre Portal Legislativo')
+            ->assertSee('Cadastro e acompanhamento das indicações legislativas.');
+    }
+
     private function submissionToken(string $scope): string
     {
         $token = (string) Str::uuid();

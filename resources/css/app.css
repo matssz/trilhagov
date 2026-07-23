@@ -439,6 +439,26 @@ a:hover {
     text-align: right;
 }
 
+.workspace-mode-pill {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .7rem;
+    border: 1px solid #c8d5e2;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f7fafc, #edf3f8);
+    color: var(--navy-900);
+    font-size: .76rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.workspace-mode-pill svg {
+    width: 16px;
+    height: 16px;
+}
+
 .app-main {
     padding: 1.75rem;
 }
@@ -1935,6 +1955,39 @@ h6 {
     border-color: var(--navy-800);
     background: #f6f9fd;
     box-shadow: 0 0 0 2px rgba(18, 63, 112, .12);
+}
+
+.municipality-option-main {
+    display: grid;
+    min-width: 0;
+    gap: .35rem;
+}
+
+.municipality-workspace {
+    display: grid;
+    gap: .2rem;
+    margin-top: .35rem;
+    padding-top: .65rem;
+    border-top: 1px solid #edf1f5;
+}
+
+.municipality-workspace > span {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--navy-900);
+    font-size: .86rem;
+    font-weight: 750;
+}
+
+.municipality-workspace svg {
+    width: 17px;
+    height: 17px;
+}
+
+.municipality-workspace small {
+    color: var(--muted);
+    line-height: 1.35;
 }
 
 .app-alert {

@@ -10,7 +10,7 @@
             <p>{{ $role === App\Models\User::ROLE_COUNCILOR ? ($membership->legislative_name.' · '.$membership->legislative_party) : 'Indicações da Câmara e acompanhamento da execução municipal' }}</p>
         </div>
         @if ($role === App\Models\User::ROLE_COUNCILOR && $profile)
-            <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Cadastrar emenda</a>
+            <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
         @elseif ($role === App\Models\User::ROLE_COUNCILOR)
             <button class="btn btn-outline-secondary" type="button" disabled title="A configuração normativa precisa estar vigente"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Cadastro indisponível</button>
         @endif
@@ -57,7 +57,7 @@
                 <i data-lucide="chevron-right" aria-hidden="true"></i>
             </a>
         @empty
-            <div class="empty-state py-5">Nenhuma indicação de emenda encontrada neste exercício.</div>
+            <div class="empty-state py-5">Nenhuma proposta legislativa encontrada neste exercício.</div>
         @endforelse
         @if($proposals->hasPages())<div class="content-panel-body border-top">{{ $proposals->links() }}</div>@endif
     </section>

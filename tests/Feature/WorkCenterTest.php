@@ -169,6 +169,37 @@ class WorkCenterTest extends TestCase
         $this->patch(route('work-center.items.update', $item), [])->assertForbidden();
     }
 
+    public function test_readonly_profiles_see_consultation_mode_and_wait_for_manager_empty_state(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $viewer = User::factory()->create();
+        $auditor = User::factory()->create();
+        $municipality->users()->attach($viewer, ['role' => User::ROLE_VIEWER]);
+        $municipality->users()->attach($auditor, ['role' => User::ROLE_AUDITOR]);
+
+        $this->actingAs($viewer)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('work-center.index'))
+            ->assertOk()
+            ->assertSee('Somente leitura')
+            ->assertSee('Aguardando atualização do gestor municipal.')
+            ->assertDontSee('Atualize o plano para organizar as próximas ações do município.');
+
+        $this->actingAs($auditor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('work-center.index'))
+            ->assertOk()
+            ->assertSee('Somente leitura')
+            ->assertSee('Aguardando atualização do gestor municipal.');
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('work-center.index'))
+            ->assertOk()
+            ->assertDontSee('Somente leitura')
+            ->assertSee('Atualize o plano para organizar as próximas ações do município.');
+    }
+
     public function test_work_items_are_isolated_by_active_municipality(): void
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
