@@ -376,10 +376,12 @@ a:hover {
 }
 
 .app-workspace {
+    display: flex;
     min-width: 0;
     height: 100vh;
     flex: 1;
-    overflow-y: auto;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .app-topbar {
@@ -460,6 +462,10 @@ a:hover {
 }
 
 .app-main {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.75rem;
 }
 
