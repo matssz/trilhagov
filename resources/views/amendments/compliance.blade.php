@@ -14,9 +14,14 @@
             <h1 class="h3 mb-1">Matriz de conformidade</h1>
             <p class="text-secondary mb-0">Emenda {{ $amendment->reference }} · {{ $amendment->municipality->name }}/SP</p>
         </div>
-        <a class="btn btn-outline-primary" href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">
-            <i data-lucide="external-link" aria-hidden="true"></i>Consultar fonte oficial
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" href="{{ route('emendas.compliance.dossier.pdf', $amendment) }}">
+                <i data-lucide="file-down" aria-hidden="true"></i>Dossie TCESP
+            </a>
+            <a class="btn btn-outline-primary" href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="external-link" aria-hidden="true"></i>Consultar fonte oficial
+            </a>
+        </div>
     </div>
 
     <nav class="amendment-tabs mb-4" aria-label="Seções da emenda">

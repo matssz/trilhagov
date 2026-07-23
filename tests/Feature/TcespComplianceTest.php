@@ -62,9 +62,32 @@ class TcespComplianceTest extends TestCase
             ->assertOk()
             ->assertSee('Saneamento guiado')
             ->assertSee('Resolver agora')
+            ->assertSee('Dossie TCESP')
             ->assertSee('Evidencias que costumam resolver este item')
             ->assertSee('Lei Organica atualizada')
             ->assertSee('essencial(is) em aberto');
+    }
+
+    public function test_user_can_download_tcesp_dossier_for_municipal_amendment(): void
+    {
+        [$user, $municipality, $amendment] = $this->context();
+        $amendment->complianceReviews()->create([
+            'municipality_id' => $municipality->id,
+            'framework_version' => TcespComplianceFramework::VERSION,
+            'rule_code' => 'NORM-01',
+            'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
+            'evidence_notes' => 'Lei Organica e LDO conferidas.',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance.dossier.pdf', $amendment));
+
+        $response->assertOk();
+        $this->assertSame('application/pdf', $response->headers->get('content-type'));
+        $this->assertStringContainsString('dossie-tcesp-', (string) $response->headers->get('content-disposition'));
     }
 
     public function test_editor_can_record_compliance_with_evidence_and_audit(): void
