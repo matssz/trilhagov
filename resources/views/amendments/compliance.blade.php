@@ -18,6 +18,9 @@
             <a class="btn btn-outline-primary" href="{{ route('emendas.compliance.dossier.pdf', $amendment) }}">
                 <i data-lucide="file-down" aria-hidden="true"></i>Dossie TCESP
             </a>
+            <a class="btn btn-primary" href="{{ route('emendas.compliance.dossier.package', $amendment) }}">
+                <i data-lucide="package" aria-hidden="true"></i>Pacote TCESP
+            </a>
             <a class="btn btn-outline-primary" href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">
                 <i data-lucide="external-link" aria-hidden="true"></i>Consultar fonte oficial
             </a>

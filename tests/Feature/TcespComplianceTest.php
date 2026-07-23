@@ -9,6 +9,7 @@ use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\TcespComplianceFramework;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -63,6 +64,7 @@ class TcespComplianceTest extends TestCase
             ->assertSee('Saneamento guiado')
             ->assertSee('Resolver agora')
             ->assertSee('Dossie TCESP')
+            ->assertSee('Pacote TCESP')
             ->assertSee('Evidencias que costumam resolver este item')
             ->assertSee('Lei Organica atualizada')
             ->assertSee('essencial(is) em aberto');
@@ -87,6 +89,37 @@ class TcespComplianceTest extends TestCase
 
         $response->assertOk();
         $this->assertSame('application/pdf', $response->headers->get('content-type'));
+        $this->assertStringContainsString('dossie-tcesp-', (string) $response->headers->get('content-disposition'));
+    }
+
+    public function test_user_can_download_tcesp_package_with_pdf_and_documents(): void
+    {
+        Storage::fake('local');
+        [$user, $municipality, $amendment] = $this->context();
+        $documentType = $municipality->documentTypes()->create([
+            'created_by' => $user->id,
+            'name' => 'Parecer tecnico',
+            'is_active' => true,
+        ]);
+        Storage::put('documents/tcesp/parecer.pdf', 'conteudo do parecer');
+        $amendment->documents()->create([
+            'municipality_id' => $municipality->id,
+            'document_type_id' => $documentType->id,
+            'uploaded_by' => $user->id,
+            'uploader_name' => $user->name,
+            'original_name' => 'parecer.pdf',
+            'storage_path' => 'documents/tcesp/parecer.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 18,
+            'version' => 1,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.compliance.dossier.package', $amendment));
+
+        $response->assertOk();
+        $this->assertSame('application/zip', $response->headers->get('content-type'));
         $this->assertStringContainsString('dossie-tcesp-', (string) $response->headers->get('content-disposition'));
     }
 

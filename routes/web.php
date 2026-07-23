@@ -146,7 +146,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/emendas/{emenda}/plano-de-trabalho.pdf', MunicipalWorkPlanPdfController::class)->name('emendas.work-plan.pdf');
         Route::get('/emendas/{emenda}/impedimentos', [TechnicalImpedimentController::class, 'index'])->name('emendas.impediments');
         Route::get('/emendas/{emenda}/conformidade-tcesp', [AmendmentComplianceController::class, 'index'])->name('emendas.compliance');
-        Route::get('/emendas/{emenda}/conformidade-tcesp/dossie.pdf', TcespDossierController::class)->name('emendas.compliance.dossier.pdf');
+        Route::get('/emendas/{emenda}/conformidade-tcesp/dossie.pdf', [TcespDossierController::class, 'pdf'])->name('emendas.compliance.dossier.pdf');
+        Route::get('/emendas/{emenda}/conformidade-tcesp/pacote.zip', [TcespDossierController::class, 'package'])->name('emendas.compliance.dossier.package');
         Route::get('/emendas/{emenda}/controle-interno', [MunicipalInternalControlController::class, 'index'])->name('emendas.internal-control');
         Route::get('/controle-interno/pareceres/{review}/documento.pdf', [MunicipalInternalControlController::class, 'pdf'])->name('internal-control-reviews.pdf');
         Route::get('/controle-interno/pareceres/{review}/evidencia', [MunicipalInternalControlController::class, 'reviewEvidence'])->name('internal-control-reviews.evidence');
