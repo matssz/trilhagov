@@ -177,7 +177,19 @@
                 @csrf @method('PATCH')
                 <div class="rules-section-title">
                     <div><p class="panel-kicker">Parametrização</p><h2>Decisões do município</h2></div>
-                    <button class="btn btn-primary" type="submit"><i data-lucide="save" aria-hidden="true"></i>Salvar parâmetros</button>
+                    <div class="rules-title-actions">
+                        <button class="btn btn-outline-primary" type="submit" name="apply_organic_law_defaults" value="1"><i data-lucide="wand-sparkles" aria-hidden="true"></i>Usar Lei Orgânica</button>
+                        <button class="btn btn-primary" type="submit"><i data-lucide="save" aria-hidden="true"></i>Salvar parâmetros</button>
+                    </div>
+                </div>
+
+                <div class="rules-auto-budget">
+                    <i data-lucide="calculator" aria-hidden="true"></i>
+                    <div>
+                        <strong>Orçamento calculado automaticamente para a Câmara</strong>
+                        <p>Com RCL e número de vereadores informados, o TrilhaGov calcula teto global, cota individual, saldo disponível e reserva de saúde. O vereador apenas registra a proposta e acompanha se ela cabe na regra.</p>
+                    </div>
+                    <span>RCL x % / vereadores</span>
                 </div>
 
                 <fieldset>

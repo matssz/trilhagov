@@ -66,6 +66,52 @@ class MunicipalRegulatoryProfileTest extends TestCase
         $this->assertSame(MunicipalRegulatoryProfile::STATUS_DRAFT, $profile->fresh()->status);
     }
 
+    public function test_manager_can_apply_organic_law_defaults_without_typing_budget_percentages(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->patch(route('municipal-rules.update', $profile), [
+                'apply_organic_law_defaults' => '1',
+                'regime_status' => MunicipalRegulatoryProfile::REGIME_UNDER_REVIEW,
+                'previous_year_rcl' => 100000000,
+                'councilor_seats' => 10,
+                'audesp_registration_status' => 'not_started',
+            ])
+            ->assertSessionHas('status');
+
+        $profile->refresh();
+        $this->assertSame(MunicipalRegulatoryProfile::REGIME_INSTITUTED, $profile->regime_status);
+        $this->assertSame('1.5500', $profile->individual_limit_percentage);
+        $this->assertSame('50.0000', $profile->health_reserve_percentage);
+        $this->assertSame('per_councilor', $profile->health_reserve_method);
+        $this->assertTrue($profile->work_plan_required);
+        $this->assertSame(155000.0, app(\App\Services\LegislativeProposalService::class)->quota($municipality, $profile, 'Vereador')['author_ceiling']);
+    }
+
+    public function test_linking_organic_law_applies_defaults_to_empty_draft(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $token = $this->submissionSession($municipality, "municipal-rules-instrument-{$profile->id}");
+
+        $this->actingAs($manager)->post(route('municipal-rules.instruments.store', $profile), [
+            '_submission_token' => $token,
+            'type' => 'organic_law',
+            'title' => 'Lei Organica Municipal',
+            'reference' => 'LOM/2026',
+        ])->assertSessionHas('status', 'Lei Organica vinculada. Parametros-padrao aplicados automaticamente; informe apenas RCL e cadeiras se ainda estiverem pendentes.');
+
+        $profile->refresh();
+        $this->assertSame(MunicipalRegulatoryProfile::REGIME_INSTITUTED, $profile->regime_status);
+        $this->assertSame('1.5500', $profile->individual_limit_percentage);
+        $this->assertSame('50.0000', $profile->health_reserve_percentage);
+        $this->assertSame('per_councilor', $profile->health_reserve_method);
+        $this->assertTrue($profile->generic_amendments_prohibited);
+    }
+
     public function test_manager_can_activate_a_complete_review_and_it_becomes_immutable(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

@@ -7,6 +7,7 @@ use App\Models\MunicipalRegulatoryProfile;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
+use App\Services\MunicipalOrganicLawAutomation;
 use App\Services\MunicipalRegulatoryReadiness;
 use App\Services\MunicipalRuleApplicationService;
 use Illuminate\Http\RedirectResponse;
@@ -92,6 +93,7 @@ class MunicipalRegulatoryProfileController extends Controller
         Request $request,
         int $profile,
         CurrentMunicipality $currentMunicipality,
+        MunicipalOrganicLawAutomation $organicLawAutomation,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
@@ -99,6 +101,9 @@ class MunicipalRegulatoryProfileController extends Controller
         abort_unless($rules->isDraft(), 409, 'Crie uma nova revisão para alterar uma configuração vigente.');
 
         $validated = $request->validate($this->profileRules($municipality->id));
+        if ($request->boolean('apply_organic_law_defaults')) {
+            $validated = $organicLawAutomation->mergeInto($validated);
+        }
         $municipalityValues = [
             'federal_amendments_enabled' => $request->boolean('federal_amendments_enabled'),
             'state_amendments_enabled' => $request->boolean('state_amendments_enabled'),
@@ -109,10 +114,10 @@ class MunicipalRegulatoryProfileController extends Controller
             ->all();
         $values = [
             ...Arr::except($validated, ['generic_amendments_prohibited', 'prior_technical_review_required', 'work_plan_required', 'pca_check_required']),
-            'generic_amendments_prohibited' => $this->nullableBoolean($request->input('generic_amendments_prohibited')),
-            'prior_technical_review_required' => $this->nullableBoolean($request->input('prior_technical_review_required')),
-            'work_plan_required' => $this->nullableBoolean($request->input('work_plan_required')),
-            'pca_check_required' => $this->nullableBoolean($request->input('pca_check_required')),
+            'generic_amendments_prohibited' => $this->nullableBoolean($validated['generic_amendments_prohibited'] ?? $request->input('generic_amendments_prohibited')),
+            'prior_technical_review_required' => $this->nullableBoolean($validated['prior_technical_review_required'] ?? $request->input('prior_technical_review_required')),
+            'work_plan_required' => $this->nullableBoolean($validated['work_plan_required'] ?? $request->input('work_plan_required')),
+            'pca_check_required' => $this->nullableBoolean($validated['pca_check_required'] ?? $request->input('pca_check_required')),
             'updated_by' => $request->user()->id,
         ];
         $values = array_map(fn ($value) => $value === '' ? null : $value, $values);
@@ -150,6 +155,7 @@ class MunicipalRegulatoryProfileController extends Controller
         int $profile,
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
+        MunicipalOrganicLawAutomation $organicLawAutomation,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
@@ -171,19 +177,28 @@ class MunicipalRegulatoryProfileController extends Controller
             return back()->with('warning', 'Este instrumento já foi processado.');
         }
 
-        DB::transaction(function () use ($request, $municipality, $rules, $validated, $auditTrail): void {
+        $appliedDefaults = [];
+        DB::transaction(function () use ($request, $municipality, $rules, $validated, $organicLawAutomation, $auditTrail, &$appliedDefaults): void {
             $instrument = $rules->instruments()->create([
                 ...Arr::except($validated, '_submission_token'),
                 'municipality_id' => $municipality->id,
                 'created_by' => $request->user()->id,
             ]);
+            if ($instrument->type === 'organic_law') {
+                $appliedDefaults = $organicLawAutomation->applyTo($rules);
+            }
             $auditTrail->recordMunicipalityOperation($request, $municipality, 'municipal_instrument_created', [
                 'profile_id' => $rules->id,
                 'normative_instrument' => $instrument->title,
                 'instrument_type' => $instrument->type,
                 'reference' => $instrument->reference,
+                'organic_law_defaults_applied' => array_keys($appliedDefaults),
             ]);
         });
+
+        if ($validated['type'] === 'organic_law' && $appliedDefaults !== []) {
+            return back()->with('status', 'Lei Organica vinculada. Parametros-padrao aplicados automaticamente; informe apenas RCL e cadeiras se ainda estiverem pendentes.');
+        }
 
         return back()->with('status', 'Instrumento normativo vinculado à revisão.');
     }

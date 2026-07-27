@@ -84,6 +84,12 @@
 
 .rules-parameters { display: grid; gap: 1.2rem; }
 .rules-parameters > .rules-section-title { margin-bottom: 0; }
+.rules-title-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.rules-auto-budget { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: .9rem; margin: 1rem 1.2rem 0; padding: .9rem 1rem; border: 1px solid #cbd9e6; border-radius: 7px; background: linear-gradient(110deg, #fbfdff 0%, #eef6fb 100%); }
+.rules-auto-budget > svg { width: 42px; height: 42px; padding: 10px; border-radius: 50%; background: var(--navy-900); color: #fff; }
+.rules-auto-budget strong { color: var(--navy-950); font-size: .84rem; }
+.rules-auto-budget p { margin: .15rem 0 0; color: var(--muted); font-size: .72rem; line-height: 1.45; }
+.rules-auto-budget span { padding: .32rem .55rem; border-radius: 4px; background: #e8f5ef; color: #166534; font-size: .7rem; font-weight: 800; white-space: nowrap; }
 .rules-parameters fieldset { margin: 0; padding: 0; border: 0; }
 .rules-parameters legend { width: 100%; margin-bottom: .7rem; padding-bottom: .45rem; border-bottom: 1px solid var(--line-soft); color: var(--navy-950); font-size: .83rem; font-weight: 800; }
 .rules-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
@@ -158,12 +164,16 @@
     .rules-readonly > div { border-right: 0; border-bottom: 1px solid var(--line); }
     .rules-readonly > div:last-child { border-bottom: 0; }
     .rules-activation { grid-template-columns: 1fr; }
+    .rules-auto-budget { grid-template-columns: 42px minmax(0, 1fr); }
+    .rules-auto-budget span { grid-column: 2; width: fit-content; white-space: normal; }
 }
 
 @media (max-width: 575.98px) {
     .rules-fields, .instrument-create form { grid-template-columns: 1fr; }
     .instrument-create .span-2, .rules-fields .span-2 { grid-column: auto; }
     .rules-section-title { align-items: flex-start; flex-direction: column; }
+    .rules-title-actions { width: 100%; justify-content: stretch; }
+    .rules-title-actions .btn { flex: 1 1 180px; }
     .rules-section-title .btn, .rules-activation .btn { width: 100%; }
     .rules-activation form { width: 100%; }
     .rules-portfolio-metrics { grid-template-columns: 1fr; }
