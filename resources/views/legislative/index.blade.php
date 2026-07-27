@@ -23,6 +23,26 @@
     @endif
 
     @if ($quota)
+        @if ($role === App\Models\User::ROLE_COUNCILOR)
+            <section class="legislative-councilor-home">
+                <div>
+                    <span class="page-kicker">Minha cota</span>
+                    <h2>{{ $quota['remaining'] === null ? 'Cota em configuracao' : 'R$ '.number_format($quota['remaining'], 2, ',', '.').' disponiveis' }}</h2>
+                    <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Ainda falta direcionar R$ '.number_format($quota['health_gap'], 2, ',', '.').' para saude antes do protocolo.' : 'Sua reserva de saude esta em dia no recorte atual.' }}</p>
+                </div>
+                <div class="councilor-home-actions">
+                    <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
+                    <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
+                </div>
+                <div class="councilor-home-steps">
+                    <span><i data-lucide="edit-3" aria-hidden="true"></i>Criar</span>
+                    <span><i data-lucide="badge-check" aria-hidden="true"></i>Conferir</span>
+                    <span><i data-lucide="send" aria-hidden="true"></i>Enviar</span>
+                    <span><i data-lucide="building-2" aria-hidden="true"></i>Executivo acompanha</span>
+                </div>
+            </section>
+        @endif
+
         <section class="legislative-automation-panel">
             <i data-lucide="calculator" aria-hidden="true"></i>
             <div>
@@ -53,7 +73,7 @@
         <button class="btn btn-outline-primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i>Filtrar</button>
     </form>
 
-    <section class="content-panel legislative-list">
+    <section class="content-panel legislative-list" id="minhas-propostas">
         <div class="content-panel-header"><div><h2 class="h5 mb-1">Indicações do exercício</h2><p class="small text-secondary mb-0">{{ $proposals->total() }} registro(s)</p></div></div>
         @forelse($proposals as $proposal)
             <a class="legislative-row" href="{{ route('legislative.show', $proposal) }}">

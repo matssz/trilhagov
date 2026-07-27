@@ -68,6 +68,39 @@ class LegislativeProposalTest extends TestCase
         $this->get(route('dashboard'))->assertForbidden();
     }
 
+    public function test_councilor_can_create_proposal_with_simplified_required_fields(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereadora Simples',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->actingAs($councilor);
+        $token = $this->token($municipality, 'legislative-proposal-create');
+
+        $this->post(route('legislative.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => now()->year + 1,
+            'object' => 'Compra de equipamentos para atendimento da populacao no posto municipal.',
+            'justification' => 'A unidade precisa ampliar o atendimento e reduzir o tempo de espera dos moradores.',
+            'beneficiary_name' => 'Posto Municipal Central',
+            'expense_destination' => 'investment',
+            'health_related' => '1',
+            'responsible_department' => 'Secretaria Municipal de Saude',
+            'estimated_amount' => 75000,
+        ])->assertRedirect();
+
+        $proposal = LegislativeProposal::firstOrFail();
+        $this->assertSame('normal', $proposal->priority);
+        $this->assertSame('municipal_body', $proposal->beneficiary_type);
+        $this->assertSame('direct_execution', $proposal->transfer_type);
+        $this->assertSame($municipality->name, $proposal->beneficiary_location);
+        $this->assertSame($proposal->justification, $proposal->public_need);
+        $this->assertSame('Estimativa declarada pelo vereador', $proposal->estimate_source);
+    }
+
     public function test_portal_uses_available_active_year_instead_of_unconfigured_next_year(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

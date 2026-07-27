@@ -425,22 +425,22 @@ class LegislativeProposalController extends Controller
             '_submission_token' => ['required', 'string'],
             'object' => ['required', 'string', 'min:20', 'max:5000'],
             'justification' => ['required', 'string', 'min:30', 'max:5000'],
-            'priority' => ['required', Rule::in(array_keys(LegislativeProposal::priorities()))],
-            'beneficiary_type' => ['required', Rule::in(array_keys(LegislativeProposal::beneficiaryTypes()))],
+            'priority' => ['nullable', Rule::in(array_keys(LegislativeProposal::priorities()))],
+            'beneficiary_type' => ['nullable', Rule::in(array_keys(LegislativeProposal::beneficiaryTypes()))],
             'beneficiary_name' => ['required', 'string', 'min:3', 'max:255'],
             'beneficiary_cnpj' => ['nullable', 'required_if:beneficiary_type,third_sector', 'string', 'max:20'],
-            'beneficiary_location' => ['required', 'string', 'min:3', 'max:255'],
+            'beneficiary_location' => ['nullable', 'string', 'min:3', 'max:255'],
             'expense_destination' => ['required', Rule::in(array_keys(ParliamentaryAmendment::expenseDestinations()))],
-            'transfer_type' => ['required', Rule::in(array_keys(ParliamentaryAmendment::transferTypes()))],
+            'transfer_type' => ['nullable', Rule::in(array_keys(ParliamentaryAmendment::transferTypes()))],
             'health_related' => ['nullable', 'boolean'],
             'responsible_department' => ['required', 'string', 'min:3', 'max:255'],
             'program_reference' => ['nullable', 'string', 'max:255'],
             'action_reference' => ['nullable', 'string', 'max:255'],
-            'public_need' => ['required', 'string', 'min:30', 'max:5000'],
+            'public_need' => ['nullable', 'string', 'min:30', 'max:5000'],
             'target_population' => ['nullable', 'string', 'max:255'],
             'estimated_quantity' => ['nullable', 'string', 'max:255'],
             'estimated_amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999999.99'],
-            'estimate_source' => ['required', 'string', 'min:5', 'max:255'],
+            'estimate_source' => ['nullable', 'string', 'min:5', 'max:255'],
             'desired_contract_at' => ['nullable', 'date'],
             'third_sector_conflict_declaration' => ['nullable', 'boolean'],
         ];
@@ -454,6 +454,13 @@ class LegislativeProposalController extends Controller
             'beneficiary_cnpj.required_if' => 'Informe o CNPJ da organização da sociedade civil.',
         ]);
         unset($validated['_submission_token']);
+        $municipality = app(CurrentMunicipality::class)->get($request);
+        $validated['priority'] = $validated['priority'] ?? 'normal';
+        $validated['beneficiary_type'] = $validated['beneficiary_type'] ?? 'municipal_body';
+        $validated['beneficiary_location'] = blank($validated['beneficiary_location'] ?? null) ? $municipality->name : $validated['beneficiary_location'];
+        $validated['transfer_type'] = $validated['transfer_type'] ?? 'direct_execution';
+        $validated['public_need'] = blank($validated['public_need'] ?? null) ? $validated['justification'] : $validated['public_need'];
+        $validated['estimate_source'] = blank($validated['estimate_source'] ?? null) ? 'Estimativa declarada pelo vereador' : $validated['estimate_source'];
         foreach (['beneficiary_cnpj', 'program_reference', 'action_reference', 'target_population', 'estimated_quantity', 'desired_contract_at'] as $field) {
             $validated[$field] = blank($validated[$field] ?? null) ? null : trim((string) $validated[$field]);
         }
