@@ -128,7 +128,7 @@
                 <label><span class="form-label">Efeito ou risco</span><textarea class="form-control" name="effect" rows="2"></textarea></label>
                 <label class="span-2"><span class="form-label">Recomendação <span class="required-mark">*</span></span><textarea class="form-control" name="recommendation" rows="2" required></textarea></label>
                 <label><span class="form-label">Prazo recomendado</span><input class="form-control" name="recommended_due_at" type="date"></label>
-                <button class="btn btn-primary" type="submit"><i data-lucide="search-plus" aria-hidden="true"></i>Registrar achado</button>
+                <button class="btn btn-primary" type="submit"><i data-lucide="search-check" aria-hidden="true"></i>Registrar achado</button>
             </form>
         @endif
         @if($program->findings->isEmpty())

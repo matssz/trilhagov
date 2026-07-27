@@ -1,4 +1,6 @@
 @php($amendment = $amendment ?? null)
+@php($hasExternalSpheres = count($governmentSpheres) > 1)
+@php($showFederalFields = $municipality->federal_amendments_enabled || $amendment?->government_sphere === 'federal')
 
 @if ($activeRegulatoryProfiles->isNotEmpty())
     <div class="normative-form-context">
@@ -19,7 +21,10 @@
             <input class="form-control @error('reference') is-invalid @enderror" id="reference" name="reference" value="{{ old('reference', $amendment?->reference) }}" maxlength="100" autofocus required>
             @error('reference')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="col-md-3">
+        @unless($hasExternalSpheres)
+            <input type="hidden" name="government_sphere" value="{{ old('government_sphere', $amendment?->government_sphere ?? 'municipal') }}">
+        @endunless
+        <div class="col-md-3 {{ $hasExternalSpheres ? '' : 'd-none' }}">
             <label class="form-label" for="fiscal_year">Exercício <span class="required-mark">*</span></label>
             <input class="form-control @error('fiscal_year') is-invalid @enderror" id="fiscal_year" name="fiscal_year" type="number" value="{{ old('fiscal_year', $amendment?->fiscal_year ?? now()->year) }}" min="2000" max="{{ now()->year + 1 }}" required>
             @error('fiscal_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -54,12 +59,14 @@
             </select>
             @error('transfer_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
+        @if ($showFederalFields)
         <div class="col-md-4">
             <label class="form-label" for="transferegov_code">Código Transferegov</label>
             <input class="form-control @error('transferegov_code') is-invalid @enderror" id="transferegov_code" name="transferegov_code" value="{{ old('transferegov_code', $amendment?->transferegov_code) }}" maxlength="100">
             <div class="form-text">Obrigatório para emendas federais.</div>
             @error('transferegov_code')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
+        @endif
     </div>
 </section>
 

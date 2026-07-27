@@ -57,7 +57,11 @@
         <table>
             <tr><th>Objeto</th><td colspan="3">{{ $amendment->object }}</td></tr>
             <tr><th>Autor</th><td>{{ $amendment->author_name }}</td><th>Modalidade</th><td>{{ $amendment->transferTypeLabel() }}</td></tr>
-            <tr><th>Órgão responsável</th><td>{{ $amendment->responsible_department }}</td><th>Código Transferegov</th><td>{{ $amendment->transferegov_code ?: 'Não informado' }}</td></tr>
+            @if ($amendment->government_sphere === 'federal')
+                <tr><th>Órgão responsável</th><td>{{ $amendment->responsible_department }}</td><th>Código Transferegov</th><td>{{ $amendment->transferegov_code ?: 'Não informado' }}</td></tr>
+            @else
+                <tr><th>Órgão responsável</th><td colspan="3">{{ $amendment->responsible_department }}</td></tr>
+            @endif
         </table>
     </section>
 

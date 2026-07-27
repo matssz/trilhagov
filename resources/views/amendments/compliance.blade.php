@@ -143,7 +143,7 @@
             </div>
         @else
             <div class="package-readiness-clear">
-                <i data-lucide="archive-check" aria-hidden="true"></i>
+                <i data-lucide="package-check" aria-hidden="true"></i>
                 <div>
                     <strong>Pacote sem pendencia essencial aparente</strong>
                     <p>Baixe o pacote TCESP e mantenha o manifesto junto ao processo administrativo da emenda.</p>

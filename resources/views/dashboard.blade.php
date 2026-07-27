@@ -37,15 +37,17 @@
                 @endforeach
             </select>
         </label>
-        <label>
-            <span>Esfera</span>
-            <select class="form-select" name="sphere">
-                <option value="">Todas</option>
-                @foreach ($spheres as $value => $label)
-                    <option value="{{ $value }}" @selected(($filters['sphere'] ?? '') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
-        </label>
+        @if (count($spheres) > 1)
+            <label>
+                <span>Esfera</span>
+                <select class="form-select" name="sphere">
+                    <option value="">Todas</option>
+                    @foreach ($spheres as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['sphere'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        @endif
         <label>
             <span>Situação</span>
             <select class="form-select" name="status">

@@ -57,7 +57,8 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->assertOk()
             ->assertSee('Nova emenda')
             ->assertSee('Salvar nova emenda')
-            ->assertSee('Municipal')
+            ->assertSee('name="government_sphere" value="municipal"', false)
+            ->assertDontSee('Código Transferegov')
             ->assertDontSee('Federal')
             ->assertDontSee('Estadual')
             ->assertDontSee('Cadastrar emenda');
@@ -86,7 +87,9 @@ class ParliamentaryAmendmentManagementTest extends TestCase
 
         $this->get(route('emendas.create'))
             ->assertOk()
-            ->assertSee('Federal');
+            ->assertSee('Esfera')
+            ->assertSee('Federal')
+            ->assertSee('Código Transferegov');
 
         $this->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
             'government_sphere' => 'federal',

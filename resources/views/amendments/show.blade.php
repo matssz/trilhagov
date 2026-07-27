@@ -64,7 +64,9 @@
                         <dt>Tipo de autoria</dt><dd>{{ $amendment->authorshipTypeLabel() }}</dd>
                         <dt>Modalidade</dt><dd>{{ $amendment->transferTypeLabel() }}</dd>
                         <dt>Autor</dt><dd>{{ $amendment->author_name }}{{ $amendment->author_party ? ' / '.$amendment->author_party : '' }}</dd>
-                        <dt>Código Transferegov</dt><dd>{{ $amendment->transferegov_code ?: 'Não informado' }}</dd>
+                        @if ($amendment->government_sphere === 'federal')
+                            <dt>Código Transferegov</dt><dd>{{ $amendment->transferegov_code ?: 'Não informado' }}</dd>
+                        @endif
                         <dt>Órgão responsável</dt><dd>{{ $amendment->responsible_department }}</dd>
                         <dt>Responsável operacional</dt><dd>{{ $amendment->responsibleUser?->name ?? 'Não definido' }}</dd>
                         <dt>Data da indicação</dt><dd>{{ $amendment->indicated_at?->format('d/m/Y') ?: 'Não informada' }}</dd>
