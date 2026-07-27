@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Municipality;
+use App\Models\MunicipalityInvitation;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\User;
 
@@ -12,7 +13,7 @@ class MunicipalOnboardingService
         private readonly MunicipalRegulatoryReadiness $readiness,
     ) {}
 
-    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, health: array<string, mixed>} */
+    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, health: array<string, mixed>, council: array<string, mixed>} */
     public function summary(Municipality $municipality): array
     {
         $activeProfile = $municipality->regulatoryProfiles()
@@ -33,6 +34,15 @@ class MunicipalOnboardingService
         $hasCouncil = $members
             ->whereIn('pivot.role', [User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER])
             ->isNotEmpty();
+        $councilors = $members->where('pivot.role', User::ROLE_COUNCILOR)->values();
+        $legislativeReviewers = $members->where('pivot.role', User::ROLE_LEGISLATIVE_REVIEWER)->values();
+        $pendingCouncilInvitations = MunicipalityInvitation::query()
+            ->where('municipality_id', $municipality->id)
+            ->whereIn('role', [User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER])
+            ->whereNull('accepted_at')
+            ->whereNull('revoked_at')
+            ->latest()
+            ->get();
         $hasLegislativeFlow = $municipality->legislativeProposals()
             ->when($activeProfile, fn ($query) => $query->where('fiscal_year', $activeProfile->fiscal_year))
             ->exists();
@@ -126,6 +136,19 @@ class MunicipalOnboardingService
                 'rules_score' => $readiness['score'] ?? 0,
                 'blockers' => $readiness['blockers'] ?? ['Nenhuma norma ativa ou em preparação foi encontrada.'],
                 'warnings' => $readiness['warnings'] ?? [],
+            ],
+            'council' => [
+                'released' => $activeProfile !== null,
+                'ready' => $activeProfile !== null && ($councilors->isNotEmpty() || $pendingCouncilInvitations->isNotEmpty()),
+                'councilors' => $councilors,
+                'reviewers' => $legislativeReviewers,
+                'pending_invitations' => $pendingCouncilInvitations,
+                'quota_label' => $activeProfile && $activeProfile->previous_year_rcl && $activeProfile->individual_limit_percentage && $activeProfile->councilor_seats
+                    ? 'R$ '.number_format(((float) $activeProfile->previous_year_rcl * (float) $activeProfile->individual_limit_percentage / 100) / max(1, (int) $activeProfile->councilor_seats), 2, ',', '.')
+                    : 'A configurar',
+                'health_label' => $activeProfile?->health_reserve_percentage
+                    ? number_format((float) $activeProfile->health_reserve_percentage, 2, ',', '.').'%'
+                    : 'A configurar',
             ],
         ];
     }

@@ -7,6 +7,7 @@
         $activeProfile = $summary['activeProfile'];
         $draftProfile = $summary['draftProfile'];
         $health = $summary['health'];
+        $council = $summary['council'];
     @endphp
 
     <header class="onboarding-heading">
@@ -110,6 +111,58 @@
             </form>
         </section>
     </div>
+
+    <section class="content-panel onboarding-council-panel">
+        <div class="content-panel-header">
+            <p class="panel-kicker">Câmara Municipal</p>
+            <h2 class="h5 mb-0">Liberação dos vereadores</h2>
+        </div>
+        <div class="onboarding-council-grid">
+            <div class="onboarding-council-status {{ $council['ready'] ? 'is-ready' : 'needs-action' }}">
+                <span><i data-lucide="{{ $council['ready'] ? 'circle-check' : 'user-plus' }}" aria-hidden="true"></i></span>
+                <div>
+                    <strong>{{ $council['released'] ? 'Exercício liberado para indicações' : 'Câmara bloqueada sem exercício ativo' }}</strong>
+                    <p>{{ $council['released'] ? 'Convide vereadores para que eles criem propostas dentro da cota automática.' : 'Ative o exercício antes de convidar a Câmara para operar oficialmente.' }}</p>
+                </div>
+            </div>
+            <div class="onboarding-council-metrics">
+                <div><span>Cota por vereador</span><strong>{{ $council['quota_label'] }}</strong></div>
+                <div><span>Reserva saúde</span><strong>{{ $council['health_label'] }}</strong></div>
+                <div><span>Vereadores ativos</span><strong>{{ $council['councilors']->count() }}</strong></div>
+                <div><span>Convites pendentes</span><strong>{{ $council['pending_invitations']->count() }}</strong></div>
+            </div>
+            <form class="onboarding-council-invite" method="POST" action="{{ route('users.invitations.store') }}">
+                @csrf
+                <input type="hidden" name="_submission_token" value="{{ $councilInvitationToken }}">
+                <input type="hidden" name="role" value="{{ App\Models\User::ROLE_COUNCILOR }}">
+                <input type="hidden" name="redirect_to" value="onboarding">
+                <label class="span-2"><span>E-mail do vereador <b>*</b></span><input class="form-control @error('email') is-invalid @enderror" name="email" type="email" value="{{ old('email') }}" required>@error('email')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label><span>Nome parlamentar <b>*</b></span><input class="form-control @error('legislative_name') is-invalid @enderror" name="legislative_name" value="{{ old('legislative_name') }}" required>@error('legislative_name')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label><span>Partido <b>*</b></span><input class="form-control text-uppercase @error('legislative_party') is-invalid @enderror" name="legislative_party" value="{{ old('legislative_party') }}" maxlength="30" required>@error('legislative_party')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label class="span-2"><span>Início do mandato <b>*</b></span><input class="form-control @error('legislative_term_start') is-invalid @enderror" name="legislative_term_start" type="date" value="{{ old('legislative_term_start', '2025-01-01') }}" required>@error('legislative_term_start')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label><span>Fim do mandato <b>*</b></span><input class="form-control @error('legislative_term_end') is-invalid @enderror" name="legislative_term_end" type="date" value="{{ old('legislative_term_end', '2028-12-31') }}" required>@error('legislative_term_end')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <button class="btn btn-primary span-2" type="submit"><i data-lucide="user-plus" aria-hidden="true"></i>Convidar vereador</button>
+            </form>
+            <div class="onboarding-council-list">
+                <div>
+                    <strong>Vereadores cadastrados</strong>
+                    @forelse ($council['councilors'] as $member)
+                        <span>{{ $member->pivot->legislative_name ?: $member->name }} · {{ $member->pivot->legislative_party ?: 'Partido pendente' }}</span>
+                    @empty
+                        <span>Nenhum vereador aceitou convite ainda.</span>
+                    @endforelse
+                </div>
+                <div>
+                    <strong>Convites pendentes</strong>
+                    @forelse ($council['pending_invitations'] as $invitation)
+                        <span>{{ $invitation->legislative_name ?: $invitation->email }} · expira {{ $invitation->expires_at->format('d/m/Y') }}</span>
+                    @empty
+                        <span>Nenhum convite legislativo pendente.</span>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section class="content-panel onboarding-decision-panel">
         <div class="content-panel-header">

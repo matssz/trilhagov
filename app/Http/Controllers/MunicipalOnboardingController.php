@@ -30,6 +30,7 @@ class MunicipalOnboardingController extends Controller
             'municipality' => $municipality,
             'summary' => $summary,
             'activationToken' => $formSubmission->issue($request, "municipal-onboarding-activate-{$municipality->id}"),
+            'councilInvitationToken' => $formSubmission->issue($request, 'municipality-invitation-create'),
         ]);
     }
 

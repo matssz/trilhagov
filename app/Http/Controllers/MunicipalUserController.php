@@ -72,6 +72,7 @@ class MunicipalUserController extends Controller
             'legislative_party' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'string', 'min:2', 'max:30'],
             'legislative_term_start' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'date'],
             'legislative_term_end' => ['nullable', 'required_if:role,'.User::ROLE_COUNCILOR, 'date', 'after_or_equal:legislative_term_start'],
+            'redirect_to' => ['nullable', Rule::in(['users', 'onboarding'])],
         ], [
             'legislative_name.required_if' => 'Informe o nome parlamentar do vereador.',
             'legislative_party.required_if' => 'Informe o partido do vereador.',
@@ -129,7 +130,7 @@ class MunicipalUserController extends Controller
         }
 
         return redirect()
-            ->route('users.index')
+            ->route(($validated['redirect_to'] ?? 'users') === 'onboarding' ? 'municipal-onboarding.index' : 'users.index')
             ->with('invitation_link', $acceptUrl)
             ->with('invitation_mail_status', $mailStatus);
     }

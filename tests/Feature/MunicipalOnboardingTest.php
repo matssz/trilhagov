@@ -75,6 +75,43 @@ class MunicipalOnboardingTest extends TestCase
             ->assertSee('R$ 238.461,54');
     }
 
+    public function test_manager_invites_councilor_from_onboarding(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee('Liberação dos vereadores')
+            ->assertSee('Convidar vereador');
+
+        $token = $this->submissionSession($municipality, 'municipality-invitation-create');
+
+        $this->post(route('users.invitations.store'), [
+            '_submission_token' => $token,
+            'redirect_to' => 'onboarding',
+            'email' => 'vereador@camara.test',
+            'role' => User::ROLE_COUNCILOR,
+            'legislative_name' => 'Vereador Câmara',
+            'legislative_party' => 'PSD',
+            'legislative_term_start' => '2025-01-01',
+            'legislative_term_end' => '2028-12-31',
+        ])->assertRedirect(route('municipal-onboarding.index'))
+            ->assertSessionHas('invitation_link');
+
+        $this->assertDatabaseHas('municipality_invitations', [
+            'municipality_id' => $municipality->id,
+            'email' => 'vereador@camara.test',
+            'role' => User::ROLE_COUNCILOR,
+            'legislative_name' => 'Vereador Câmara',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee('Vereador Câmara');
+    }
+
     /** @return array{User, Municipality} */
     private function member(string $role): array
     {
