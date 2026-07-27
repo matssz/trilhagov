@@ -57,6 +57,9 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->assertOk()
             ->assertSee('Nova emenda')
             ->assertSee('Salvar nova emenda')
+            ->assertSee('Municipal')
+            ->assertDontSee('Federal')
+            ->assertDontSee('Estadual')
             ->assertDontSee('Cadastrar emenda');
 
         $this->get(route('emendas.index'))
@@ -64,6 +67,41 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             ->assertSee('Nenhuma emenda encontrada.')
             ->assertSee('Nova emenda')
             ->assertDontSee('Cadastrar emenda');
+    }
+
+    public function test_external_amendment_spheres_are_controlled_by_municipal_parameter(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality();
+
+        $this->actingAs($user)
+            ->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
+                'government_sphere' => 'federal',
+                'transferegov_code' => '123456',
+            ]))
+            ->assertSessionHasErrors([
+                'government_sphere' => 'Esta esfera ainda nÃ£o estÃ¡ habilitada para este municÃ­pio. Ative o parÃ¢metro em Normas municipais.',
+            ]);
+
+        $municipality->update(['federal_amendments_enabled' => true]);
+
+        $this->get(route('emendas.create'))
+            ->assertOk()
+            ->assertSee('Federal');
+
+        $this->post(route('emendas.store'), $this->payloadWithToken('amendment-create', [
+            'government_sphere' => 'federal',
+            'transferegov_code' => '123456',
+            'expense_destination' => null,
+            'beneficiary_location' => null,
+            'administrative_process' => null,
+            'bank_tracking_type' => null,
+            'application_deadline' => null,
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $municipality->id,
+            'government_sphere' => 'federal',
+        ]);
     }
 
     public function test_viewer_can_consult_but_cannot_create_or_edit_amendments(): void
@@ -413,7 +451,18 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         return ParliamentaryAmendment::factory()
             ->for($municipality)
             ->for($user, 'creator')
-            ->create($attributes);
+            ->create([
+                'government_sphere' => 'municipal',
+                'transfer_type' => 'direct_execution',
+                'expense_destination' => 'investment',
+                'beneficiary_location' => 'Centro',
+                'transferegov_code' => null,
+                'administrative_process' => 'PROC-2026-001',
+                'bank_tracking_type' => 'specific_account',
+                'bank_account_number' => '001-12345-6',
+                'application_deadline' => '2027-02-28',
+                ...$attributes,
+            ]);
     }
 
     /** @return array<string, mixed> */
@@ -436,14 +485,19 @@ class ParliamentaryAmendmentManagementTest extends TestCase
         return array_merge([
             'reference' => 'EM-2026-001',
             'fiscal_year' => 2026,
-            'government_sphere' => 'federal',
+            'government_sphere' => 'municipal',
             'authorship_type' => 'individual',
-            'transfer_type' => 'special',
-            'author_name' => 'Deputada Exemplo',
+            'transfer_type' => 'direct_execution',
+            'author_name' => 'Vereadora Exemplo',
             'author_party' => 'PSD',
             'object' => 'Aquisicao de equipamentos para unidade municipal de saude',
+            'expense_destination' => 'investment',
             'responsible_department' => 'Secretaria Municipal de Saude',
-            'transferegov_code' => '123456',
+            'beneficiary_location' => 'Centro',
+            'transferegov_code' => null,
+            'administrative_process' => 'PROC-2026-001',
+            'bank_tracking_type' => 'specific_account',
+            'bank_account_number' => '001-12345-6',
             'expected_amount' => '500000.00',
             'received_amount' => null,
             'status' => ParliamentaryAmendment::STATUS_IDENTIFIED,
@@ -452,6 +506,7 @@ class ParliamentaryAmendmentManagementTest extends TestCase
             'communication_deadline' => '2026-08-01',
             'communication_completed_at' => null,
             'execution_deadline' => '2027-06-30',
+            'application_deadline' => '2027-02-28',
             'execution_completed_at' => null,
             'accountability_deadline' => '2027-12-31',
             'accountability_completed_at' => null,

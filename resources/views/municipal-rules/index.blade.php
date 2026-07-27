@@ -181,6 +181,14 @@
                 </div>
 
                 <fieldset>
+                    <legend>Módulos opcionais</legend>
+                    <div class="rules-fields">
+                        <label class="rules-toggle"><input class="form-check-input" name="federal_amendments_enabled" type="checkbox" value="1" @checked(old('federal_amendments_enabled', $municipality->federal_amendments_enabled))><span><strong>Habilitar emendas federais</strong><small>Mostra campos e importações de Transferegov somente quando o município decidir usar esse módulo.</small></span></label>
+                        <label class="rules-toggle"><input class="form-check-input" name="state_amendments_enabled" type="checkbox" value="1" @checked(old('state_amendments_enabled', $municipality->state_amendments_enabled))><span><strong>Habilitar emendas estaduais</strong><small>Libera o cadastro de emendas estaduais sem misturar com o fluxo municipal da Câmara.</small></span></label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
                     <legend>Regime e limites</legend>
                     <div class="rules-fields">
                         <label><span>Situação local <b>*</b></span><select class="form-select" name="regime_status" required>@foreach(App\Models\MunicipalRegulatoryProfile::regimeStatuses() as $value => $label)<option value="{{ $value }}" @selected(old('regime_status', $profile->regime_status) === $value)>{{ $label }}</option>@endforeach</select></label>
@@ -248,6 +256,7 @@
                 <div><span>Revisão jurídica</span><strong>{{ $profile->legal_review_reference ?: 'Não informada' }}</strong><small>{{ $profile->legal_review_responsible ?: 'Responsável não informado' }}{{ $profile->legal_reviewed_at ? ' · '.$profile->legal_reviewed_at->format('d/m/Y') : '' }}</small></div>
                 <div><span>Atualização pública</span><strong>{{ is_null($profile->publication_business_days) ? 'Não definida' : $profile->publication_business_days.' dia(s) útil(eis)' }}</strong><small>Parâmetro local registrado</small></div>
                 <div><span>Audesp</span><strong>{{ App\Models\MunicipalRegulatoryProfile::audespStatuses()[$profile->audesp_registration_status] }}</strong><small>{{ $profile->audespResponsible?->name ?: 'Sem responsável definido' }}</small></div>
+                <div><span>Módulos externos</span><strong>{{ collect([$municipality->federal_amendments_enabled ? 'Federal' : null, $municipality->state_amendments_enabled ? 'Estadual' : null])->filter()->implode(' e ') ?: 'Desativados' }}</strong><small>Municipal sempre disponível</small></div>
             </section>
         @endif
     @endif

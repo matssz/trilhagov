@@ -23,6 +23,8 @@ class Municipality extends Model
         'state',
         'cnpj',
         'ibge_code',
+        'federal_amendments_enabled',
+        'state_amendments_enabled',
         'transparency_enabled',
         'transparency_slug',
         'transparency_updated_at',
@@ -31,6 +33,8 @@ class Municipality extends Model
     protected function casts(): array
     {
         return [
+            'federal_amendments_enabled' => 'boolean',
+            'state_amendments_enabled' => 'boolean',
             'transparency_enabled' => 'boolean',
             'transparency_updated_at' => 'datetime',
         ];
@@ -49,6 +53,27 @@ class Municipality extends Model
     {
         return $this->state === 'SP'
             && (string) $this->ibge_code !== self::SAO_PAULO_CAPITAL_IBGE_CODE;
+    }
+
+    /** @return array<string, string> */
+    public function enabledGovernmentSpheres(): array
+    {
+        $spheres = ['municipal' => ParliamentaryAmendment::governmentSpheres()['municipal']];
+
+        if ($this->federal_amendments_enabled) {
+            $spheres['federal'] = ParliamentaryAmendment::governmentSpheres()['federal'];
+        }
+
+        if ($this->state_amendments_enabled) {
+            $spheres['state'] = ParliamentaryAmendment::governmentSpheres()['state'];
+        }
+
+        return $spheres;
+    }
+
+    public function allowsGovernmentSphere(string $sphere): bool
+    {
+        return array_key_exists($sphere, $this->enabledGovernmentSpheres());
     }
 
     public function users(): BelongsToMany

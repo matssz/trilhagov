@@ -23,6 +23,14 @@
     @endif
 
     @if ($quota)
+        <section class="legislative-automation-panel">
+            <i data-lucide="calculator" aria-hidden="true"></i>
+            <div>
+                <strong>Cota calculada automaticamente pelas normas de {{ $year }}</strong>
+                <p>O sistema usa RCL anterior, percentual impositivo, número de vereadores e reserva de saúde cadastrados pelo gestor municipal. O vereador só precisa indicar objeto, valor e se a proposta atende saúde.</p>
+            </div>
+            <span>{{ $quota['health_percentage'] === null ? 'Saúde a configurar' : number_format($quota['health_percentage'], 2, ',', '.').'% para saúde' }}</span>
+        </section>
         <section class="legislative-quota-band">
             <div><span>Cota individual</span><strong>{{ $quota['author_ceiling'] === null ? 'A configurar' : 'R$ '.number_format($quota['author_ceiling'], 2, ',', '.') }}</strong><small>{{ $quota['councilor_seats'] ? $quota['councilor_seats'].' cadeiras' : 'divisão pendente' }}</small></div>
             <div><span>Carteira indicada</span><strong>R$ {{ number_format($quota['used'], 2, ',', '.') }}</strong><small>{{ $quota['count'] }} de {{ $quota['count_limit'] ?? '∞' }} propostas</small></div>

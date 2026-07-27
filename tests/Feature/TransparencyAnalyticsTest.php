@@ -269,7 +269,7 @@ class TransparencyAnalyticsTest extends TestCase
     private function memberWithMunicipality(string $role): array
     {
         $user = User::factory()->create();
-        $municipality = Municipality::factory()->create();
+        $municipality = Municipality::factory()->create(['federal_amendments_enabled' => true]);
         $municipality->users()->attach($user, ['role' => $role]);
 
         return [$user, $municipality];

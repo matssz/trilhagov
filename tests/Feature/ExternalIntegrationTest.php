@@ -250,6 +250,21 @@ class ExternalIntegrationTest extends TestCase
         ])->assertNotFound();
     }
 
+    public function test_federal_integration_is_hidden_when_municipal_parameter_is_disabled(): void
+    {
+        $manager = User::factory()->create();
+        $municipality = Municipality::factory()->create(['federal_amendments_enabled' => false]);
+        $municipality->users()->attach($manager, ['role' => User::ROLE_MANAGER]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee(route('integrations.index', [], false));
+
+        $this->get(route('integrations.index'))->assertNotFound();
+    }
+
     /** @return array<string, callable> */
     private function officialResponses(array $plans): array
     {
@@ -352,7 +367,7 @@ class ExternalIntegrationTest extends TestCase
     private function memberWithMunicipality(string $role): array
     {
         $user = User::factory()->create();
-        $municipality = Municipality::factory()->create();
+        $municipality = Municipality::factory()->create(['federal_amendments_enabled' => true]);
         $municipality->users()->attach($user, ['role' => $role]);
 
         return [$user, $municipality];
@@ -363,7 +378,18 @@ class ExternalIntegrationTest extends TestCase
         return ParliamentaryAmendment::factory()
             ->for($municipality)
             ->for($user, 'creator')
-            ->create($attributes);
+            ->create([
+                'government_sphere' => 'federal',
+                'transfer_type' => 'special',
+                'expense_destination' => null,
+                'beneficiary_location' => null,
+                'administrative_process' => null,
+                'bank_tracking_type' => null,
+                'bank_account_number' => null,
+                'application_deadline' => null,
+                'transferegov_code' => '0903-003221',
+                ...$attributes,
+            ]);
     }
 
     private function candidate(Municipality $municipality, array $attributes = []): ExternalAmendmentCandidate

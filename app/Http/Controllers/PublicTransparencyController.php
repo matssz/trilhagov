@@ -18,6 +18,9 @@ class PublicTransparencyController extends Controller
     ): View {
         $this->ensurePublished($municipality);
         $filters = $request->only(['year', 'sphere', 'status', 'department']);
+        if (isset($filters['sphere']) && ! $municipality->allowsGovernmentSphere((string) $filters['sphere'])) {
+            unset($filters['sphere']);
+        }
         $analytics = $analyticsService->dashboard($municipality, $filters);
 
         return view('transparency.show', [
@@ -29,7 +32,7 @@ class PublicTransparencyController extends Controller
             'filters' => $filters,
             'options' => $analyticsService->filterOptions($municipality),
             'statuses' => ParliamentaryAmendment::statuses(),
-            'spheres' => ParliamentaryAmendment::governmentSpheres(),
+            'spheres' => $municipality->enabledGovernmentSpheres(),
         ]);
     }
 
@@ -39,9 +42,13 @@ class PublicTransparencyController extends Controller
         AmendmentAnalyticsService $analyticsService,
     ): StreamedResponse {
         $this->ensurePublished($municipality);
+        $filters = $request->only(['year', 'sphere', 'status', 'department']);
+        if (isset($filters['sphere']) && ! $municipality->allowsGovernmentSphere((string) $filters['sphere'])) {
+            unset($filters['sphere']);
+        }
         $amendments = $analyticsService->amendments(
             $municipality,
-            $request->only(['year', 'sphere', 'status', 'department']),
+            $filters,
         );
 
         return response()->streamDownload(function () use ($amendments, $analyticsService, $municipality): void {
@@ -108,6 +115,7 @@ class PublicTransparencyController extends Controller
                 'transparencyEvents',
             ])
             ->findOrFail($emenda);
+        abort_unless($municipality->allowsGovernmentSphere($amendment->government_sphere), 404);
 
         return view('transparency.detail', [
             'municipality' => $municipality,

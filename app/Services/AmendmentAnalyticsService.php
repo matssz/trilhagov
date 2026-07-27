@@ -37,8 +37,9 @@ class AmendmentAnalyticsService
         $department = trim((string) ($filters['department'] ?? ''));
 
         return $municipality->amendments()->getQuery()
+            ->whereIn('government_sphere', array_keys($municipality->enabledGovernmentSpheres()))
             ->when(ctype_digit($year), fn (Builder $query) => $query->where('fiscal_year', (int) $year))
-            ->when(array_key_exists($sphere, ParliamentaryAmendment::governmentSpheres()), fn (Builder $query) => $query->where('government_sphere', $sphere))
+            ->when($municipality->allowsGovernmentSphere($sphere), fn (Builder $query) => $query->where('government_sphere', $sphere))
             ->when(array_key_exists($status, ParliamentaryAmendment::statuses()), fn (Builder $query) => $query->where('status', $status))
             ->when($department !== '', fn (Builder $query) => $query->where('responsible_department', $department));
     }
@@ -110,8 +111,8 @@ class AmendmentAnalyticsService
     public function filterOptions(Municipality $municipality): array
     {
         return [
-            'years' => $municipality->amendments()->select('fiscal_year')->distinct()->orderByDesc('fiscal_year')->pluck('fiscal_year'),
-            'departments' => $municipality->amendments()->whereNotNull('responsible_department')->select('responsible_department')->distinct()->orderBy('responsible_department')->pluck('responsible_department'),
+            'years' => $municipality->amendments()->whereIn('government_sphere', array_keys($municipality->enabledGovernmentSpheres()))->select('fiscal_year')->distinct()->orderByDesc('fiscal_year')->pluck('fiscal_year'),
+            'departments' => $municipality->amendments()->whereIn('government_sphere', array_keys($municipality->enabledGovernmentSpheres()))->whereNotNull('responsible_department')->select('responsible_department')->distinct()->orderBy('responsible_department')->pluck('responsible_department'),
         ];
     }
 

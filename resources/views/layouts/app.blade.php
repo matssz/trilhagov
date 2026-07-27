@@ -113,10 +113,12 @@
                                 <span class="sidebar-count">{{ min($unreadNotificationCount, 99) }}</span>
                             @endif
                         </a>
+                        @if ($activeMunicipality?->federal_amendments_enabled)
                         <a class="sidebar-link {{ request()->routeIs('integrations.*') ? 'active' : '' }}" href="{{ route('integrations.index') }}">
                             <i data-lucide="database-zap" aria-hidden="true"></i>
                             <span>Integrações</span>
                         </a>
+                        @endif
                         <a class="sidebar-link {{ request()->routeIs('municipal-rules.*') ? 'active' : '' }}" href="{{ route('municipal-rules.index') }}">
                             <i data-lucide="landmark" aria-hidden="true"></i>
                             <span>Normas municipais</span>

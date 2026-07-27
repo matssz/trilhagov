@@ -120,6 +120,14 @@ class ParliamentaryAmendmentRequest extends FormRequest
             }
 
             $municipality = app(CurrentMunicipality::class)->get($this);
+            if (! $municipality->allowsGovernmentSphere((string) $this->input('government_sphere'))) {
+                $validator->errors()->add(
+                    'government_sphere',
+                    'Esta esfera ainda nÃ£o estÃ¡ habilitada para este municÃ­pio. Ative o parÃ¢metro em Normas municipais.',
+                );
+
+                return;
+            }
             if ($this->input('bank_tracking_type') === 'municipal_direct_codes'
                 && $this->input('transfer_type') !== 'direct_execution') {
                 $validator->errors()->add(

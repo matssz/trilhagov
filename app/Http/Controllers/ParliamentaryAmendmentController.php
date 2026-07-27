@@ -258,7 +258,7 @@ class ParliamentaryAmendmentController extends Controller
                 ->orderBy('name')
                 ->get(),
             'statuses' => ParliamentaryAmendment::statuses(),
-            'governmentSpheres' => ParliamentaryAmendment::governmentSpheres(),
+            'governmentSpheres' => $municipality->enabledGovernmentSpheres(),
             'authorshipTypes' => ParliamentaryAmendment::authorshipTypes(),
             'transferTypes' => ParliamentaryAmendment::transferTypes(),
             'expenseDestinations' => ParliamentaryAmendment::expenseDestinations(),

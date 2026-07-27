@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExternalAmendmentCandidate;
 use App\Models\ExternalDataSync;
 use App\Models\ExternalFinancialReconciliation;
+use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
@@ -26,6 +27,7 @@ class ExternalIntegrationController extends Controller
         FormSubmission $formSubmission,
     ): View {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $selectedStatus = (string) $request->query('status');
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
         $query = $municipality->externalAmendmentCandidates()
@@ -75,6 +77,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $candidateModel = $municipality->externalAmendmentCandidates()->findOrFail($candidate);
         $request->validate(['_submission_token' => ['required', 'string']]);
 
@@ -114,6 +117,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $request->validate(['_submission_token' => ['required', 'string']]);
 
         if (! $formSubmission->consume($request, "external-sync-{$municipality->id}")) {
@@ -148,6 +152,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $candidateModel = $municipality->externalAmendmentCandidates()->findOrFail($candidate);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
@@ -183,6 +188,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $candidateModel = $municipality->externalAmendmentCandidates()->with('amendment')->findOrFail($candidate);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
@@ -231,6 +237,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $candidateModel = $municipality->externalAmendmentCandidates()->findOrFail($candidate);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
@@ -306,6 +313,7 @@ class ExternalIntegrationController extends Controller
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
+        $this->ensureFederalModule($municipality);
         $candidateModel = $municipality->externalAmendmentCandidates()->findOrFail($candidate);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
@@ -328,5 +336,10 @@ class ExternalIntegrationController extends Controller
         ]);
 
         return back()->with('status', 'Candidato ignorado com justificativa registrada.');
+    }
+
+    private function ensureFederalModule(Municipality $municipality): void
+    {
+        abort_unless($municipality->federal_amendments_enabled, 404);
     }
 }

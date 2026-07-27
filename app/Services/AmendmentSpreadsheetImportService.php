@@ -119,7 +119,7 @@ class AmendmentSpreadsheetImportService
 
         foreach ($parsedRows as $parsedRow) {
             $normalized = $this->normalize($parsedRow['data']);
-            $errors = $this->validationErrors($normalized);
+            $errors = $this->validationErrors($municipality, $normalized);
             $status = AmendmentImportRow::STATUS_INVALID;
 
             if ($errors === []) {
@@ -493,7 +493,7 @@ class AmendmentSpreadsheetImportService
     }
 
     /** @param array<string, mixed> $data @return array<int, string> */
-    private function validationErrors(array $data): array
+    private function validationErrors(Municipality $municipality, array $data): array
     {
         $validator = Validator::make($data, [
             'reference' => ['required', 'string', 'max:100'],
@@ -569,6 +569,10 @@ class AmendmentSpreadsheetImportService
         if ($data['bank_tracking_type'] === 'municipal_direct_codes'
             && $data['transfer_type'] !== 'direct_execution') {
             $errors[] = 'A dispensa de conta individualizada só pode ser usada na execução direta pela Prefeitura.';
+        }
+
+        if (! $municipality->allowsGovernmentSphere((string) $data['government_sphere'])) {
+            $errors[] = 'A esfera informada nÃ£o estÃ¡ habilitada nos parÃ¢metros deste municÃ­pio.';
         }
 
         return array_values(array_unique($errors));

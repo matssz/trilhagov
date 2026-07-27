@@ -87,6 +87,11 @@
 .rules-parameters fieldset { margin: 0; padding: 0; border: 0; }
 .rules-parameters legend { width: 100%; margin-bottom: .7rem; padding-bottom: .45rem; border-bottom: 1px solid var(--line-soft); color: var(--navy-950); font-size: .83rem; font-weight: 800; }
 .rules-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+.rules-toggle { display: flex; align-items: flex-start; gap: .65rem; min-height: 82px; padding: .8rem; border: 1px solid var(--line); border-radius: 6px; background: #fbfdff; }
+.rules-toggle input { width: 18px; height: 18px; flex: 0 0 18px; margin-top: .12rem; accent-color: var(--navy-800); }
+.rules-toggle > span { display: grid !important; margin: 0 !important; color: inherit !important; }
+.rules-toggle strong { color: var(--navy-950); font-size: .78rem; }
+.rules-toggle small { margin-top: .18rem; color: var(--muted); font-size: .68rem; line-height: 1.45; }
 .rules-form-errors { padding: .6rem .75rem; border-left: 3px solid var(--danger); background: #fff1f1; color: var(--danger); font-size: .76rem; }
 
 .rules-activation { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border: 1px solid #d9c680; border-radius: 7px; background: linear-gradient(100deg, #fffdf8, var(--pearl-gold)); }
@@ -96,7 +101,7 @@
 .rules-activation strong { font-size: .85rem; }
 .rules-activation small { color: var(--muted); font-size: .7rem; }
 .rules-activation .rules-form-errors { grid-column: 1 / -1; margin: 0; }
-.rules-readonly { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.rules-readonly { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .rules-readonly > div { display: grid; padding: 1rem; border-right: 1px solid var(--line); }
 .rules-readonly > div:last-child { border-right: 0; }
 .rules-readonly span, .rules-readonly small { color: var(--muted); font-size: .7rem; }

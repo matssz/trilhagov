@@ -99,6 +99,14 @@ class MunicipalRegulatoryProfileController extends Controller
         abort_unless($rules->isDraft(), 409, 'Crie uma nova revisão para alterar uma configuração vigente.');
 
         $validated = $request->validate($this->profileRules($municipality->id));
+        $municipalityValues = [
+            'federal_amendments_enabled' => $request->boolean('federal_amendments_enabled'),
+            'state_amendments_enabled' => $request->boolean('state_amendments_enabled'),
+        ];
+        $oldMunicipalityValues = $municipality->only(array_keys($municipalityValues));
+        $changedMunicipalityValues = collect($municipalityValues)
+            ->filter(fn ($value, $field) => (bool) $oldMunicipalityValues[$field] !== $value)
+            ->all();
         $values = [
             ...Arr::except($validated, ['generic_amendments_prohibited', 'prior_technical_review_required', 'work_plan_required', 'pca_check_required']),
             'generic_amendments_prohibited' => $this->nullableBoolean($request->input('generic_amendments_prohibited')),
@@ -111,18 +119,26 @@ class MunicipalRegulatoryProfileController extends Controller
         $oldValues = $rules->only(array_keys($values));
         $changed = collect($values)->filter(fn ($value, $field) => $oldValues[$field] != $value)->all();
 
-        if ($changed === []) {
+        if ($changed === [] && $changedMunicipalityValues === []) {
             return back()->with('warning', 'Nenhum parâmetro foi alterado.');
         }
 
-        DB::transaction(function () use ($request, $municipality, $rules, $oldValues, $changed, $auditTrail): void {
-            $rules->update($changed);
+        DB::transaction(function () use ($request, $municipality, $rules, $oldValues, $changed, $oldMunicipalityValues, $changedMunicipalityValues, $auditTrail): void {
+            if ($changed !== []) {
+                $rules->update($changed);
+            }
+            if ($changedMunicipalityValues !== []) {
+                $municipality->update($changedMunicipalityValues);
+            }
             $auditTrail->recordMunicipalityOperation(
                 $request,
                 $municipality,
                 'municipal_rules_updated',
-                ['profile_id' => $rules->id, ...$changed],
-                array_intersect_key($oldValues, $changed),
+                ['profile_id' => $rules->id, ...$changed, ...$changedMunicipalityValues],
+                [
+                    ...array_intersect_key($oldValues, $changed),
+                    ...array_intersect_key($oldMunicipalityValues, $changedMunicipalityValues),
+                ],
             );
         });
 

@@ -31,6 +31,9 @@
                     <option value="{{ $value }}" @selected(old('government_sphere', $amendment?->government_sphere ?? 'municipal') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
+            @if (count($governmentSpheres) === 1)
+                <div class="form-text">Emendas federais e estaduais aparecem somente quando o gestor habilita esses mÃ³dulos em Normas municipais.</div>
+            @endif
             @error('government_sphere')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-4">

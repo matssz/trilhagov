@@ -20,6 +20,17 @@
         <div class="legislative-notice is-warning"><i data-lucide="triangle-alert" aria-hidden="true"></i><div><strong>Número de vereadores não informado</strong><p>A divisão igualitária da cota depende desse parâmetro na configuração municipal.</p></div></div>
     @endif
 
+    @if ($quota)
+        <section class="legislative-automation-panel">
+            <i data-lucide="wallet-cards" aria-hidden="true"></i>
+            <div>
+                <strong>Saldo disponível antes desta proposta: {{ $quota['remaining'] === null ? 'a configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong>
+                <p>O limite individual e a reserva de saúde são calculados automaticamente a partir da norma municipal ativa. Marque saúde quando a indicação for destinada a ações e serviços públicos de saúde.</p>
+            </div>
+            <span>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Saúde em dia' }}</span>
+        </section>
+    @endif
+
     <form method="POST" action="{{ route('legislative.store') }}" data-prevent-double-submit>
         @csrf
         <input name="_submission_token" type="hidden" value="{{ $submissionToken }}">

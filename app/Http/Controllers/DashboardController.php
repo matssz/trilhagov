@@ -22,6 +22,9 @@ class DashboardController extends Controller
         $municipality = $currentMunicipality->get($request);
         $integrityAlertService->syncIfDue($municipality);
         $filters = $request->only(['year', 'sphere', 'status', 'department']);
+        if (isset($filters['sphere']) && ! $municipality->allowsGovernmentSphere((string) $filters['sphere'])) {
+            unset($filters['sphere']);
+        }
         $analytics = $analyticsService->dashboard($municipality, $filters);
         $options = $analyticsService->filterOptions($municipality);
         $amendments = $analytics['amendments'];
@@ -44,7 +47,7 @@ class DashboardController extends Controller
             'years' => $options['years'],
             'departments' => $options['departments'],
             'statuses' => ParliamentaryAmendment::statuses(),
-            'spheres' => ParliamentaryAmendment::governmentSpheres(),
+            'spheres' => $municipality->enabledGovernmentSpheres(),
             'deadlines' => $deadlines,
             'recentAmendments' => $amendments->take(5),
             'canEdit' => $request->user()->canEditMunicipality($municipality->id),
