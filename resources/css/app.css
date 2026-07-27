@@ -16,6 +16,7 @@
 @import './health-asps.css';
 @import './municipal-contracts.css';
 @import './legislative.css';
+@import './municipal-onboarding.css';
 
 :root {
     --navy-950: #071f3d;

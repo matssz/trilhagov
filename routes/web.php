@@ -29,6 +29,7 @@ use App\Http\Controllers\MunicipalAuditProgramController;
 use App\Http\Controllers\MunicipalContractController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
 use App\Http\Controllers\MunicipalInternalControlController;
+use App\Http\Controllers\MunicipalOnboardingController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalOfficialDocumentController;
 use App\Http\Controllers\MunicipalRegulatoryProfileController;
@@ -184,6 +185,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     });
 
     Route::middleware('municipality.role:manager')->group(function () {
+        Route::get('/implantacao', [MunicipalOnboardingController::class, 'index'])->name('municipal-onboarding.index');
+        Route::post('/implantacao/ativar-exercicio', [MunicipalOnboardingController::class, 'activate'])->name('municipal-onboarding.activate')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/{template}/revisar', [MunicipalOfficialDocumentController::class, 'reviseTemplate'])->name('official-document-templates.revise')->block(10, 10);
         Route::post('/comunicacoes-oficiais/{document}/emitir', [MunicipalOfficialDocumentController::class, 'issue'])->name('official-documents.issue')->block(10, 10);

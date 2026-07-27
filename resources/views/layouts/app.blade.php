@@ -58,6 +58,12 @@
                             <i data-lucide="layout-dashboard" aria-hidden="true"></i>
                             <span>Painel</span>
                         </a>
+                        @if ($canManageUsers)
+                            <a class="sidebar-link {{ request()->routeIs('municipal-onboarding.*') ? 'active' : '' }}" href="{{ route('municipal-onboarding.index') }}">
+                                <i data-lucide="rocket" aria-hidden="true"></i>
+                                <span>Implantação</span>
+                            </a>
+                        @endif
                         <a class="sidebar-link {{ request()->routeIs('emendas.*') ? 'active' : '' }}" href="{{ route('emendas.index') }}">
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
