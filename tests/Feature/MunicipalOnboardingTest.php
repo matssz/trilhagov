@@ -78,6 +78,49 @@ class MunicipalOnboardingTest extends TestCase
             ->assertSee('R$ 238.461,54');
     }
 
+    public function test_onboarding_activation_reuses_existing_draft_without_deleting_instruments(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $draft = $municipality->regulatoryProfiles()->create([
+            'created_by' => $manager->id,
+            'updated_by' => $manager->id,
+            'fiscal_year' => 2027,
+            'version' => 1,
+            'status' => MunicipalRegulatoryProfile::STATUS_DRAFT,
+            'notes' => 'Rascunho preparado pela equipe.',
+        ]);
+        $draft->instruments()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'type' => 'organic_law',
+            'title' => 'Lei Orgânica Municipal',
+            'reference' => 'LOM 01/1990',
+            'notes' => 'Referência oficial já conferida.',
+        ]);
+        $token = $this->submissionSession($municipality, "municipal-onboarding-activate-{$municipality->id}");
+
+        $this->actingAs($manager)->post(route('municipal-onboarding.activate'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2027,
+            'previous_year_rcl' => 200000000,
+            'councilor_seats' => 13,
+            'legal_review_responsible' => 'Procuradoria Municipal',
+            'legal_review_reference' => 'Parecer 001/2027',
+            'legal_reviewed_at' => today()->toDateString(),
+        ])->assertRedirect(route('municipal-onboarding.index'))
+            ->assertSessionHas('status');
+
+        $draft->refresh();
+        $this->assertSame(MunicipalRegulatoryProfile::STATUS_ACTIVE, $draft->status);
+        $this->assertSame('Rascunho preparado pela equipe.', $draft->notes);
+        $this->assertSame(6, $draft->instruments()->count());
+        $this->assertDatabaseHas('municipal_normative_instruments', [
+            'id' => $draft->instruments()->where('type', 'organic_law')->firstOrFail()->id,
+            'reference' => 'LOM 01/1990',
+            'notes' => 'Referência oficial já conferida.',
+        ]);
+    }
+
     public function test_manager_invites_councilor_from_onboarding(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

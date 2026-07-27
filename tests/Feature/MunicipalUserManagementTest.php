@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use App\Models\Municipality;
 use App\Models\MunicipalityInvitation;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\User;
 use App\Notifications\MunicipalityInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -74,6 +75,7 @@ class MunicipalUserManagementTest extends TestCase
         Notification::fake();
         config(['mail.default' => 'log']);
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->activeProfile($municipality, $manager);
 
         $this->actingAs($manager)
             ->withSession(['active_municipality_id' => $municipality->id])
@@ -90,6 +92,28 @@ class MunicipalUserManagementTest extends TestCase
             ->assertSessionHas('invitation_mail_status', 'unavailable');
 
         Notification::assertNothingSent();
+    }
+
+    public function test_manager_cannot_invite_legislative_access_without_active_exercise(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->post(route('users.invitations.store'), [
+                '_submission_token' => $this->submissionToken('municipality-invitation-create'),
+                'email' => 'vereador-sem-regra@municipio.test',
+                'role' => User::ROLE_COUNCILOR,
+                'legislative_name' => 'Vereador Sem Regra',
+                'legislative_party' => 'PSD',
+                'legislative_term_start' => '2025-01-01',
+                'legislative_term_end' => '2028-12-31',
+            ])
+            ->assertSessionHasErrors('role');
+
+        $this->assertDatabaseMissing('municipality_invitations', [
+            'email' => 'vereador-sem-regra@municipio.test',
+        ]);
     }
 
     public function test_signed_in_manager_can_safely_switch_accounts_to_accept_new_user_invitation(): void
@@ -343,5 +367,40 @@ class MunicipalUserManagementTest extends TestCase
         ]);
 
         return $token;
+    }
+
+    private function activeProfile(Municipality $municipality, User $manager): MunicipalRegulatoryProfile
+    {
+        return $municipality->regulatoryProfiles()->create([
+            'created_by' => $manager->id,
+            'updated_by' => $manager->id,
+            'activated_by' => $manager->id,
+            'audesp_responsible_user_id' => $manager->id,
+            'fiscal_year' => 2027,
+            'version' => 1,
+            'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
+            'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,
+            'previous_year_rcl' => 200000000,
+            'individual_limit_percentage' => 1.55,
+            'councilor_seats' => 13,
+            'health_reserve_percentage' => 50,
+            'health_reserve_method' => 'per_councilor',
+            'amendments_per_councilor_limit' => 20,
+            'minimum_amendment_amount' => 1,
+            'generic_amendments_prohibited' => true,
+            'prior_technical_review_required' => true,
+            'work_plan_required' => true,
+            'pca_check_required' => true,
+            'impediment_notice_days' => 30,
+            'impediment_correction_days' => 30,
+            'publication_business_days' => 5,
+            'document_retention_years' => 10,
+            'bank_traceability_rule' => 'direct_execution_traceability',
+            'audesp_registration_status' => 'ready',
+            'legal_review_responsible' => 'Procuradoria Municipal',
+            'legal_review_reference' => 'Parecer 001/2027',
+            'legal_reviewed_at' => today(),
+            'activated_at' => now(),
+        ]);
     }
 }

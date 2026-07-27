@@ -27,6 +27,7 @@ class MunicipalOnboardingService
             ->orderByDesc('fiscal_year')
             ->first();
         $year = $activeProfile?->fiscal_year ?? $draftProfile?->fiscal_year ?? now()->year + 1;
+        $termStartYear = $year - (($year - 2025) % 4 + 4) % 4;
         $members = $municipality->users()->get();
         $hasTeam = $members
             ->whereIn('pivot.role', [User::ROLE_MANAGER, User::ROLE_EDITOR, User::ROLE_AUDITOR])
@@ -150,11 +151,13 @@ class MunicipalOnboardingService
                             : 'Informe RCL, cadeiras e revisão jurídica para liberar a Câmara.',
                     ],
                     [
-                        'title' => 'Câmara convidada',
-                        'complete' => $hasCouncil || $pendingCouncilInvitations->isNotEmpty(),
-                        'message' => $hasCouncil || $pendingCouncilInvitations->isNotEmpty()
-                            ? 'Há vereador ou convite legislativo vinculado ao município.'
-                            : 'Convide pelo menos um vereador após ativar o exercício.',
+                        'title' => 'Câmara habilitada',
+                        'complete' => $hasCouncil,
+                        'message' => $hasCouncil
+                            ? 'Há vereador ou análise legislativa com acesso aceito.'
+                            : ($pendingCouncilInvitations->isNotEmpty()
+                                ? 'Convite enviado. Aguardando aceite para habilitar a Câmara.'
+                                : 'Convide pelo menos um vereador após ativar o exercício.'),
                     ],
                     [
                         'title' => 'Primeiro fluxo iniciado',
@@ -172,6 +175,8 @@ class MunicipalOnboardingService
                     'Referência do parecer ou despacho',
                     'Data da revisão',
                 ],
+                'legislative_term_start' => $termStartYear.'-01-01',
+                'legislative_term_end' => ($termStartYear + 3).'-12-31',
             ],
             'health' => [
                 'ready' => $activeProfile !== null && $hasCouncil,
@@ -181,7 +186,7 @@ class MunicipalOnboardingService
             ],
             'council' => [
                 'released' => $activeProfile !== null,
-                'ready' => $activeProfile !== null && ($councilors->isNotEmpty() || $pendingCouncilInvitations->isNotEmpty()),
+                'ready' => $activeProfile !== null && $councilors->isNotEmpty(),
                 'councilors' => $councilors,
                 'reviewers' => $legislativeReviewers,
                 'pending_invitations' => $pendingCouncilInvitations,

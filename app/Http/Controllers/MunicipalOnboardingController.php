@@ -70,20 +70,14 @@ class MunicipalOnboardingController extends Controller
         }
 
         $profile = DB::transaction(function () use ($request, $municipality, $validated, $organicLawAutomation, $readiness, $auditTrail): MunicipalRegulatoryProfile {
-            $municipality->regulatoryProfiles()
+            $profile = $municipality->regulatoryProfiles()
                 ->where('fiscal_year', $validated['fiscal_year'])
                 ->where('status', MunicipalRegulatoryProfile::STATUS_DRAFT)
-                ->delete();
+                ->orderByDesc('version')
+                ->first();
 
-            $version = (int) $municipality->regulatoryProfiles()
-                ->where('fiscal_year', $validated['fiscal_year'])
-                ->max('version') + 1;
-
-            $profile = $municipality->regulatoryProfiles()->create([
-                'created_by' => $request->user()->id,
+            $values = [
                 'updated_by' => $request->user()->id,
-                'fiscal_year' => $validated['fiscal_year'],
-                'version' => max(1, $version),
                 ...$organicLawAutomation->mergeInto([
                     'previous_year_rcl' => $validated['previous_year_rcl'],
                     'councilor_seats' => $validated['councilor_seats'],
@@ -92,15 +86,32 @@ class MunicipalOnboardingController extends Controller
                     'legal_reviewed_at' => $validated['legal_reviewed_at'],
                     'audesp_responsible_user_id' => $request->user()->id,
                 ]),
-            ]);
+            ];
+
+            if ($profile) {
+                $profile->update($values);
+            } else {
+                $version = (int) $municipality->regulatoryProfiles()
+                    ->where('fiscal_year', $validated['fiscal_year'])
+                    ->max('version') + 1;
+
+                $profile = $municipality->regulatoryProfiles()->create([
+                    'created_by' => $request->user()->id,
+                    'fiscal_year' => $validated['fiscal_year'],
+                    'version' => max(1, $version),
+                    ...$values,
+                ]);
+            }
 
             foreach ($this->defaultInstruments((int) $validated['fiscal_year']) as $type => $instrument) {
-                $profile->instruments()->create([
-                    'municipality_id' => $municipality->id,
-                    'created_by' => $request->user()->id,
-                    'type' => $type,
-                    ...$instrument,
-                ]);
+                $profile->instruments()->firstOrCreate(
+                    ['type' => $type],
+                    [
+                        'municipality_id' => $municipality->id,
+                        'created_by' => $request->user()->id,
+                        ...$instrument,
+                    ],
+                );
             }
 
             $diagnostic = $readiness->evaluate($profile->fresh('instruments'));
@@ -152,7 +163,7 @@ class MunicipalOnboardingController extends Controller
                 'reference' => 'A informar/'.$year,
                 'effective_from' => $year.'-01-01',
                 'effective_until' => $year.'-12-31',
-                'notes' => 'Criado pelo assistente de implantação. Substitua a referência pelo ato municipal oficial quando disponível.',
+                'notes' => 'Criado pelo assistente de implantação como pendência de conferência. Substitua a referência pelo ato municipal oficial antes da revisão final.',
             ],
         ])->all();
     }

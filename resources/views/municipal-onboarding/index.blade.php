@@ -161,8 +161,24 @@
             <div class="onboarding-council-status {{ $council['ready'] ? 'is-ready' : 'needs-action' }}">
                 <span><i data-lucide="{{ $council['ready'] ? 'circle-check' : 'user-plus' }}" aria-hidden="true"></i></span>
                 <div>
-                    <strong>{{ $council['released'] ? 'Exercício liberado para indicações' : 'Câmara bloqueada sem exercício ativo' }}</strong>
-                    <p>{{ $council['released'] ? 'Convide vereadores para que eles criem propostas dentro da cota automática.' : 'Ative o exercício antes de convidar a Câmara para operar oficialmente.' }}</p>
+                    <strong>
+                        @if ($council['ready'])
+                            Câmara habilitada para indicações
+                        @elseif ($council['released'])
+                            Exercício ativo, Câmara aguardando aceite
+                        @else
+                            Câmara bloqueada sem exercício ativo
+                        @endif
+                    </strong>
+                    <p>
+                        @if ($council['ready'])
+                            Vereadores já podem criar propostas dentro da cota automática.
+                        @elseif ($council['released'])
+                            Envie ou acompanhe os convites. A Câmara só opera quando houver aceite.
+                        @else
+                            Ative o exercício antes de convidar a Câmara para operar oficialmente.
+                        @endif
+                    </p>
                 </div>
             </div>
             <div class="onboarding-council-metrics">
@@ -185,8 +201,8 @@
                 <label class="span-2"><span>E-mail do vereador <b>*</b></span><input class="form-control @error('email') is-invalid @enderror" name="email" type="email" value="{{ old('email') }}" required @disabled(! $council['released'])>@error('email')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
                 <label><span>Nome parlamentar <b>*</b></span><input class="form-control @error('legislative_name') is-invalid @enderror" name="legislative_name" value="{{ old('legislative_name') }}" required @disabled(! $council['released'])>@error('legislative_name')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
                 <label><span>Partido <b>*</b></span><input class="form-control text-uppercase @error('legislative_party') is-invalid @enderror" name="legislative_party" value="{{ old('legislative_party') }}" maxlength="30" required @disabled(! $council['released'])>@error('legislative_party')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
-                <label class="span-2"><span>Início do mandato <b>*</b></span><input class="form-control @error('legislative_term_start') is-invalid @enderror" name="legislative_term_start" type="date" value="{{ old('legislative_term_start', '2025-01-01') }}" required @disabled(! $council['released'])>@error('legislative_term_start')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
-                <label><span>Fim do mandato <b>*</b></span><input class="form-control @error('legislative_term_end') is-invalid @enderror" name="legislative_term_end" type="date" value="{{ old('legislative_term_end', '2028-12-31') }}" required @disabled(! $council['released'])>@error('legislative_term_end')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label class="span-2"><span>Início do mandato <b>*</b></span><input class="form-control @error('legislative_term_start') is-invalid @enderror" name="legislative_term_start" type="date" value="{{ old('legislative_term_start', $guide['legislative_term_start']) }}" required @disabled(! $council['released'])>@error('legislative_term_start')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+                <label><span>Fim do mandato <b>*</b></span><input class="form-control @error('legislative_term_end') is-invalid @enderror" name="legislative_term_end" type="date" value="{{ old('legislative_term_end', $guide['legislative_term_end']) }}" required @disabled(! $council['released'])>@error('legislative_term_end')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
                 <button class="btn btn-primary span-2" type="submit" @disabled(! $council['released'])><i data-lucide="user-plus" aria-hidden="true"></i>Convidar vereador</button>
             </form>
             <div class="onboarding-council-list">

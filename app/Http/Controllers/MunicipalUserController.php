@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MunicipalityInvitation;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\User;
 use App\Notifications\MunicipalityInvitationNotification;
 use App\Services\AuditTrail;
@@ -85,6 +86,13 @@ class MunicipalUserController extends Controller
         }
 
         $municipality = $currentMunicipality->get($request);
+        $legislativeRole = in_array($validated['role'], [User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER], true);
+
+        if ($legislativeRole && ! $municipality->regulatoryProfiles()->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)->exists()) {
+            return back()->withInput()->withErrors([
+                'role' => 'Ative primeiro o exercício municipal em Implantação para liberar convites da Câmara.',
+            ]);
+        }
 
         if ($municipality->users()->where('users.email', $validated['email'])->exists()) {
             return back()->withInput()->withErrors([
