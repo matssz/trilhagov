@@ -22,8 +22,11 @@ class MunicipalOnboardingTest extends TestCase
             ->get(route('municipal-onboarding.index'))
             ->assertOk()
             ->assertSee('Implantação municipal')
+            ->assertSee('Assistente de liberação')
+            ->assertSee('Próxima ação recomendada')
             ->assertSee('Ativar normas do exercício')
-            ->assertSee('Convidar Câmara');
+            ->assertSee('Convidar Câmara')
+            ->assertSee('Ative primeiro o exercício');
     }
 
     public function test_only_manager_can_activate_exercise_from_onboarding(): void
@@ -84,6 +87,7 @@ class MunicipalOnboardingTest extends TestCase
             ->assertOk()
             ->assertSee('Liberação dos vereadores')
             ->assertSee('Convidar vereador');
+        $this->activeProfile($municipality, $manager);
 
         $token = $this->submissionSession($municipality, 'municipality-invitation-create');
 
@@ -131,5 +135,40 @@ class MunicipalOnboardingTest extends TestCase
         ]);
 
         return $token;
+    }
+
+    private function activeProfile(Municipality $municipality, User $manager): MunicipalRegulatoryProfile
+    {
+        return $municipality->regulatoryProfiles()->create([
+            'created_by' => $manager->id,
+            'updated_by' => $manager->id,
+            'activated_by' => $manager->id,
+            'audesp_responsible_user_id' => $manager->id,
+            'fiscal_year' => 2027,
+            'version' => 1,
+            'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
+            'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,
+            'previous_year_rcl' => 200000000,
+            'individual_limit_percentage' => 1.55,
+            'councilor_seats' => 13,
+            'health_reserve_percentage' => 50,
+            'health_reserve_method' => 'per_councilor',
+            'amendments_per_councilor_limit' => 20,
+            'minimum_amendment_amount' => 1,
+            'generic_amendments_prohibited' => true,
+            'prior_technical_review_required' => true,
+            'work_plan_required' => true,
+            'pca_check_required' => true,
+            'impediment_notice_days' => 30,
+            'impediment_correction_days' => 30,
+            'publication_business_days' => 5,
+            'document_retention_years' => 10,
+            'bank_traceability_rule' => 'direct_execution_traceability',
+            'audesp_registration_status' => 'ready',
+            'legal_review_responsible' => 'Procuradoria Municipal',
+            'legal_review_reference' => 'Parecer 001/2027',
+            'legal_reviewed_at' => today(),
+            'activated_at' => now(),
+        ]);
     }
 }

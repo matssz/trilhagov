@@ -13,7 +13,7 @@ class MunicipalOnboardingService
         private readonly MunicipalRegulatoryReadiness $readiness,
     ) {}
 
-    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, health: array<string, mixed>, council: array<string, mixed>} */
+    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, guide: array<string, mixed>, health: array<string, mixed>, council: array<string, mixed>} */
     public function summary(Municipality $municipality): array
     {
         $activeProfile = $municipality->regulatoryProfiles()
@@ -124,6 +124,7 @@ class MunicipalOnboardingService
         ];
 
         $complete = count(array_filter($steps, fn (array $step) => $step['complete']));
+        $nextStep = collect($steps)->first(fn (array $step) => ! $step['complete']) ?? end($steps);
 
         return [
             'activeProfile' => $activeProfile,
@@ -131,6 +132,47 @@ class MunicipalOnboardingService
             'year' => $year,
             'steps' => $steps,
             'score' => (int) round($complete / count($steps) * 100),
+            'guide' => [
+                'next_step' => $nextStep,
+                'release_items' => [
+                    [
+                        'title' => 'Município identificado',
+                        'complete' => $municipality->hasCompleteProfile(),
+                        'message' => $municipality->hasCompleteProfile()
+                            ? 'Dados básicos prontos para auditoria e vínculos.'
+                            : 'Complete CNPJ, UF e código IBGE para operar oficialmente.',
+                    ],
+                    [
+                        'title' => 'Exercício ativo',
+                        'complete' => $activeProfile !== null,
+                        'message' => $activeProfile
+                            ? "Norma de {$activeProfile->fiscal_year} ativa para calcular cotas."
+                            : 'Informe RCL, cadeiras e revisão jurídica para liberar a Câmara.',
+                    ],
+                    [
+                        'title' => 'Câmara convidada',
+                        'complete' => $hasCouncil || $pendingCouncilInvitations->isNotEmpty(),
+                        'message' => $hasCouncil || $pendingCouncilInvitations->isNotEmpty()
+                            ? 'Há vereador ou convite legislativo vinculado ao município.'
+                            : 'Convide pelo menos um vereador após ativar o exercício.',
+                    ],
+                    [
+                        'title' => 'Primeiro fluxo iniciado',
+                        'complete' => $hasLegislativeFlow || $hasAmendment,
+                        'message' => $hasLegislativeFlow || $hasAmendment
+                            ? 'Já existe proposta ou emenda para validar a rotina.'
+                            : 'Depois da Câmara liberada, registre a primeira proposta.',
+                    ],
+                ],
+                'activation_fields' => [
+                    'Exercício que será usado pela Câmara',
+                    'RCL do exercício anterior',
+                    'Quantidade de cadeiras da Câmara',
+                    'Responsável pela revisão jurídica',
+                    'Referência do parecer ou despacho',
+                    'Data da revisão',
+                ],
+            ],
             'health' => [
                 'ready' => $activeProfile !== null && $hasCouncil,
                 'rules_score' => $readiness['score'] ?? 0,
