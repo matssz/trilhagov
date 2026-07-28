@@ -269,6 +269,13 @@ class LegislativeProposalTest extends TestCase
             'protocol_number' => 'CAM-2027-0100',
         ])->assertSessionHas('status');
 
+        $this->actingAs($manager)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $proposal))
+            ->assertOk()
+            ->assertSee('Recebimento pela Prefeitura')
+            ->assertSee('Receber agora')
+            ->assertSee('Processo executivo');
+
         $this->actingAs($manager)->post(route('legislative.receive', $proposal), [
             '_submission_token' => $receiveToken = $this->token($municipality, "legislative-proposal-receive-{$proposal->id}"),
             'executive_process_number' => 'PREF-2027-0021',
@@ -285,6 +292,13 @@ class LegislativeProposalTest extends TestCase
         $this->assertNotNull($amendment);
         $this->assertTrue($amendment->indicated_for_health);
         $this->assertSame(1, ParliamentaryAmendment::where('reference', $proposal->reference)->count());
+
+        $this->actingAs($manager)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $proposal))
+            ->assertOk()
+            ->assertSee('Reserva orçamentária')
+            ->assertSee('Registrar reserva')
+            ->assertSee('Emenda aberta');
 
         $this->post(route('legislative.reserve', $proposal), [
             '_submission_token' => $this->token($municipality, "legislative-proposal-reserve-{$proposal->id}"),

@@ -767,6 +767,110 @@
     overflow-wrap: anywhere;
 }
 
+.legislative-decision-panel {
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid #b9cad9;
+    border-left: 4px solid var(--navy-900);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+}
+
+.legislative-decision-panel-main {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 16px 18px;
+    background: linear-gradient(120deg, #f8fbff 0%, #eef5fa 100%);
+}
+
+.legislative-decision-panel-main > span {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.legislative-decision-panel-main svg {
+    width: 22px;
+    height: 22px;
+}
+
+.legislative-decision-panel-main small,
+.legislative-decision-checks small {
+    display: block;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.legislative-decision-panel-main h2 {
+    margin: 1px 0 2px;
+    color: var(--navy-950);
+    font-size: 1.03rem;
+    font-weight: 850;
+}
+
+.legislative-decision-panel-main p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.legislative-decision-panel-main .btn {
+    white-space: nowrap;
+}
+
+.legislative-decision-checks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    border-top: 1px solid var(--line-soft);
+}
+
+.legislative-decision-checks > div {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+    padding: 13px 15px;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.legislative-decision-checks > div > span {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 7px;
+    background: #eef3f7;
+    color: #6b7888;
+}
+
+.legislative-decision-checks > div.is-ok > span {
+    background: #e8f6ef;
+    color: #147451;
+}
+
+.legislative-decision-checks > div.is-attention > span {
+    background: #fff4d8;
+    color: #9a6b00;
+}
+
+.legislative-decision-checks strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: .8rem;
+    font-weight: 850;
+    overflow-wrap: anywhere;
+}
+
 .legislative-flow {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1364,6 +1468,20 @@
         grid-column: 1 / -1;
         width: 100%;
         white-space: normal;
+    }
+
+    .legislative-decision-panel-main {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .legislative-decision-panel-main .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        white-space: normal;
+    }
+
+    .legislative-decision-checks {
+        grid-template-columns: 1fr;
     }
 
     .legislative-detail-summary {

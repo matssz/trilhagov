@@ -42,6 +42,61 @@
             $proposal->status === App\Models\LegislativeProposal::STATUS_REJECTED => ['icon' => 'circle-x', 'title' => 'Proposta rejeitada na análise prévia', 'description' => 'Consulte a fundamentação registrada e o histórico institucional da decisão.', 'href' => '#historico-proposta', 'label' => 'Ver decisão'],
             default => ['icon' => 'eye', 'title' => 'Acompanhar andamento', 'description' => 'Consulte a situação atual, documentos e histórico da proposta.', 'href' => '#historico-proposta', 'label' => 'Ver histórico'],
         };
+        $decisionPanel = match (true) {
+            $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED => [
+                'scope' => 'Câmara',
+                'title' => 'Decisão da conferência legislativa',
+                'description' => 'Aprovar, devolver ou rejeitar com base nos requisitos mínimos antes de mandar ao Executivo.',
+                'icon' => 'clipboard-check',
+                'href' => '#conferencia-legislativa',
+                'label' => 'Abrir decisão',
+                'checks' => collect($reviewChecklist)->map(fn ($item, $field) => [
+                    'label' => $item['label'],
+                    'state' => $proposal->{$field} ? 'ok' : 'pending',
+                    'value' => $proposal->{$field} ? 'conferido' : 'pendente',
+                ])->values()->all(),
+            ],
+            $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED => [
+                'scope' => 'Câmara',
+                'title' => 'Encaminhamento ao Executivo',
+                'description' => 'A proposta já foi aprovada na conferência. Falta registrar o protocolo formal.',
+                'icon' => 'send',
+                'href' => '#protocolo-executivo',
+                'label' => 'Protocolar',
+                'checks' => [
+                    ['label' => 'Conferência legislativa', 'state' => 'ok', 'value' => 'aprovada'],
+                    ['label' => 'Reserva de saúde', 'state' => $healthGap > 0 ? 'attention' : 'ok', 'value' => $healthGap > 0 ? 'déficit R$ '.number_format($healthGap, 2, ',', '.') : 'atendida'],
+                    ['label' => 'Protocolo da Câmara', 'state' => blank($proposal->protocol_number) ? 'pending' : 'ok', 'value' => $proposal->protocol_number ?: 'a informar'],
+                ],
+            ],
+            $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT => [
+                'scope' => 'Executivo',
+                'title' => 'Recebimento pela Prefeitura',
+                'description' => 'Confirme o processo administrativo para transformar a proposta em emenda executiva.',
+                'icon' => 'inbox',
+                'href' => '#recebimento-executivo',
+                'label' => 'Receber agora',
+                'checks' => [
+                    ['label' => 'Protocolo da Câmara', 'state' => filled($proposal->protocol_number) ? 'ok' : 'attention', 'value' => $proposal->protocol_number ?: 'não informado'],
+                    ['label' => 'Valor indicado', 'state' => 'ok', 'value' => 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.')],
+                    ['label' => 'Processo executivo', 'state' => 'pending', 'value' => 'a abrir'],
+                ],
+            ],
+            $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED => [
+                'scope' => 'Executivo',
+                'title' => 'Reserva orçamentária',
+                'description' => 'Registre a reserva integral para liberar plano de trabalho, execução e prestação de contas.',
+                'icon' => 'wallet-cards',
+                'href' => '#reserva-orcamentaria',
+                'label' => 'Registrar reserva',
+                'checks' => [
+                    ['label' => 'Processo executivo', 'state' => filled($proposal->executive_process_number) ? 'ok' : 'attention', 'value' => $proposal->executive_process_number ?: 'pendente'],
+                    ['label' => 'Emenda aberta', 'state' => $proposal->amendment ? 'ok' : 'attention', 'value' => $proposal->amendment ? $proposal->amendment->reference : 'pendente'],
+                    ['label' => 'Valor a reservar', 'state' => 'pending', 'value' => 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.')],
+                ],
+            ],
+            default => null,
+        };
     @endphp
 
     <div class="legislative-detail-heading">
@@ -77,6 +132,31 @@
             <div><span>Executivo</span><strong>{{ $proposal->executive_process_number ?: ($proposal->protocol_number ?: 'Aguardando protocolo') }}</strong><small>{{ $proposal->budget_reservation_number ? 'Reserva '.$proposal->budget_reservation_number : 'Reserva pendente' }}</small></div>
         </div>
     </section>
+
+    @if($decisionPanel)
+        <section class="legislative-decision-panel" aria-label="Painel de decisão">
+            <div class="legislative-decision-panel-main">
+                <span><i data-lucide="{{ $decisionPanel['icon'] }}" aria-hidden="true"></i></span>
+                <div>
+                    <small>{{ $decisionPanel['scope'] }}</small>
+                    <h2>{{ $decisionPanel['title'] }}</h2>
+                    <p>{{ $decisionPanel['description'] }}</p>
+                </div>
+                <a class="btn btn-primary" href="{{ $decisionPanel['href'] }}">{{ $decisionPanel['label'] }}</a>
+            </div>
+            <div class="legislative-decision-checks">
+                @foreach($decisionPanel['checks'] as $check)
+                    <div class="is-{{ $check['state'] }}">
+                        <span><i data-lucide="{{ $check['state'] === 'ok' ? 'circle-check' : ($check['state'] === 'attention' ? 'triangle-alert' : 'circle-dot') }}" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>{{ $check['label'] }}</strong>
+                            <small>{{ $check['value'] }}</small>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     <section class="legislative-flow" aria-label="Tramitação da proposta">
         @foreach([
