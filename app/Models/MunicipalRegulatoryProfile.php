@@ -148,6 +148,11 @@ class MunicipalRegulatoryProfile extends Model
         return self::regimeStatuses()[$this->regime_status] ?? $this->regime_status;
     }
 
+    public function audespStatusLabel(): string
+    {
+        return self::audespStatuses()[$this->audesp_registration_status] ?? 'Nao informado';
+    }
+
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
