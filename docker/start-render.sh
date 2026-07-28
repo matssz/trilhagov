@@ -9,6 +9,10 @@ sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost *:${port}>/" /etc/apache2/sites-
 
 php artisan db:prepare-production --no-interaction
 php artisan migrate --force --no-interaction
+php artisan view:clear --no-interaction
+php artisan cache:clear --no-interaction
+php artisan route:clear --no-interaction
+php artisan config:clear --no-interaction
 php artisan optimize
 
 exec apache2-foreground
