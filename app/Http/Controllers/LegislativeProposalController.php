@@ -12,6 +12,7 @@ use App\Services\FormSubmission;
 use App\Services\LegislativeNotificationService;
 use App\Services\LegislativeProposalService;
 use App\Services\MunicipalTransparencyTrail;
+use App\Services\MunicipalWorkItemService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -448,6 +449,7 @@ class LegislativeProposalController extends Controller
         FormSubmission $formSubmission,
         LegislativeNotificationService $notifications,
         MunicipalTransparencyTrail $transparencyTrail,
+        MunicipalWorkItemService $workItems,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
@@ -484,9 +486,10 @@ class LegislativeProposalController extends Controller
             ]);
         });
         $auditTrail->recordMunicipalityOperation($request, $municipality, 'legislative_proposal_budget_reserved', ['proposal_id' => $proposal->id, 'reference' => $proposal->reference, 'reservation' => $proposal->budget_reservation_number]);
+        $stats = $workItems->synchronize($municipality->fresh());
         $notifications->submitter($proposal, 'Reserva orçamentária registrada', "A proposta {$proposal->reference} avançou para a solicitação e análise do Plano de Trabalho.");
 
-        return back()->with('status', 'Reserva registrada. O fluxo executivo avançou para o Plano de Trabalho.');
+        return back()->with('status', 'Reserva registrada. O fluxo executivo avançou para o Plano de Trabalho e a Central recebeu '.$stats['created'].' pendência(s) automática(s).');
     }
 
     /** @return array<string, mixed> */

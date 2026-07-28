@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\LegislativeProposal;
 use App\Models\Municipality;
 use App\Models\MunicipalRegulatoryProfile;
+use App\Models\MunicipalWorkItem;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\LegislativeProposalService;
@@ -310,6 +311,11 @@ class LegislativeProposalTest extends TestCase
 
         $this->assertSame(LegislativeProposal::STATUS_RESERVED, $proposal->fresh()->status);
         $this->assertSame(ParliamentaryAmendment::STATUS_PLAN_PENDING, $amendment->fresh()->status);
+        $this->assertDatabaseHas('municipal_work_items', [
+            'source_key' => "amendment:{$amendment->id}:municipal-work-plan:create",
+            'category' => 'planning',
+            'status' => MunicipalWorkItem::STATUS_PENDING,
+        ]);
         $this->assertDatabaseHas('legislative_proposal_events', ['legislative_proposal_id' => $proposal->id, 'event_type' => 'budget_reserved']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'legislative_proposal_budget_reserved']);
 
