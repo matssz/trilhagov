@@ -3,14 +3,20 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
+    padding: 18px 20px;
+    border: 1px solid #d5e0ea;
+    border-radius: 8px;
+    background: linear-gradient(120deg, #fbfdff 0%, #f4f8fb 70%, #eef4f8 100%);
+    box-shadow: 0 12px 28px rgba(17, 43, 70, .06);
 }
 
 .onboarding-heading h1 {
     margin: 0;
     color: var(--navy-950);
-    font-size: clamp(2rem, 5vw, 2.7rem);
+    font-size: clamp(1.9rem, 4vw, 2.45rem);
     font-weight: 850;
+    line-height: 1.05;
 }
 
 .onboarding-heading p:last-child {
@@ -19,46 +25,49 @@
 }
 
 .onboarding-score {
-    display: grid;
-    width: 132px;
+    display: flex;
+    width: 118px;
     aspect-ratio: 1;
-    flex: 0 0 132px;
-    place-items: center;
-    border: 1px solid #c8d5e2;
+    flex: 0 0 118px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #c2d2e1;
     border-radius: 50%;
     background:
-        radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+        radial-gradient(circle at center, #ffffff 0 61%, transparent 62%),
         conic-gradient(var(--navy-900) calc(var(--score) * 1%), #dbe4ed 0);
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 10px 24px rgba(17, 43, 70, .10);
 }
 
 .onboarding-score span {
     color: var(--navy-950);
-    font-size: 1.9rem;
+    font-size: 1.55rem;
     font-weight: 850;
-    line-height: 1;
+    line-height: 1.05;
 }
 
 .onboarding-score small {
-    max-width: 82px;
+    max-width: 76px;
     color: var(--muted);
-    font-size: .65rem;
+    font-size: .56rem;
     font-weight: 800;
+    line-height: 1.25;
     text-align: center;
     text-transform: uppercase;
 }
 
 .onboarding-status {
     display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
     gap: 16px;
     align-items: center;
-    margin-bottom: 18px;
-    padding: 18px;
-    border: 1px solid #cbd8e4;
-    border-radius: 7px;
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    border: 1px solid #d4c296;
+    border-radius: 8px;
     background: linear-gradient(120deg, #ffffff 0%, #f3f8fb 66%, #eef4f8 100%);
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 10px 22px rgba(17, 43, 70, .055);
 }
 
 .onboarding-status.needs-action {
@@ -68,8 +77,8 @@
 
 .onboarding-status > span {
     display: grid;
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     place-items: center;
     border-radius: 7px;
     background: var(--navy-100);
@@ -89,47 +98,55 @@
 .onboarding-status h2 {
     margin: .15rem 0 .25rem;
     color: var(--navy-950);
-    font-size: 1.25rem;
+    font-size: 1.08rem;
     font-weight: 850;
 }
 
 .onboarding-status p {
     margin: 0;
     color: var(--muted);
+    font-size: .84rem;
 }
 
 .onboarding-guide-panel {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
+    border-radius: 8px;
 }
 
 .onboarding-guide-panel .content-panel-header {
     align-items: center;
+    padding: 16px 18px;
+    background: linear-gradient(120deg, #ffffff 0%, #f8fbfd 72%, #f4f7fa 100%);
 }
 
 .onboarding-guide-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-top: 1px solid var(--line-soft);
+    gap: 12px;
+    padding: 14px 18px;
+    border-top: 1px solid #e2e9ef;
+    background: #fbfdff;
 }
 
 .onboarding-guide-card {
     display: flex;
     gap: 12px;
     min-width: 0;
-    padding: 16px;
-    border-right: 1px solid var(--line-soft);
+    padding: 14px;
+    border: 1px solid #d9e3ec;
+    border-radius: 8px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
 }
 
 .onboarding-guide-card:last-child {
-    border-right: 0;
+    border-right: 1px solid #d9e3ec;
 }
 
 .onboarding-guide-card > span {
     display: grid;
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
     place-items: center;
     border: 1px solid #d6e1eb;
     border-radius: 7px;
@@ -148,25 +165,26 @@
     display: block;
     color: var(--navy-950);
     font-weight: 850;
+    font-size: .88rem;
 }
 
 .onboarding-guide-card p,
 .onboarding-guide-next p {
     margin: .25rem 0 0;
     color: var(--muted);
-    font-size: .78rem;
+    font-size: .76rem;
 }
 
 .onboarding-guide-next {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(280px, .85fr);
     gap: 0;
-    border-top: 1px solid var(--line-soft);
+    border-top: 1px solid #e2e9ef;
 }
 
 .onboarding-guide-next > div {
-    padding: 16px 18px;
-    border-right: 1px solid var(--line-soft);
+    padding: 15px 18px;
+    border-right: 1px solid #e2e9ef;
 }
 
 .onboarding-guide-next > div:last-child {
@@ -188,7 +206,7 @@
     margin: .45rem 0 0;
     padding-left: 18px;
     color: #40546b;
-    font-size: .78rem;
+    font-size: .74rem;
     font-weight: 700;
 }
 
@@ -493,7 +511,6 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .onboarding-guide-card:nth-child(2n),
     .onboarding-guide-next > div {
         border-right: 0;
     }
@@ -515,10 +532,28 @@
 @media (max-width: 767.98px) {
     .onboarding-heading {
         flex-direction: column;
+        padding: 16px;
     }
 
     .onboarding-score {
-        width: 112px;
+        width: 104px;
+        flex-basis: 104px;
+    }
+
+    .onboarding-status {
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .onboarding-status > span {
+        width: 40px;
+        height: 40px;
+    }
+
+    .onboarding-status > a {
+        grid-column: 1 / -1;
+        width: 100%;
     }
 
     .onboarding-step {
@@ -543,12 +578,12 @@
     }
 
     .onboarding-guide-card {
-        border-right: 0;
-        border-bottom: 1px solid var(--line-soft);
+        border-right: 1px solid #d9e3ec;
+        border-bottom: 1px solid #d9e3ec;
     }
 
     .onboarding-guide-card:last-child {
-        border-bottom: 0;
+        border-bottom: 1px solid #d9e3ec;
     }
 
     .onboarding-council-metrics,
