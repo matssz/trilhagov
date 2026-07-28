@@ -15,8 +15,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class MunicipalRegulatoryProfileController extends Controller
 {
@@ -37,12 +39,15 @@ class MunicipalRegulatoryProfileController extends Controller
             ? $profiles->firstWhere('id', $request->integer('perfil'))
             : $profiles->first(fn ($profile) => $profile->isDraft()) ?? $profiles->first();
 
+        $diagnostic = $selected ? $this->safeDiagnostic($selected, $readiness) : null;
+        $portfolio = $selected ? $this->safePortfolio($selected, $municipalRules) : null;
+
         return view('municipal-rules.index', [
             'municipality' => $municipality,
             'profiles' => $profiles,
             'profile' => $selected,
-            'diagnostic' => $selected ? $readiness->evaluate($selected) : null,
-            'portfolio' => $selected ? $municipalRules->portfolioAssessment($selected) : null,
+            'diagnostic' => $diagnostic,
+            'portfolio' => $portfolio,
             'members' => $municipality->users()->orderBy('name')->get(),
             'canManage' => $request->user()->roleForMunicipality($municipality->id) === 'manager',
             'profileToken' => $formSubmission->issue($request, 'municipal-rules-create'),
@@ -344,6 +349,58 @@ class MunicipalRegulatoryProfileController extends Controller
 
         return redirect()->route('municipal-rules.index', ['perfil' => $copy->id])
             ->with('status', 'Nova revisão criada sem alterar a versão vigente.');
+    }
+
+    /** @return array{blockers: array<int, string>, warnings: array<int, string>, checks: array<int, array{label: string, complete: bool}>, score: int, ceiling: ?float} */
+    private function safeDiagnostic(
+        MunicipalRegulatoryProfile $profile,
+        MunicipalRegulatoryReadiness $readiness,
+    ): array {
+        try {
+            return $readiness->evaluate($profile);
+        } catch (Throwable $exception) {
+            Log::error('Falha ao avaliar prontidao das normas municipais.', [
+                'municipality_id' => $profile->municipality_id,
+                'profile_id' => $profile->id,
+                'exception' => $exception,
+            ]);
+
+            return [
+                'blockers' => ['Revise os dados desta configuracao antes de ativa-la.'],
+                'warnings' => ['Alguns dados antigos nao puderam ser avaliados automaticamente.'],
+                'checks' => [],
+                'score' => 0,
+                'ceiling' => null,
+            ];
+        }
+    }
+
+    /** @return array{amendment_count: int, author_count: int, total: float, health_total: float, health_required: ?float, shortfall: ?float, unclassified: int, authors_below: int, status: string} */
+    private function safePortfolio(
+        MunicipalRegulatoryProfile $profile,
+        MunicipalRuleApplicationService $municipalRules,
+    ): array {
+        try {
+            return $municipalRules->portfolioAssessment($profile);
+        } catch (Throwable $exception) {
+            Log::error('Falha ao avaliar carteira das normas municipais.', [
+                'municipality_id' => $profile->municipality_id,
+                'profile_id' => $profile->id,
+                'exception' => $exception,
+            ]);
+
+            return [
+                'amendment_count' => 0,
+                'author_count' => 0,
+                'total' => 0.0,
+                'health_total' => 0.0,
+                'health_required' => null,
+                'shortfall' => null,
+                'unclassified' => 0,
+                'authors_below' => 0,
+                'status' => 'not_configured',
+            ];
+        }
     }
 
     /** @return array<string, mixed> */

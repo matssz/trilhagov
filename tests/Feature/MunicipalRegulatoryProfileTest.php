@@ -7,6 +7,7 @@ use App\Models\MunicipalNormativeInstrument;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
+use App\Services\LegislativeProposalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use LogicException;
@@ -32,6 +33,31 @@ class MunicipalRegulatoryProfileTest extends TestCase
             '_submission_token' => (string) Str::uuid(),
             'fiscal_year' => 2027,
         ])->assertForbidden();
+    }
+
+    public function test_legacy_profile_values_do_not_break_municipal_rules_page(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+
+        $profile->forceFill([
+            'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
+            'regime_status' => 'legacy_status',
+            'health_reserve_method' => 'legacy_method',
+            'audesp_registration_status' => 'legacy_status',
+        ])->saveQuietly();
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-rules.index'))
+            ->assertOk()
+            ->assertSee('legacy_status')
+            ->assertSee('Metodo nao definido')
+            ->assertSee('Nao informado');
+
+        $emptyProfile = new MunicipalRegulatoryProfile;
+        $this->assertSame('Situacao nao informada', $emptyProfile->statusLabel());
+        $this->assertSame('Situacao normativa nao informada', $emptyProfile->regimeStatusLabel());
     }
 
     public function test_manager_starts_only_one_draft_per_year_even_when_request_is_repeated(): void
@@ -88,7 +114,7 @@ class MunicipalRegulatoryProfileTest extends TestCase
         $this->assertSame('50.0000', $profile->health_reserve_percentage);
         $this->assertSame('per_councilor', $profile->health_reserve_method);
         $this->assertTrue($profile->work_plan_required);
-        $this->assertSame(155000.0, app(\App\Services\LegislativeProposalService::class)->quota($municipality, $profile, 'Vereador')['author_ceiling']);
+        $this->assertSame(155000.0, app(LegislativeProposalService::class)->quota($municipality, $profile, 'Vereador')['author_ceiling']);
     }
 
     public function test_linking_organic_law_applies_defaults_to_empty_draft(): void

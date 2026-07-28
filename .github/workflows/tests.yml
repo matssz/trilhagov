@@ -39,6 +39,19 @@ jobs:
       - name: Compilar interface
         run: npm run build
 
+      - name: Validar templates Blade
+        shell: bash
+        run: |
+          php artisan view:clear
+          php artisan view:cache
+
+          if grep -R -n -E '@(if|else|endif|foreach|endforeach|php|endphp|csrf|method|selected|checked|error)' storage/framework/views; then
+            echo "::error::Uma diretiva Blade permaneceu sem compilar."
+            exit 1
+          fi
+
+          php artisan view:clear
+
       - name: Executar testes
         run: php artisan test
 

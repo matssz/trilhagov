@@ -79,7 +79,9 @@
                     @csrf @method('PATCH')
                     <div class="rules-module-grid">
                         @foreach (App\Models\Municipality::moduleParameters() as $key => $module)
-                            @php($field = $module['field'])
+                            @php
+                                $field = $module['field'];
+                            @endphp
                             @if ($field)
                                 <label class="rules-module-card">
                                     <input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $municipality->moduleEnabled($key)))>
@@ -116,7 +118,7 @@
                 <div><span>Emendas vinculadas</span><strong>{{ $portfolio['amendment_count'] }}</strong><small>{{ $portfolio['author_count'] }} autor(es)</small></div>
                 <div><span>Total individual</span><strong>R$ {{ number_format($portfolio['total'], 2, ',', '.') }}</strong><small>Base da revisão</small></div>
                 <div><span>Identificado para saúde</span><strong>R$ {{ number_format($portfolio['health_total'], 2, ',', '.') }}</strong><small>Conforme planos de trabalho</small></div>
-                <div><span>Reserva esperada</span><strong>{{ $portfolio['health_required'] === null ? 'Não calculada' : 'R$ '.number_format($portfolio['health_required'], 2, ',', '.') }}</strong><small>{{ $profile->health_reserve_method ? App\Models\MunicipalRegulatoryProfile::healthReserveMethods()[$profile->health_reserve_method] : 'Método não definido' }}</small></div>
+                <div><span>Reserva esperada</span><strong>{{ $portfolio['health_required'] === null ? 'Não calculada' : 'R$ '.number_format($portfolio['health_required'], 2, ',', '.') }}</strong><small>{{ $profile->healthReserveMethodLabel() }}</small></div>
                 <div><span>Diferença provisória</span><strong>{{ $portfolio['shortfall'] === null ? 'Não calculada' : 'R$ '.number_format($portfolio['shortfall'], 2, ',', '.') }}</strong><small>{{ $profile->health_reserve_method === 'per_councilor' ? $portfolio['authors_below'].' autor(es) abaixo' : $portfolio['unclassified'].' plano(s) sem classificação' }}</small></div>
             </div>
             @if ($portfolio['unclassified'] > 0)
@@ -244,16 +246,19 @@
                     </div>
                 </fieldset>
 
-                @php($binaryOptions = ['' => 'A confirmar', '1' => 'Sim', '0' => 'Não'])
+                @php
+                    $binaryOptions = ['' => 'A confirmar', '1' => 'Sim', '0' => 'Não'];
+                    $binaryRuleLabels = [
+                        'generic_amendments_prohibited' => 'Objetos genéricos são proibidos?',
+                        'prior_technical_review_required' => 'Há análise técnica prévia?',
+                        'work_plan_required' => 'Plano de trabalho é obrigatório?',
+                        'pca_check_required' => 'Há conferência com o PCA?',
+                    ];
+                @endphp
                 <fieldset>
                     <legend>Admissibilidade e execução</legend>
                     <div class="rules-fields">
-                        @foreach ([
-                            'generic_amendments_prohibited' => 'Objetos genéricos são proibidos?',
-                            'prior_technical_review_required' => 'Há análise técnica prévia?',
-                            'work_plan_required' => 'Plano de trabalho é obrigatório?',
-                            'pca_check_required' => 'Há conferência com o PCA?',
-                        ] as $field => $label)
+                        @foreach ($binaryRuleLabels as $field => $label)
                             @php $current = old($field, is_null($profile->{$field}) ? '' : ($profile->{$field} ? '1' : '0')); @endphp
                             <label><span>{{ $label }}</span><select class="form-select" name="{{ $field }}">@foreach($binaryOptions as $value => $option)<option value="{{ $value }}" @selected((string) $current === (string) $value)>{{ $option }}</option>@endforeach</select></label>
                         @endforeach

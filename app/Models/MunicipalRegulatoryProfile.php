@@ -140,17 +140,24 @@ class MunicipalRegulatoryProfile extends Model
 
     public function statusLabel(): string
     {
-        return self::statuses()[$this->status] ?? $this->status;
+        return self::statuses()[$this->status]
+            ?? (filled($this->status) ? (string) $this->status : 'Situacao nao informada');
     }
 
     public function regimeStatusLabel(): string
     {
-        return self::regimeStatuses()[$this->regime_status] ?? $this->regime_status;
+        return self::regimeStatuses()[$this->regime_status]
+            ?? (filled($this->regime_status) ? (string) $this->regime_status : 'Situacao normativa nao informada');
     }
 
     public function audespStatusLabel(): string
     {
         return self::audespStatuses()[$this->audesp_registration_status] ?? 'Nao informado';
+    }
+
+    public function healthReserveMethodLabel(): string
+    {
+        return self::healthReserveMethods()[$this->health_reserve_method] ?? 'Metodo nao definido';
     }
 
     public function isDraft(): bool
