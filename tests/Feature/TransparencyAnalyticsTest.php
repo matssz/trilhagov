@@ -48,7 +48,27 @@ class TransparencyAnalyticsTest extends TestCase
             ->assertSee('R$ 80.000,00')
             ->assertSee('R$ 40.000,00')
             ->assertSee('60%')
+            ->assertSee('Saúde do sistema municipal')
+            ->assertSee('Município ainda exige atenção')
+            ->assertSee('Ativar exercício')
+            ->assertSee('Nenhum ponto crítico no recorte')
             ->assertDontSee('EM-FORA-2025');
+    }
+
+    public function test_dashboard_empty_states_explain_next_steps(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Saúde do sistema municipal')
+            ->assertSee('Nada cadastrado')
+            ->assertSee('Nenhum ponto crítico no recorte')
+            ->assertSee('Abrir Central de Trabalho')
+            ->assertSee('Nenhum prazo registrado')
+            ->assertSee('Revisar emendas');
     }
 
     public function test_only_manager_can_publish_and_repeated_request_is_ignored(): void

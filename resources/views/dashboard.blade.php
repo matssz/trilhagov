@@ -76,6 +76,30 @@
         </div>
     </form>
 
+    <section class="municipal-health health-{{ $municipalHealth['tone'] }}" aria-label="Saúde operacional do município">
+        <div class="municipal-health-summary">
+            <span><i data-lucide="{{ $municipalHealth['tone'] === 'ready' ? 'shield-check' : 'shield-alert' }}" aria-hidden="true"></i></span>
+            <div>
+                <p class="panel-kicker">Saúde do sistema municipal</p>
+                <h2>{{ $municipalHealth['title'] }}</h2>
+                <p>{{ $municipalHealth['subtitle'] }}</p>
+            </div>
+            <strong>{{ $municipalHealth['score'] }}%</strong>
+        </div>
+        <div class="municipal-health-grid">
+            @foreach ($municipalHealth['checks'] as $check)
+                <article class="{{ $check['ok'] ? 'is-ok' : 'needs-action' }}">
+                    <span><i data-lucide="{{ $check['ok'] ? 'circle-check' : $check['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $check['label'] }}</small>
+                        <strong>{{ $check['value'] }}</strong>
+                    </div>
+                    <a href="{{ $check['route'] }}">{{ $check['action'] }}</a>
+                </article>
+            @endforeach
+        </div>
+    </section>
+
     <section class="analytics-metrics" aria-label="Indicadores financeiros e operacionais">
         <article class="analytics-metric">
             <span class="analytics-metric-icon metric-blue"><i data-lucide="landmark" aria-hidden="true"></i></span>
@@ -237,7 +261,7 @@
                         </span>
                     </a>
                 @empty
-                    <div class="empty-state">Nenhum ponto crítico no recorte atual.</div>
+                    <div class="empty-state compact"><i data-lucide="circle-check-big" aria-hidden="true"></i><h3>Nenhum ponto crítico no recorte</h3><p>Não há prazo vencido, risco elevado ou emenda sem responsável nos filtros atuais.</p><a class="btn btn-outline-primary" href="{{ route('work-center.index') }}">Abrir Central de Trabalho</a></div>
                 @endforelse
             </div>
         </section>
@@ -256,7 +280,7 @@
                         <div class="deadline-date {{ $isOverdue ? 'deadline-overdue' : ($isUpcoming ? 'deadline-upcoming' : '') }}">{{ $deadline['date']->format('d/m/Y') }}@if ($isOverdue)<div class="small">Vencido</div>@endif</div>
                     </div>
                 @empty
-                    <div class="empty-state">Nenhum prazo registrado.</div>
+                    <div class="empty-state compact"><i data-lucide="calendar-plus" aria-hidden="true"></i><h3>Nenhum prazo registrado</h3><p>Cadastre marcos de comunicação, aplicação, execução ou prestação de contas para montar a agenda municipal.</p>@if ($canEdit)<a class="btn btn-outline-primary" href="{{ route('emendas.index') }}">Revisar emendas</a>@endif</div>
                 @endforelse
             </div>
         </section>
