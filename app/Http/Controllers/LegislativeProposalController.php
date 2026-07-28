@@ -49,6 +49,9 @@ class LegislativeProposalController extends Controller
         $quota = $role === User::ROLE_COUNCILOR && $profile
             ? $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name))
             : null;
+        $councilorGuide = $role === User::ROLE_COUNCILOR
+            ? $this->councilorGuide($municipality, $request->user()->id, $year, $profile, $quota)
+            : null;
         $executiveBoard = $role === User::ROLE_COUNCILOR
             ? null
             : $this->executiveBoard($boardQuery->latest('id')->get());
@@ -64,6 +67,7 @@ class LegislativeProposalController extends Controller
             'activeYears' => $service->activeYears($municipality),
             'profile' => $profile,
             'quota' => $quota,
+            'councilorGuide' => $councilorGuide,
             'executiveBoard' => $executiveBoard,
             'proposals' => $query->latest('id')->paginate(12)->withQueryString(),
             'summary' => [
@@ -73,6 +77,79 @@ class LegislativeProposalController extends Controller
                 'sent' => (clone $summaryQuery)->whereIn('status', [LegislativeProposal::STATUS_SENT, LegislativeProposal::STATUS_RECEIVED, LegislativeProposal::STATUS_RESERVED])->count(),
             ],
         ]);
+    }
+
+    /**
+     * @param array<string, mixed>|null $quota
+     * @return array<string, mixed>
+     */
+    private function councilorGuide(
+        Municipality $municipality,
+        int $userId,
+        int $year,
+        ?\App\Models\MunicipalRegulatoryProfile $profile,
+        ?array $quota,
+    ): array {
+        $statusBase = $municipality->legislativeProposals()
+            ->where('fiscal_year', $year)
+            ->where('submitted_by', $userId);
+        $statusCounts = [];
+        foreach (array_keys(LegislativeProposal::statuses()) as $status) {
+            $statusCounts[$status] = (clone $statusBase)->where('status', $status)->count();
+        }
+
+        $remaining = $quota['remaining'] ?? null;
+        $countLimit = $quota['count_limit'] ?? null;
+        $count = (int) ($quota['count'] ?? 0);
+        $quotaUsed = (float) ($quota['used'] ?? 0);
+        $quotaCeiling = $quota['author_ceiling'] ?? null;
+        $healthAllocated = (float) ($quota['health_allocated'] ?? 0);
+        $healthRequired = $quota['health_required'] ?? null;
+        $healthGap = $quota['health_gap'] ?? null;
+
+        $canCreate = $profile !== null
+            && ($remaining === null || (float) $remaining > 0.005)
+            && ($countLimit === null || $count < (int) $countLimit);
+        $quotaProgress = $quotaCeiling ? min(100, round($quotaUsed / (float) $quotaCeiling * 100)) : null;
+        $healthProgress = $healthRequired ? min(100, round($healthAllocated / (float) $healthRequired * 100)) : null;
+
+        if ($profile === null) {
+            $nextTitle = 'Aguardando ativacao do exercicio';
+            $nextText = 'O gestor municipal precisa ativar a norma para liberar cota, reserva de saude e cadastro de propostas.';
+            $badge = 'Bloqueado';
+            $badgeTone = 'danger';
+        } elseif ($countLimit !== null && $count >= (int) $countLimit) {
+            $nextTitle = 'Limite de propostas atingido';
+            $nextText = 'Revise as propostas existentes ou aguarde orientacao da equipe municipal antes de cadastrar outra.';
+            $badge = 'Cota encerrada';
+            $badgeTone = 'warning';
+        } elseif ($remaining !== null && (float) $remaining <= 0.005) {
+            $nextTitle = 'Saldo individual esgotado';
+            $nextText = 'Todas as novas indicacoes precisam respeitar o teto da Lei Organica definido para o exercicio.';
+            $badge = 'Sem saldo';
+            $badgeTone = 'warning';
+        } elseif ($healthGap !== null && (float) $healthGap > 0.005) {
+            $nextTitle = 'Priorize uma proposta de saude';
+            $nextText = 'Para protocolar sem bloqueio, direcione pelo menos R$ '.number_format((float) $healthGap, 2, ',', '.').' para saude.';
+            $badge = 'Saude pendente';
+            $badgeTone = 'warning';
+        } else {
+            $nextTitle = 'Pronto para indicar';
+            $nextText = 'Informe objeto, beneficiario, valor estimado e envie para conferencia legislativa.';
+            $badge = 'Pode indicar';
+            $badgeTone = 'success';
+        }
+
+        return [
+            'canCreate' => $canCreate,
+            'quotaProgress' => $quotaProgress,
+            'healthProgress' => $healthProgress,
+            'nextTitle' => $nextTitle,
+            'nextText' => $nextText,
+            'badge' => $badge,
+            'badgeTone' => $badgeTone,
+            'statusCounts' => $statusCounts,
+        ];
     }
 
     /**

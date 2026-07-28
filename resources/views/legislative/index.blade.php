@@ -9,7 +9,7 @@
             <h1>Portal Legislativo</h1>
             <p>{{ $role === App\Models\User::ROLE_COUNCILOR ? ($membership->legislative_name.' · '.$membership->legislative_party) : 'Indicações da Câmara e acompanhamento da execução municipal' }}</p>
         </div>
-        @if ($role === App\Models\User::ROLE_COUNCILOR && $profile)
+        @if ($role === App\Models\User::ROLE_COUNCILOR && $profile && ($councilorGuide['canCreate'] ?? false))
             <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
         @elseif ($role === App\Models\User::ROLE_COUNCILOR)
             <button class="btn btn-outline-secondary" type="button" disabled title="A configuração normativa precisa estar vigente"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Cadastro indisponível</button>
@@ -25,20 +25,46 @@
     @if ($quota)
         @if ($role === App\Models\User::ROLE_COUNCILOR)
             <section class="legislative-councilor-home">
-                <div>
+                <div class="councilor-home-main">
                     <span class="page-kicker">Minha cota</span>
                     <h2>{{ $quota['remaining'] === null ? 'Cota em configuracao' : 'R$ '.number_format($quota['remaining'], 2, ',', '.').' disponiveis' }}</h2>
-                    <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Ainda falta direcionar R$ '.number_format($quota['health_gap'], 2, ',', '.').' para saude antes do protocolo.' : 'Sua reserva de saude esta em dia no recorte atual.' }}</p>
+                    <strong class="councilor-home-next">{{ $councilorGuide['nextTitle'] ?? 'Pronto para indicar' }}</strong>
+                    <p>{{ $councilorGuide['nextText'] ?? 'O sistema calcula automaticamente saldo, limite e reserva de saude.' }}</p>
+                    <span class="councilor-home-badge is-{{ $councilorGuide['badgeTone'] ?? 'success' }}">{{ $councilorGuide['badge'] ?? 'Pode indicar' }}</span>
                 </div>
                 <div class="councilor-home-actions">
-                    <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
+                    @if ($councilorGuide['canCreate'] ?? false)
+                        <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
+                    @else
+                        <button class="btn btn-outline-secondary" type="button" disabled><i data-lucide="lock-keyhole" aria-hidden="true"></i>Aguardando liberacao</button>
+                    @endif
                     <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
                 </div>
+                <div class="councilor-home-progress">
+                    <div>
+                        <span>Uso da cota</span>
+                        <strong>{{ $councilorGuide['quotaProgress'] === null ? 'A configurar' : $councilorGuide['quotaProgress'].'%' }}</strong>
+                        <div class="councilor-progress-track"><i style="width: {{ $councilorGuide['quotaProgress'] ?? 0 }}%"></i></div>
+                    </div>
+                    <div>
+                        <span>Reserva minima de saude</span>
+                        <strong>{{ $councilorGuide['healthProgress'] === null ? 'A configurar' : $councilorGuide['healthProgress'].'%' }}</strong>
+                        <div class="councilor-progress-track is-health"><i style="width: {{ $councilorGuide['healthProgress'] ?? 0 }}%"></i></div>
+                    </div>
+                    <div>
+                        <span>Em elaboracao</span>
+                        <strong>{{ $councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_DRAFT] ?? 0 }}</strong>
+                    </div>
+                    <div>
+                        <span>No Executivo</span>
+                        <strong>{{ ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_SENT] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RECEIVED] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RESERVED] ?? 0) }}</strong>
+                    </div>
+                </div>
                 <div class="councilor-home-steps">
-                    <span><i data-lucide="edit-3" aria-hidden="true"></i>Criar</span>
-                    <span><i data-lucide="badge-check" aria-hidden="true"></i>Conferir</span>
-                    <span><i data-lucide="send" aria-hidden="true"></i>Enviar</span>
-                    <span><i data-lucide="building-2" aria-hidden="true"></i>Executivo acompanha</span>
+                    <span><i data-lucide="edit-3" aria-hidden="true"></i>Vereador indica</span>
+                    <span><i data-lucide="badge-check" aria-hidden="true"></i>Camara confere</span>
+                    <span><i data-lucide="send" aria-hidden="true"></i>Executivo recebe</span>
+                    <span><i data-lucide="building-2" aria-hidden="true"></i>Prefeitura executa</span>
                 </div>
             </section>
         @endif

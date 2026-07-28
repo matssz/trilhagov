@@ -159,6 +159,11 @@ class LegislativeProposalTest extends TestCase
             ->assertViewHas('year', now()->year)
             ->assertSee(now()->year.' · ativo')
             ->assertSee('Nova proposta')
+            ->assertSee('Pronto para indicar')
+            ->assertSee('Uso da cota')
+            ->assertSee('Reserva minima de saude')
+            ->assertSee('Vereador indica')
+            ->assertSee('Prefeitura executa')
             ->assertDontSee('Cadastro indisponível')
             ->assertDontSee('Cadastrar emenda');
 
@@ -181,6 +186,27 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.create'))
             ->assertRedirect(route('legislative.index', ['year' => now()->year + 1]))
             ->assertSessionHas('warning');
+    }
+
+    public function test_councilor_portal_guides_when_quota_is_exhausted(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereadora Saldo Zero',
+            'legislative_party' => 'PSD',
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'author_name' => 'Vereadora Saldo Zero',
+            'estimated_amount' => 155000,
+        ]);
+
+        $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Sem saldo')
+            ->assertSee('Saldo individual esgotado')
+            ->assertSee('Aguardando liberacao');
     }
 
     public function test_submission_blocks_amount_above_councilor_quota(): void
