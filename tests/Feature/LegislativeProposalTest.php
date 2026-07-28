@@ -313,6 +313,54 @@ class LegislativeProposalTest extends TestCase
             ->assertDontSee('Abrir fluxo executivo');
     }
 
+    public function test_executive_sees_single_board_for_chamber_intake_and_councilor_keeps_simple_view(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereadora Mesa',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SUBMITTED,
+            'object' => 'Compra de computadores para modernizar o atendimento da secretaria municipal.',
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'object' => 'Aquisição de equipamentos para ampliar serviços públicos nos bairros.',
+            'protocol_number' => 'CAM-2027-001',
+            'sent_at' => now(),
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_RECEIVED,
+            'object' => 'Reforma de unidade municipal para atendimento direto aos moradores.',
+            'executive_process_number' => 'PREF-2027-001',
+            'received_by' => $manager->id,
+            'received_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Entrada da Câmara')
+            ->assertSee('Propostas para decisão do Executivo')
+            ->assertSee('Conferir na Câmara')
+            ->assertSee('Receber no Executivo')
+            ->assertSee('Reservar orçamento')
+            ->assertSee('Compra de computadores')
+            ->assertSee('Receber proposta')
+            ->assertSee('Registrar reserva');
+
+        $this->actingAs($councilor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Minha cota')
+            ->assertDontSee('Entrada da Câmara');
+    }
+
     public function test_councilor_cannot_view_another_councilors_proposal_or_another_municipality(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

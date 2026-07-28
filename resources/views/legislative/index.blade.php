@@ -66,6 +66,44 @@
         </section>
     @endif
 
+    @if ($executiveBoard)
+        <section class="content-panel legislative-executive-board">
+            <div class="content-panel-header">
+                <div>
+                    <p class="panel-kicker">Entrada da Câmara</p>
+                    <h2 class="h5 mb-1">Propostas para decisão do Executivo</h2>
+                    <p class="small text-secondary mb-0">Acompanhe em uma tela o que a Câmara enviou, o que precisa ser recebido e o que já entrou na execução municipal.</p>
+                </div>
+            </div>
+            <div class="legislative-board-grid">
+                @foreach ($executiveBoard as $column)
+                    <article class="legislative-board-column">
+                        <header>
+                            <span><i data-lucide="{{ $column['icon'] }}" aria-hidden="true"></i></span>
+                            <div>
+                                <strong>{{ $column['title'] }}</strong>
+                                <small>{{ $column['items']->count() }} item(ns) · R$ {{ number_format($column['amount'], 2, ',', '.') }}</small>
+                            </div>
+                        </header>
+                        <p>{{ $column['description'] }}</p>
+                        <div class="legislative-board-items">
+                            @forelse ($column['items'] as $item)
+                                <a href="{{ route('legislative.show', $item) }}">
+                                    <span>{{ $item->reference }}</span>
+                                    <strong>{{ $item->object }}</strong>
+                                    <small>{{ $item->author_name }} · R$ {{ number_format((float) $item->estimated_amount, 2, ',', '.') }}</small>
+                                    <em>{{ $column['action'] }}</em>
+                                </a>
+                            @empty
+                                <div class="legislative-board-empty">Nenhuma proposta nesta etapa.</div>
+                            @endforelse
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <form class="legislative-filters" method="GET">
         <label><span>Exercício</span><select class="form-select" name="year">@foreach(collect([$year, ...$activeYears])->unique()->sortDesc() as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}{{ in_array($availableYear, $activeYears, true) ? ' · ativo' : ' · sem regra ativa' }}</option>@endforeach</select></label>
         <label><span>Situação</span><select class="form-select" name="status"><option value="">Todas</option>@foreach($statuses as $value => $label)<option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>@endforeach</select></label>

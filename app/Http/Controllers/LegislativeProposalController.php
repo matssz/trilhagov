@@ -43,10 +43,14 @@ class LegislativeProposalController extends Controller
                     ->orWhere('beneficiary_name', 'like', "%{$search}%");
             }));
         $summaryQuery = clone $query;
+        $boardQuery = clone $query;
         $profile = $service->profile($municipality, $year);
         $quota = $role === User::ROLE_COUNCILOR && $profile
             ? $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name))
             : null;
+        $executiveBoard = $role === User::ROLE_COUNCILOR
+            ? null
+            : $this->executiveBoard($boardQuery->latest('id')->get());
 
         return view('legislative.index', [
             'municipality' => $municipality,
@@ -59,6 +63,7 @@ class LegislativeProposalController extends Controller
             'activeYears' => $service->activeYears($municipality),
             'profile' => $profile,
             'quota' => $quota,
+            'executiveBoard' => $executiveBoard,
             'proposals' => $query->latest('id')->paginate(12)->withQueryString(),
             'summary' => [
                 'total' => (clone $summaryQuery)->count(),
@@ -67,6 +72,59 @@ class LegislativeProposalController extends Controller
                 'sent' => (clone $summaryQuery)->whereIn('status', [LegislativeProposal::STATUS_SENT, LegislativeProposal::STATUS_RECEIVED, LegislativeProposal::STATUS_RESERVED])->count(),
             ],
         ]);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection<int, LegislativeProposal> $proposals
+     * @return array<int, array{key: string, title: string, description: string, icon: string, statuses: array<int, string>, items: \Illuminate\Support\Collection<int, LegislativeProposal>, amount: float, action: string}>
+     */
+    private function executiveBoard(\Illuminate\Support\Collection $proposals): array
+    {
+        return collect([
+            [
+                'key' => 'review',
+                'title' => 'Conferir na Câmara',
+                'description' => 'Indicações enviadas pelos vereadores ou aprovadas para protocolo.',
+                'icon' => 'badge-check',
+                'statuses' => [LegislativeProposal::STATUS_SUBMITTED, LegislativeProposal::STATUS_APPROVED],
+                'action' => 'Analisar ou protocolar',
+            ],
+            [
+                'key' => 'receive',
+                'title' => 'Receber no Executivo',
+                'description' => 'Protocoladas pela Câmara e aguardando processo executivo.',
+                'icon' => 'inbox',
+                'statuses' => [LegislativeProposal::STATUS_SENT],
+                'action' => 'Receber proposta',
+            ],
+            [
+                'key' => 'budget',
+                'title' => 'Reservar orçamento',
+                'description' => 'Recebidas e aguardando reserva orçamentária formal.',
+                'icon' => 'wallet-cards',
+                'statuses' => [LegislativeProposal::STATUS_RECEIVED],
+                'action' => 'Registrar reserva',
+            ],
+            [
+                'key' => 'execution',
+                'title' => 'Acompanhar execução',
+                'description' => 'Com reserva registrada e fluxo executivo aberto.',
+                'icon' => 'gauge',
+                'statuses' => [LegislativeProposal::STATUS_RESERVED],
+                'action' => 'Abrir acompanhamento',
+            ],
+        ])->map(function (array $column) use ($proposals): array {
+            $items = $proposals
+                ->whereIn('status', $column['statuses'])
+                ->take(5)
+                ->values();
+
+            return [
+                ...$column,
+                'items' => $items,
+                'amount' => (float) $proposals->whereIn('status', $column['statuses'])->sum('estimated_amount'),
+            ];
+        })->all();
     }
 
     public function create(
