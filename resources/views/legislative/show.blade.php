@@ -232,7 +232,12 @@
                                 <label><input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $proposal->{$field}))><span><strong>{{ $item['label'] }}</strong><small>{{ $item['guidance'] }}</small></span></label>
                             @endforeach
                         </div>
-                        <label class="d-block mt-3"><span class="form-label">Fundamentação <b class="required-mark">*</b></span><textarea class="form-control" name="review_notes" rows="4" minlength="20" maxlength="5000" required>{{ old('review_notes', $proposal->review_notes) }}</textarea></label>
+                        @error('review')<p class="field-error mt-3 mb-0">{{ $message }}</p>@enderror
+                        <label class="d-block mt-3">
+                            <span class="form-label">Fundamentação <b class="required-mark">*</b></span>
+                            <textarea class="form-control @error('review_notes') is-invalid @enderror" name="review_notes" rows="4" minlength="20" maxlength="5000" required>{{ old('review_notes', $proposal->review_notes) }}</textarea>
+                            @error('review_notes')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
                         <div class="legislative-decision-actions">
                             <button class="btn btn-outline-danger" name="decision" type="submit" value="reject"><i data-lucide="circle-x" aria-hidden="true"></i>Rejeitar</button>
                             <button class="btn btn-outline-secondary" name="decision" type="submit" value="return"><i data-lucide="undo-2" aria-hidden="true"></i>Devolver</button>
@@ -253,7 +258,12 @@
                     <form method="POST" action="{{ route('legislative.protocol', $proposal) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $protocolToken }}">
-                        <label><span>Número do protocolo <b>*</b></span><input class="form-control" name="protocol_number" value="{{ old('protocol_number', $proposal->protocol_number) }}" required></label>
+                        @error('protocol')<p class="field-error span-2 mb-0">{{ $message }}</p>@enderror
+                        <label>
+                            <span>Número do protocolo <b>*</b></span>
+                            <input class="form-control @error('protocol_number') is-invalid @enderror" name="protocol_number" value="{{ old('protocol_number', $proposal->protocol_number) }}" required>
+                            @error('protocol_number')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
                         <button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Protocolar no Executivo</button>
                     </form>
                 </section>
@@ -265,8 +275,16 @@
                     <form method="POST" action="{{ route('legislative.receive', $proposal) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $receiveToken }}">
-                        <label><span>Processo administrativo <b>*</b></span><input class="form-control" name="executive_process_number" value="{{ old('executive_process_number') }}" required></label>
-                        <label class="span-2"><span>Conferência inicial <b>*</b></span><textarea class="form-control" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes') }}</textarea></label>
+                        <label>
+                            <span>Processo administrativo <b>*</b></span>
+                            <input class="form-control @error('executive_process_number') is-invalid @enderror" name="executive_process_number" value="{{ old('executive_process_number') }}" required>
+                            @error('executive_process_number')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
+                        <label class="span-2">
+                            <span>Conferência inicial <b>*</b></span>
+                            <textarea class="form-control @error('executive_notes') is-invalid @enderror" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes') }}</textarea>
+                            @error('executive_notes')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
                         <button class="btn btn-primary" type="submit"><i data-lucide="download" aria-hidden="true"></i>Confirmar recebimento</button>
                     </form>
                 </section>
@@ -278,10 +296,26 @@
                     <form method="POST" action="{{ route('legislative.reserve', $proposal) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $reserveToken }}">
-                        <label><span>Número da reserva <b>*</b></span><input class="form-control" name="budget_reservation_number" value="{{ old('budget_reservation_number') }}" required></label>
-                        <label><span>Valor reservado <b>*</b></span><input class="form-control" name="budget_reserved_amount" type="number" min="0.01" step="0.01" value="{{ old('budget_reserved_amount', $proposal->estimated_amount) }}" required></label>
-                        <label><span>Data da reserva <b>*</b></span><input class="form-control" name="budget_reserved_at" type="date" max="{{ now()->toDateString() }}" value="{{ old('budget_reserved_at', now()->toDateString()) }}" required></label>
-                        <label class="span-2"><span>Reanálise orçamentária <b>*</b></span><textarea class="form-control" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes', $proposal->executive_notes) }}</textarea></label>
+                        <label>
+                            <span>Número da reserva <b>*</b></span>
+                            <input class="form-control @error('budget_reservation_number') is-invalid @enderror" name="budget_reservation_number" value="{{ old('budget_reservation_number') }}" required>
+                            @error('budget_reservation_number')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
+                        <label>
+                            <span>Valor reservado <b>*</b></span>
+                            <input class="form-control @error('budget_reserved_amount') is-invalid @enderror" name="budget_reserved_amount" type="number" min="0.01" step="0.01" value="{{ old('budget_reserved_amount', $proposal->estimated_amount) }}" required>
+                            @error('budget_reserved_amount')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
+                        <label>
+                            <span>Data da reserva <b>*</b></span>
+                            <input class="form-control @error('budget_reserved_at') is-invalid @enderror" name="budget_reserved_at" type="date" max="{{ now()->toDateString() }}" value="{{ old('budget_reserved_at', now()->toDateString()) }}" required>
+                            @error('budget_reserved_at')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
+                        <label class="span-2">
+                            <span>Reanálise orçamentária <b>*</b></span>
+                            <textarea class="form-control @error('executive_notes') is-invalid @enderror" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes', $proposal->executive_notes) }}</textarea>
+                            @error('executive_notes')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </label>
                         <button class="btn btn-primary" type="submit"><i data-lucide="wallet-cards" aria-hidden="true"></i>Registrar reserva</button>
                     </form>
                 </section>

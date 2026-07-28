@@ -312,7 +312,8 @@ class LegislativeProposalTest extends TestCase
             '_submission_token' => $receiveToken,
             'executive_process_number' => 'PREF-2027-0021',
             'executive_notes' => 'Documentação recebida e encaminhada para reanálise orçamentária da unidade municipal competente.',
-        ])->assertSessionHas('warning');
+        ])->assertRedirect(route('emendas.show', $proposal->fresh()->amendment))
+            ->assertSessionHas('status');
 
         $proposal->refresh();
         $amendment = $proposal->amendment;

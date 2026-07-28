@@ -2086,17 +2086,33 @@ h6 {
 .data-list {
     display: grid;
     grid-template-columns: 220px minmax(0, 1fr);
+    overflow: hidden;
     margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
 }
 
 .data-list dt,
 .data-list dd {
-    padding: .7rem 0;
+    min-width: 0;
+    margin: 0;
+    padding: .85rem 1rem;
     border-bottom: 1px solid var(--line);
 }
 
 .data-list dt {
+    background: #f8fafc;
     color: #566276;
+    font-size: .78rem;
+    font-weight: 850;
+    text-transform: none;
+}
+
+.data-list dd {
+    background: #ffffff;
+    color: var(--navy-950);
+    overflow-wrap: anywhere;
 }
 
 .auth-shell {

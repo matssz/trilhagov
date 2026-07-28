@@ -395,11 +395,11 @@ class LegislativeProposalController extends Controller
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal);
         abort_unless($proposal->submitted_by === $request->user()->id, 404);
-        $request->validate(['_submission_token' => ['required', 'string']]);
-        if (! $formSubmission->consume($request, "legislative-proposal-submit-{$proposal->id}")) {
-            return back()->with('warning', 'Este envio já foi processado.');
+        $request->validate(['_submission_token' => ['nullable', 'string']]);
+        $formSubmission->consume($request, "legislative-proposal-submit-{$proposal->id}");
+        if (! $proposal->isEditable()) {
+            return back()->with('status', 'Esta indicação já foi enviada ou já avançou no fluxo.');
         }
-        abort_unless($proposal->isEditable(), 409, 'Esta proposta não está disponível para envio.');
         $errors = $service->submissionErrors($proposal, $request->user());
         if ($errors !== []) {
             return back()->withErrors($errors);
@@ -424,15 +424,15 @@ class LegislativeProposalController extends Controller
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal);
-        $rules = ['_submission_token' => ['required', 'string'], 'decision' => ['required', Rule::in(['approve', 'return', 'reject'])], 'review_notes' => ['required', 'string', 'min:20', 'max:5000']];
+        $rules = ['_submission_token' => ['nullable', 'string'], 'decision' => ['required', Rule::in(['approve', 'return', 'reject'])], 'review_notes' => ['required', 'string', 'min:20', 'max:5000']];
         foreach (array_keys($service->reviewChecklist()) as $field) {
             $rules[$field] = ['nullable', 'boolean'];
         }
         $validated = $request->validate($rules, ['review_notes.min' => 'Fundamente a análise com pelo menos 20 caracteres.']);
-        if (! $formSubmission->consume($request, "legislative-proposal-review-{$proposal->id}")) {
-            return back()->with('warning', 'Esta análise já foi processada.');
+        $formSubmission->consume($request, "legislative-proposal-review-{$proposal->id}");
+        if ($proposal->status !== LegislativeProposal::STATUS_SUBMITTED) {
+            return back()->with('status', 'Esta proposta já saiu da conferência legislativa. A etapa atual foi mantida.');
         }
-        abort_unless($proposal->status === LegislativeProposal::STATUS_SUBMITTED, 409, 'A proposta não aguarda análise.');
         $checks = collect(array_keys($service->reviewChecklist()))->mapWithKeys(fn (string $field) => [$field => $request->boolean($field)])->all();
         $proposal->forceFill($checks);
         if ($validated['decision'] === 'approve' && $service->reviewBlockers($proposal) !== []) {
@@ -467,11 +467,12 @@ class LegislativeProposalController extends Controller
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal);
         $validated = $request->validate([
-            '_submission_token' => ['required', 'string'],
+            '_submission_token' => ['nullable', 'string'],
             'protocol_number' => ['required', 'string', 'min:3', 'max:180'],
         ]);
-        if (! $formSubmission->consume($request, "legislative-proposal-protocol-{$proposal->id}")) {
-            return back()->with('warning', 'Este protocolo já foi processado.');
+        $formSubmission->consume($request, "legislative-proposal-protocol-{$proposal->id}");
+        if ($proposal->status !== LegislativeProposal::STATUS_APPROVED) {
+            return back()->with('status', 'Esta proposta já foi protocolada ou não está mais nessa etapa.');
         }
         $proposal->forceFill(['protocol_number' => trim($validated['protocol_number'])]);
         $blockers = $service->protocolBlockers($proposal);
@@ -503,18 +504,26 @@ class LegislativeProposalController extends Controller
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal);
         $validated = $request->validate([
-            '_submission_token' => ['required', 'string'],
+            '_submission_token' => ['nullable', 'string'],
             'executive_process_number' => ['required', 'string', 'min:3', 'max:180'],
             'executive_notes' => ['required', 'string', 'min:20', 'max:5000'],
         ], ['executive_notes.min' => 'Registre a conferência inicial do Executivo com pelo menos 20 caracteres.']);
-        if (! $formSubmission->consume($request, "legislative-proposal-receive-{$proposal->id}")) {
-            return back()->with('warning', 'Este recebimento já foi processado.');
+        $formSubmission->consume($request, "legislative-proposal-receive-{$proposal->id}");
+        if ($proposal->status !== LegislativeProposal::STATUS_SENT) {
+            $proposal->load('amendment');
+
+            if ($proposal->amendment) {
+                return redirect()->route('emendas.show', $proposal->amendment)->with('status', 'Recebimento já confirmado. A emenda executiva está aberta.');
+            }
+
+            return back()->with('status', 'Esta proposta não está mais aguardando recebimento pelo Executivo.');
         }
-        abort_unless($proposal->status === LegislativeProposal::STATUS_SENT, 409, 'A proposta não aguarda recebimento.');
 
         $amendment = DB::transaction(function () use ($request, $municipality, $proposal, $validated, $transparencyTrail): ParliamentaryAmendment {
             $locked = LegislativeProposal::query()->lockForUpdate()->findOrFail($proposal->id);
-            abort_unless($locked->status === LegislativeProposal::STATUS_SENT && $locked->parliamentary_amendment_id === null, 409, 'A proposta já foi recebida.');
+            if ($locked->status !== LegislativeProposal::STATUS_SENT || $locked->parliamentary_amendment_id !== null) {
+                return $locked->amendment()->firstOrFail();
+            }
             $amendment = $municipality->amendments()->create([
                 'municipal_regulatory_profile_id' => $locked->municipal_regulatory_profile_id,
                 'created_by' => $request->user()->id,
@@ -569,7 +578,7 @@ class LegislativeProposalController extends Controller
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal)->load('amendment');
         $validated = $request->validate([
-            '_submission_token' => ['required', 'string'],
+            '_submission_token' => ['nullable', 'string'],
             'budget_reservation_number' => ['required', 'string', 'min:3', 'max:180'],
             'budget_reserved_amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999999.99'],
             'budget_reserved_at' => ['required', 'date', 'before_or_equal:today'],
@@ -578,10 +587,10 @@ class LegislativeProposalController extends Controller
         if (abs((float) $validated['budget_reserved_amount'] - (float) $proposal->estimated_amount) > 0.01) {
             return back()->withErrors(['budget_reserved_amount' => 'A reserva deve corresponder integralmente ao valor protocolado. Divergências exigem devolução formal à Câmara.']);
         }
-        if (! $formSubmission->consume($request, "legislative-proposal-reserve-{$proposal->id}")) {
-            return back()->with('warning', 'Esta reserva já foi processada.');
+        $formSubmission->consume($request, "legislative-proposal-reserve-{$proposal->id}");
+        if ($proposal->status !== LegislativeProposal::STATUS_RECEIVED || ! $proposal->amendment) {
+            return back()->with('status', 'Esta proposta já avançou ou ainda não está disponível para reserva orçamentária.');
         }
-        abort_unless($proposal->status === LegislativeProposal::STATUS_RECEIVED && $proposal->amendment, 409, 'A proposta ainda não está disponível para reserva.');
 
         DB::transaction(function () use ($request, $proposal, $validated, $transparencyTrail): void {
             $from = $proposal->status;
