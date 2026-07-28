@@ -17,6 +17,7 @@
             'health' => 'heart-pulse',
             'contract' => 'hard-hat',
             'control' => 'shield-check',
+            'transparency' => 'eye',
         ];
     @endphp
 
@@ -48,7 +49,32 @@
         <article><span class="metric-owner"><i data-lucide="user-round-check" aria-hidden="true"></i></span><div><small>Sem responsável</small><strong>{{ $metrics['unassigned'] }}</strong></div></article>
     </section>
 
+    <section class="work-lanes" aria-label="Filas por perfil e frente de trabalho">
+        <div class="work-lanes-heading">
+            <div>
+                <p class="panel-kicker">Filas rápidas</p>
+                <h2>Escolha o tipo de pendência</h2>
+            </div>
+            @if ($selectedQueue)
+                <a class="btn btn-outline-primary" href="{{ route('work-center.index', request()->except('queue', 'page')) }}"><i data-lucide="x" aria-hidden="true"></i>Ver todas</a>
+            @endif
+        </div>
+        <div class="work-lane-grid">
+            @foreach ($queueCards as $card)
+                <a class="work-lane-card {{ $card['active'] ? 'active' : '' }}" href="{{ route('work-center.index', array_merge(request()->except('queue', 'page'), ['queue' => $card['key']])) }}">
+                    <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                    <strong>{{ $card['count'] }}</strong>
+                    <small>{{ $card['label'] }}</small>
+                    <em>{{ $card['description'] }}</em>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
     <form class="work-filters" method="GET" action="{{ route('work-center.index') }}">
+        @if ($selectedQueue)
+            <input type="hidden" name="queue" value="{{ $selectedQueue }}">
+        @endif
         <label><span>Situação</span><select class="form-select" name="status"><option value="active" @selected($selectedStatus === 'active')>Ativas</option>@foreach ($statuses as $value => $label)<option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>@endforeach</select></label>
         <label><span>Prioridade</span><select class="form-select" name="priority"><option value="">Todas</option>@foreach ($priorities as $value => $label)<option value="{{ $value }}" @selected($selectedPriority === $value)>{{ $label }}</option>@endforeach</select></label>
         <label><span>Frente</span><select class="form-select" name="category"><option value="">Todas</option>@foreach ($categories as $value => $label)<option value="{{ $value }}" @selected($selectedCategory === $value)>{{ $label }}</option>@endforeach</select></label>
@@ -57,7 +83,7 @@
     </form>
 
     <section class="work-queue" aria-label="Fila de trabalho">
-        <header><div><p class="panel-kicker">Fila priorizada</p><h2>{{ $selectedStatus === 'active' ? 'Próximas ações' : ($statuses[$selectedStatus] ?? 'Ações') }}</h2></div><span>{{ $items->total() }} resultado(s)</span></header>
+        <header><div><p class="panel-kicker">Fila priorizada</p><h2>{{ $selectedQueue ? collect($queueCards)->firstWhere('key', $selectedQueue)['label'] : ($selectedStatus === 'active' ? 'Próximas ações' : ($statuses[$selectedStatus] ?? 'Ações')) }}</h2></div><span>{{ $items->total() }} resultado(s)</span></header>
         @forelse ($items as $item)
             <details class="work-item priority-{{ $item->priority }} status-{{ $item->status }}">
                 <summary>

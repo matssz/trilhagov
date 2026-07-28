@@ -244,6 +244,46 @@ class WorkCenterTest extends TestCase
             ->assertSee('Atualize o plano para organizar as próximas ações do município.');
     }
 
+    public function test_work_center_has_profile_queues_and_filters_my_actions(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, ['responsible_user_id' => $manager->id]);
+        $municipality->workItems()->create([
+            'parliamentary_amendment_id' => $amendment->id,
+            'responsible_user_id' => $manager->id,
+            'source_key' => "amendment:{$amendment->id}:mine",
+            'category' => 'planning',
+            'title' => 'Concluir plano da emenda',
+            'guidance' => 'Finalize os campos obrigatórios para liberar a análise.',
+            'action_url' => route('emendas.work-plan', $amendment, false),
+            'priority' => MunicipalWorkItem::PRIORITY_HIGH,
+            'status' => MunicipalWorkItem::STATUS_PENDING,
+            'first_detected_at' => now(),
+            'last_evaluated_at' => now(),
+        ]);
+        $municipality->workItems()->create([
+            'parliamentary_amendment_id' => $amendment->id,
+            'source_key' => "amendment:{$amendment->id}:unassigned",
+            'category' => 'document',
+            'title' => 'Anexar parecer jurídico',
+            'guidance' => 'Inclua o parecer no dossiê municipal.',
+            'action_url' => route('emendas.show', $amendment, false),
+            'priority' => MunicipalWorkItem::PRIORITY_NORMAL,
+            'status' => MunicipalWorkItem::STATUS_PENDING,
+            'first_detected_at' => now(),
+            'last_evaluated_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('work-center.index', ['queue' => 'mine']))
+            ->assertOk()
+            ->assertSee('Filas rápidas')
+            ->assertSee('Minhas ações')
+            ->assertSee('Concluir plano da emenda')
+            ->assertDontSee('Anexar parecer jurídico');
+    }
+
     public function test_work_items_are_isolated_by_active_municipality(): void
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);

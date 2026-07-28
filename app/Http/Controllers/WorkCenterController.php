@@ -31,6 +31,9 @@ class WorkCenterController extends Controller
             ? (string) $request->query('category')
             : '';
         $selectedResponsible = $request->query('responsible');
+        $selectedQueue = in_array($request->query('queue'), array_keys($this->queueDefinitions()), true)
+            ? (string) $request->query('queue')
+            : '';
 
         $query = $municipality->workItems()->with(['amendment', 'responsibleUser', 'events'])
             ->when($selectedStatus === 'active', fn ($query) => $query->whereIn('status', [MunicipalWorkItem::STATUS_PENDING, MunicipalWorkItem::STATUS_IN_PROGRESS]))
@@ -38,8 +41,9 @@ class WorkCenterController extends Controller
             ->when($selectedPriority !== '', fn ($query) => $query->where('priority', $selectedPriority))
             ->when($selectedCategory !== '', fn ($query) => $query->where('category', $selectedCategory))
             ->when($selectedResponsible === 'unassigned', fn ($query) => $query->whereNull('responsible_user_id'))
-            ->when(is_numeric($selectedResponsible), fn ($query) => $query->where('responsible_user_id', (int) $selectedResponsible))
-            ->orderByRaw("CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 ELSE 2 END")
+            ->when(is_numeric($selectedResponsible), fn ($query) => $query->where('responsible_user_id', (int) $selectedResponsible));
+        $this->applyQueueFilter($query, $selectedQueue, $request->user()->id);
+        $query->orderByRaw("CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 ELSE 2 END")
             ->orderByRaw('CASE WHEN due_at IS NULL THEN 1 ELSE 0 END')
             ->orderBy('due_at')
             ->latest('first_detected_at');
@@ -65,6 +69,8 @@ class WorkCenterController extends Controller
             'selectedPriority' => $selectedPriority,
             'selectedCategory' => $selectedCategory,
             'selectedResponsible' => $selectedResponsible,
+            'selectedQueue' => $selectedQueue,
+            'queueCards' => $this->queueCards($activeQuery, $request->user()->id, $selectedQueue),
             'metrics' => [
                 'active' => (clone $activeQuery)->count(),
                 'overdue' => (clone $activeQuery)->whereDate('due_at', '<', today())->count(),
@@ -77,6 +83,58 @@ class WorkCenterController extends Controller
                 $item->id => $formSubmission->issue($request, "work-item-update-{$item->id}"),
             ]) : collect(),
         ]);
+    }
+
+    /** @return array<string, array{label: string, description: string, icon: string}> */
+    private function queueDefinitions(): array
+    {
+        return [
+            'mine' => ['label' => 'Minhas ações', 'description' => 'Pendências atribuídas a você.', 'icon' => 'user-check'],
+            'unassigned' => ['label' => 'Sem responsável', 'description' => 'Ações que precisam de dono.', 'icon' => 'user-round-x'],
+            'overdue' => ['label' => 'Atrasadas', 'description' => 'Prazos vencidos ou críticos.', 'icon' => 'triangle-alert'],
+            'chamber' => ['label' => 'Câmara e protocolo', 'description' => 'Comunicações, ofícios e retornos.', 'icon' => 'landmark'],
+            'executive' => ['label' => 'Executivo e plano', 'description' => 'Responsáveis, normas e plano de trabalho.', 'icon' => 'clipboard-list'],
+            'documents' => ['label' => 'Documentos', 'description' => 'Anexos e evidências obrigatórias.', 'icon' => 'file-check-2'],
+            'health_control' => ['label' => 'Saúde e controle', 'description' => 'ASPS, TCESP e Controle Interno.', 'icon' => 'shield-check'],
+            'execution' => ['label' => 'Execução e contas', 'description' => 'Financeiro, contratos e prestação.', 'icon' => 'chart-no-axes-combined'],
+        ];
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string, description: string, icon: string, count: int, active: bool}>
+     */
+    private function queueCards($baseQuery, int $userId, string $selectedQueue): array
+    {
+        $cards = [];
+        foreach ($this->queueDefinitions() as $key => $definition) {
+            $query = clone $baseQuery;
+            $this->applyQueueFilter($query, $key, $userId);
+            $cards[] = [
+                'key' => $key,
+                'label' => $definition['label'],
+                'description' => $definition['description'],
+                'icon' => $definition['icon'],
+                'count' => $query->count(),
+                'active' => $selectedQueue === $key,
+            ];
+        }
+
+        return $cards;
+    }
+
+    private function applyQueueFilter($query, string $queue, int $userId): void
+    {
+        match ($queue) {
+            'mine' => $query->where('responsible_user_id', $userId),
+            'unassigned' => $query->whereNull('responsible_user_id'),
+            'overdue' => $query->whereDate('due_at', '<', today()),
+            'chamber' => $query->whereIn('category', ['communication', 'impediment']),
+            'executive' => $query->whereIn('category', ['responsibility', 'normative', 'planning']),
+            'documents' => $query->where('category', 'document'),
+            'health_control' => $query->whereIn('category', ['health', 'control']),
+            'execution' => $query->whereIn('category', ['execution', 'financial', 'contract', 'accountability']),
+            default => null,
+        };
     }
 
     public function synchronize(
