@@ -83,8 +83,8 @@ class LegislativeProposalController extends Controller
         return collect([
             [
                 'key' => 'review',
-                'title' => 'Conferir na Câmara',
-                'description' => 'Indicações enviadas pelos vereadores ou aprovadas para protocolo.',
+                'title' => 'Conferência da Câmara',
+                'description' => 'Propostas enviadas pelos vereadores ou aprovadas para protocolo.',
                 'icon' => 'badge-check',
                 'statuses' => [LegislativeProposal::STATUS_SUBMITTED, LegislativeProposal::STATUS_APPROVED],
                 'action' => 'Analisar ou protocolar',
@@ -159,7 +159,7 @@ class LegislativeProposalController extends Controller
         $municipality = $currentMunicipality->get($request);
         abort_unless($request->user()->roleForMunicipality($municipality->id) === User::ROLE_COUNCILOR, 403);
         $validated = $this->validateProposal($request);
-        if (! $formSubmission->consume($request, 'legislative-proposal-create')) {
+        if (! $formSubmission->has($request, 'legislative-proposal-create')) {
             return redirect()->route('legislative.index')->with('warning', 'Esta proposta já foi cadastrada.');
         }
         $profile = $service->profile($municipality, (int) $validated['fiscal_year']);
@@ -167,6 +167,14 @@ class LegislativeProposalController extends Controller
             return back()->withInput()->withErrors(['fiscal_year' => 'Não existe configuração normativa vigente para este exercício.']);
         }
         $membership = $request->user()->municipalities()->whereKey($municipality->id)->firstOrFail()->pivot;
+        $authorName = trim((string) ($membership->legislative_name ?: $request->user()->name));
+        $draftErrors = $service->draftErrors($municipality, $profile, $authorName, $validated);
+        if ($draftErrors !== []) {
+            return back()->withInput()->withErrors($draftErrors);
+        }
+        if (! $formSubmission->consume($request, 'legislative-proposal-create')) {
+            return redirect()->route('legislative.index')->with('warning', 'Esta proposta já foi cadastrada.');
+        }
 
         $proposal = DB::transaction(function () use ($request, $municipality, $profile, $membership, $validated): LegislativeProposal {
             Municipality::query()->lockForUpdate()->findOrFail($municipality->id);
@@ -235,12 +243,17 @@ class LegislativeProposalController extends Controller
         int $proposal,
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
+        LegislativeProposalService $service,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
-        $proposal = $this->proposal($request, $municipality, $proposal);
+        $proposal = $this->proposal($request, $municipality, $proposal)->load('regulatoryProfile');
         abort_unless($proposal->submitted_by === $request->user()->id && $proposal->isEditable(), 409, 'Esta proposta não pode mais ser editada.');
         $validated = $this->validateProposal($request, false);
+        $draftErrors = $service->draftErrors($municipality, $proposal->regulatoryProfile, $proposal->author_name, $validated, $proposal);
+        if ($draftErrors !== []) {
+            return back()->withInput()->withErrors($draftErrors);
+        }
         if (! $formSubmission->consume($request, "legislative-proposal-update-{$proposal->id}")) {
             return back()->with('warning', 'Esta alteração já foi processada.');
         }

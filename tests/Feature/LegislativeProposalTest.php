@@ -101,6 +101,48 @@ class LegislativeProposalTest extends TestCase
         $this->assertSame('Estimativa declarada pelo vereador', $proposal->estimate_source);
     }
 
+    public function test_councilor_cannot_save_proposal_above_available_quota(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Limite Inicial',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->actingAs($councilor);
+        $this->post(route('legislative.store'), [
+            ...$this->proposalPayload(),
+            '_submission_token' => $this->token($municipality, 'legislative-proposal-create'),
+            'estimated_amount' => 155000.01,
+        ])->assertSessionHasErrors('estimated_amount');
+
+        $this->assertSame(0, LegislativeProposal::count());
+    }
+
+    public function test_councilor_cannot_update_draft_above_available_quota(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Limite Edicao',
+            'legislative_party' => 'PSD',
+        ]);
+        $proposal = $this->proposal($municipality, $profile, $councilor, [
+            'author_name' => 'Vereador Limite Edicao',
+            'estimated_amount' => 50000,
+        ]);
+
+        $this->actingAs($councilor);
+        $this->patch(route('legislative.update', $proposal), [
+            ...$this->proposalPayload(),
+            '_submission_token' => $this->token($municipality, "legislative-proposal-update-{$proposal->id}"),
+            'estimated_amount' => 155000.01,
+        ])->assertSessionHasErrors('estimated_amount');
+
+        $this->assertEquals(50000.0, (float) $proposal->fresh()->estimated_amount);
+    }
+
     public function test_portal_uses_available_active_year_instead_of_unconfigured_next_year(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
@@ -348,9 +390,9 @@ class LegislativeProposalTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
-            ->assertSee('Entrada da Câmara')
-            ->assertSee('Propostas para decisão do Executivo')
-            ->assertSee('Conferir na Câmara')
+            ->assertSee('Fila Câmara')
+            ->assertSee('Propostas para decisão institucional')
+            ->assertSee('Conferência da Câmara')
             ->assertSee('Receber no Executivo')
             ->assertSee('Reservar orçamento')
             ->assertSee('Compra de computadores')
@@ -362,7 +404,7 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
             ->assertSee('Minha cota')
-            ->assertDontSee('Entrada da Câmara');
+            ->assertDontSee('Fila Câmara');
     }
 
     public function test_councilor_cannot_view_another_councilors_proposal_or_another_municipality(): void

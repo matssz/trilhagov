@@ -70,9 +70,9 @@
         <section class="content-panel legislative-executive-board">
             <div class="content-panel-header">
                 <div>
-                    <p class="panel-kicker">Entrada da Câmara</p>
-                    <h2 class="h5 mb-1">Propostas para decisão do Executivo</h2>
-                    <p class="small text-secondary mb-0">Acompanhe em uma tela o que a Câmara enviou, o que precisa ser recebido e o que já entrou na execução municipal.</p>
+                    <p class="panel-kicker">Fila Câmara → Executivo</p>
+                    <h2 class="h5 mb-1">Propostas para decisão institucional</h2>
+                    <p class="small text-secondary mb-0">Veja em uma tela o que ainda está na conferência da Câmara, o que precisa ser recebido pela Prefeitura e o que aguarda reserva orçamentária.</p>
                 </div>
             </div>
             <div class="legislative-board-grid">

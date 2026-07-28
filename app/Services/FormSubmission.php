@@ -45,4 +45,12 @@ class FormSubmission
 
         return true;
     }
+
+    public function has(Request $request, string $scope): bool
+    {
+        $token = (string) $request->input('_submission_token');
+        $tokens = $request->session()->get('form_submission_tokens', []);
+
+        return $token !== '' && isset($tokens[$scope][$token]);
+    }
 }

@@ -177,6 +177,59 @@ class LegislativeProposalService
         return $errors;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, string>
+     */
+    public function draftErrors(
+        Municipality $municipality,
+        ?MunicipalRegulatoryProfile $profile,
+        string $authorName,
+        array $data,
+        ?LegislativeProposal $current = null,
+    ): array {
+        $errors = [];
+
+        if ($profile === null) {
+            return ['fiscal_year' => 'O MunicÃ­pio ainda nÃ£o ativou a configuraÃ§Ã£o normativa deste exercÃ­cio.'];
+        }
+
+        if ($profile->regime_status !== MunicipalRegulatoryProfile::REGIME_INSTITUTED) {
+            $errors['fiscal_year'] = 'A Lei OrgÃ¢nica ainda nÃ£o estÃ¡ marcada como instituÃ­da para este exercÃ­cio.';
+        }
+
+        $amount = isset($data['estimated_amount']) ? (float) $data['estimated_amount'] : 0.0;
+        $quota = $this->quota(
+            $municipality,
+            $profile,
+            $authorName,
+            $current,
+            $amount,
+            (bool) ($data['health_related'] ?? false),
+        );
+
+        if ($profile->minimum_amendment_amount !== null && $amount < (float) $profile->minimum_amendment_amount) {
+            $errors['estimated_amount'] = 'O valor mÃ­nimo para proposta neste exercÃ­cio Ã© R$ '
+                .number_format((float) $profile->minimum_amendment_amount, 2, ',', '.').'.';
+        }
+
+        if ($quota['count_limit'] !== null && $quota['count'] > $quota['count_limit']) {
+            $errors['estimated_amount'] = "Este vereador jÃ¡ atingiu o limite de {$quota['count_limit']} proposta(s) para o exercÃ­cio.";
+        }
+
+        if ($quota['author_ceiling'] !== null && $quota['used'] > $quota['author_ceiling'] + 0.005) {
+            $availableBeforeThisProposal = max(0, (float) $quota['author_ceiling'] - ((float) $quota['used'] - $amount));
+            $errors['estimated_amount'] = 'Esta proposta ultrapassa o saldo disponÃ­vel do vereador. Saldo antes desta proposta: R$ '
+                .number_format($availableBeforeThisProposal, 2, ',', '.').'.';
+        }
+
+        if (($data['beneficiary_type'] ?? null) === 'third_sector' && ! (bool) ($data['third_sector_conflict_declaration'] ?? false)) {
+            $errors['third_sector_conflict_declaration'] = 'Para entidade do Terceiro Setor, confirme a declaraÃ§Ã£o preliminar de inexistÃªncia de conflito.';
+        }
+
+        return $errors;
+    }
+
     /** @return array<int, string> */
     public function reviewBlockers(LegislativeProposal $proposal): array
     {
