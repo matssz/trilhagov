@@ -25,6 +25,12 @@ class Municipality extends Model
         'ibge_code',
         'federal_amendments_enabled',
         'state_amendments_enabled',
+        'health_asps_module_enabled',
+        'contracts_module_enabled',
+        'audit_module_enabled',
+        'specialized_reports_enabled',
+        'spreadsheet_import_enabled',
+        'document_checklist_enabled',
         'transparency_enabled',
         'transparency_slug',
         'transparency_updated_at',
@@ -35,6 +41,12 @@ class Municipality extends Model
         return [
             'federal_amendments_enabled' => 'boolean',
             'state_amendments_enabled' => 'boolean',
+            'health_asps_module_enabled' => 'boolean',
+            'contracts_module_enabled' => 'boolean',
+            'audit_module_enabled' => 'boolean',
+            'specialized_reports_enabled' => 'boolean',
+            'spreadsheet_import_enabled' => 'boolean',
+            'document_checklist_enabled' => 'boolean',
             'transparency_enabled' => 'boolean',
             'transparency_updated_at' => 'datetime',
         ];
@@ -53,6 +65,72 @@ class Municipality extends Model
     {
         return $this->state === 'SP'
             && (string) $this->ibge_code !== self::SAO_PAULO_CAPITAL_IBGE_CODE;
+    }
+
+    /** @return array<string, array{label: string, description: string, field: string, automatic?: bool, paulista?: bool}> */
+    public static function moduleParameters(): array
+    {
+        return [
+            'federal_amendments' => [
+                'label' => 'Emendas federais e Transferegov',
+                'description' => 'Mostra campos federais, conciliacao externa e importacao de transferencias especiais.',
+                'field' => 'federal_amendments_enabled',
+            ],
+            'state_amendments' => [
+                'label' => 'Emendas estaduais',
+                'description' => 'Libera o cadastro de emendas estaduais sem misturar com o fluxo municipal da Camara.',
+                'field' => 'state_amendments_enabled',
+            ],
+            'health_asps' => [
+                'label' => 'Saude e LC 141 avancado',
+                'description' => 'Mostra a tela tecnica de enquadramento ASPS. A reserva de saude continua automatica mesmo desligada.',
+                'field' => 'health_asps_module_enabled',
+                'automatic' => true,
+            ],
+            'contracts' => [
+                'label' => 'Obras e contratos',
+                'description' => 'Libera planejamento, medicoes, aditivos e dossie de execucao contratual.',
+                'field' => 'contracts_module_enabled',
+            ],
+            'audit' => [
+                'label' => 'Controle Interno avancado',
+                'description' => 'Libera plano anual de auditoria, programas, papeis de trabalho e achados.',
+                'field' => 'audit_module_enabled',
+            ],
+            'specialized_reports' => [
+                'label' => 'Relatorios especializados',
+                'description' => 'Libera relatorios tecnicos de reserva, divergencias e consolidacoes para decisao.',
+                'field' => 'specialized_reports_enabled',
+            ],
+            'spreadsheet_import' => [
+                'label' => 'Importacao de planilhas',
+                'description' => 'Permite carga assistida por CSV para equipes que ja possuem bases antigas.',
+                'field' => 'spreadsheet_import_enabled',
+            ],
+            'document_checklist' => [
+                'label' => 'Checklist de documentos',
+                'description' => 'Libera configuracao avancada dos tipos documentais exigidos por fluxo.',
+                'field' => 'document_checklist_enabled',
+            ],
+            'tcesp_audesp' => [
+                'label' => 'TCESP e Audesp',
+                'description' => 'Aparece automaticamente para municipios paulistas atendidos pelo TCESP.',
+                'field' => '',
+                'automatic' => true,
+                'paulista' => true,
+            ],
+        ];
+    }
+
+    public function moduleEnabled(string $module): bool
+    {
+        if ($module === 'tcesp_audesp') {
+            return $this->supportsTcespAudesp();
+        }
+
+        $field = self::moduleParameters()[$module]['field'] ?? null;
+
+        return $field ? (bool) $this->{$field} : false;
     }
 
     /** @return array<string, string> */

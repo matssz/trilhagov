@@ -69,6 +69,44 @@
             <p><strong>Controle assistido.</strong> A ativação registra a decisão municipal, mas não substitui parecer jurídico nem validação do Tribunal de Contas.</p>
         </div>
 
+        @if ($canManage)
+            <section class="rules-modules-band">
+                <div class="rules-section-title">
+                    <div><p class="panel-kicker">Experiencia do sistema</p><h2>Modulos do municipio</h2></div>
+                    <span>Menu simples por padrao</span>
+                </div>
+                <form method="POST" action="{{ route('municipal-modules.update') }}" data-prevent-double-submit>
+                    @csrf @method('PATCH')
+                    <div class="rules-module-grid">
+                        @foreach (App\Models\Municipality::moduleParameters() as $key => $module)
+                            @php($field = $module['field'])
+                            @if ($field)
+                                <label class="rules-module-card">
+                                    <input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $municipality->{$field}))>
+                                    <span>
+                                        <strong>{{ $module['label'] }}</strong>
+                                        <small>{{ $module['description'] }}</small>
+                                    </span>
+                                </label>
+                            @else
+                                <div class="rules-module-card is-automatic">
+                                    <i data-lucide="{{ $municipality->moduleEnabled($key) ? 'badge-check' : 'circle-dashed' }}" aria-hidden="true"></i>
+                                    <span>
+                                        <strong>{{ $module['label'] }}</strong>
+                                        <small>{{ $municipality->moduleEnabled($key) ? $module['description'] : 'Indisponivel automaticamente para este municipio.' }}</small>
+                                    </span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <div class="rules-module-actions">
+                        <p>Audesp/TCESP segue automatico para municipios paulistas. A reserva de saude continua calculada no fluxo, mesmo com a tela tecnica desligada.</p>
+                        <button class="btn btn-primary" type="submit"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>Salvar modulos</button>
+                    </div>
+                </form>
+            </section>
+        @endif
+
         <section class="rules-portfolio-band">
             <div class="rules-section-title">
                 <div><p class="panel-kicker">Aplicação no exercício</p><h2>Reserva municipal da saúde</h2></div>
@@ -193,14 +231,6 @@
                 </div>
 
                 <fieldset>
-                    <legend>Módulos opcionais</legend>
-                    <div class="rules-fields">
-                        <label class="rules-toggle"><input class="form-check-input" name="federal_amendments_enabled" type="checkbox" value="1" @checked(old('federal_amendments_enabled', $municipality->federal_amendments_enabled))><span><strong>Habilitar emendas federais</strong><small>Mostra campos e importações de Transferegov somente quando o município decidir usar esse módulo.</small></span></label>
-                        <label class="rules-toggle"><input class="form-check-input" name="state_amendments_enabled" type="checkbox" value="1" @checked(old('state_amendments_enabled', $municipality->state_amendments_enabled))><span><strong>Habilitar emendas estaduais</strong><small>Libera o cadastro de emendas estaduais sem misturar com o fluxo municipal da Câmara.</small></span></label>
-                    </div>
-                </fieldset>
-
-                <fieldset>
                     <legend>Regime e limites</legend>
                     <div class="rules-fields">
                         <label><span>Situação local <b>*</b></span><select class="form-select" name="regime_status" required>@foreach(App\Models\MunicipalRegulatoryProfile::regimeStatuses() as $value => $label)<option value="{{ $value }}" @selected(old('regime_status', $profile->regime_status) === $value)>{{ $label }}</option>@endforeach</select></label>
@@ -214,7 +244,7 @@
                     </div>
                 </fieldset>
 
-                @php $binaryOptions = ['' => 'A confirmar', '1' => 'Sim', '0' => 'Não']; @endphp
+                @php($binaryOptions = ['' => 'A confirmar', '1' => 'Sim', '0' => 'Não'])
                 <fieldset>
                     <legend>Admissibilidade e execução</legend>
                     <div class="rules-fields">

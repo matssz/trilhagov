@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Municipality;
 use App\Models\MunicipalNormativeInstrument;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Services\AuditTrail;
@@ -104,14 +105,6 @@ class MunicipalRegulatoryProfileController extends Controller
         if ($request->boolean('apply_organic_law_defaults')) {
             $validated = $organicLawAutomation->mergeInto($validated);
         }
-        $municipalityValues = [
-            'federal_amendments_enabled' => $request->boolean('federal_amendments_enabled'),
-            'state_amendments_enabled' => $request->boolean('state_amendments_enabled'),
-        ];
-        $oldMunicipalityValues = $municipality->only(array_keys($municipalityValues));
-        $changedMunicipalityValues = collect($municipalityValues)
-            ->filter(fn ($value, $field) => (bool) $oldMunicipalityValues[$field] !== $value)
-            ->all();
         $values = [
             ...Arr::except($validated, ['generic_amendments_prohibited', 'prior_technical_review_required', 'work_plan_required', 'pca_check_required']),
             'generic_amendments_prohibited' => $this->nullableBoolean($validated['generic_amendments_prohibited'] ?? $request->input('generic_amendments_prohibited')),
@@ -124,30 +117,62 @@ class MunicipalRegulatoryProfileController extends Controller
         $oldValues = $rules->only(array_keys($values));
         $changed = collect($values)->filter(fn ($value, $field) => $oldValues[$field] != $value)->all();
 
-        if ($changed === [] && $changedMunicipalityValues === []) {
+        if ($changed === []) {
             return back()->with('warning', 'Nenhum parâmetro foi alterado.');
         }
 
-        DB::transaction(function () use ($request, $municipality, $rules, $oldValues, $changed, $oldMunicipalityValues, $changedMunicipalityValues, $auditTrail): void {
+        DB::transaction(function () use ($request, $municipality, $rules, $oldValues, $changed, $auditTrail): void {
             if ($changed !== []) {
                 $rules->update($changed);
-            }
-            if ($changedMunicipalityValues !== []) {
-                $municipality->update($changedMunicipalityValues);
             }
             $auditTrail->recordMunicipalityOperation(
                 $request,
                 $municipality,
                 'municipal_rules_updated',
-                ['profile_id' => $rules->id, ...$changed, ...$changedMunicipalityValues],
-                [
-                    ...array_intersect_key($oldValues, $changed),
-                    ...array_intersect_key($oldMunicipalityValues, $changedMunicipalityValues),
-                ],
+                ['profile_id' => $rules->id, ...$changed],
+                array_intersect_key($oldValues, $changed),
             );
         });
 
         return back()->with('status', 'Parâmetros municipais atualizados.');
+    }
+
+    public function updateModules(
+        Request $request,
+        CurrentMunicipality $currentMunicipality,
+        AuditTrail $auditTrail,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $fields = collect(Municipality::moduleParameters())
+            ->pluck('field')
+            ->filter()
+            ->values()
+            ->all();
+
+        $values = collect($fields)
+            ->mapWithKeys(fn (string $field) => [$field => $request->boolean($field)])
+            ->all();
+        $oldValues = $municipality->only($fields);
+        $changed = collect($values)
+            ->filter(fn ($value, $field) => (bool) $oldValues[$field] !== $value)
+            ->all();
+
+        if ($changed === []) {
+            return back()->with('warning', 'Nenhum modulo foi alterado.');
+        }
+
+        DB::transaction(function () use ($request, $municipality, $auditTrail, $changed, $oldValues): void {
+            $municipality->update($changed);
+            $auditTrail->recordMunicipalityOperation(
+                $request,
+                $municipality,
+                'municipal_modules_updated',
+                $changed,
+                array_intersect_key($oldValues, $changed),
+            );
+        });
+
+        return back()->with('status', 'Modulos do municipio atualizados.');
     }
 
     public function addInstrument(

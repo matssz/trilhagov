@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureActiveMunicipality;
+use App\Http\Middleware\EnsureMunicipalityModuleEnabled;
 use App\Http\Middleware\EnsureMunicipalityRole;
 use App\Http\Middleware\PreventAuthenticatedResponseCaching;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'municipality' => EnsureActiveMunicipality::class,
+            'municipality.module' => EnsureMunicipalityModuleEnabled::class,
             'municipality.role' => EnsureMunicipalityRole::class,
         ]);
     })

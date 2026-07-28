@@ -10,7 +10,7 @@
     @endphp
     <div class="page-heading health-heading">
         <div><span class="page-kicker">Controle municipal</span><h1>Saúde e LC 141</h1><p>Reserva das emendas e enquadramento técnico das despesas em ASPS.</p></div>
-        <div class="health-heading-actions"><a class="btn btn-outline-secondary" href="{{ route('specialized-reports.index') }}"><i data-lucide="file-chart-column" aria-hidden="true"></i>Relatórios</a><a class="btn btn-primary" href="{{ route('municipal-rules.index') }}"><i data-lucide="landmark" aria-hidden="true"></i>Regra local</a></div>
+        <div class="health-heading-actions">@if($municipality->moduleEnabled('specialized_reports'))<a class="btn btn-outline-secondary" href="{{ route('specialized-reports.index') }}"><i data-lucide="file-chart-column" aria-hidden="true"></i>Relatórios</a>@endif<a class="btn btn-primary" href="{{ route('municipal-rules.index') }}"><i data-lucide="landmark" aria-hidden="true"></i>Regra local</a></div>
     </div>
 
     <div class="health-context-band">

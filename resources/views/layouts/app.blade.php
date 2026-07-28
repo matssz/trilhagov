@@ -77,18 +77,24 @@
                                 <i data-lucide="scroll-text" aria-hidden="true"></i>
                                 <span>Relatórios mensais</span>
                             </a>
+                            @if ($activeMunicipality?->moduleEnabled('specialized_reports'))
                             <a class="sidebar-link {{ request()->routeIs('specialized-reports.*') ? 'active' : '' }}" href="{{ route('specialized-reports.index') }}">
                                 <i data-lucide="file-chart-column" aria-hidden="true"></i>
                                 <span>Relatórios especiais</span>
                             </a>
+                            @endif
+                            @if ($activeMunicipality?->moduleEnabled('health_asps'))
                             <a class="sidebar-link {{ request()->routeIs('health-asps.*') ? 'active' : '' }}" href="{{ route('health-asps.index') }}">
                                 <i data-lucide="heart-pulse" aria-hidden="true"></i>
                                 <span>Saúde e LC 141</span>
                             </a>
+                            @endif
+                            @if ($activeMunicipality?->moduleEnabled('audit'))
                             <a class="sidebar-link {{ request()->routeIs('audit-plans.*') || request()->routeIs('audit-plan-items.*') ? 'active' : '' }}" href="{{ route('audit-plans.index') }}">
                                 <i data-lucide="calendar-check-2" aria-hidden="true"></i>
                                 <span>Plano de auditoria</span>
                             </a>
+                            @endif
                             <a class="sidebar-link {{ request()->routeIs('audesp-homologations.*') ? 'active' : '' }}" href="{{ route('audesp-homologations.index') }}">
                                 <i data-lucide="package-check" aria-hidden="true"></i>
                                 <span>Homologação Audesp</span>
@@ -98,11 +104,13 @@
                                 <span>Aderência TCESP</span>
                             </a>
                         @endif
+                        @if ($activeMunicipality?->moduleEnabled('contracts'))
                         <a class="sidebar-link {{ request()->routeIs('municipal-contracts.*') || request()->routeIs('contract-measurements.*') || request()->routeIs('contract-addenda.*') ? 'active' : '' }}" href="{{ route('municipal-contracts.index') }}">
                             <i data-lucide="hard-hat" aria-hidden="true"></i>
                             <span>Obras e contratos</span>
                         </a>
-                        @if ($canEditAmendments)
+                        @endif
+                        @if ($canEditAmendments && $activeMunicipality?->moduleEnabled('spreadsheet_import'))
                             <a class="sidebar-link {{ request()->routeIs('spreadsheet-imports.*') ? 'active' : '' }}" href="{{ route('spreadsheet-imports.index') }}">
                                 <i data-lucide="file-spreadsheet" aria-hidden="true"></i>
                                 <span>Importar</span>
@@ -134,10 +142,12 @@
                                 <i data-lucide="users" aria-hidden="true"></i>
                                 <span>Usuários</span>
                             </a>
+                            @if ($activeMunicipality?->moduleEnabled('document_checklist'))
                             <a class="sidebar-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}" href="{{ route('document-types.index') }}">
                                 <i data-lucide="list-checks" aria-hidden="true"></i>
                                 <span>Checklist</span>
                             </a>
+                            @endif
                         @endif
                         @endif
                     </nav>

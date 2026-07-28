@@ -199,7 +199,7 @@
                             <p class="small text-secondary mb-0 mt-1">{{ $checklistCompleted }} de {{ $checklistTotal }} tipos com documento</p>
                         @endif
                     </div>
-                    @if ($canManageChecklist)
+                    @if ($canManageChecklist && $amendment->municipality->moduleEnabled('document_checklist'))
                         <a class="btn btn-sm btn-outline-primary" href="{{ route('document-types.index') }}">Configurar checklist</a>
                     @endif
                 </div>
