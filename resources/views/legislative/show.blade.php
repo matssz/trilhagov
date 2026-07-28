@@ -26,6 +26,22 @@
         $executionDate = $commitments->min('committed_at')
             ?? $amendment?->executionStages?->min('planned_start_at');
         $paymentDate = $payments->min('paid_at');
+        $isCouncilor = $role === App\Models\User::ROLE_COUNCILOR;
+        $isLegislativeReviewer = $role === App\Models\User::ROLE_LEGISLATIVE_REVIEWER;
+        $healthGap = (float) ($quota['health_gap'] ?? 0);
+        $nextAction = match (true) {
+            $canEdit => ['icon' => 'send', 'title' => 'Enviar para conferência legislativa', 'description' => 'Revise os dados e encaminhe a proposta para a conferência mínima da Câmara.', 'href' => '#enviar-conferencia', 'label' => 'Ir para envio'],
+            $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED => ['icon' => 'badge-check', 'title' => 'Conferir requisitos da Câmara', 'description' => 'Valide compatibilidade, teto, saúde, objeto e beneficiário antes do protocolo.', 'href' => '#conferencia-legislativa', 'label' => 'Analisar proposta'],
+            $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED => ['icon' => 'send', 'title' => 'Protocolar no Executivo', 'description' => $healthGap > 0 ? 'Ainda existe déficit de saúde na carteira do vereador; resolva antes do protocolo.' : 'Informe o protocolo da Câmara para encaminhar formalmente ao Executivo.', 'href' => '#protocolo-executivo', 'label' => 'Ir para protocolo'],
+            $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT => ['icon' => 'download', 'title' => 'Receber no Executivo', 'description' => 'Informe o processo administrativo e abra a emenda no núcleo executivo.', 'href' => '#recebimento-executivo', 'label' => 'Receber proposta'],
+            $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED => ['icon' => 'wallet-cards', 'title' => 'Registrar reserva orçamentária', 'description' => 'Confirme a reanálise orçamentária e avance para o Plano de Trabalho.', 'href' => '#reserva-orcamentaria', 'label' => 'Registrar reserva'],
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RESERVED && $proposal->amendment && ! in_array($role, [App\Models\User::ROLE_COUNCILOR, App\Models\User::ROLE_LEGISLATIVE_REVIEWER], true) => ['icon' => 'gauge', 'title' => 'Acompanhar no fluxo executivo', 'description' => 'A proposta já virou emenda executiva. Continue pelo plano, execução e prestação de contas.', 'href' => route('emendas.show', $proposal->amendment), 'label' => 'Abrir fluxo executivo'],
+            $isCouncilor && in_array($proposal->status, [App\Models\LegislativeProposal::STATUS_SUBMITTED, App\Models\LegislativeProposal::STATUS_APPROVED], true) => ['icon' => 'eye', 'title' => 'Aguardando tramitação da Câmara', 'description' => 'Sua proposta já foi enviada. Acompanhe o status e o histórico nesta página.', 'href' => '#historico-proposta', 'label' => 'Ver histórico'],
+            $isCouncilor && in_array($proposal->status, [App\Models\LegislativeProposal::STATUS_SENT, App\Models\LegislativeProposal::STATUS_RECEIVED, App\Models\LegislativeProposal::STATUS_RESERVED], true) => ['icon' => 'building-2', 'title' => 'Acompanhando o Executivo', 'description' => 'A proposta entrou no fluxo executivo. Veja processo, reserva e execução abaixo.', 'href' => '#acompanhamento-executivo', 'label' => 'Ver Executivo'],
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RETURNED => ['icon' => 'undo-2', 'title' => 'Proposta devolvida para ajuste', 'description' => $isCouncilor ? 'Ajuste os pontos indicados e envie novamente.' : 'Aguardando ajuste pelo vereador.', 'href' => $isCouncilor ? '#editor-proposta' : '#historico-proposta', 'label' => $isCouncilor ? 'Editar proposta' : 'Ver histórico'],
+            $proposal->status === App\Models\LegislativeProposal::STATUS_REJECTED => ['icon' => 'circle-x', 'title' => 'Proposta rejeitada na análise prévia', 'description' => 'Consulte a fundamentação registrada e o histórico institucional da decisão.', 'href' => '#historico-proposta', 'label' => 'Ver decisão'],
+            default => ['icon' => 'eye', 'title' => 'Acompanhar andamento', 'description' => 'Consulte a situação atual, documentos e histórico da proposta.', 'href' => '#historico-proposta', 'label' => 'Ver histórico'],
+        };
     @endphp
 
     <div class="legislative-detail-heading">
@@ -43,6 +59,24 @@
     </div>
 
     <x-validation-summary />
+
+    <section class="legislative-smart-summary">
+        <div class="legislative-next-action">
+            <span><i data-lucide="{{ $nextAction['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <small>{{ $isCouncilor ? 'Próximo passo para o vereador' : ($isLegislativeReviewer ? 'Próximo passo da Câmara' : 'Próximo passo do Executivo') }}</small>
+                <h2>{{ $nextAction['title'] }}</h2>
+                <p>{{ $nextAction['description'] }}</p>
+            </div>
+            <a class="btn btn-primary" href="{{ $nextAction['href'] }}">{{ $nextAction['label'] }}</a>
+        </div>
+        <div class="legislative-smart-grid">
+            <div><span>Valor solicitado</span><strong>R$ {{ number_format((float) $proposal->estimated_amount, 2, ',', '.') }}</strong><small>{{ $proposal->health_related ? 'Marcada para saúde' : 'Demais áreas' }}</small></div>
+            <div><span>Saldo do vereador</span><strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong><small>{{ $quota['count'] }} proposta(s) na carteira</small></div>
+            <div class="{{ $healthGap > 0 ? 'needs-attention' : 'is-ok' }}"><span>Reserva de saúde</span><strong>{{ $healthGap > 0 ? 'Pendente' : 'Atendida' }}</strong><small>{{ $healthGap > 0 ? 'Faltam R$ '.number_format($healthGap, 2, ',', '.') : 'Proporção mínima preservada' }}</small></div>
+            <div><span>Executivo</span><strong>{{ $proposal->executive_process_number ?: ($proposal->protocol_number ?: 'Aguardando protocolo') }}</strong><small>{{ $proposal->budget_reservation_number ? 'Reserva '.$proposal->budget_reservation_number : 'Reserva pendente' }}</small></div>
+        </div>
+    </section>
 
     <section class="legislative-flow" aria-label="Tramitação da proposta">
         @foreach([
@@ -69,7 +103,7 @@
     </section>
 
     @if($canEdit)
-        <details class="legislative-editor" @if($errors->any()) open @endif>
+        <details class="legislative-editor" id="editor-proposta" @if($errors->any()) open @endif>
             <summary><span><i data-lucide="pencil" aria-hidden="true"></i><strong>Editar proposta</strong><small>Disponível enquanto o registro estiver em elaboração ou devolvido.</small></span><i data-lucide="chevron-down" aria-hidden="true"></i></summary>
             <form method="POST" action="{{ route('legislative.update', $proposal) }}" data-prevent-double-submit>
                 @csrf
@@ -80,7 +114,7 @@
             </form>
         </details>
 
-        <section class="legislative-action-band">
+        <section class="legislative-action-band" id="enviar-conferencia">
             <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><strong>Encaminhar à conferência legislativa</strong><p>A indicação ficará bloqueada para edição até a conferência dos requisitos mínimos.</p></div></div>
             <form method="POST" action="{{ route('legislative.submit', $proposal) }}" data-prevent-double-submit>@csrf<input name="_submission_token" type="hidden" value="{{ $submitToken }}"><button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Enviar para conferência</button></form>
         </section>
@@ -108,7 +142,7 @@
             </section>
 
             @if($canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED)
-                <section class="content-panel legislative-review-panel">
+                <section class="content-panel legislative-review-panel" id="conferencia-legislativa">
                     <div class="content-panel-header"><div><h2 class="h5 mb-1">Conferência mínima da Câmara</h2><p class="small text-secondary mb-0">Comissão de Finanças e Orçamento ou unidade definida no Regimento</p></div></div>
                     <form class="content-panel-body" method="POST" action="{{ route('legislative.review', $proposal) }}" data-prevent-double-submit>
                         @csrf
@@ -134,7 +168,7 @@
             @endif
 
             @if($canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED)
-                <section class="legislative-action-panel">
+                <section class="legislative-action-panel" id="protocolo-executivo">
                     <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><strong>Protocolo Câmara → Executivo</strong><p>A reserva de saúde será conferida sobre a carteira do autor antes do encaminhamento.</p></div></div>
                     <form method="POST" action="{{ route('legislative.protocol', $proposal) }}" data-prevent-double-submit>
                         @csrf
@@ -146,7 +180,7 @@
             @endif
 
             @if($canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT)
-                <section class="legislative-action-panel executive">
+                <section class="legislative-action-panel executive" id="recebimento-executivo">
                     <div><span><i data-lucide="download" aria-hidden="true"></i></span><div><strong>Recebimento pelo Executivo</strong><p>Abre a emenda no núcleo executivo sem dispensar a reanálise técnica.</p></div></div>
                     <form method="POST" action="{{ route('legislative.receive', $proposal) }}" data-prevent-double-submit>
                         @csrf
@@ -159,7 +193,7 @@
             @endif
 
             @if($canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED)
-                <section class="legislative-action-panel executive">
+                <section class="legislative-action-panel executive" id="reserva-orcamentaria">
                     <div><span><i data-lucide="wallet-cards" aria-hidden="true"></i></span><div><strong>Reserva orçamentária</strong><p>Registre o resultado da reanálise antes de solicitar o Plano de Trabalho.</p></div></div>
                     <form method="POST" action="{{ route('legislative.reserve', $proposal) }}" data-prevent-double-submit>
                         @csrf
@@ -174,7 +208,7 @@
             @endif
 
             @if($proposal->amendment)
-                <section class="content-panel legislative-execution-panel">
+                <section class="content-panel legislative-execution-panel" id="acompanhamento-executivo">
                     <div class="content-panel-header"><div><h2 class="h5 mb-1">Acompanhamento no Executivo</h2><p class="small text-secondary mb-0">Processo {{ $proposal->executive_process_number }}</p></div>@unless(in_array($role, [App\Models\User::ROLE_COUNCILOR, App\Models\User::ROLE_LEGISLATIVE_REVIEWER], true))<a class="btn btn-sm btn-outline-primary" href="{{ route('emendas.show', $proposal->amendment) }}">Abrir fluxo executivo</a>@endunless</div>
                     <div class="legislative-execution-metrics">
                         <div><span>Situação</span><strong>{{ $proposal->amendment->statusLabel() }}</strong></div>
@@ -190,7 +224,7 @@
         </div>
 
         <aside class="legislative-side-column">
-            <section class="content-panel">
+            <section class="content-panel" id="historico-proposta">
                 <div class="content-panel-header"><h2 class="h6 mb-0">Beneficiário</h2></div>
                 <dl class="legislative-side-data">
                     <dt>Tipo</dt><dd>{{ $proposal->beneficiaryTypeLabel() }}</dd>
