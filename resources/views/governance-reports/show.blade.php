@@ -3,7 +3,16 @@
 @section('title', $report->code().' | TrilhaGov')
 
 @section('content')
-    @php($totals = $snapshot['totals'])
+    @php
+        $totals = $snapshot['totals'];
+        $controlActions = [
+            'work_plan' => ['label' => 'Abrir planos', 'route' => route('work-center.index', ['queue' => 'executive', 'category' => 'planning']), 'icon' => 'clipboard-list'],
+            'budget' => ['label' => 'Ver conformidade', 'route' => route('work-center.index', ['queue' => 'executive', 'category' => 'normative']), 'icon' => 'scale'],
+            'procurement' => ['label' => 'Ver contratos', 'route' => route('work-center.index', ['queue' => 'execution', 'category' => 'contract']), 'icon' => 'hard-hat'],
+            'transparency' => ['label' => 'Abrir transparência', 'route' => route('work-center.index', ['category' => 'transparency']), 'icon' => 'eye'],
+            'audesp' => ['label' => 'Homologar Audesp', 'route' => route('audesp-homologations.index'), 'icon' => 'database-zap'],
+        ];
+    @endphp
     <div class="governance-heading mb-4">
         <div>
             <a class="back-link" href="{{ route('governance-reports.index') }}"><i data-lucide="arrow-left" aria-hidden="true"></i>Relatórios mensais</a>
@@ -41,7 +50,11 @@
             <div class="content-panel-header governance-panel-header"><div><p class="page-kicker mb-1">Controle interno</p><h2 class="h5 mb-0">Matriz de acompanhamento</h2></div><span class="small text-secondary">Posição da competência</span></div>
             <div class="governance-control-list">
                 @foreach ($snapshot['control_matrix'] as $check)
+                    @php($action = $controlActions[$check['key']] ?? null)
                     <div class="governance-control-row"><span class="control-state {{ $check['status'] }}"><i data-lucide="{{ $check['status'] === 'controlled' ? 'circle-check' : 'circle-alert' }}" aria-hidden="true"></i></span><div><strong>{{ $check['label'] }}</strong><small>{{ $check['met'] }} controlada(s) · {{ $check['pending'] }} pendente(s)</small></div><span class="governance-control-label {{ $check['status'] }}">{{ $check['status'] === 'controlled' ? 'Controlado' : 'Requer atenção' }}</span></div>
+                    @if ($action && $check['status'] !== 'controlled')
+                        <a class="governance-control-action" href="{{ $action['route'] }}"><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i>{{ $action['label'] }}</a>
+                    @endif
                 @endforeach
             </div>
         </section>

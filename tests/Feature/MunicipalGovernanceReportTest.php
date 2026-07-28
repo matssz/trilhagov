@@ -109,9 +109,35 @@ class MunicipalGovernanceReportTest extends TestCase
         $this->assertSame('controlled', collect($report->snapshot['control_matrix'])->firstWhere('key', 'budget')['status']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'governance_report_created']);
 
-        $this->get(route('governance-reports.show', $report))->assertOk()->assertSee('RGM-2026-07-V1')->assertSee('Matriz de acompanhamento');
+        $this->get(route('governance-reports.show', $report))
+            ->assertOk()
+            ->assertSee('RGM-2026-07-V1')
+            ->assertSee('Matriz de acompanhamento')
+            ->assertDontSee('Abrir planos');
         $this->get(route('governance-reports.csv', $report))->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
         $this->get(route('governance-reports.pdf', $report))->assertOk()->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_report_matrix_shows_contextual_shortcuts_when_attention_is_required(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->amendment($municipality, $manager);
+        $token = $this->token($municipality, 'governance-report-create');
+
+        $this->actingAs($manager)->post(route('governance-reports.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+        ]);
+        $report = MunicipalGovernanceReport::firstOrFail();
+
+        $this->get(route('governance-reports.show', $report))
+            ->assertOk()
+            ->assertSee('Abrir planos')
+            ->assertSee('Ver conformidade')
+            ->assertSee('Ver contratos')
+            ->assertSee('Abrir transparência')
+            ->assertSee('Homologar Audesp');
     }
 
     public function test_only_manager_issues_an_immutable_version_and_next_report_becomes_revision(): void
