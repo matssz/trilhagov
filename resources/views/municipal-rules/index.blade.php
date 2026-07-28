@@ -82,7 +82,7 @@
                             @php($field = $module['field'])
                             @if ($field)
                                 <label class="rules-module-card">
-                                    <input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $municipality->{$field}))>
+                                    <input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $municipality->moduleEnabled($key)))>
                                     <span>
                                         <strong>{{ $module['label'] }}</strong>
                                         <small>{{ $module['description'] }}</small>

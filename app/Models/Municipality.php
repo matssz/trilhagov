@@ -130,7 +130,7 @@ class Municipality extends Model
 
         $field = self::moduleParameters()[$module]['field'] ?? null;
 
-        return $field ? (bool) $this->{$field} : false;
+        return $field ? (bool) ($this->getAttribute($field) ?? false) : false;
     }
 
     /** @return array<string, string> */
