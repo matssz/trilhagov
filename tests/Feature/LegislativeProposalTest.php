@@ -436,8 +436,8 @@ class LegislativeProposalTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
-            ->assertSee('Fila Câmara')
-            ->assertSee('Propostas para decisão institucional')
+            ->assertSee('Mesa do Executivo')
+            ->assertSee('Decisão, recebimento e reserva em uma fila')
             ->assertSee('Conferência da Câmara')
             ->assertSee('Receber no Executivo')
             ->assertSee('Reservar orçamento')
@@ -450,7 +450,42 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
             ->assertSee('Minha cota')
-            ->assertDontSee('Fila Câmara');
+            ->assertDontSee('Mesa do Executivo');
+    }
+
+    public function test_executive_desk_shows_focus_metrics_and_action_shortcuts(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Atalho',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'object' => 'Equipamentos para atendimento municipal integrado.',
+            'protocol_number' => 'CAM-2027-088',
+            'sent_at' => now(),
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_RECEIVED,
+            'object' => 'Reforma de unidade de atendimento ao cidadao.',
+            'executive_process_number' => 'PREF-2027-088',
+            'received_by' => $manager->id,
+            'received_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Foco recomendado agora')
+            ->assertSee('Acoes pendentes')
+            ->assertSee('Valor sob decisao')
+            ->assertSee('Em execucao aberta')
+            ->assertSee('#recebimento-executivo')
+            ->assertSee('#reserva-orcamentaria');
     }
 
     public function test_councilor_cannot_view_another_councilors_proposal_or_another_municipality(): void

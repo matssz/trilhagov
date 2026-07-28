@@ -55,6 +55,9 @@ class LegislativeProposalController extends Controller
         $executiveBoard = $role === User::ROLE_COUNCILOR
             ? null
             : $this->executiveBoard($boardQuery->latest('id')->get());
+        $executiveDesk = $executiveBoard
+            ? $this->executiveDesk($executiveBoard)
+            : null;
 
         return view('legislative.index', [
             'municipality' => $municipality,
@@ -69,6 +72,7 @@ class LegislativeProposalController extends Controller
             'quota' => $quota,
             'councilorGuide' => $councilorGuide,
             'executiveBoard' => $executiveBoard,
+            'executiveDesk' => $executiveDesk,
             'proposals' => $query->latest('id')->paginate(12)->withQueryString(),
             'summary' => [
                 'total' => (clone $summaryQuery)->count(),
@@ -154,7 +158,7 @@ class LegislativeProposalController extends Controller
 
     /**
      * @param \Illuminate\Support\Collection<int, LegislativeProposal> $proposals
-     * @return array<int, array{key: string, title: string, description: string, icon: string, statuses: array<int, string>, items: \Illuminate\Support\Collection<int, LegislativeProposal>, amount: float, action: string}>
+     * @return array<int, array<string, mixed>>
      */
     private function executiveBoard(\Illuminate\Support\Collection $proposals): array
     {
@@ -166,6 +170,8 @@ class LegislativeProposalController extends Controller
                 'icon' => 'badge-check',
                 'statuses' => [LegislativeProposal::STATUS_SUBMITTED, LegislativeProposal::STATUS_APPROVED],
                 'action' => 'Analisar ou protocolar',
+                'fragment' => '#conferencia-legislativa',
+                'tone' => 'review',
             ],
             [
                 'key' => 'receive',
@@ -174,6 +180,8 @@ class LegislativeProposalController extends Controller
                 'icon' => 'inbox',
                 'statuses' => [LegislativeProposal::STATUS_SENT],
                 'action' => 'Receber proposta',
+                'fragment' => '#recebimento-executivo',
+                'tone' => 'receive',
             ],
             [
                 'key' => 'budget',
@@ -182,6 +190,8 @@ class LegislativeProposalController extends Controller
                 'icon' => 'wallet-cards',
                 'statuses' => [LegislativeProposal::STATUS_RECEIVED],
                 'action' => 'Registrar reserva',
+                'fragment' => '#reserva-orcamentaria',
+                'tone' => 'budget',
             ],
             [
                 'key' => 'execution',
@@ -190,19 +200,46 @@ class LegislativeProposalController extends Controller
                 'icon' => 'gauge',
                 'statuses' => [LegislativeProposal::STATUS_RESERVED],
                 'action' => 'Abrir acompanhamento',
+                'fragment' => '#acompanhamento-executivo',
+                'tone' => 'execution',
             ],
         ])->map(function (array $column) use ($proposals): array {
+            $allItems = $proposals->whereIn('status', $column['statuses'])->values();
             $items = $proposals
                 ->whereIn('status', $column['statuses'])
                 ->take(5)
                 ->values();
+            $oldest = $allItems->sortBy('updated_at')->first();
 
             return [
                 ...$column,
                 'items' => $items,
+                'count' => $allItems->count(),
                 'amount' => (float) $proposals->whereIn('status', $column['statuses'])->sum('estimated_amount'),
+                'oldest' => $oldest,
+                'hidden_count' => max(0, $allItems->count() - $items->count()),
             ];
         })->all();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $board
+     * @return array<string, mixed>
+     */
+    private function executiveDesk(array $board): array
+    {
+        $actionable = collect($board)->whereIn('key', ['review', 'receive', 'budget']);
+        $total = (int) $actionable->sum('count');
+        $amount = (float) $actionable->sum('amount');
+        $focus = $actionable->first(fn (array $column): bool => (int) $column['count'] > 0);
+
+        return [
+            'total' => $total,
+            'amount' => $amount,
+            'focus' => $focus,
+            'ready' => $total === 0,
+            'done' => (int) collect($board)->firstWhere('key', 'execution')['count'],
+        ];
     }
 
     public function create(

@@ -96,14 +96,29 @@
         <section class="content-panel legislative-executive-board">
             <div class="content-panel-header">
                 <div>
-                    <p class="panel-kicker">Fila Câmara → Executivo</p>
-                    <h2 class="h5 mb-1">Propostas para decisão institucional</h2>
-                    <p class="small text-secondary mb-0">Veja em uma tela o que ainda está na conferência da Câmara, o que precisa ser recebido pela Prefeitura e o que aguarda reserva orçamentária.</p>
+                    <p class="panel-kicker">Mesa do Executivo</p>
+                    <h2 class="h5 mb-1">Decisão, recebimento e reserva em uma fila</h2>
+                    <p class="small text-secondary mb-0">Veja em uma tela o que veio da Câmara, o que precisa entrar formalmente na Prefeitura e o que depende de reserva para virar execução.</p>
+                </div>
+            </div>
+            <div class="legislative-executive-desk">
+                <div class="executive-desk-focus {{ ($executiveDesk['ready'] ?? false) ? 'is-clear' : '' }}">
+                    <span><i data-lucide="{{ ($executiveDesk['ready'] ?? false) ? 'circle-check' : ($executiveDesk['focus']['icon'] ?? 'alert-circle') }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ ($executiveDesk['ready'] ?? false) ? 'Sem gargalo operacional' : 'Foco recomendado agora' }}</small>
+                        <strong>{{ ($executiveDesk['ready'] ?? false) ? 'Nenhuma proposta aguardando acao do Executivo' : ($executiveDesk['focus']['title'] ?? 'Revisar fila') }}</strong>
+                        <p>{{ ($executiveDesk['ready'] ?? false) ? 'As propostas ativas estao sem pendencia imediata de decisao, recebimento ou reserva.' : ($executiveDesk['focus']['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.') }}</p>
+                    </div>
+                </div>
+                <div class="executive-desk-metrics">
+                    <div><span>Acoes pendentes</span><strong>{{ $executiveDesk['total'] ?? 0 }}</strong></div>
+                    <div><span>Valor sob decisao</span><strong>R$ {{ number_format($executiveDesk['amount'] ?? 0, 2, ',', '.') }}</strong></div>
+                    <div><span>Em execucao aberta</span><strong>{{ $executiveDesk['done'] ?? 0 }}</strong></div>
                 </div>
             </div>
             <div class="legislative-board-grid">
                 @foreach ($executiveBoard as $column)
-                    <article class="legislative-board-column">
+                    <article class="legislative-board-column is-{{ $column['tone'] }}">
                         <header>
                             <span><i data-lucide="{{ $column['icon'] }}" aria-hidden="true"></i></span>
                             <div>
@@ -114,7 +129,17 @@
                         <p>{{ $column['description'] }}</p>
                         <div class="legislative-board-items">
                             @forelse ($column['items'] as $item)
-                                <a href="{{ route('legislative.show', $item) }}">
+                                @php
+                                    $fragment = match ($item->status) {
+                                        App\Models\LegislativeProposal::STATUS_SUBMITTED => '#conferencia-legislativa',
+                                        App\Models\LegislativeProposal::STATUS_APPROVED => '#protocolo-executivo',
+                                        App\Models\LegislativeProposal::STATUS_SENT => '#recebimento-executivo',
+                                        App\Models\LegislativeProposal::STATUS_RECEIVED => '#reserva-orcamentaria',
+                                        App\Models\LegislativeProposal::STATUS_RESERVED => '#acompanhamento-executivo',
+                                        default => '',
+                                    };
+                                @endphp
+                                <a href="{{ route('legislative.show', $item) }}{{ $fragment }}">
                                     <span>{{ $item->reference }}</span>
                                     <strong>{{ $item->object }}</strong>
                                     <small>{{ $item->author_name }} · R$ {{ number_format((float) $item->estimated_amount, 2, ',', '.') }}</small>
@@ -123,6 +148,9 @@
                             @empty
                                 <div class="legislative-board-empty">Nenhuma proposta nesta etapa.</div>
                             @endforelse
+                            @if (($column['hidden_count'] ?? 0) > 0)
+                                <a class="legislative-board-more" href="{{ route('legislative.index', ['year' => $year, 'status' => $column['statuses'][0]]) }}">Ver mais {{ $column['hidden_count'] }} nesta etapa</a>
+                            @endif
                         </div>
                     </article>
                 @endforeach
