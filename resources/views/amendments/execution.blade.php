@@ -343,6 +343,24 @@
                                 <p class="small text-secondary">Nenhum pagamento registrado.</p>
                             @endif
 
+                            @if ($canEdit && $amendment->supportsTcespCompliance() && $commitment->status === 'active' && $commitment->remainingToLiquidate() > 0)
+                                <form class="liquidation-form" method="POST" action="{{ route('emendas.liquidations.store', [$amendment, $commitment]) }}" novalidate>
+                                    @csrf
+                                    <input name="_submission_token" type="hidden" value="{{ $liquidationCreateTokens->get($commitment->id) }}">
+                                    <div class="execution-form-heading">
+                                        <strong>Liquidação simplificada</strong>
+                                        <small>Confirme a nota, medição ou ateste antes de liberar pagamento.</small>
+                                    </div>
+                                    <div><label class="form-label" for="liquidation_reference_{{ $commitment->id }}">Referência <span class="required-mark">*</span></label><input class="form-control" id="liquidation_reference_{{ $commitment->id }}" name="liquidation_reference" value="LIQ-{{ $commitment->commitment_number }}" maxlength="100" required></div>
+                                    <div><label class="form-label" for="liquidation_amount_{{ $commitment->id }}">Valor <span class="required-mark">*</span></label><input class="form-control" id="liquidation_amount_{{ $commitment->id }}" name="amount" type="number" value="{{ number_format($commitment->remainingToLiquidate(), 2, '.', '') }}" min="0.01" max="{{ $commitment->remainingToLiquidate() }}" step="0.01" required></div>
+                                    <div><label class="form-label" for="liquidated_at_{{ $commitment->id }}">Data <span class="required-mark">*</span></label><input class="form-control" id="liquidated_at_{{ $commitment->id }}" name="liquidated_at" type="date" value="{{ today()->toDateString() }}" min="{{ $commitment->committed_at->toDateString() }}" max="{{ today()->toDateString() }}" required></div>
+                                    <div><label class="form-label" for="supporting_document_{{ $commitment->id }}">Nota, medição ou documento <span class="required-mark">*</span></label><input class="form-control" id="supporting_document_{{ $commitment->id }}" name="supporting_document" value="{{ $commitment->procurement_process }}" maxlength="140" required></div>
+                                    <div><label class="form-label" for="acceptance_reference_{{ $commitment->id }}">Ateste ou recebimento <span class="required-mark">*</span></label><input class="form-control" id="acceptance_reference_{{ $commitment->id }}" name="acceptance_reference" value="{{ $commitment->executionStage?->title ?? 'Ateste do responsável pela execução' }}" maxlength="140" required></div>
+                                    <div><label class="form-label" for="liquidation_notes_{{ $commitment->id }}">Observação</label><input class="form-control" id="liquidation_notes_{{ $commitment->id }}" name="notes" value="Liquidação vinculada ao objeto da emenda {{ $amendment->reference }}." maxlength="1000"></div>
+                                    <button class="btn btn-primary liquidation-submit" type="submit"><i data-lucide="stamp" aria-hidden="true"></i>Registrar liquidação</button>
+                                </form>
+                            @endif
+
                             @php($availableLiquidations = $commitment->liquidations->filter(fn ($liquidation) => $liquidation->availableAmount() > 0))
                             @if ($canEdit && $commitment->status === 'active' && $commitmentRemaining > 0 && (! $amendment->supportsTcespCompliance() || $availableLiquidations->isNotEmpty()))
                                 <form class="payment-form" method="POST" action="{{ route('emendas.payments.store', [$amendment, $commitment]) }}" novalidate>

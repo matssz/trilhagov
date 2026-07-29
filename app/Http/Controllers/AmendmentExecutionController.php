@@ -79,6 +79,11 @@ class AmendmentExecutionController extends Controller
                 ])
                 : collect(),
             'commitmentCreateToken' => $canEdit ? $formSubmission->issue($request, "financial-commitment-create-{$amendment->id}") : null,
+            'liquidationCreateTokens' => $canEdit
+                ? $amendment->financialCommitments->mapWithKeys(fn ($commitment) => [
+                    $commitment->id => $formSubmission->issue($request, "financial-liquidation-create-{$commitment->id}"),
+                ])
+                : collect(),
             'paymentCreateTokens' => $canEdit
                 ? $amendment->financialCommitments->mapWithKeys(fn ($commitment) => [
                     $commitment->id => $formSubmission->issue($request, "financial-payment-create-{$commitment->id}"),

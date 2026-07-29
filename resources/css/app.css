@@ -4896,6 +4896,7 @@ h6 {
     color: var(--muted);
 }
 
+.liquidation-form,
 .payment-form,
 .execution-evidence-form {
     display: grid;
@@ -4905,7 +4906,22 @@ h6 {
     padding-top: .25rem;
 }
 
+.liquidation-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 1rem 0;
+    padding: .9rem;
+    border: 1px solid #d8e2eb;
+    border-radius: 6px;
+    background: linear-gradient(110deg, #fbfdff 0%, #f4f8fc 100%);
+}
+
+.liquidation-form .execution-form-heading {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+}
+
 .payment-submit,
+.liquidation-submit,
 .evidence-submit {
     min-height: 42px;
     margin-top: 1.85rem;
@@ -4968,12 +4984,14 @@ h6 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .liquidation-form,
     .payment-form,
     .execution-evidence-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .payment-submit,
+    .liquidation-submit,
     .evidence-submit {
         width: fit-content;
         margin-top: 0;
@@ -5014,6 +5032,7 @@ h6 {
     .stage-form-grid,
     .stage-edit-grid,
     .commitment-form-grid,
+    .liquidation-form,
     .payment-form,
     .execution-evidence-form {
         grid-template-columns: 1fr;

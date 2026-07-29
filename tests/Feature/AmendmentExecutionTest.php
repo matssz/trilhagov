@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
+use App\Models\FinancialLiquidation;
 use App\Models\IntegrityAlert;
 use App\Models\MunicipalWorkPlan;
 use App\Models\Municipality;
@@ -148,6 +149,47 @@ class AmendmentExecutionTest extends TestCase
         $this->assertSame(30000.0, $commitment->fresh()->paidAmount());
         $this->assertSame(50000.0, $commitment->fresh()->remainingAmount());
         $this->assertDatabaseHas('audit_logs', ['action' => 'financial_payment_created']);
+    }
+
+    public function test_tcesp_execution_has_inline_simplified_liquidation_before_payment(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->update(['state' => 'SP', 'ibge_code' => '3522307']);
+        $amendment = $this->amendment($municipality, $manager, [
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'received_amount' => 100000,
+        ]);
+        $stage = $this->stage($municipality, $amendment, $manager);
+        $commitment = $this->createCommitmentThroughHttp($manager, $municipality, $amendment, 80000);
+        $commitment->update(['execution_stage_id' => $stage->id]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.execution', $amendment))
+            ->assertOk()
+            ->assertSee('Liquidação simplificada')
+            ->assertSee('Registrar liquidação')
+            ->assertSee('Confirme a nota, medição ou ateste antes de liberar pagamento.');
+
+        $token = $this->sessionFor($municipality, "financial-liquidation-create-{$commitment->id}");
+        $this->post(route('emendas.liquidations.store', [$amendment, $commitment]), [
+            '_submission_token' => $token,
+            'liquidation_reference' => 'LIQ-NE-2026-001',
+            'amount' => 80000,
+            'liquidated_at' => '2026-07-16',
+            'supporting_document' => 'NF-2026-001',
+            'acceptance_reference' => 'Ateste da entrega dos equipamentos',
+            'notes' => 'Liquidação registrada pela execução simplificada.',
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseCount('financial_liquidations', 1);
+        $this->assertSame('LIQ-NE-2026-001', FinancialLiquidation::firstOrFail()->liquidation_reference);
+
+        $this->get(route('emendas.execution', $amendment))
+            ->assertOk()
+            ->assertSee('Registrar pagamento')
+            ->assertSee('LIQ-NE-2026-001');
     }
 
     public function test_commitment_with_payment_cannot_be_cancelled(): void
