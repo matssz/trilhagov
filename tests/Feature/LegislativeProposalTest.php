@@ -164,6 +164,9 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Reserva minima de saude')
             ->assertSee('Vereador indica')
             ->assertSee('Prefeitura executa')
+            ->assertSee('Meu acompanhamento')
+            ->assertSee('Suas propostas por etapa')
+            ->assertSee('Com o Executivo')
             ->assertDontSee('Cadastro indisponível')
             ->assertDontSee('Cadastrar emenda');
 
@@ -476,6 +479,43 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Minha cota')
             ->assertDontSee('Mesa do Executivo');
+    }
+
+    public function test_councilor_portal_groups_proposals_by_next_step(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Painel',
+            'legislative_party' => 'PSD',
+        ]);
+
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_RETURNED,
+            'object' => 'Ajuste de proposta para compra de equipamentos de atendimento municipal.',
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SUBMITTED,
+            'object' => 'Proposta aguardando conferencia da Camara Municipal.',
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'object' => 'Proposta protocolada e aguardando recebimento do Executivo.',
+            'protocol_number' => 'CAM-2027-777',
+            'sent_at' => now(),
+        ]);
+
+        $this->actingAs($councilor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Meu acompanhamento')
+            ->assertSee('Precisa de voc')
+            ->assertSee('Com o Executivo')
+            ->assertSee('Corrigir proposta')
+            ->assertSee('#editor-proposta')
+            ->assertSee('#acompanhamento-executivo')
+            ->assertSee('Proposta protocolada e aguardando recebimento');
     }
 
     public function test_executive_desk_shows_focus_metrics_and_action_shortcuts(): void

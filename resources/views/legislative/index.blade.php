@@ -67,6 +67,51 @@
                     <span><i data-lucide="building-2" aria-hidden="true"></i>Prefeitura executa</span>
                 </div>
             </section>
+
+            <section class="councilor-workspace" aria-label="Painel do vereador">
+                <div class="councilor-workspace-header">
+                    <div>
+                        <span class="page-kicker">Meu acompanhamento</span>
+                        <h2>Suas propostas por etapa</h2>
+                        <p>Veja o que depende de você, o que está com a Câmara e o que já entrou no Executivo.</p>
+                    </div>
+                    @if($councilorGroups['next_url'] ?? null)
+                        <a class="btn btn-primary" href="{{ $councilorGroups['next_url'] }}">
+                            <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $councilorGroups['next_label'] }}
+                        </a>
+                    @endif
+                </div>
+                <div class="councilor-stage-grid">
+                    @foreach($councilorGroups['groups'] as $group)
+                        <article class="councilor-stage-card is-{{ $group['tone'] }}">
+                            <header>
+                                <span><i data-lucide="{{ $group['icon'] }}" aria-hidden="true"></i></span>
+                                <div>
+                                    <strong>{{ $group['title'] }}</strong>
+                                    <small>{{ $group['count'] }} proposta(s) · R$ {{ number_format($group['amount'], 2, ',', '.') }}</small>
+                                </div>
+                            </header>
+                            <p>{{ $group['description'] }}</p>
+                            <div class="councilor-stage-items">
+                                @forelse($group['items'] as $item)
+                                    <a href="{{ $item->councilor_action_url }}">
+                                        <span>{{ $item->reference }} · {{ $item->statusLabel() }}</span>
+                                        <strong>{{ $item->object }}</strong>
+                                        <small>{{ $item->updated_at->diffForHumans() }}</small>
+                                    </a>
+                                @empty
+                                    <div>{{ $group['empty'] }}</div>
+                                @endforelse
+                            </div>
+                            @if($group['hidden_count'] > 0)
+                                <a class="councilor-stage-filter" href="{{ $group['filter_url'] }}">Ver mais {{ $group['hidden_count'] }}</a>
+                            @elseif($group['count'] > 0)
+                                <a class="councilor-stage-filter" href="{{ $group['filter_url'] }}">Filtrar etapa</a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            </section>
         @endif
 
         <section class="legislative-automation-panel">

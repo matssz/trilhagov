@@ -52,6 +52,9 @@ class LegislativeProposalController extends Controller
         $councilorGuide = $role === User::ROLE_COUNCILOR
             ? $this->councilorGuide($municipality, $request->user()->id, $year, $profile, $quota)
             : null;
+        $councilorGroups = $role === User::ROLE_COUNCILOR
+            ? $this->councilorProposalGroups($municipality, $request->user()->id, $year, $councilorGuide)
+            : null;
         $executiveBoard = $role === User::ROLE_COUNCILOR
             ? null
             : $this->executiveBoard($boardQuery->latest('id')->get());
@@ -71,6 +74,7 @@ class LegislativeProposalController extends Controller
             'profile' => $profile,
             'quota' => $quota,
             'councilorGuide' => $councilorGuide,
+            'councilorGroups' => $councilorGroups,
             'executiveBoard' => $executiveBoard,
             'executiveDesk' => $executiveDesk,
             'proposals' => $query->latest('id')->paginate(12)->withQueryString(),
@@ -160,6 +164,98 @@ class LegislativeProposalController extends Controller
             'badge' => $badge,
             'badgeTone' => $badgeTone,
             'statusCounts' => $statusCounts,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed>|null $guide
+     * @return array<string, mixed>
+     */
+    private function councilorProposalGroups(
+        Municipality $municipality,
+        int $userId,
+        int $year,
+        ?array $guide,
+    ): array {
+        $proposals = $municipality->legislativeProposals()
+            ->where('fiscal_year', $year)
+            ->where('submitted_by', $userId)
+            ->latest('updated_at')
+            ->get();
+
+        $groups = collect([
+            [
+                'key' => 'action',
+                'title' => 'Precisa de você',
+                'description' => 'Rascunhos e propostas devolvidas para ajuste antes de seguir.',
+                'icon' => 'pencil',
+                'statuses' => [LegislativeProposal::STATUS_DRAFT, LegislativeProposal::STATUS_RETURNED],
+                'empty' => 'Nenhuma proposta aguardando ajuste seu.',
+                'tone' => 'warning',
+            ],
+            [
+                'key' => 'chamber',
+                'title' => 'Com a Câmara',
+                'description' => 'Itens enviados para conferência, aprovação ou protocolo.',
+                'icon' => 'landmark',
+                'statuses' => [LegislativeProposal::STATUS_SUBMITTED, LegislativeProposal::STATUS_APPROVED],
+                'empty' => 'Nenhuma proposta parada na Câmara.',
+                'tone' => 'info',
+            ],
+            [
+                'key' => 'executive',
+                'title' => 'Com o Executivo',
+                'description' => 'Propostas protocoladas, recebidas ou com reserva aberta pela Prefeitura.',
+                'icon' => 'building-2',
+                'statuses' => [LegislativeProposal::STATUS_SENT, LegislativeProposal::STATUS_RECEIVED, LegislativeProposal::STATUS_RESERVED],
+                'empty' => 'Nenhuma proposta em andamento no Executivo.',
+                'tone' => 'success',
+            ],
+            [
+                'key' => 'closed',
+                'title' => 'Encerradas',
+                'description' => 'Registros rejeitados ou sem continuidade neste fluxo.',
+                'icon' => 'archive',
+                'statuses' => [LegislativeProposal::STATUS_REJECTED],
+                'empty' => 'Nenhuma proposta encerrada.',
+                'tone' => 'muted',
+            ],
+        ])->map(function (array $group) use ($proposals, $year): array {
+            $items = $proposals->whereIn('status', $group['statuses'])->values();
+
+            return [
+                ...$group,
+                'count' => $items->count(),
+                'amount' => (float) $items->sum('estimated_amount'),
+                'items' => $items->take(3)->map(function (LegislativeProposal $proposal): LegislativeProposal {
+                    $proposal->setAttribute('councilor_action_url', route('legislative.show', $proposal).match ($proposal->status) {
+                        LegislativeProposal::STATUS_DRAFT, LegislativeProposal::STATUS_RETURNED => '#editor-proposta',
+                        LegislativeProposal::STATUS_SENT, LegislativeProposal::STATUS_RECEIVED, LegislativeProposal::STATUS_RESERVED => '#acompanhamento-executivo',
+                        default => '#historico-proposta',
+                    });
+
+                    return $proposal;
+                })->values(),
+                'filter_url' => route('legislative.index', ['year' => $year, 'status' => $group['statuses'][0]]),
+                'hidden_count' => max(0, $items->count() - 3),
+            ];
+        })->all();
+
+        $actionItem = collect($groups)->firstWhere('key', 'action')['items']->first() ?? null;
+        $executiveItem = collect($groups)->firstWhere('key', 'executive')['items']->first() ?? null;
+        $chamberItem = collect($groups)->firstWhere('key', 'chamber')['items']->first() ?? null;
+        $createUrl = ($guide['canCreate'] ?? false) ? route('legislative.create', ['year' => $year]) : null;
+
+        return [
+            'groups' => $groups,
+            'next_url' => $actionItem?->getAttribute('councilor_action_url')
+                ?? $createUrl
+                ?? $executiveItem?->getAttribute('councilor_action_url')
+                ?? $chamberItem?->getAttribute('councilor_action_url'),
+            'next_label' => $actionItem ? 'Corrigir proposta'
+                : (($guide['canCreate'] ?? false) ? 'Criar proposta'
+                    : ($executiveItem ? 'Acompanhar Executivo'
+                        : ($chamberItem ? 'Ver tramitação' : 'Ver propostas'))),
         ];
     }
 
