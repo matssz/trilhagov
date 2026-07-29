@@ -496,6 +496,15 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
         : document.querySelector('.legislative-simple-form')?.closest('form');
     const amountInput = form?.querySelector('input[name="estimated_amount"]');
     const healthInput = form?.querySelector('input[name="health_related"]');
+    const objectInput = form?.querySelector('[name="object"]');
+    const beneficiaryInput = form?.querySelector('[name="beneficiary_name"]');
+    const departmentInput = form?.querySelector('[name="responsible_department"]');
+    const locationInput = form?.querySelector('[name="beneficiary_location"]');
+    const justificationInput = form?.querySelector('[name="justification"]');
+    const estimateSourceInput = form?.querySelector('[name="estimate_source"]');
+    const readinessPanel = document.querySelector('[data-legislative-readiness]');
+    const readinessMessage = readinessPanel?.querySelector('[data-readiness-message]');
+    const readinessItems = readinessPanel?.querySelectorAll('[data-readiness-item]');
     const remainingTarget = legislativeProjection.querySelector('[data-projection-remaining]');
     const messageTarget = legislativeProjection.querySelector('[data-projection-message]');
     const fillAvailable = legislativeProjection.querySelector('[data-fill-available]');
@@ -513,6 +522,105 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
     const remaining = parseNumber(legislativeAutomation.dataset.remaining);
     const minimum = parseNumber(legislativeAutomation.dataset.minimum) ?? 0.01;
     const healthGap = parseNumber(legislativeAutomation.dataset.healthGap) ?? 0;
+    const healthTerms = [
+        'saude',
+        'saúde',
+        'ubs',
+        'unidade basica',
+        'unidade básica',
+        'posto de saude',
+        'posto de saúde',
+        'vacina',
+        'vacinacao',
+        'vacinação',
+        'medicamento',
+        'hospital',
+        'ambulatorio',
+        'ambulatório',
+        'enfermagem',
+        'odontologico',
+        'odontológico',
+        'atencao basica',
+        'atenção básica',
+    ];
+
+    const normalizeText = (value) => String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    const fieldValue = (field) => field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement
+        ? field.value.trim()
+        : '';
+
+    const setIfBlank = (field, value) => {
+        if ((field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) && field.value.trim() === '') {
+            field.value = value;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    };
+
+    const detectsHealth = () => {
+        const text = normalizeText(`${fieldValue(objectInput)} ${fieldValue(beneficiaryInput)} ${fieldValue(departmentInput)}`);
+
+        return healthTerms.some((term) => text.includes(normalizeText(term)));
+    };
+
+    const syncAssistedFields = () => {
+        const healthDetected = detectsHealth();
+
+        if (healthDetected && healthInput instanceof HTMLInputElement && !healthInput.checked) {
+            healthInput.checked = true;
+            healthInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        if (healthDetected) {
+            setIfBlank(departmentInput, 'Secretaria Municipal de Saude');
+        }
+
+        if (locationInput instanceof HTMLInputElement && locationInput.value.trim() === '') {
+            locationInput.value = locationInput.dataset.defaultLocation ?? '';
+        }
+
+        setIfBlank(estimateSourceInput, 'Estimativa declarada pelo vereador');
+    };
+
+    const readinessState = () => {
+        const amount = parseNumber(amountInput instanceof HTMLInputElement ? amountInput.value : null) ?? 0;
+        const after = remaining === null ? null : remaining - amount;
+
+        return {
+            object: fieldValue(objectInput).length >= 20,
+            amount: amount >= minimum && (after === null || after >= -0.005),
+            beneficiary: fieldValue(beneficiaryInput).length >= 3,
+            justification: fieldValue(justificationInput).length >= 30,
+        };
+    };
+
+    const updateReadiness = () => {
+        if (!(readinessPanel instanceof HTMLElement) || !readinessItems || !readinessMessage) {
+            return;
+        }
+
+        const state = readinessState();
+        const readyCount = Object.values(state).filter(Boolean).length;
+        const allReady = readyCount === Object.keys(state).length;
+
+        readinessPanel.classList.toggle('is-ready', allReady);
+        readinessPanel.classList.toggle('is-partial', !allReady && readyCount > 0);
+        readinessMessage.textContent = allReady
+            ? 'Pronto para salvar como rascunho. Depois, revise e envie para conferencia legislativa.'
+            : `${readyCount} de ${Object.keys(state).length} pontos prontos. Complete os itens pendentes para evitar devolucao.`;
+
+        readinessItems.forEach((item) => {
+            if (!(item instanceof HTMLElement)) {
+                return;
+            }
+
+            const key = item.dataset.readinessItem;
+            item.classList.toggle('is-ok', Boolean(key && state[key]));
+        });
+    };
 
     const updateProjection = () => {
         if (!(amountInput instanceof HTMLInputElement) || !remainingTarget || !messageTarget) {
@@ -544,6 +652,8 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
         } else {
             messageTarget.textContent = 'Valor dentro da cota disponivel para salvar como proposta.';
         }
+
+        updateReadiness();
     };
 
     fillAvailable?.addEventListener('click', () => {
@@ -566,6 +676,17 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
 
     amountInput?.addEventListener('input', updateProjection);
     healthInput?.addEventListener('change', updateProjection);
+    [objectInput, beneficiaryInput, departmentInput, locationInput, justificationInput, estimateSourceInput].forEach((field) => {
+        field?.addEventListener('input', () => {
+            syncAssistedFields();
+            updateProjection();
+        });
+        field?.addEventListener('blur', () => {
+            syncAssistedFields();
+            updateProjection();
+        });
+    });
+    syncAssistedFields();
     updateProjection();
 }
 

@@ -55,6 +55,21 @@
                 </button>
             @endif
         </section>
+        <section class="legislative-readiness-panel" data-legislative-readiness>
+            <div>
+                <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                <div>
+                    <strong>Assistente automatico de preenchimento</strong>
+                    <p data-readiness-message>Preencha objeto, valor e beneficiario. O TrilhaGov sugere saude, secretaria, localidade e fonte da estimativa quando identificar o padrao.</p>
+                </div>
+            </div>
+            <ul>
+                <li data-readiness-item="object">Objeto claro</li>
+                <li data-readiness-item="amount">Valor dentro da cota</li>
+                <li data-readiness-item="beneficiary">Destino informado</li>
+                <li data-readiness-item="justification">Justificativa suficiente</li>
+            </ul>
+        </section>
     @endif
 
     <form method="POST" action="{{ route('legislative.store') }}" data-prevent-double-submit>
