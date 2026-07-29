@@ -371,6 +371,9 @@ class LegislativeProposalController extends Controller
                 'receive_token' => $column['key'] === 'receive'
                     ? $formSubmission->issue($request, "legislative-proposal-receive-{$proposal->id}")
                     : null,
+                'reserve_token' => $column['key'] === 'budget'
+                    ? $formSubmission->issue($request, "legislative-proposal-reserve-{$proposal->id}")
+                    : null,
             ]))
             ->sortBy([
                 ['late', 'desc'],
@@ -745,13 +748,18 @@ class LegislativeProposalController extends Controller
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal)->load('amendment');
+        $suggestion = $this->budgetReservationSuggestion($proposal);
         $validated = $request->validate([
             '_submission_token' => ['nullable', 'string'],
-            'budget_reservation_number' => ['required', 'string', 'min:3', 'max:180'],
-            'budget_reserved_amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999999.99'],
-            'budget_reserved_at' => ['required', 'date', 'before_or_equal:today'],
-            'executive_notes' => ['required', 'string', 'min:20', 'max:5000'],
+            'budget_reservation_number' => ['nullable', 'string', 'min:3', 'max:180'],
+            'budget_reserved_amount' => ['nullable', 'numeric', 'min:0.01', 'max:9999999999999.99'],
+            'budget_reserved_at' => ['nullable', 'date', 'before_or_equal:today'],
+            'executive_notes' => ['nullable', 'string', 'min:20', 'max:5000'],
         ], ['executive_notes.min' => 'Registre a reanálise orçamentária com pelo menos 20 caracteres.']);
+        $validated['budget_reservation_number'] = trim((string) (($validated['budget_reservation_number'] ?? null) ?: $suggestion['reservation_number']));
+        $validated['budget_reserved_amount'] = $validated['budget_reserved_amount'] ?? $suggestion['amount'];
+        $validated['budget_reserved_at'] = $validated['budget_reserved_at'] ?? $suggestion['reserved_at'];
+        $validated['executive_notes'] = trim((string) (($validated['executive_notes'] ?? null) ?: $suggestion['notes']));
         if (abs((float) $validated['budget_reserved_amount'] - (float) $proposal->estimated_amount) > 0.01) {
             return back()->withErrors(['budget_reserved_amount' => 'A reserva deve corresponder integralmente ao valor protocolado. Divergências exigem devolução formal à Câmara.']);
         }
@@ -807,6 +815,26 @@ class LegislativeProposalController extends Controller
                 ['label' => 'Classificacao', 'value' => $classification],
                 ['label' => 'Valor recebido', 'value' => 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.')],
             ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function budgetReservationSuggestion(LegislativeProposal $proposal): array
+    {
+        $sequence = preg_replace('/^LEG-\d{4}-/i', '', $proposal->reference) ?: str_pad((string) $proposal->id, 3, '0', STR_PAD_LEFT);
+        $reservationNumber = 'RES-'.$proposal->fiscal_year.'-'.$sequence;
+        $amount = (float) $proposal->estimated_amount;
+        $process = $proposal->executive_process_number ?: 'processo executivo pendente';
+        $notes = 'Reserva orcamentaria automatica da proposta '.$proposal->reference
+            .' vinculada ao '.$process
+            .'. Valor integral reservado: R$ '.number_format($amount, 2, ',', '.')
+            .'. A etapa seguinte deve solicitar e revisar o Plano de Trabalho antes da execucao.';
+
+        return [
+            'reservation_number' => $reservationNumber,
+            'amount' => $amount,
+            'reserved_at' => now()->toDateString(),
+            'notes' => $notes,
         ];
     }
 

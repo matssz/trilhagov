@@ -216,6 +216,18 @@
                                     </div>
                                     <button type="submit">Confirmar</button>
                                 </form>
+                            @elseif(in_array($role, [App\Models\User::ROLE_MANAGER, App\Models\User::ROLE_EDITOR], true) && $action['column']['key'] === 'budget')
+                                <form class="executive-action-card is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" method="POST" action="{{ route('legislative.reserve', $action['proposal']) }}" data-prevent-double-submit>
+                                    @csrf
+                                    <input name="_submission_token" type="hidden" value="{{ $action['reserve_token'] }}">
+                                    <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>
+                                    <div>
+                                        <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
+                                        <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
+                                        <em>{{ $action['proposal']->author_name }} · reserva integral e Plano de Trabalho serao acionados automaticamente</em>
+                                    </div>
+                                    <button type="submit">Reservar</button>
+                                </form>
                             @else
                                 <a class="executive-action-card is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" href="{{ $action['url'] }}">
                                     <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>

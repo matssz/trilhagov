@@ -493,6 +493,16 @@ class LegislativeProposalTest extends TestCase
             'source_key' => "amendment:{$proposal->amendment->id}:municipal-work-plan:create",
             'status' => MunicipalWorkItem::STATUS_PENDING,
         ]);
+
+        $this->post(route('legislative.reserve', $proposal), [
+            '_submission_token' => $this->token($municipality, "legislative-proposal-reserve-{$proposal->id}"),
+        ])->assertSessionHas('status');
+
+        $proposal->refresh();
+        $this->assertSame(LegislativeProposal::STATUS_RESERVED, $proposal->status);
+        $this->assertSame('RES-2027-'.Str::after($proposal->reference, 'LEG-2027-'), $proposal->budget_reservation_number);
+        $this->assertEquals((float) $proposal->estimated_amount, (float) $proposal->budget_reserved_amount);
+        $this->assertStringContainsString('Reserva orcamentaria automatica', $proposal->executive_notes);
     }
 
     public function test_executive_sees_single_board_for_chamber_intake_and_councilor_keeps_simple_view(): void
@@ -619,6 +629,8 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('fora do prazo')
             ->assertSee('processo e pendencias serao sugeridos automaticamente')
             ->assertSee('Confirmar')
+            ->assertSee('reserva integral e Plano de Trabalho serao acionados automaticamente')
+            ->assertSee('Reservar')
             ->assertSee('Atenção imediata')
             ->assertSee('Abrir prioridade')
             ->assertSee('Triagem rapida do Legislativo')
