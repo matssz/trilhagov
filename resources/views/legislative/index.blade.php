@@ -177,6 +177,18 @@
                     @endforeach
                 </div>
             @endif
+            <div class="executive-triage-strip" aria-label="Triagem rapida do Legislativo">
+                @foreach($executiveBoard as $column)
+                    <a class="is-{{ $column['tone'] }}" href="{{ $column['items']->first()?->getAttribute('executive_board_url') ?? route('legislative.index', ['year' => $year, 'status' => $column['statuses'][0]]) }}">
+                        <span><i data-lucide="{{ $column['icon'] }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>{{ $column['action'] }}</small>
+                            <strong>{{ $column['count'] }} em {{ $column['title'] }}</strong>
+                            <em>R$ {{ number_format($column['amount'], 2, ',', '.') }}{{ ($column['stale_count'] ?? 0) > 0 ? ' · '.$column['stale_count'].' atrasada(s)' : '' }}</em>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
             <div class="legislative-board-grid">
                 @foreach ($executiveBoard as $column)
                     <article class="legislative-board-column is-{{ $column['tone'] }}">
