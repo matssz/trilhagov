@@ -7,6 +7,7 @@ use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\IntegrityAlertService;
+use App\Services\SimplifiedExecutionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,40 @@ use Illuminate\Validation\Rule;
 
 class ExecutionStageController extends Controller
 {
+    public function start(Request $request, int $emenda, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, IntegrityAlertService $integrityAlertService, SimplifiedExecutionService $simplifiedExecutionService): RedirectResponse
+    {
+        $municipality = $currentMunicipality->get($request);
+        $amendment = $municipality->amendments()->with('municipalWorkPlan.stages')->findOrFail($emenda);
+        $request->validate(['_submission_token' => ['required', 'string']]);
+
+        if (! $formSubmission->consume($request, "execution-start-{$amendment->id}")) {
+            return back()->with('warning', 'A execucao desta emenda ja foi iniciada ou o pedido ja foi processado.');
+        }
+
+        $created = DB::transaction(function () use ($request, $amendment, $auditTrail, $simplifiedExecutionService): int {
+            $created = $simplifiedExecutionService->createStagesFromPlan($amendment, $request->user()->id);
+
+            if ($created > 0) {
+                $auditTrail->recordOperation($request, $amendment, 'execution_simplified_started', [
+                    'created_stages' => $created,
+                    'source' => $amendment->municipalWorkPlan?->status === 'approved' ? 'work_plan' : 'amendment',
+                ]);
+            }
+
+            return $created;
+        });
+
+        $integrityAlertService->sync($municipality->fresh());
+
+        if ($created === 0) {
+            return back()->with('warning', 'A execucao desta emenda ja possui etapas cadastradas.');
+        }
+
+        return redirect()
+            ->route('emendas.execution', $amendment)
+            ->with('status', $created.' etapa(s) gerada(s). Agora registre o empenho e vincule as evidencias da entrega.');
+    }
+
     public function store(Request $request, int $emenda, CurrentMunicipality $currentMunicipality, FormSubmission $formSubmission, AuditTrail $auditTrail, IntegrityAlertService $integrityAlertService): RedirectResponse
     {
         $municipality = $currentMunicipality->get($request);

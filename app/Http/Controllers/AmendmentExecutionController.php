@@ -6,6 +6,7 @@ use App\Models\ExecutionStage;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\IntegrityAlertService;
+use App\Services\SimplifiedExecutionService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,6 +18,7 @@ class AmendmentExecutionController extends Controller
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
         IntegrityAlertService $integrityAlertService,
+        SimplifiedExecutionService $simplifiedExecutionService,
     ): View {
         $municipality = $currentMunicipality->get($request);
         $integrityAlertService->syncIfDue($municipality);
@@ -32,6 +34,7 @@ class AmendmentExecutionController extends Controller
                 'financialCommitments.liquidations.payments',
                 'financialCommitments.payments.creator',
                 'financialCommitments.payments.liquidation',
+                'municipalWorkPlan.stages',
             ])
             ->findOrFail($emenda);
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
@@ -62,6 +65,10 @@ class AmendmentExecutionController extends Controller
             'uncommittedBalance' => $receivedAmount - $committedAmount,
             'financialPercentage' => $receivedAmount > 0 ? (int) round(($paidAmount / $receivedAmount) * 100) : 0,
             'physicalPercentage' => $amendment->physicalExecutionPercentage(),
+            'executionGuide' => $simplifiedExecutionService->guide($amendment, $receivedAmount, $committedAmount, $paidAmount, $amendment->physicalExecutionPercentage()),
+            'executionStartToken' => $canEdit && $amendment->executionStages->isEmpty()
+                ? $formSubmission->issue($request, "execution-start-{$amendment->id}")
+                : null,
             'stageCreateToken' => $canEdit ? $formSubmission->issue($request, "execution-stage-create-{$amendment->id}") : null,
             'documentSubmissionToken' => $canEdit
                 ? $formSubmission->issue($request, "amendment-document-upload-{$amendment->id}")

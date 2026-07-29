@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
 use App\Models\IntegrityAlert;
+use App\Models\MunicipalWorkPlan;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -21,6 +22,75 @@ use Tests\TestCase;
 class AmendmentExecutionTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_manager_can_start_simplified_execution_from_approved_work_plan(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'responsible_user_id' => $manager->id,
+            'received_amount' => 100000,
+        ]);
+        $plan = $amendment->municipalWorkPlan()->create([
+            'municipality_id' => $municipality->id,
+            'created_by' => $manager->id,
+            'updated_by' => $manager->id,
+            'status' => MunicipalWorkPlan::STATUS_APPROVED,
+            'beneficiary_type' => 'municipal_body',
+            'beneficiary_name' => 'Secretaria Municipal de Saude',
+            'beneficiary_contact' => 'Secretaria Municipal de Saude',
+            'object_description' => $amendment->object,
+            'public_need' => 'Necessidade publica testada.',
+            'physical_target' => 'Entregar equipamentos.',
+            'finalistic_target' => 'Melhorar o atendimento.',
+            'budget_program' => 'Saude municipal',
+            'budget_action' => 'Equipamentos',
+            'application_plan' => 'Aplicacao integral.',
+            'cost_memory' => 'Memoria de calculo.',
+            'maintenance_plan' => 'Manutencao pela secretaria.',
+            'health_related' => true,
+            'health_reserve_verified' => true,
+            'pca_status' => 'included',
+            'planned_start_at' => '2026-07-01',
+            'planned_end_at' => '2026-12-31',
+            'submitted_at' => now(),
+            'approved_at' => now(),
+        ]);
+        $plan->stages()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'title' => 'Entrega dos equipamentos',
+            'physical_delivery' => 'Equipamentos entregues e instalados.',
+            'planned_amount' => 100000,
+            'planned_start_at' => '2026-07-01',
+            'planned_end_at' => '2026-12-31',
+            'sort_order' => 10,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.execution', $amendment))
+            ->assertOk()
+            ->assertSee('Execucao simplificada')
+            ->assertSee('Gerar etapas do plano')
+            ->assertSee('Plano aprovado localizado');
+
+        $token = $this->sessionFor($municipality, "execution-start-{$amendment->id}");
+        $payload = ['_submission_token' => $token];
+
+        $this->post(route('emendas.execution.start', $amendment), $payload)
+            ->assertRedirect(route('emendas.execution', $amendment))
+            ->assertSessionHas('status');
+        $this->post(route('emendas.execution.start', $amendment), $payload)
+            ->assertSessionHas('warning');
+
+        $stage = ExecutionStage::firstOrFail();
+        $this->assertDatabaseCount('execution_stages', 1);
+        $this->assertSame('Entrega dos equipamentos', $stage->title);
+        $this->assertSame('100000.00', $stage->planned_amount);
+        $this->assertSame(ParliamentaryAmendment::STATUS_EXECUTING, $amendment->fresh()->status);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'execution_simplified_started']);
+    }
 
     public function test_manager_can_create_and_update_a_physical_execution_stage_once(): void
     {

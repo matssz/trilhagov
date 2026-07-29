@@ -40,6 +40,74 @@
 
     <x-validation-summary />
 
+    <section class="execution-guide mb-4" aria-label="Execucao simplificada">
+        <div class="execution-guide-header">
+            <div>
+                <p class="page-kicker mb-1">Execucao simplificada</p>
+                <h2 class="h5 mb-1">Painel unico do Executivo</h2>
+                <p>Controle o que precisa acontecer agora: abrir etapas, registrar empenho, comprovar entrega e preparar a prestacao de contas.</p>
+            </div>
+            @if ($amendment->municipalWorkPlan)
+                <a class="btn btn-outline-primary" href="{{ route('emendas.work-plan', $amendment) }}"><i data-lucide="clipboard-list" aria-hidden="true"></i>Ver plano</a>
+            @endif
+        </div>
+
+        <div class="execution-guide-next" id="iniciar-execucao">
+            <span><i data-lucide="{{ $executionGuide['next']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <strong>{{ $executionGuide['next']['title'] }}</strong>
+                <p>{{ $executionGuide['next']['description'] }}</p>
+            </div>
+            @if ($canEdit && $amendment->executionStages->isEmpty())
+                <form method="POST" action="{{ route('emendas.execution.start', $amendment) }}">
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $executionStartToken }}">
+                    <button class="btn btn-primary" type="submit">{{ $executionGuide['next']['label'] }}</button>
+                </form>
+            @else
+                <a class="btn btn-primary" href="{{ $executionGuide['next']['href'] }}">{{ $executionGuide['next']['label'] }}</a>
+            @endif
+        </div>
+
+        <div class="execution-guide-steps">
+            @foreach ($executionGuide['steps'] as $step)
+                <div class="{{ $step['done'] ? 'is-done' : '' }}">
+                    <span><i data-lucide="{{ $step['done'] ? 'check' : 'circle' }}" aria-hidden="true"></i></span>
+                    <strong>{{ $step['label'] }}</strong>
+                    <small>{{ $step['description'] }}</small>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="execution-guide-grid">
+            <div>
+                <h3>Resumo automatico</h3>
+                <dl>
+                    @foreach ($executionGuide['summary'] as $item)
+                        <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                    @endforeach
+                </dl>
+            </div>
+            <div>
+                <h3>Riscos operacionais</h3>
+                <ul>
+                    @foreach ($executionGuide['risks'] as $risk)
+                        <li>{{ $risk }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            <div>
+                <h3>Atalhos do gestor</h3>
+                <div class="execution-guide-actions">
+                    <a href="#stages"><i data-lucide="clipboard-check" aria-hidden="true"></i>Etapas</a>
+                    <a href="#commitments"><i data-lucide="briefcase-business" aria-hidden="true"></i>Empenhos</a>
+                    <a href="#evidence"><i data-lucide="file-check-2" aria-hidden="true"></i>Evidencias</a>
+                    <a href="{{ route('emendas.accountability', $amendment) }}"><i data-lucide="archive" aria-hidden="true"></i>Prestacao</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     @if ($availableBalance < 0 || $uncommittedBalance < 0)
         <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
             <i data-lucide="triangle-alert" aria-hidden="true"></i>

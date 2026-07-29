@@ -325,6 +325,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::patch('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos/{remanejamento}', [AmendmentRemappingController::class, 'update'])->name('emendas.impediments.remappings.update')->block(10, 10);
         Route::post('/emendas/{emenda}/impedimentos/{impedimento}/remanejamentos/{remanejamento}/enviar', [AmendmentRemappingController::class, 'submit'])->name('emendas.impediments.remappings.submit')->block(10, 10);
         Route::patch('/emendas/{emenda}/conformidade-tcesp/{regra}', [AmendmentComplianceController::class, 'update'])->name('emendas.compliance.update')->block(10, 10);
+        Route::post('/emendas/{emenda}/execucao/iniciar', [ExecutionStageController::class, 'start'])->name('emendas.execution.start')->block(10, 10);
         Route::post('/emendas/{emenda}/etapas', [ExecutionStageController::class, 'store'])->name('emendas.stages.store')->block(10, 10);
         Route::patch('/emendas/{emenda}/etapas/{etapa}', [ExecutionStageController::class, 'update'])->name('emendas.stages.update')->block(10, 10);
         Route::post('/emendas/{emenda}/empenhos', [FinancialCommitmentController::class, 'store'])->name('emendas.commitments.store')->block(10, 10);
