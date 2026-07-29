@@ -955,6 +955,144 @@
     color: var(--danger);
 }
 
+.executive-action-queue {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--line-soft);
+    background: #fbfdff;
+}
+
+.executive-action-queue header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.executive-action-queue header strong,
+.executive-action-queue header small {
+    display: block;
+}
+
+.executive-action-queue header strong {
+    color: var(--navy-950);
+    font-size: .9rem;
+}
+
+.executive-action-queue header small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.executive-action-queue header > span {
+    flex: 0 0 auto;
+    padding: .24rem .52rem;
+    border: 1px solid #cbd8e4;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--navy-800);
+    font-size: .7rem;
+    font-weight: 900;
+}
+
+.executive-action-queue > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.executive-action-queue a {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+    padding: 12px 14px;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    color: inherit;
+    text-decoration: none;
+}
+
+.executive-action-queue a:nth-child(2n) {
+    border-right: 0;
+}
+
+.executive-action-queue a:nth-last-child(-n+2) {
+    border-bottom: 0;
+}
+
+.executive-action-queue a:hover {
+    background: #f5f9fc;
+}
+
+.executive-action-queue a > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid #c7d8e6;
+    border-radius: 7px;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.executive-action-queue a.is-budget > span {
+    border-color: #ebd59b;
+    background: #fff8e7;
+    color: #8a5600;
+}
+
+.executive-action-queue a.is-late > span {
+    border-color: #f0a2a2;
+    background: #fff1f1;
+    color: var(--danger);
+}
+
+.executive-action-queue svg {
+    width: 18px;
+    height: 18px;
+}
+
+.executive-action-queue a div {
+    min-width: 0;
+}
+
+.executive-action-queue small,
+.executive-action-queue em {
+    display: block;
+    color: var(--muted);
+    font-size: .68rem;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.executive-action-queue strong {
+    display: block;
+    margin: 2px 0;
+    overflow: hidden;
+    color: var(--navy-950);
+    font-size: .82rem;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.executive-action-queue b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 .65rem;
+    border-radius: 5px;
+    background: var(--navy-900);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 900;
+}
+
 .executive-stale-strip {
     display: flex;
     flex-wrap: wrap;
@@ -2529,6 +2667,23 @@
         border-bottom: 1px solid var(--line-soft);
     }
 
+    .executive-action-queue > div {
+        grid-template-columns: 1fr;
+    }
+
+    .executive-action-queue a,
+    .executive-action-queue a:nth-child(2n) {
+        border-right: 0;
+    }
+
+    .executive-action-queue a:nth-last-child(-n+2) {
+        border-bottom: 1px solid var(--line-soft);
+    }
+
+    .executive-action-queue a:last-child {
+        border-bottom: 0;
+    }
+
     .legislative-board-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -2688,6 +2843,28 @@
 
     .executive-desk-metrics > div:last-child {
         border-bottom: 0;
+    }
+
+    .executive-action-queue header {
+        display: grid;
+        align-items: stretch;
+    }
+
+    .executive-action-queue header > span {
+        width: fit-content;
+    }
+
+    .executive-action-queue a {
+        grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+    .executive-action-queue b {
+        grid-column: 2;
+        width: fit-content;
+    }
+
+    .executive-action-queue strong {
+        white-space: normal;
     }
 
     .legislative-board-grid {

@@ -360,6 +360,20 @@ class LegislativeProposalController extends Controller
             ->sortByDesc('age')
             ->take(4)
             ->values();
+        $quickActions = $actionable
+            ->flatMap(fn (array $column) => $column['items']->map(fn (LegislativeProposal $proposal): array => [
+                'proposal' => $proposal,
+                'column' => $column,
+                'age' => $this->proposalAgeDays($proposal),
+                'late' => $this->proposalAgeDays($proposal) >= (int) $column['sla_days'],
+                'url' => route('legislative.show', $proposal).$column['fragment'],
+            ]))
+            ->sortBy([
+                ['late', 'desc'],
+                ['age', 'desc'],
+            ])
+            ->take(6)
+            ->values();
         $focusItem = $focus ? $focus['items']->first() : null;
 
         return [
@@ -370,6 +384,7 @@ class LegislativeProposalController extends Controller
             'done' => (int) collect($board)->firstWhere('key', 'execution')['count'],
             'stale' => $staleItems,
             'stale_count' => (int) $actionable->sum('stale_count'),
+            'quick_actions' => $quickActions,
             'focus_item' => $focusItem,
             'focus_url' => $focusItem ? route('legislative.show', $focusItem).$focus['fragment'] : null,
             'focus_class' => $total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : ''),

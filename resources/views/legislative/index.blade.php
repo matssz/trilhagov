@@ -193,6 +193,30 @@
                     <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
                 </div>
             </div>
+            @if (($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
+                <div class="executive-action-queue" aria-label="Fila rapida do Executivo">
+                    <header>
+                        <div>
+                            <strong>Fila rapida de atendimento</strong>
+                            <small>Ordem sugerida pelo prazo e pela etapa atual da proposta.</small>
+                        </div>
+                        <span>{{ $executiveDesk['quick_actions']->count() }} prioridade(s)</span>
+                    </header>
+                    <div>
+                        @foreach($executiveDesk['quick_actions'] as $action)
+                            <a class="is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" href="{{ $action['url'] }}">
+                                <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>
+                                <div>
+                                    <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
+                                    <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
+                                    <em>{{ $action['proposal']->author_name }} · R$ {{ number_format((float) $action['proposal']->estimated_amount, 2, ',', '.') }} · {{ $action['age'] }} dia(s)</em>
+                                </div>
+                                <b>Abrir</b>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             @if (($executiveDesk['stale_count'] ?? 0) > 0)
                 <div class="executive-stale-strip">
                     <strong><i data-lucide="timer-reset" aria-hidden="true"></i>Atenção imediata</strong>
