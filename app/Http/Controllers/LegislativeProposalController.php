@@ -788,7 +788,9 @@ class LegislativeProposalController extends Controller
         $stats = $workItems->synchronize($municipality->fresh());
         $notifications->submitter($proposal, 'Reserva orçamentária registrada', "A proposta {$proposal->reference} avançou para a solicitação e análise do Plano de Trabalho.");
 
-        return back()->with('status', 'Reserva registrada. O fluxo executivo avançou para o Plano de Trabalho e a Central recebeu '.$stats['created'].' pendência(s) automática(s).');
+        return redirect()
+            ->route('emendas.work-plan', $proposal->amendment)
+            ->with('status', 'Reserva registrada. Revise o Plano de Trabalho guiado e envie para analise tecnica. A Central recebeu '.$stats['created'].' pendencia(s) automatica(s).');
     }
 
     /** @return array<string, mixed> */

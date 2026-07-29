@@ -34,8 +34,67 @@
     <x-validation-summary />
     @error('work_plan')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
 
+    <section class="work-plan-guide mb-4" id="assistente-plano" aria-label="Assistente guiado do Plano de Trabalho">
+        <div class="work-plan-guide-header">
+            <div>
+                <p class="page-kicker mb-1">Assistente guiado</p>
+                <h2 class="h5 mb-1">Plano de Trabalho municipal</h2>
+                <p>O caminho abaixo transforma a proposta em plano executavel, com documentos, riscos e responsaveis antes da execucao.</p>
+            </div>
+            @if ($plan)
+                <span class="work-plan-status status-{{ $plan->status }}">{{ $plan->statusLabel() }}</span>
+            @endif
+        </div>
+
+        <div class="work-plan-guide-next">
+            <span><i data-lucide="{{ $guide['next']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <strong>{{ $guide['next']['title'] }}</strong>
+                <p>{{ $guide['next']['description'] }}</p>
+            </div>
+            <a class="btn btn-primary" href="{{ $guide['next']['href'] }}">{{ $guide['next']['label'] }}</a>
+        </div>
+
+        <div class="work-plan-guide-steps">
+            @foreach ($guide['steps'] as $step)
+                <div class="{{ $step['done'] ? 'is-done' : '' }}">
+                    <span><i data-lucide="{{ $step['done'] ? 'check' : 'circle' }}" aria-hidden="true"></i></span>
+                    <strong>{{ $step['label'] }}</strong>
+                    <small>{{ $step['description'] }}</small>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="work-plan-guide-grid">
+            <div>
+                <h3>Documentos minimos</h3>
+                <ul>
+                    @foreach ($guide['documents'] as $document)
+                        <li>{{ $document }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            <div>
+                <h3>Riscos antes da execucao</h3>
+                <ul>
+                    @foreach ($guide['risks'] as $risk)
+                        <li>{{ $risk }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            <div>
+                <h3>Responsaveis</h3>
+                <dl>
+                    @foreach ($guide['responsibles'] as $responsible)
+                        <div><dt>{{ $responsible['label'] }}</dt><dd>{{ $responsible['value'] }}</dd></div>
+                    @endforeach
+                </dl>
+            </div>
+        </div>
+    </section>
+
     @if (! $plan)
-        <section class="content-panel work-plan-empty">
+        <section class="content-panel work-plan-empty" id="iniciar-plano">
             <span><i data-lucide="clipboard-list" aria-hidden="true"></i></span>
             <div>
                 <h2 class="h5">Inicie o planejamento da emenda</h2>
@@ -117,7 +176,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('emendas.work-plan.update', $amendment) }}" novalidate>
+        <form method="POST" action="{{ route('emendas.work-plan.update', $amendment) }}" id="dados-plano" novalidate>
             @csrf
             @method('PATCH')
             <input name="_submission_token" type="hidden" value="{{ $updateToken }}">
@@ -285,7 +344,7 @@
         </section>
 
         @if ($canEdit && $plan->isEditable())
-            <section class="content-panel work-plan-submit mb-4 {{ $readiness['ready'] ? 'is-ready' : '' }}">
+            <section class="content-panel work-plan-submit mb-4 {{ $readiness['ready'] ? 'is-ready' : '' }}" id="enviar-analise">
                 <div><i data-lucide="send" aria-hidden="true"></i><div><h2 class="h5 mb-1">Enviar para análise técnica</h2><p>{{ $readiness['ready'] ? 'O plano passou pelas verificações de preenchimento e será bloqueado durante o parecer.' : 'Resolva as pendências indicadas antes de enviar o plano.' }}</p></div></div>
                 <form method="POST" action="{{ route('emendas.work-plan.submit', $amendment) }}">@csrf<input name="_submission_token" type="hidden" value="{{ $submitToken }}"><button class="btn btn-primary" type="submit" @disabled(! $readiness['ready'])><i data-lucide="send" aria-hidden="true"></i>Enviar revisão {{ $plan->revision_number + 1 }}</button></form>
             </section>

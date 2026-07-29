@@ -80,6 +80,82 @@ class MunicipalWorkPlanService
         ];
     }
 
+    /** @return array<string, mixed> */
+    public function guide(ParliamentaryAmendment $amendment, ?MunicipalWorkPlan $plan, ?array $readiness): array
+    {
+        if (! $plan) {
+            return [
+                'next' => [
+                    'icon' => 'clipboard-list',
+                    'title' => 'Iniciar Plano de Trabalho guiado',
+                    'description' => 'O sistema monta beneficiario, objeto, valor, saude e cronograma inicial a partir da proposta.',
+                    'href' => '#iniciar-plano',
+                    'label' => 'Iniciar plano guiado',
+                ],
+                'steps' => $this->guideSteps(false, false, false, false, false),
+                'documents' => $this->requiredDocuments($amendment, null),
+                'risks' => ['O Executivo ainda nao iniciou o Plano de Trabalho desta emenda.'],
+                'responsibles' => $this->responsibles($amendment, 'Gestor municipal'),
+            ];
+        }
+
+        $ready = (bool) ($readiness['ready'] ?? false);
+        $scheduleReady = $plan->stages->isNotEmpty()
+            && abs((float) ($readiness['difference'] ?? 1)) < 0.01
+            && (float) ($readiness['planned_amount'] ?? 0) > 0;
+        $coreReady = filled($plan->beneficiary_name)
+            && filled($plan->beneficiary_contact)
+            && filled($plan->object_description)
+            && filled($plan->public_need)
+            && filled($plan->physical_target)
+            && filled($plan->finalistic_target);
+        $technicalReady = $plan->pca_status !== 'not_checked'
+            && (! $plan->health_related || $plan->health_reserve_verified)
+            && (! $plan->includes_engineering || $plan->engineering_project_status !== 'pending');
+
+        $next = [
+            'icon' => 'list-checks',
+            'title' => 'Completar dados pendentes',
+            'description' => 'Revise os campos destacados, confirme documentos minimos e salve o plano antes do envio.',
+            'href' => '#dados-plano',
+            'label' => 'Revisar pendencias',
+        ];
+
+        if ($ready && $plan->isEditable()) {
+            $next = [
+                'icon' => 'send',
+                'title' => 'Enviar para analise tecnica',
+                'description' => 'O plano esta pronto para parecer de admissibilidade e sera bloqueado durante a avaliacao.',
+                'href' => '#enviar-analise',
+                'label' => 'Enviar para analise',
+            ];
+        } elseif ($plan->status === MunicipalWorkPlan::STATUS_UNDER_REVIEW) {
+            $next = [
+                'icon' => 'badge-check',
+                'title' => 'Emitir parecer de admissibilidade',
+                'description' => 'O plano esta sob responsabilidade do gestor para aprovar, devolver ou rejeitar formalmente.',
+                'href' => '#parecer',
+                'label' => 'Ver parecer',
+            ];
+        } elseif ($plan->status === MunicipalWorkPlan::STATUS_APPROVED) {
+            $next = [
+                'icon' => 'route',
+                'title' => 'Avancar para execucao',
+                'description' => 'Com o plano aprovado, o proximo controle e acompanhar entregas, pagamentos e documentos.',
+                'href' => route('emendas.execution', $amendment),
+                'label' => 'Abrir execucao',
+            ];
+        }
+
+        return [
+            'next' => $next,
+            'steps' => $this->guideSteps(true, $coreReady, $scheduleReady, $technicalReady, $ready || ! $plan->isEditable()),
+            'documents' => $this->requiredDocuments($amendment, $plan),
+            'risks' => $this->guideRisks($amendment, $plan, $readiness ?? []),
+            'responsibles' => $this->responsibles($amendment, $next['title']),
+        ];
+    }
+
     /**
      * @return array{score: int, ready: bool, completed: int, total: int, blockers: array<int, string>, warnings: array<int, string>, planned_amount: float, difference: float}
      */
@@ -142,6 +218,73 @@ class MunicipalWorkPlanService
             'warnings' => $warnings,
             'planned_amount' => $plannedAmount,
             'difference' => $difference,
+        ];
+    }
+
+    /** @return array<int, array{label: string, description: string, done: bool}> */
+    private function guideSteps(bool $started, bool $core, bool $schedule, bool $technical, bool $submitted): array
+    {
+        return [
+            ['label' => 'Plano iniciado', 'description' => 'Dados basicos criados pelo Executivo.', 'done' => $started],
+            ['label' => 'Objeto e metas', 'description' => 'Beneficiario, necessidade e resultado esperado.', 'done' => $core],
+            ['label' => 'Cronograma e valor', 'description' => 'Etapas batem com o valor reservado.', 'done' => $schedule],
+            ['label' => 'Conferencia tecnica', 'description' => 'Saude, PCA, engenharia e licencas tratados.', 'done' => $technical],
+            ['label' => 'Envio formal', 'description' => 'Plano enviado para parecer municipal.', 'done' => $submitted],
+        ];
+    }
+
+    /** @return array<int, string> */
+    private function requiredDocuments(ParliamentaryAmendment $amendment, ?MunicipalWorkPlan $plan): array
+    {
+        $documents = [
+            'Plano de Trabalho revisado pelo Executivo',
+            'Memoria de calculo ou pesquisa de precos',
+            'Cronograma fisico-financeiro',
+            'Identificacao do beneficiario ou orgao executor',
+        ];
+
+        if (($plan?->health_related ?? false) || $amendment->indicated_for_health) {
+            $documents[] = 'Comprovacao da reserva e enquadramento em saude';
+        }
+
+        if ($plan?->includes_engineering) {
+            $documents[] = 'Projeto, orcamento, ART/RRT e licencas aplicaveis';
+        }
+
+        return $documents;
+    }
+
+    /** @return array<int, string> */
+    private function guideRisks(ParliamentaryAmendment $amendment, MunicipalWorkPlan $plan, array $readiness): array
+    {
+        $risks = [];
+
+        if (($readiness['difference'] ?? 0) != 0) {
+            $risks[] = 'O total das etapas ainda nao fecha com o valor da emenda.';
+        }
+        if ($plan->pca_status === 'update_requested') {
+            $risks[] = 'O objeto precisa ser encaminhado para atualizacao do PCA pelo Executivo.';
+        }
+        if ($plan->health_related && ! $plan->health_reserve_verified) {
+            $risks[] = 'A emenda marcada como saude ainda nao teve reserva confirmada.';
+        }
+        if ($plan->includes_engineering && $plan->engineering_project_status === 'pending') {
+            $risks[] = 'Ha obra ou engenharia com projeto pendente antes da execucao.';
+        }
+        if (Str::length(trim((string) $amendment->object)) < 35) {
+            $risks[] = 'O objeto original e curto; detalhe bem a entrega para evitar devolucao.';
+        }
+
+        return $risks ?: ['Sem risco critico identificado pelo preenchimento atual.'];
+    }
+
+    /** @return array<int, array{label: string, value: string}> */
+    private function responsibles(ParliamentaryAmendment $amendment, string $nextOwner): array
+    {
+        return [
+            ['label' => 'Unidade executora', 'value' => $amendment->responsible_department ?: 'A confirmar pelo gestor'],
+            ['label' => 'Responsavel operacional', 'value' => $amendment->responsibleUser?->name ?: 'Nao definido'],
+            ['label' => 'Proxima acao', 'value' => $nextOwner],
         ];
     }
 

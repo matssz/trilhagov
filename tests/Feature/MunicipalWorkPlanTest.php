@@ -24,6 +24,9 @@ class MunicipalWorkPlanTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.work-plan', $amendment))
             ->assertOk()
+            ->assertSee('Assistente guiado')
+            ->assertSee('Iniciar Plano de Trabalho guiado')
+            ->assertSee('Documentos minimos')
             ->assertSee('O TrilhaGov vai iniciar automaticamente')
             ->assertSee('Executor sugerido')
             ->assertSee('Valor planejado');
@@ -49,6 +52,9 @@ class MunicipalWorkPlanTest extends TestCase
 
         $this->get(route('emendas.work-plan', $amendment))
             ->assertOk()
+            ->assertSee('Plano de Trabalho municipal')
+            ->assertSee('Cronograma e valor')
+            ->assertSee('Riscos antes da execucao')
             ->assertSee('Plano simplificado a partir da emenda')
             ->assertSee('Revisar cronograma');
     }
