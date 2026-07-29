@@ -1,4 +1,7 @@
 @php($editing = isset($proposal))
+@php($minimumAmount = $automation['minimum_amount'] ?? 0.01)
+@php($maximumAmount = $automation['maximum_amount'] ?? null)
+@php($htmlMinimumAmount = $maximumAmount !== null && $maximumAmount < $minimumAmount ? 0.01 : $minimumAmount)
 
 <div class="legislative-simple-form">
     <section class="legislative-form-section span-2">
@@ -10,7 +13,7 @@
             @unless($editing)
                 <label><span>Exercício <b>*</b></span><input class="form-control @error('fiscal_year') is-invalid @enderror" name="fiscal_year" type="number" min="{{ now()->year }}" max="{{ now()->year + 2 }}" value="{{ old('fiscal_year', $year) }}" required>@error('fiscal_year')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             @endunless
-            <label><span>Valor estimado (R$) <b>*</b></span><input class="form-control @error('estimated_amount') is-invalid @enderror" name="estimated_amount" type="number" min="0.01" step="0.01" value="{{ old('estimated_amount', $proposal->estimated_amount ?? '') }}" required>@error('estimated_amount')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+            <label><span>Valor estimado (R$) <b>*</b></span><input class="form-control @error('estimated_amount') is-invalid @enderror" name="estimated_amount" type="number" min="{{ $htmlMinimumAmount }}" @if($maximumAmount !== null) max="{{ $maximumAmount }}" @endif step="0.01" value="{{ old('estimated_amount', $proposal->estimated_amount ?? '') }}" required>@error('estimated_amount')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label class="{{ $editing ? 'span-2' : '' }}"><span>Objeto específico <b>*</b></span><textarea class="form-control @error('object') is-invalid @enderror" name="object" rows="3" minlength="20" maxlength="5000" required placeholder="Ex.: Aquisição de equipamento para a unidade de saúde do bairro...">{{ old('object', $proposal->object ?? '') }}</textarea>@error('object')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label><span>Secretaria ou órgão executor <b>*</b></span><input class="form-control @error('responsible_department') is-invalid @enderror" name="responsible_department" value="{{ old('responsible_department', $proposal->responsible_department ?? '') }}" maxlength="255" required placeholder="Ex.: Secretaria de Saúde">@error('responsible_department')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label><span>Natureza da despesa <b>*</b></span><select class="form-select @error('expense_destination') is-invalid @enderror" name="expense_destination" required><option value="">Selecione</option>@foreach($expenseDestinations as $value => $label)<option value="{{ $value }}" @selected(old('expense_destination', $proposal->expense_destination ?? '') === $value)>{{ $label }}</option>@endforeach</select>@error('expense_destination')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>

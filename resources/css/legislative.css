@@ -227,6 +227,58 @@
     white-space: nowrap;
 }
 
+.legislative-projection-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin: -4px 0 18px;
+    padding: 13px 14px;
+    border: 1px solid #bed1e1;
+    border-left: 4px solid var(--navy-800);
+    border-radius: 7px;
+    background: #fbfdff;
+    box-shadow: 0 10px 24px rgba(15, 47, 79, .06);
+}
+
+.legislative-projection-panel > div {
+    display: grid;
+    min-width: min(100%, 340px);
+    gap: 2px;
+}
+
+.legislative-projection-panel span,
+.legislative-projection-panel small {
+    color: var(--muted);
+    font-size: .73rem;
+    font-weight: 750;
+}
+
+.legislative-projection-panel strong {
+    color: var(--navy-950);
+    font-size: 1rem;
+}
+
+.legislative-projection-panel.is-health {
+    border-left-color: #19705b;
+    background: #f7fcfa;
+}
+
+.legislative-projection-panel.is-warning {
+    border-left-color: #d19a18;
+    background: #fffaf0;
+}
+
+.legislative-projection-panel.is-danger {
+    border-left-color: var(--danger);
+    background: #fff6f6;
+}
+
+.legislative-projection-panel .btn {
+    min-height: 38px;
+}
+
 .legislative-quota-band {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

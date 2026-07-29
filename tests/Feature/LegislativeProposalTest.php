@@ -209,6 +209,30 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Aguardando liberacao');
     }
 
+    public function test_create_screen_projects_available_quota_and_recommends_health_automatically(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereadora Automacao',
+            'legislative_party' => 'PSD',
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'author_name' => 'Vereadora Automacao',
+            'estimated_amount' => 50000,
+            'health_related' => false,
+        ]);
+
+        $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.create', ['year' => 2027]))
+            ->assertOk()
+            ->assertSee('Depois desta proposta')
+            ->assertSee('data-fill-available', false)
+            ->assertSee('data-fill-health', false)
+            ->assertSee('data-health-amount="25000"', false)
+            ->assertSee('max="105000"', false);
+    }
+
     public function test_submission_blocks_amount_above_councilor_quota(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

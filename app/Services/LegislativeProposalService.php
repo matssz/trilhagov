@@ -136,6 +136,41 @@ class LegislativeProposalService
         ];
     }
 
+    /** @return array<string, mixed> */
+    public function proposalAutomation(
+        Municipality $municipality,
+        ?MunicipalRegulatoryProfile $profile,
+        string $authorName,
+        ?LegislativeProposal $current = null,
+    ): array {
+        $quota = $this->quota($municipality, $profile, $authorName, $current);
+        $remaining = $quota['remaining'];
+        $healthGap = $quota['health_gap'];
+        $minimum = $profile?->minimum_amendment_amount === null ? null : (float) $profile->minimum_amendment_amount;
+        $maximum = $remaining === null ? null : max(0.0, (float) $remaining);
+        $recommendedHealth = $healthGap !== null && (float) $healthGap > 0.005;
+        $suggestedHealthAmount = $recommendedHealth
+            ? min((float) $healthGap, $maximum ?? (float) $healthGap)
+            : null;
+        $canCreate = $profile !== null
+            && ($maximum === null || $maximum > 0.005)
+            && ($minimum === null || $maximum === null || $maximum + 0.005 >= $minimum)
+            && ($quota['count_limit'] === null || (int) $quota['count'] < (int) $quota['count_limit']);
+
+        return [
+            'quota' => $quota,
+            'minimum_amount' => $minimum,
+            'maximum_amount' => $maximum,
+            'health_required' => $quota['health_required'],
+            'health_allocated' => $quota['health_allocated'],
+            'health_gap' => $healthGap,
+            'health_percentage' => $quota['health_percentage'],
+            'recommended_health' => $recommendedHealth,
+            'suggested_health_amount' => $suggestedHealthAmount,
+            'can_create' => $canCreate,
+        ];
+    }
+
     /** @return array<string, string> */
     public function submissionErrors(LegislativeProposal $proposal, User $user): array
     {

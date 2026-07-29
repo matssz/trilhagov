@@ -487,6 +487,88 @@ function syncOfficialSources() {
 officialAmendment?.addEventListener('change', syncOfficialSources);
 syncOfficialSources();
 
+const legislativeAutomation = document.querySelector('[data-legislative-automation]');
+const legislativeProjection = document.querySelector('[data-legislative-projection]');
+
+if (legislativeAutomation instanceof HTMLElement && legislativeProjection instanceof HTMLElement) {
+    const form = legislativeProjection.nextElementSibling instanceof HTMLFormElement
+        ? legislativeProjection.nextElementSibling
+        : document.querySelector('.legislative-simple-form')?.closest('form');
+    const amountInput = form?.querySelector('input[name="estimated_amount"]');
+    const healthInput = form?.querySelector('input[name="health_related"]');
+    const remainingTarget = legislativeProjection.querySelector('[data-projection-remaining]');
+    const messageTarget = legislativeProjection.querySelector('[data-projection-message]');
+    const fillAvailable = legislativeProjection.querySelector('[data-fill-available]');
+    const fillHealth = legislativeProjection.querySelector('[data-fill-health]');
+    const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    const parseNumber = (value) => {
+        if (value === undefined || value === null || value === '') {
+            return null;
+        }
+
+        const number = Number(String(value).replace(',', '.'));
+
+        return Number.isFinite(number) ? number : null;
+    };
+    const remaining = parseNumber(legislativeAutomation.dataset.remaining);
+    const minimum = parseNumber(legislativeAutomation.dataset.minimum) ?? 0.01;
+    const healthGap = parseNumber(legislativeAutomation.dataset.healthGap) ?? 0;
+
+    const updateProjection = () => {
+        if (!(amountInput instanceof HTMLInputElement) || !remainingTarget || !messageTarget) {
+            return;
+        }
+
+        const amount = parseNumber(amountInput.value) ?? 0;
+        const after = remaining === null ? null : remaining - amount;
+        const healthChecked = healthInput instanceof HTMLInputElement && healthInput.checked;
+
+        if (after !== null) {
+            remainingTarget.textContent = `${money.format(Math.max(0, after))} de saldo restante`;
+        } else {
+            remainingTarget.textContent = 'Saldo a configurar';
+        }
+
+        legislativeProjection.classList.toggle('is-danger', after !== null && after < -0.005);
+        legislativeProjection.classList.toggle('is-warning', after !== null && after >= -0.005 && amount > 0 && amount < minimum);
+        legislativeProjection.classList.toggle('is-health', healthChecked);
+
+        if (after !== null && after < -0.005) {
+            messageTarget.textContent = `O valor ultrapassa o saldo em ${money.format(Math.abs(after))}. Reduza antes de salvar.`;
+        } else if (amount > 0 && amount < minimum) {
+            messageTarget.textContent = `A norma municipal exige valor minimo de ${money.format(minimum)}.`;
+        } else if (healthGap > 0 && !healthChecked) {
+            messageTarget.textContent = `Ainda faltam ${money.format(healthGap)} para a reserva de saude. Marque saude se esta proposta atender essa area.`;
+        } else if (healthChecked) {
+            messageTarget.textContent = 'Esta proposta entra automaticamente no controle da reserva de saude.';
+        } else {
+            messageTarget.textContent = 'Valor dentro da cota disponivel para salvar como proposta.';
+        }
+    };
+
+    fillAvailable?.addEventListener('click', () => {
+        if (amountInput instanceof HTMLInputElement && remaining !== null) {
+            amountInput.value = Math.max(0, remaining).toFixed(2);
+            amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
+    fillHealth?.addEventListener('click', () => {
+        const healthAmount = parseNumber(fillHealth.dataset.healthAmount);
+        if (amountInput instanceof HTMLInputElement && healthAmount !== null) {
+            amountInput.value = healthAmount.toFixed(2);
+        }
+        if (healthInput instanceof HTMLInputElement) {
+            healthInput.checked = true;
+        }
+        updateProjection();
+    });
+
+    amountInput?.addEventListener('input', updateProjection);
+    healthInput?.addEventListener('change', updateProjection);
+    updateProjection();
+}
+
 document.addEventListener('submit', (event) => {
     const form = event.target;
 

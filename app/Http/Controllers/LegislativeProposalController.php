@@ -110,9 +110,11 @@ class LegislativeProposalController extends Controller
         $healthAllocated = (float) ($quota['health_allocated'] ?? 0);
         $healthRequired = $quota['health_required'] ?? null;
         $healthGap = $quota['health_gap'] ?? null;
+        $minimumAmount = $profile?->minimum_amendment_amount === null ? null : (float) $profile->minimum_amendment_amount;
 
         $canCreate = $profile !== null
             && ($remaining === null || (float) $remaining > 0.005)
+            && ($minimumAmount === null || $remaining === null || (float) $remaining + 0.005 >= $minimumAmount)
             && ($countLimit === null || $count < (int) $countLimit);
         $quotaProgress = $quotaCeiling ? min(100, round($quotaUsed / (float) $quotaCeiling * 100)) : null;
         $healthProgress = $healthRequired ? min(100, round($healthAllocated / (float) $healthRequired * 100)) : null;
@@ -131,6 +133,11 @@ class LegislativeProposalController extends Controller
             $nextTitle = 'Saldo individual esgotado';
             $nextText = 'Todas as novas indicacoes precisam respeitar o teto da Lei Organica definido para o exercicio.';
             $badge = 'Sem saldo';
+            $badgeTone = 'warning';
+        } elseif ($minimumAmount !== null && $remaining !== null && (float) $remaining + 0.005 < $minimumAmount) {
+            $nextTitle = 'Saldo abaixo do minimo';
+            $nextText = 'A norma municipal exige proposta minima de R$ '.number_format($minimumAmount, 2, ',', '.').', acima do saldo disponivel.';
+            $badge = 'Sem valor minimo';
             $badgeTone = 'warning';
         } elseif ($healthGap !== null && (float) $healthGap > 0.005) {
             $nextTitle = 'Priorize uma proposta de saude';
@@ -690,6 +697,7 @@ class LegislativeProposalController extends Controller
             'expenseDestinations' => ParliamentaryAmendment::expenseDestinations(),
             'transferTypes' => collect(ParliamentaryAmendment::transferTypes())->only(['direct_execution', 'defined_purpose', 'fund_to_fund', 'other'])->all(),
             'quota' => $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name)),
+            'automation' => $service->proposalAutomation($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name)),
         ];
     }
 
