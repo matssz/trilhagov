@@ -487,12 +487,13 @@ class LegislativeProposalTest extends TestCase
             'legislative_party' => 'PSD',
         ]);
 
-        $this->proposal($municipality, $profile, $councilor, [
+        $stale = $this->proposal($municipality, $profile, $councilor, [
             'status' => LegislativeProposal::STATUS_SENT,
             'object' => 'Equipamentos para atendimento municipal integrado.',
             'protocol_number' => 'CAM-2027-088',
             'sent_at' => now(),
         ]);
+        $stale->forceFill(['updated_at' => now()->subDays(4)])->saveQuietly();
         $this->proposal($municipality, $profile, $councilor, [
             'status' => LegislativeProposal::STATUS_RECEIVED,
             'object' => 'Reforma de unidade de atendimento ao cidadao.',
@@ -509,6 +510,11 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Acoes pendentes')
             ->assertSee('Valor sob decisao')
             ->assertSee('Em execucao aberta')
+            ->assertSee('Fora do prazo')
+            ->assertSee('Atenção imediata')
+            ->assertSee('Abrir prioridade')
+            ->assertSee('4 dia(s)')
+            ->assertSee('Filtrar')
             ->assertSee('#recebimento-executivo')
             ->assertSee('#reserva-orcamentaria');
     }

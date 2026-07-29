@@ -178,6 +178,8 @@ class LegislativeProposalController extends Controller
                 'statuses' => [LegislativeProposal::STATUS_SUBMITTED, LegislativeProposal::STATUS_APPROVED],
                 'action' => 'Analisar ou protocolar',
                 'fragment' => '#conferencia-legislativa',
+                'empty' => 'Sem proposta aguardando conferência ou protocolo.',
+                'sla_days' => 3,
                 'tone' => 'review',
             ],
             [
@@ -188,6 +190,8 @@ class LegislativeProposalController extends Controller
                 'statuses' => [LegislativeProposal::STATUS_SENT],
                 'action' => 'Receber proposta',
                 'fragment' => '#recebimento-executivo',
+                'empty' => 'Nenhum protocolo aguardando recebimento formal.',
+                'sla_days' => 2,
                 'tone' => 'receive',
             ],
             [
@@ -198,6 +202,8 @@ class LegislativeProposalController extends Controller
                 'statuses' => [LegislativeProposal::STATUS_RECEIVED],
                 'action' => 'Registrar reserva',
                 'fragment' => '#reserva-orcamentaria',
+                'empty' => 'Nenhuma proposta aguardando reserva orçamentária.',
+                'sla_days' => 5,
                 'tone' => 'budget',
             ],
             [
@@ -208,6 +214,8 @@ class LegislativeProposalController extends Controller
                 'statuses' => [LegislativeProposal::STATUS_RESERVED],
                 'action' => 'Abrir acompanhamento',
                 'fragment' => '#acompanhamento-executivo',
+                'empty' => 'Nenhuma emenda com reserva para acompanhar.',
+                'sla_days' => 7,
                 'tone' => 'execution',
             ],
         ])->map(function (array $column) use ($proposals): array {
@@ -215,6 +223,11 @@ class LegislativeProposalController extends Controller
             $items = $proposals
                 ->whereIn('status', $column['statuses'])
                 ->take(5)
+                ->map(function (LegislativeProposal $proposal) use ($column): LegislativeProposal {
+                    $proposal->setAttribute('executive_board_url', route('legislative.show', $proposal).$column['fragment']);
+
+                    return $proposal;
+                })
                 ->values();
             $oldest = $allItems->sortBy('updated_at')->first();
 
@@ -225,6 +238,7 @@ class LegislativeProposalController extends Controller
                 'amount' => (float) $proposals->whereIn('status', $column['statuses'])->sum('estimated_amount'),
                 'oldest' => $oldest,
                 'hidden_count' => max(0, $allItems->count() - $items->count()),
+                'stale_count' => $allItems->filter(fn (LegislativeProposal $proposal): bool => $this->proposalAgeDays($proposal) >= (int) $column['sla_days'])->count(),
             ];
         })->all();
     }
@@ -239,6 +253,18 @@ class LegislativeProposalController extends Controller
         $total = (int) $actionable->sum('count');
         $amount = (float) $actionable->sum('amount');
         $focus = $actionable->first(fn (array $column): bool => (int) $column['count'] > 0);
+        $staleItems = $actionable
+            ->flatMap(fn (array $column) => $column['items']->map(fn (LegislativeProposal $proposal): array => [
+                'proposal' => $proposal,
+                'column' => $column,
+                'age' => $this->proposalAgeDays($proposal),
+                'url' => route('legislative.show', $proposal).$column['fragment'],
+            ]))
+            ->filter(fn (array $item): bool => $item['age'] >= (int) $item['column']['sla_days'])
+            ->sortByDesc('age')
+            ->take(4)
+            ->values();
+        $focusItem = $focus ? $focus['items']->first() : null;
 
         return [
             'total' => $total,
@@ -246,7 +272,21 @@ class LegislativeProposalController extends Controller
             'focus' => $focus,
             'ready' => $total === 0,
             'done' => (int) collect($board)->firstWhere('key', 'execution')['count'],
+            'stale' => $staleItems,
+            'stale_count' => (int) $actionable->sum('stale_count'),
+            'focus_item' => $focusItem,
+            'focus_url' => $focusItem ? route('legislative.show', $focusItem).$focus['fragment'] : null,
+            'focus_class' => $total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : ''),
+            'focus_icon' => $total === 0 ? 'circle-check' : ($focus['icon'] ?? 'alert-circle'),
+            'focus_kicker' => $total === 0 ? 'Sem gargalo operacional' : 'Foco recomendado agora',
+            'focus_title' => $total === 0 ? 'Nenhuma proposta aguardando acao do Executivo' : ($focus['title'] ?? 'Revisar fila'),
+            'focus_text' => $total === 0 ? 'As propostas ativas estao sem pendencia imediata de decisao, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.'),
         ];
+    }
+
+    private function proposalAgeDays(LegislativeProposal $proposal): int
+    {
+        return (int) floor($proposal->updated_at->diffInHours(now()) / 24);
     }
 
     public function create(
