@@ -18,7 +18,7 @@
 .work-plan-empty {
     display: grid;
     min-height: 190px;
-    grid-template-columns: 54px minmax(0, 1fr) auto;
+    grid-template-columns: 54px minmax(0, 1fr) minmax(300px, .9fr) auto;
     align-items: center;
     gap: 1.1rem;
     padding: 1.5rem;
@@ -36,6 +36,104 @@
 
 .work-plan-empty > span svg { width: 27px; height: 27px; }
 .work-plan-empty p { margin: .3rem 0 0; color: var(--muted); }
+
+.work-plan-autofill-preview,
+.work-plan-autofill-panel {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid #cbd8e4;
+    border-radius: 6px;
+    background: linear-gradient(110deg, #fbfdff 0%, #f3f8fc 100%);
+}
+
+.work-plan-autofill-preview > strong {
+    display: block;
+    margin-bottom: .65rem;
+    color: var(--navy-900);
+    font-size: .84rem;
+}
+
+.work-plan-autofill-preview dl,
+.work-plan-autofill-panel dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+    margin: 0;
+}
+
+.work-plan-autofill-preview dl > div,
+.work-plan-autofill-panel dl > div {
+    min-width: 0;
+    padding: .65rem;
+    border: 1px solid #d5e1eb;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.work-plan-autofill-preview dt,
+.work-plan-autofill-preview dd,
+.work-plan-autofill-panel dt,
+.work-plan-autofill-panel dd {
+    margin: 0;
+}
+
+.work-plan-autofill-preview dt,
+.work-plan-autofill-panel dt {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 800;
+}
+
+.work-plan-autofill-preview dd,
+.work-plan-autofill-panel dd {
+    margin-top: .2rem;
+    overflow-wrap: anywhere;
+    color: var(--navy-900);
+    font-size: .76rem;
+    font-weight: 850;
+}
+
+.work-plan-autofill-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+.work-plan-autofill-panel > div:first-child {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .8rem;
+    align-items: center;
+}
+
+.work-plan-autofill-panel > div:first-child > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #bdd1e3;
+    border-radius: 50%;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.work-plan-autofill-panel svg {
+    width: 18px;
+    height: 18px;
+}
+
+.work-plan-autofill-panel strong {
+    display: block;
+    color: var(--navy-900);
+    font-size: .9rem;
+}
+
+.work-plan-autofill-panel p {
+    margin: .15rem 0 0;
+    color: var(--muted);
+    font-size: .76rem;
+}
 
 .work-plan-overview {
     display: grid;
@@ -207,6 +305,19 @@
 .admissibility-history-criteria small { color: var(--muted); }
 
 @media (max-width: 1050px) {
+    .work-plan-empty {
+        grid-template-columns: 54px minmax(0, 1fr);
+    }
+
+    .work-plan-autofill-preview,
+    .work-plan-empty form {
+        grid-column: 1 / -1;
+    }
+
+    .work-plan-autofill-panel {
+        grid-template-columns: 1fr;
+    }
+
     .work-plan-overview { grid-template-columns: 1fr; }
     .work-plan-overview-metrics { border-top: 1px solid var(--line); border-left: 0; }
     .work-plan-stage-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -217,6 +328,8 @@
 @media (max-width: 700px) {
     .work-plan-empty { grid-template-columns: 44px minmax(0, 1fr); }
     .work-plan-empty form { grid-column: 1 / -1; }
+    .work-plan-autofill-preview dl,
+    .work-plan-autofill-panel dl { grid-template-columns: 1fr; }
     .work-plan-overview-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .work-plan-overview-metrics > div:nth-child(2) { border-right: 0; }
     .work-plan-form-grid,

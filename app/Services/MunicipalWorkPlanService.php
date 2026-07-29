@@ -4,10 +4,68 @@ namespace App\Services;
 
 use App\Models\MunicipalWorkPlan;
 use App\Models\ParliamentaryAmendment;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class MunicipalWorkPlanService
 {
+    /** @return array<string, mixed> */
+    public function suggestedDraft(ParliamentaryAmendment $amendment): array
+    {
+        $start = $amendment->received_at ?? $amendment->indicated_at ?? today();
+        $end = $amendment->execution_deadline ?? $start->copy()->addMonths(6);
+        $department = $amendment->responsible_department ?: 'Unidade executora municipal';
+        $amount = (float) $amendment->expected_amount;
+        $object = trim((string) $amendment->object);
+        $notes = trim((string) $amendment->notes);
+        $healthContext = Str::of($department.' '.$object.' '.$notes)->ascii()->lower();
+        $health = (bool) $amendment->indicated_for_health
+            || $healthContext->contains(['saude', 'ubs', 'vacina', 'hospital', 'clinica']);
+
+        return [
+            'fields' => [
+                'beneficiary_type' => 'municipal_body',
+                'beneficiary_name' => $department,
+                'beneficiary_contact' => $department,
+                'object_description' => $object,
+                'public_need' => $notes !== ''
+                    ? $notes
+                    : 'Necessidade publica vinculada a emenda '.$amendment->reference.' indicada para atendimento municipal.',
+                'physical_target' => 'Executar o objeto indicado: '.$object,
+                'finalistic_target' => $health
+                    ? 'Ampliar ou qualificar o atendimento publico de saude vinculado ao objeto indicado.'
+                    : 'Entregar beneficio direto a populacao municipal conforme o objeto aprovado.',
+                'budget_program' => $health ? 'Programa municipal de saude' : 'Programa municipal a confirmar',
+                'budget_action' => $health ? 'Acao de atencao e servicos publicos de saude' : 'Acao orcamentaria a confirmar',
+                'application_plan' => 'Aplicacao integral dos recursos no objeto aprovado pela Camara e recebido pelo Executivo.',
+                'cost_memory' => 'Valor base recebido da emenda: R$ '.number_format($amount, 2, ',', '.').'. Detalhar composicao final antes da analise tecnica.',
+                'maintenance_plan' => 'A unidade executora municipal ficara responsavel pela operacao, guarda, manutencao e continuidade da entrega.',
+                'health_related' => $health,
+                'health_reserve_verified' => $health,
+                'includes_engineering' => false,
+                'engineering_project_status' => 'not_applicable',
+                'environmental_license_status' => 'not_applicable',
+                'pca_status' => 'update_requested',
+                'planned_start_at' => $start->toDateString(),
+                'planned_end_at' => $end->toDateString(),
+            ],
+            'stage' => [
+                'title' => 'Execucao integral da emenda',
+                'physical_delivery' => $object,
+                'planned_amount' => $amount,
+                'planned_start_at' => $start->toDateString(),
+                'planned_end_at' => $end->toDateString(),
+                'sort_order' => 10,
+            ],
+            'items' => [
+                ['label' => 'Executor sugerido', 'value' => $department],
+                ['label' => 'Valor planejado', 'value' => 'R$ '.number_format($amount, 2, ',', '.')],
+                ['label' => 'Saude', 'value' => $health ? 'Reserva ja marcada' : 'Nao classificada como saude'],
+                ['label' => 'Cronograma', 'value' => $start->format('d/m/Y').' a '.$end->format('d/m/Y')],
+            ],
+        ];
+    }
+
     /** @return array<string, array{label: string, guidance: string}> */
     public function admissibilityCriteria(): array
     {

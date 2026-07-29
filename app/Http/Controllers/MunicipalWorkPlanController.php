@@ -42,6 +42,7 @@ class MunicipalWorkPlanController extends Controller
             'plan' => $plan,
             'canEdit' => $canEdit,
             'canReview' => $canReview,
+            'draftSuggestion' => $workPlanService->suggestedDraft($amendment),
             'readiness' => $plan ? $workPlanService->readiness($plan, $amendment) : null,
             'beneficiaryTypes' => MunicipalWorkPlan::beneficiaryTypes(),
             'engineeringStatuses' => MunicipalWorkPlan::engineeringStatuses(),
@@ -82,6 +83,7 @@ class MunicipalWorkPlanController extends Controller
         int $emenda,
         CurrentMunicipality $currentMunicipality,
         FormSubmission $formSubmission,
+        MunicipalWorkPlanService $workPlanService,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $amendment = $this->amendment($request, $emenda, $currentMunicipality)->load('municipality');
@@ -96,23 +98,26 @@ class MunicipalWorkPlanController extends Controller
             return back()->with('warning', 'Esta emenda já possui um plano de trabalho.');
         }
 
-        DB::transaction(function () use ($request, $amendment, $auditTrail): void {
+        DB::transaction(function () use ($request, $amendment, $workPlanService, $auditTrail): void {
+            $suggestion = $workPlanService->suggestedDraft($amendment);
             $plan = $amendment->municipalWorkPlan()->create([
                 'municipality_id' => $amendment->municipality_id,
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
-                'beneficiary_type' => 'municipal_body',
-                'beneficiary_name' => $amendment->responsible_department,
-                'object_description' => $amendment->object,
-                'planned_start_at' => $amendment->indicated_at,
-                'planned_end_at' => $amendment->execution_deadline,
+                ...$suggestion['fields'],
+            ]);
+            $plan->stages()->create([
+                'municipality_id' => $amendment->municipality_id,
+                'parliamentary_amendment_id' => $amendment->id,
+                'created_by' => $request->user()->id,
+                ...$suggestion['stage'],
             ]);
             $auditTrail->recordOperation($request, $amendment, 'municipal_work_plan_created', [
                 'work_plan_status' => $plan->status,
             ]);
         });
 
-        return back()->with('status', 'Plano de trabalho iniciado. Complete os campos e o cronograma.');
+        return back()->with('status', 'Plano de trabalho iniciado com preenchimento automatico e cronograma inicial. Revise antes de enviar para analise.');
     }
 
     public function update(

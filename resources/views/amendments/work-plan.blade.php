@@ -41,6 +41,14 @@
                 <h2 class="h5">Inicie o planejamento da emenda</h2>
                 <p>Organize beneficiário, necessidade pública, metas, custos e cronograma físico-financeiro antes da análise técnica.</p>
             </div>
+            <div class="work-plan-autofill-preview">
+                <strong>O TrilhaGov vai iniciar automaticamente</strong>
+                <dl>
+                    @foreach($draftSuggestion['items'] as $item)
+                        <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                    @endforeach
+                </dl>
+            </div>
             @if ($canEdit)
                 <form method="POST" action="{{ route('emendas.work-plan.store', $amendment) }}">
                     @csrf
@@ -65,6 +73,24 @@
                 <div class="{{ abs($readiness['difference']) >= 0.01 ? 'has-difference' : '' }}"><small>Diferença</small><strong>R$ {{ number_format($readiness['difference'], 2, ',', '.') }}</strong></div>
                 <div><small>Revisão</small><strong>{{ $plan->revision_number > 0 ? 'R'.$plan->revision_number : 'Rascunho' }}</strong></div>
             </div>
+        </section>
+
+        <section class="work-plan-autofill-panel mb-4">
+            <div>
+                <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                <div>
+                    <strong>Plano simplificado a partir da emenda</strong>
+                    <p>Objeto, executor, valor, saude, justificativa e uma etapa inicial foram preenchidos automaticamente. Revise somente o que for necessario antes da analise.</p>
+                </div>
+            </div>
+            <dl>
+                @foreach($draftSuggestion['items'] as $item)
+                    <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                @endforeach
+            </dl>
+            @if($canEdit && $plan->isEditable())
+                <a class="btn btn-outline-primary" href="#cronograma"><i data-lucide="route" aria-hidden="true"></i>Revisar cronograma</a>
+            @endif
         </section>
 
         @if ($readiness['blockers'] || $readiness['warnings'])

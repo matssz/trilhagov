@@ -16,6 +16,43 @@ class MunicipalWorkPlanTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_manager_sees_auto_fill_preview_and_starts_simplified_plan(): void
+    {
+        [$manager, $municipality, $amendment] = $this->context();
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.work-plan', $amendment))
+            ->assertOk()
+            ->assertSee('O TrilhaGov vai iniciar automaticamente')
+            ->assertSee('Executor sugerido')
+            ->assertSee('Valor planejado');
+
+        $this->post(route('emendas.work-plan.store', $amendment), $this->payloadWithToken(
+            "municipal-work-plan-create-{$amendment->id}",
+        ))
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('status', 'Plano de trabalho iniciado com preenchimento automatico e cronograma inicial. Revise antes de enviar para analise.');
+
+        $plan = $amendment->municipalWorkPlan()->with('stages')->firstOrFail();
+
+        $this->assertSame('municipal_body', $plan->beneficiary_type);
+        $this->assertSame($amendment->responsible_department, $plan->beneficiary_name);
+        $this->assertSame($amendment->object, $plan->object_description);
+        $this->assertTrue($plan->health_related);
+        $this->assertTrue($plan->health_reserve_verified);
+        $this->assertSame('2026-07-01', $plan->planned_start_at->toDateString());
+        $this->assertSame('2026-12-31', $plan->planned_end_at->toDateString());
+        $this->assertCount(1, $plan->stages);
+        $this->assertSame('Execucao integral da emenda', $plan->stages->first()->title);
+        $this->assertSame('100000.00', $plan->stages->first()->planned_amount);
+
+        $this->get(route('emendas.work-plan', $amendment))
+            ->assertOk()
+            ->assertSee('Plano simplificado a partir da emenda')
+            ->assertSee('Revisar cronograma');
+    }
+
     public function test_manager_can_start_and_complete_structured_work_plan(): void
     {
         [$manager, $municipality, $amendment] = $this->context();
@@ -317,6 +354,7 @@ class MunicipalWorkPlanTest extends TestCase
             "municipal-work-plan-update-{$plan->id}",
             $this->planPayload(),
         ))->assertSessionHasNoErrors();
+        $plan->stages()->delete();
         $this->post(route('emendas.work-plan.stages.store', $amendment), $this->payloadWithToken(
             "municipal-work-plan-stage-create-{$plan->id}",
             [
