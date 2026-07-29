@@ -118,6 +118,13 @@
             ['title' => 'Execucao', 'owner' => 'Prefeitura', 'description' => 'Entrega fisica e liquidacao acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
             ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestacao de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
         ];
+        $stepSlaDays = [0 => 2, 1 => 3, 2 => 2, 3 => 2, 4 => 5, 5 => 5, 6 => 7, 7 => 7];
+        $currentTrackingStep = $trackingSteps[$currentProcessIndex] ?? $trackingSteps[0];
+        $currentStepAgeDays = (int) floor($proposal->updated_at->diffInHours(now()) / 24);
+        $currentStepSlaDays = $stepSlaDays[$currentProcessIndex] ?? 3;
+        $currentStepDelayed = ! in_array($proposal->status, [
+            App\Models\LegislativeProposal::STATUS_REJECTED,
+        ], true) && $currentStepAgeDays >= $currentStepSlaDays;
     @endphp
 
     <div class="legislative-detail-heading">
@@ -153,6 +160,18 @@
             <div><span>Executivo</span><strong>{{ $proposal->executive_process_number ?: ($proposal->protocol_number ?: 'Aguardando protocolo') }}</strong><small>{{ $proposal->budget_reservation_number ? 'Reserva '.$proposal->budget_reservation_number : 'Reserva pendente' }}</small></div>
         </div>
     </section>
+
+    @if($currentStepDelayed)
+        <section class="legislative-stale-alert">
+            <span><i data-lucide="timer-reset" aria-hidden="true"></i></span>
+            <div>
+                <small>Alerta interno de prazo</small>
+                <strong>{{ $currentTrackingStep['title'] }} parada ha {{ $currentStepAgeDays }} dia(s)</strong>
+                <p>Responsavel atual: {{ $currentTrackingStep['owner'] }}. O prazo operacional recomendado para esta etapa e de {{ $currentStepSlaDays }} dia(s).</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ $currentTrackingStep['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Ir para etapa</a>
+        </section>
+    @endif
 
     <section class="legislative-process-map" aria-label="Esteira de acompanhamento da proposta">
         <header>

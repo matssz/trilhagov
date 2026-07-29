@@ -612,6 +612,33 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('#reserva-orcamentaria');
     }
 
+    public function test_stale_legislative_proposal_shows_internal_deadline_alert(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Prazo',
+            'legislative_party' => 'PSD',
+        ]);
+        $proposal = $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'object' => 'Aquisicao de equipamentos para atendimento municipal integrado.',
+            'protocol_number' => 'CAM-2027-099',
+            'sent_at' => now()->subDays(4),
+        ]);
+        $proposal->forceFill(['updated_at' => now()->subDays(4)])->saveQuietly();
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $proposal))
+            ->assertOk()
+            ->assertSee('Alerta interno de prazo')
+            ->assertSee('Recebimento municipal parada ha 4 dia(s)')
+            ->assertSee('Responsavel atual: Executivo')
+            ->assertSee('Ir para etapa')
+            ->assertSee('#recebimento-executivo');
+    }
+
     public function test_councilor_cannot_view_another_councilors_proposal_or_another_municipality(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
