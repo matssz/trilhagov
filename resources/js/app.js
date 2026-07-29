@@ -700,7 +700,7 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
         const healthChecked = healthInput instanceof HTMLInputElement && healthInput.checked;
 
         if (after !== null) {
-            remainingTarget.textContent = `${money.format(Math.max(0, after))} de saldo restante`;
+            remainingTarget.textContent = `${money.format(Math.max(0, after))} sobrara na cota`;
         } else {
             remainingTarget.textContent = 'Saldo a configurar';
         }
@@ -717,8 +717,10 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
             messageTarget.textContent = `Ainda faltam ${money.format(healthGap)} para a reserva de saude. Marque saude se esta proposta atender essa area.`;
         } else if (healthChecked) {
             messageTarget.textContent = 'Esta proposta entra automaticamente no controle da reserva de saude.';
+        } else if (after !== null && amount > 0 && Math.abs(after) <= 0.005) {
+            messageTarget.textContent = 'Esta proposta usa todo o saldo disponivel da cota. O valor fica comprometido nesta indicacao ate a analise e reserva do Executivo.';
         } else {
-            messageTarget.textContent = 'Valor dentro da cota disponivel para salvar como proposta.';
+            messageTarget.textContent = 'Valor dentro da cota. Ao salvar, essa quantia fica comprometida nesta proposta e o restante segue disponivel para novas indicacoes.';
         }
 
         updateReadiness();

@@ -233,7 +233,7 @@ class LegislativeProposalTest extends TestCase
         $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('legislative.create', ['year' => 2027]))
             ->assertOk()
-            ->assertSee('Depois desta proposta')
+            ->assertSee('Saldo que sobrara na cota')
             ->assertSee('Assistente automatico de preenchimento')
             ->assertSee('Modelos rapidos para vereador')
             ->assertSee('Equipamento de saude')

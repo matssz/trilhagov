@@ -36,13 +36,13 @@
         </section>
         <section class="legislative-projection-panel" data-legislative-projection>
             <div>
-                <span>Depois desta proposta</span>
+                <span>Saldo que sobrara na cota</span>
                 <strong data-projection-remaining>{{ $automation['maximum_amount'] === null ? 'Saldo a configurar' : 'Informe o valor' }}</strong>
                 <small data-projection-message>
                     @if ($automation['recommended_health'])
                         Priorize saúde: faltam R$ {{ number_format((float) $automation['health_gap'], 2, ',', '.') }} para atender a reserva mínima.
                     @else
-                        O sistema vai conferir o saldo automaticamente antes de salvar.
+                        O valor informado fica indicado nesta proposta. Ele so vira execucao depois da analise da Camara e da reserva pelo Executivo.
                     @endif
                 </small>
             </div>
@@ -82,7 +82,7 @@
                 <article>
                     <small>Orçamento</small>
                     <strong>Cota e saldo</strong>
-                    <span>Bloqueia valor acima do disponível e mostra quanto sobra.</span>
+                    <span>Mostra quanto da cota do vereador ficara comprometido por esta proposta.</span>
                 </article>
                 <article>
                     <small>Saúde</small>
