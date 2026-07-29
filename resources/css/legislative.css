@@ -549,6 +549,81 @@
     background: linear-gradient(110deg, #fbfffd 0%, #f0faf5 100%);
 }
 
+.legislative-auto-check-panel {
+    display: grid;
+    gap: 12px;
+    margin: -6px 0 18px;
+    padding: 15px;
+    border: 1px solid #c7d8e6;
+    border-radius: 7px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(241, 247, 252, .94)),
+        linear-gradient(90deg, rgba(13, 59, 102, .08), rgba(201, 166, 63, .08));
+    box-shadow: 0 12px 28px rgba(15, 47, 79, .06);
+}
+
+.legislative-auto-check-panel header {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
+
+.legislative-auto-check-panel header > span {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid #bdd1e3;
+    border-radius: 50%;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.legislative-auto-check-panel svg {
+    width: 18px;
+    height: 18px;
+}
+
+.legislative-auto-check-panel strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: .88rem;
+}
+
+.legislative-auto-check-panel p {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: .76rem;
+}
+
+.legislative-auto-check-panel > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.legislative-auto-check-panel article {
+    min-width: 0;
+    padding: .8rem;
+    border: 1px solid #d4e0ea;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .9);
+}
+
+.legislative-auto-check-panel small,
+.legislative-auto-check-panel span {
+    display: block;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 750;
+}
+
+.legislative-auto-check-panel article strong {
+    margin: .15rem 0 .2rem;
+    font-size: .82rem;
+}
+
 .legislative-quota-band {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2083,6 +2158,14 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .legislative-auto-check-panel > div {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .legislative-auto-check-panel article:last-child {
+        grid-column: 1 / -1;
+    }
+
     .legislative-quota-band > div:nth-child(2) {
         border-right: 0;
     }
@@ -2170,9 +2253,14 @@
     .legislative-form-grid,
     .legislative-simple-form,
     .legislative-fields,
+    .legislative-auto-check-panel > div,
     .legislative-readiness-panel ul,
     .legislative-review-checks {
         grid-template-columns: 1fr;
+    }
+
+    .legislative-auto-check-panel article:last-child {
+        grid-column: auto;
     }
 
     .legislative-form-section.span-2,

@@ -70,6 +70,32 @@
                 <li data-readiness-item="justification">Justificativa suficiente</li>
             </ul>
         </section>
+        <section class="legislative-auto-check-panel">
+            <header>
+                <span><i data-lucide="shield-check" aria-hidden="true"></i></span>
+                <div>
+                    <strong>Conferência automática antes da Câmara</strong>
+                    <p>Você informa o pedido. O TrilhaGov calcula e sinaliza os pontos técnicos que serão avaliados.</p>
+                </div>
+            </header>
+            <div>
+                <article>
+                    <small>Orçamento</small>
+                    <strong>Cota e saldo</strong>
+                    <span>Bloqueia valor acima do disponível e mostra quanto sobra.</span>
+                </article>
+                <article>
+                    <small>Saúde</small>
+                    <strong>Reserva mínima</strong>
+                    <span>Sugere saúde quando identifica UBS, vacina, hospital ou secretaria de saúde.</span>
+                </article>
+                <article>
+                    <small>Execução</small>
+                    <strong>Destino municipal</strong>
+                    <span>Preenche localidade, fonte da estimativa e executor quando possível.</span>
+                </article>
+            </div>
+        </section>
     @endif
 
     <form method="POST" action="{{ route('legislative.store') }}" data-prevent-double-submit>
@@ -78,7 +104,7 @@
         @include('legislative._form')
         <div class="legislative-form-actions">
             <a class="btn btn-outline-secondary" href="{{ route('legislative.index', ['year' => $year]) }}">Cancelar</a>
-            <button class="btn btn-primary" type="submit" @disabled(! $profile || ! ($automation['can_create'] ?? false))><i data-lucide="save" aria-hidden="true"></i>Salvar rascunho</button>
+            <button class="btn btn-primary" type="submit" @disabled(! $profile || ! ($automation['can_create'] ?? false))><i data-lucide="save" aria-hidden="true"></i>Salvar proposta</button>
         </div>
     </form>
 @endsection
