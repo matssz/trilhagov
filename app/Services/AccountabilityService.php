@@ -7,6 +7,7 @@ use App\Models\AccountabilityRequirement;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AccountabilityService
@@ -64,6 +65,129 @@ class AccountabilityService
                 'status' => AccountabilityRequirement::STATUS_PENDING,
             ]);
         }
+    }
+
+    /** @return array<string, mixed> */
+    public function guide(ParliamentaryAmendment $amendment, ?AccountabilityProcess $process, ?array $readiness): array
+    {
+        $financial = $process ? $this->financialSummary($amendment, $process) : $this->financialSummary($amendment);
+        $physicalPercentage = $amendment->physicalExecutionPercentage();
+        $evidenceCount = $amendment->documents->whereNotNull('execution_stage_id')->count();
+        $hasProcess = $process !== null;
+        $checklistReady = $process
+            ? $process->requirements->where('is_required', true)->every(fn ($requirement) => in_array($requirement->status, [
+                AccountabilityRequirement::STATUS_COMPLETED,
+                AccountabilityRequirement::STATUS_NOT_APPLICABLE,
+            ], true))
+            : false;
+        $financialReady = $amendment->received_amount !== null && abs($financial['unreconciled']) <= 0.01;
+        $ready = (bool) ($readiness['ready'] ?? false);
+
+        $next = [
+            'icon' => 'clipboard-list',
+            'title' => 'Iniciar prestacao simplificada',
+            'description' => 'Abra o processo para o sistema montar o checklist e ler execucao, pagamentos e evidencias ja registrados.',
+            'href' => '#iniciar-prestacao',
+            'label' => 'Iniciar processo',
+        ];
+
+        if ($hasProcess && ! $checklistReady) {
+            $next = [
+                'icon' => 'wand-sparkles',
+                'title' => 'Pre-conferir checklist',
+                'description' => 'Use os dados da execucao para resolver automaticamente itens que ja possuem lastro no sistema.',
+                'href' => '#assistente-prestacao',
+                'label' => 'Pre-conferir agora',
+            ];
+        } elseif ($hasProcess && ! $financialReady) {
+            $next = [
+                'icon' => 'scale',
+                'title' => 'Conciliar saldo',
+                'description' => 'Ajuste pagamentos ou devolucao para fechar recebido, pago e saldo devolvido.',
+                'href' => '#reconciliation',
+                'label' => 'Ver conciliacao',
+            ];
+        } elseif ($hasProcess && ! $ready) {
+            $next = [
+                'icon' => 'list-checks',
+                'title' => 'Resolver pendencias finais',
+                'description' => 'Finalize execucao fisica, evidencias ou diligencias antes do protocolo.',
+                'href' => '#requirements',
+                'label' => 'Ver pendencias',
+            ];
+        } elseif ($hasProcess) {
+            $next = [
+                'icon' => 'send',
+                'title' => 'Enviar prestacao de contas',
+                'description' => 'A base esta pronta para informar protocolo, data de envio e gerar o dossie.',
+                'href' => '#process',
+                'label' => 'Informar protocolo',
+            ];
+        }
+
+        return [
+            'next' => $next,
+            'steps' => [
+                ['label' => 'Processo aberto', 'description' => 'Checklist municipal criado.', 'done' => $hasProcess],
+                ['label' => 'Execucao concluida', 'description' => 'Etapas fisicas em 100%.', 'done' => $physicalPercentage >= 100],
+                ['label' => 'Financeiro conciliado', 'description' => 'Recebido, pago e devolvido fecham.', 'done' => $financialReady],
+                ['label' => 'Evidencias vinculadas', 'description' => 'Documentos ligados as entregas.', 'done' => $evidenceCount > 0],
+                ['label' => 'Pronta para envio', 'description' => 'Sem bloqueios para protocolo.', 'done' => $ready],
+            ],
+            'summary' => [
+                ['label' => 'Execucao fisica', 'value' => $physicalPercentage.'%'],
+                ['label' => 'Evidencias', 'value' => $evidenceCount.' documento(s)'],
+                ['label' => 'Saldo sem conciliacao', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Nao iniciado'],
+            ],
+        ];
+    }
+
+    /** @return array{updated: int, completed: int, not_applicable: int} */
+    public function quickCheck(AccountabilityProcess $process, ParliamentaryAmendment $amendment, User $user): array
+    {
+        $process->loadMissing('requirements');
+        $amendment->loadMissing('executionStages', 'financialCommitments.payments', 'documents.documentType');
+
+        $financial = $this->financialSummary($amendment, $process);
+        $physicalComplete = $amendment->executionStages->isNotEmpty()
+            && $amendment->executionStages->every(fn ($stage) => $stage->status === 'completed' && $stage->progress_percentage === 100);
+        $evidence = $amendment->documents->whereNotNull('execution_stage_id')->first();
+        $anyDocument = $amendment->documents->first();
+        $updated = 0;
+        $completed = 0;
+        $notApplicable = 0;
+
+        foreach ($process->requirements as $requirement) {
+            if ($requirement->status !== AccountabilityRequirement::STATUS_PENDING) {
+                continue;
+            }
+
+            $data = null;
+            $title = (string) Str::of($requirement->title)->ascii()->lower();
+
+            if (str_contains($title, 'cumprimento do objeto') && $physicalComplete && $evidence) {
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Execucao fisica concluida e evidencia de entrega localizada automaticamente.');
+            } elseif (str_contains($title, 'comprovacao') && $evidence) {
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Evidencia de entrega vinculada automaticamente.');
+            } elseif (str_contains($title, 'comprovantes de despesas') && $financial['paid'] > 0) {
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $anyDocument?->id, 'Pagamentos registrados no TrilhaGov foram localizados para esta emenda.');
+            } elseif (str_contains($title, 'extrato') && abs($financial['unreconciled']) <= 0.01 && $amendment->received_amount !== null) {
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $anyDocument?->id, 'Conciliação financeira fechada automaticamente: recebido, pago e devolvido conferidos.');
+            } elseif (str_contains($title, 'devolucao de saldo') && abs($financial['unreconciled']) <= 0.01 && (float) $process->returned_amount <= 0) {
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_NOT_APPLICABLE, null, 'Sem saldo a devolver conforme conciliação financeira do sistema.');
+            }
+
+            if ($data === null) {
+                continue;
+            }
+
+            $requirement->update($data);
+            $updated++;
+            $data['status'] === AccountabilityRequirement::STATUS_NOT_APPLICABLE ? $notApplicable++ : $completed++;
+        }
+
+        return compact('updated', 'completed', 'notApplicable');
     }
 
     /** @return array{received: float, paid: float, returned: float, unreconciled: float} */
@@ -177,5 +301,17 @@ class AccountabilityService
                 'status' => 'A prestação ainda não pode ser enviada: '.$readiness['blockers']->first(),
             ]);
         }
+    }
+
+    /** @return array<string, mixed> */
+    private function resolvedRequirement(User $user, string $status, ?int $documentId, string $notes): array
+    {
+        return [
+            'status' => $status,
+            'amendment_document_id' => $documentId,
+            'notes' => $notes,
+            'completed_by' => $user->id,
+            'completed_at' => now(),
+        ];
     }
 }

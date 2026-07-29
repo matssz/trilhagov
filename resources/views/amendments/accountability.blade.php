@@ -41,8 +41,54 @@
 
     <x-validation-summary />
 
+    <section class="accountability-guide mb-4" id="assistente-prestacao" aria-label="Prestacao de contas simplificada">
+        <div class="accountability-guide-header">
+            <div>
+                <p class="page-kicker mb-1">Prestacao simplificada</p>
+                <h2 class="h5 mb-1">Fechamento municipal guiado</h2>
+                <p>O sistema confere execucao, pagamentos, saldo, evidencias e checklist para preparar o dossie de envio.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="route" aria-hidden="true"></i>Ver execucao</a>
+        </div>
+
+        <div class="accountability-guide-next">
+            <span><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <strong>{{ $accountabilityGuide['next']['title'] }}</strong>
+                <p>{{ $accountabilityGuide['next']['description'] }}</p>
+            </div>
+            @if ($canEdit && $process && $accountabilityGuide['next']['href'] === '#assistente-prestacao')
+                <form method="POST" action="{{ route('emendas.accountability.quick-check', $amendment) }}">
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $quickCheckToken }}">
+                    <button class="btn btn-primary" type="submit">{{ $accountabilityGuide['next']['label'] }}</button>
+                </form>
+            @elseif (! $canEdit && ! $process)
+                <span class="btn btn-outline-secondary disabled" aria-disabled="true">Aguardando gestor</span>
+            @else
+                <a class="btn btn-primary" href="{{ $accountabilityGuide['next']['href'] }}">{{ $accountabilityGuide['next']['label'] }}</a>
+            @endif
+        </div>
+
+        <div class="accountability-guide-steps">
+            @foreach ($accountabilityGuide['steps'] as $step)
+                <div class="{{ $step['done'] ? 'is-done' : '' }}">
+                    <span><i data-lucide="{{ $step['done'] ? 'check' : 'circle' }}" aria-hidden="true"></i></span>
+                    <strong>{{ $step['label'] }}</strong>
+                    <small>{{ $step['description'] }}</small>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="accountability-guide-summary">
+            @foreach ($accountabilityGuide['summary'] as $item)
+                <div><span>{{ $item['label'] }}</span><strong>{{ $item['value'] }}</strong></div>
+            @endforeach
+        </div>
+    </section>
+
     @if (! $process)
-        <section class="content-panel accountability-start">
+        <section class="content-panel accountability-start" id="iniciar-prestacao">
             <div class="accountability-start-icon"><i data-lucide="clipboard-list" aria-hidden="true"></i></div>
             <div>
                 <h2 class="h5">Iniciar prestação de contas</h2>

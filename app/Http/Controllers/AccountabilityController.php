@@ -45,6 +45,9 @@ class AccountabilityController extends Controller
             ->findOrFail($emenda);
         $process = $amendment->accountabilityProcess;
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
+        $readiness = $process !== null
+            ? $accountabilityService->readiness($amendment, $process)
+            : null;
 
         return view('amendments.accountability', [
             'amendment' => $amendment,
@@ -57,11 +60,13 @@ class AccountabilityController extends Controller
             'processStatuses' => AccountabilityProcess::statuses(),
             'requirementCategories' => AccountabilityRequirement::categories(),
             'requirementStatuses' => AccountabilityRequirement::statuses(),
-            'readiness' => $process !== null
-                ? $accountabilityService->readiness($amendment, $process)
-                : null,
+            'readiness' => $readiness,
+            'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness),
             'processCreateToken' => $canEdit && $process === null
                 ? $formSubmission->issue($request, "accountability-create-{$amendment->id}")
+                : null,
+            'quickCheckToken' => $canEdit && $process !== null
+                ? $formSubmission->issue($request, "accountability-quick-check-{$process->id}")
                 : null,
             'processUpdateToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-update-{$process->id}")
@@ -124,6 +129,38 @@ class AccountabilityController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', 'Prestação de contas iniciada com checklist operacional.');
+    }
+
+    public function quickCheck(
+        Request $request,
+        int $emenda,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        AccountabilityService $accountabilityService,
+        AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $amendment = $municipality->amendments()
+            ->with(['executionStages', 'financialCommitments.payments', 'documents.documentType', 'accountabilityProcess.requirements'])
+            ->findOrFail($emenda);
+        $process = $amendment->accountabilityProcess ?? abort(404);
+        $request->validate(['_submission_token' => ['required', 'string']]);
+
+        if (! $formSubmission->consume($request, "accountability-quick-check-{$process->id}")) {
+            return back()->with('warning', 'Esta pre-conferencia ja foi processada.');
+        }
+
+        $stats = DB::transaction(function () use ($request, $amendment, $process, $accountabilityService, $auditTrail): array {
+            $stats = $accountabilityService->quickCheck($process, $amendment, $request->user());
+            $auditTrail->recordOperation($request, $amendment, 'accountability_quick_checked', $stats);
+
+            return $stats;
+        });
+
+        $integrityAlertService->sync($municipality->fresh());
+
+        return back()->with('status', 'Pre-conferencia concluida: '.$stats['updated'].' item(ns) atualizado(s), '.$stats['completed'].' concluido(s) e '.$stats['notApplicable'].' nao aplicavel(is).');
     }
 
     public function update(

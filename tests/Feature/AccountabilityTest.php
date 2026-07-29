@@ -12,6 +12,7 @@ use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Notifications\IntegrityAlertNotification;
+use App\Services\AccountabilityService;
 use App\Services\IntegrityAlertProcessor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -46,6 +47,45 @@ class AccountabilityTest extends TestCase
         $this->assertSame($manager->id, $process->responsible_user_id);
         $this->assertSame('2026-12-20', $process->due_at->toDateString());
         $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_created']);
+    }
+
+    public function test_simplified_accountability_pre_checks_execution_financial_and_evidence(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $this->completeExecution($municipality, $amendment, $manager, 100000);
+        $process = $this->process($municipality, $amendment, $manager);
+        app(AccountabilityService::class)->seedRequirements($process, $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Prestacao simplificada')
+            ->assertSee('Pre-conferir checklist')
+            ->assertSee('Fechamento municipal guiado');
+
+        $token = $this->sessionFor($municipality, "accountability-quick-check-{$process->id}");
+        $this->post(route('emendas.accountability.quick-check', $amendment), [
+            '_submission_token' => $token,
+        ])->assertSessionHas('status');
+
+        $process->refresh()->load('requirements');
+        $this->assertSame(5, $process->requirements->whereIn('status', [
+            AccountabilityRequirement::STATUS_COMPLETED,
+            AccountabilityRequirement::STATUS_NOT_APPLICABLE,
+        ])->count());
+        $this->assertSame(1, $process->requirements->where('status', AccountabilityRequirement::STATUS_NOT_APPLICABLE)->count());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_quick_checked']);
+
+        $this->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Enviar prestacao de contas')
+            ->assertSee('Informar protocolo');
     }
 
     public function test_viewer_can_consult_but_cannot_change_accountability(): void
