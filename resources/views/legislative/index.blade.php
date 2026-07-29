@@ -60,6 +60,32 @@
                         <strong>{{ ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_SENT] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RECEIVED] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RESERVED] ?? 0) }}</strong>
                     </div>
                 </div>
+                <div class="councilor-decision-strip" aria-label="Resumo automatico para o vereador">
+                    <article>
+                        <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Quanto ainda posso indicar</small>
+                            <strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong>
+                            <p>Limite calculado pela norma municipal ativa.</p>
+                        </div>
+                    </article>
+                    <article class="{{ ($quota['health_gap'] ?? 0) > 0 ? 'needs-health' : 'is-ok' }}">
+                        <span><i data-lucide="heart-pulse" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Reserva de saude</small>
+                            <strong>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Atendida' }}</strong>
+                            <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Priorize uma proposta marcada para saude.' : 'Voce ja preservou a proporcao minima.' }}</p>
+                        </div>
+                    </article>
+                    <article>
+                        <span><i data-lucide="route" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Proximo movimento</small>
+                            <strong>{{ $councilorGroups['next_label'] ?? 'Ver propostas' }}</strong>
+                            <p>{{ $councilorGuide['nextText'] ?? 'Acompanhe a etapa de cada proposta.' }}</p>
+                        </div>
+                    </article>
+                </div>
                 <div class="councilor-home-steps">
                     <span><i data-lucide="edit-3" aria-hidden="true"></i>Vereador indica</span>
                     <span><i data-lucide="badge-check" aria-hidden="true"></i>Camara confere</span>
