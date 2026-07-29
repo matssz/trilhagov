@@ -443,6 +443,11 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Cadastro Câmara')
             ->assertSee('Análise executiva')
             ->assertSee('Pagamento')
+            ->assertSee('Esteira da proposta')
+            ->assertSee('Onde esta e quem precisa agir')
+            ->assertSee('Conferencia da Camara')
+            ->assertSee('Recebimento municipal')
+            ->assertSee('Reserva orcamentaria')
             ->assertDontSee('Abrir fluxo executivo');
     }
 

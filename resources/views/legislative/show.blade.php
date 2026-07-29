@@ -97,6 +97,27 @@
             ],
             default => null,
         };
+        $currentProcessIndex = match (true) {
+            $proposal->status === App\Models\LegislativeProposal::STATUS_DRAFT,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RETURNED => 0,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED => 1,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED => 2,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_SENT => 3,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED => 4,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RESERVED && ! $executionStarted => 5,
+            $proposal->status === App\Models\LegislativeProposal::STATUS_RESERVED && $paid <= 0 => 6,
+            default => 7,
+        };
+        $trackingSteps = [
+            ['title' => 'Proposta salva', 'owner' => 'Vereador', 'description' => 'Pedido criado ou ajustado antes do envio.', 'date' => $proposal->created_at, 'href' => '#editor-proposta'],
+            ['title' => 'Conferencia da Camara', 'owner' => 'Camara', 'description' => 'Analise minima de objeto, valor, saude e beneficiario.', 'date' => $proposal->submitted_at, 'href' => '#conferencia-legislativa'],
+            ['title' => 'Protocolo ao Executivo', 'owner' => 'Camara', 'description' => 'Encaminhamento formal para a Prefeitura.', 'date' => $proposal->reviewed_at, 'href' => '#protocolo-executivo'],
+            ['title' => 'Recebimento municipal', 'owner' => 'Executivo', 'description' => 'Abertura do processo administrativo.', 'date' => $proposal->sent_at, 'href' => '#recebimento-executivo'],
+            ['title' => 'Reserva orcamentaria', 'owner' => 'Executivo', 'description' => 'Confirmacao de dotacao para executar.', 'date' => $proposal->received_at, 'href' => '#reserva-orcamentaria'],
+            ['title' => 'Plano de trabalho', 'owner' => 'Executivo', 'description' => 'Planejamento tecnico e cronograma.', 'date' => $amendment?->municipalWorkPlan?->created_at, 'href' => '#acompanhamento-executivo'],
+            ['title' => 'Execucao', 'owner' => 'Prefeitura', 'description' => 'Entrega fisica e liquidacao acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
+            ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestacao de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
+        ];
     @endphp
 
     <div class="legislative-detail-heading">
@@ -130,6 +151,42 @@
             <div><span>Saldo do vereador</span><strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong><small>{{ $quota['count'] }} proposta(s) na carteira</small></div>
             <div class="{{ $healthGap > 0 ? 'needs-attention' : 'is-ok' }}"><span>Reserva de saúde</span><strong>{{ $healthGap > 0 ? 'Pendente' : 'Atendida' }}</strong><small>{{ $healthGap > 0 ? 'Faltam R$ '.number_format($healthGap, 2, ',', '.') : 'Proporção mínima preservada' }}</small></div>
             <div><span>Executivo</span><strong>{{ $proposal->executive_process_number ?: ($proposal->protocol_number ?: 'Aguardando protocolo') }}</strong><small>{{ $proposal->budget_reservation_number ? 'Reserva '.$proposal->budget_reservation_number : 'Reserva pendente' }}</small></div>
+        </div>
+    </section>
+
+    <section class="legislative-process-map" aria-label="Esteira de acompanhamento da proposta">
+        <header>
+            <div>
+                <span class="page-kicker">Esteira da proposta</span>
+                <h2>Onde esta e quem precisa agir</h2>
+                <p>O vereador acompanha em uma unica tela o caminho entre Camara, Executivo, reserva, execucao e pagamento.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ $nextAction['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $nextAction['label'] }}</a>
+        </header>
+        <div class="legislative-process-steps">
+            @foreach($trackingSteps as $index => $step)
+                @php
+                    $state = $proposal->status === App\Models\LegislativeProposal::STATUS_REJECTED && $index === 1
+                        ? 'blocked'
+                        : ($index < $currentProcessIndex ? 'complete' : ($index === $currentProcessIndex ? 'current' : 'pending'));
+                    $date = $step['date'] ? \Illuminate\Support\Carbon::parse($step['date']) : null;
+                    $stateLabel = match ($state) {
+                        'complete' => 'concluido',
+                        'current' => 'acao atual',
+                        'blocked' => 'interrompido',
+                        default => 'pendente',
+                    };
+                @endphp
+                <a class="is-{{ $state }}" href="{{ $step['href'] }}">
+                    <span><i data-lucide="{{ $state === 'complete' ? 'circle-check' : ($state === 'blocked' ? 'circle-x' : ($state === 'current' ? 'radio' : 'circle-dot')) }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $step['owner'] }} · {{ $stateLabel }}</small>
+                        <strong>{{ $step['title'] }}</strong>
+                        <p>{{ $step['description'] }}</p>
+                        <em>{{ $date ? $date->format('d/m/Y H:i') : ($state === 'current' ? 'Parado ha '.$proposal->updated_at->diffForHumans(null, true) : 'Aguardando etapa anterior') }}</em>
+                    </div>
+                </a>
+            @endforeach
         </div>
     </section>
 
