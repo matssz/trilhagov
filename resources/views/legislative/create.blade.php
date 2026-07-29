@@ -96,6 +96,29 @@
                 </article>
             </div>
         </section>
+        <section class="legislative-template-panel" data-legislative-templates>
+            <header>
+                <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                <div>
+                    <strong>Modelos rapidos para vereador</strong>
+                    <p>Escolha um caso comum. O TrilhaGov preenche secretaria, justificativa e campos tecnicos iniciais para voce ajustar.</p>
+                </div>
+            </header>
+            <div>
+                <button type="button" data-template="health-equipment">
+                    <i data-lucide="heart-pulse" aria-hidden="true"></i>
+                    <span><strong>Equipamento de saude</strong><small>UBS, vacinacao, atendimento basico</small></span>
+                </button>
+                <button type="button" data-template="school-equipment">
+                    <i data-lucide="graduation-cap" aria-hidden="true"></i>
+                    <span><strong>Escola municipal</strong><small>mobiliario, tecnologia, melhoria escolar</small></span>
+                </button>
+                <button type="button" data-template="street-work">
+                    <i data-lucide="construction" aria-hidden="true"></i>
+                    <span><strong>Obra no bairro</strong><small>pavimentacao, reforma, infraestrutura</small></span>
+                </button>
+            </div>
+        </section>
     @endif
 
     <form method="POST" action="{{ route('legislative.store') }}" data-prevent-double-submit>

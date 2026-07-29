@@ -502,6 +502,11 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
     const locationInput = form?.querySelector('[name="beneficiary_location"]');
     const justificationInput = form?.querySelector('[name="justification"]');
     const estimateSourceInput = form?.querySelector('[name="estimate_source"]');
+    const expenseDestinationInput = form?.querySelector('[name="expense_destination"]');
+    const publicNeedInput = form?.querySelector('[name="public_need"]');
+    const targetPopulationInput = form?.querySelector('[name="target_population"]');
+    const estimatedQuantityInput = form?.querySelector('[name="estimated_quantity"]');
+    const templatePanel = document.querySelector('[data-legislative-templates]');
     const readinessPanel = document.querySelector('[data-legislative-readiness]');
     const readinessMessage = readinessPanel?.querySelector('[data-readiness-message]');
     const readinessItems = readinessPanel?.querySelectorAll('[data-readiness-item]');
@@ -558,6 +563,69 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
             field.value = value;
             field.dispatchEvent(new Event('input', { bubbles: true }));
         }
+    };
+
+    const setSelectIfBlank = (field, value) => {
+        if (field instanceof HTMLSelectElement && field.value === '') {
+            field.value = value;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    const templates = {
+        'health-equipment': {
+            object: 'Aquisicao de equipamentos para melhorar o atendimento da unidade municipal de saude.',
+            beneficiary: 'Unidade Municipal de Saude',
+            department: 'Secretaria Municipal de Saude',
+            justification: 'A proposta busca melhorar o atendimento da populacao, reduzir filas e substituir equipamentos insuficientes ou defasados na rede municipal de saude.',
+            publicNeed: 'Ampliar a capacidade de atendimento da rede municipal de saude e qualificar o servico prestado aos moradores.',
+            targetPopulation: 'Usuarios do SUS atendidos pela unidade municipal',
+            quantity: 'Equipamentos permanentes conforme levantamento da secretaria',
+            expenseDestination: 'investment',
+            health: true,
+        },
+        'school-equipment': {
+            object: 'Aquisicao de mobiliario e equipamentos para unidade escolar municipal.',
+            beneficiary: 'Escola Municipal',
+            department: 'Secretaria Municipal de Educacao',
+            justification: 'A proposta busca melhorar as condicoes de ensino, aprendizagem e atendimento dos alunos da rede municipal.',
+            publicNeed: 'Modernizar a estrutura da unidade escolar e apoiar atividades pedagogicas essenciais.',
+            targetPopulation: 'Alunos, professores e comunidade escolar',
+            quantity: 'Mobiliario e equipamentos conforme levantamento da escola',
+            expenseDestination: 'investment',
+            health: false,
+        },
+        'street-work': {
+            object: 'Execucao de obra de infraestrutura urbana para melhoria de via publica municipal.',
+            beneficiary: 'Bairro indicado pela comunidade',
+            department: 'Secretaria Municipal de Obras',
+            justification: 'A proposta busca melhorar a mobilidade, a seguranca e o acesso dos moradores aos servicos publicos municipais.',
+            publicNeed: 'Atender demanda local por infraestrutura urbana e reduzir problemas de circulacao ou acesso no bairro.',
+            targetPopulation: 'Moradores e usuarios da via publica',
+            quantity: 'Trecho ou etapa a definir pela secretaria tecnica',
+            expenseDestination: 'investment',
+            health: false,
+        },
+    };
+
+    const applyTemplate = (template) => {
+        setIfBlank(objectInput, template.object);
+        setIfBlank(beneficiaryInput, template.beneficiary);
+        setIfBlank(departmentInput, template.department);
+        setIfBlank(justificationInput, template.justification);
+        setIfBlank(publicNeedInput, template.publicNeed);
+        setIfBlank(targetPopulationInput, template.targetPopulation);
+        setIfBlank(estimatedQuantityInput, template.quantity);
+        setIfBlank(estimateSourceInput, 'Estimativa declarada pelo vereador');
+        setSelectIfBlank(expenseDestinationInput, template.expenseDestination);
+
+        if (healthInput instanceof HTMLInputElement) {
+            healthInput.checked = Boolean(template.health || healthInput.checked);
+            healthInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        syncAssistedFields();
+        updateProjection();
     };
 
     const detectsHealth = () => {
@@ -672,6 +740,19 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
             healthInput.checked = true;
         }
         updateProjection();
+    });
+
+    templatePanel?.querySelectorAll('[data-template]').forEach((button) => {
+        button.addEventListener('click', () => {
+            if (!(button instanceof HTMLElement)) {
+                return;
+            }
+
+            const template = templates[button.dataset.template];
+            if (template) {
+                applyTemplate(template);
+            }
+        });
     });
 
     amountInput?.addEventListener('input', updateProjection);
