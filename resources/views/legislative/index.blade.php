@@ -204,15 +204,29 @@
                     </header>
                     <div>
                         @foreach($executiveDesk['quick_actions'] as $action)
-                            <a class="is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" href="{{ $action['url'] }}">
-                                <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>
-                                <div>
-                                    <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
-                                    <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
-                                    <em>{{ $action['proposal']->author_name }} · R$ {{ number_format((float) $action['proposal']->estimated_amount, 2, ',', '.') }} · {{ $action['age'] }} dia(s)</em>
-                                </div>
-                                <b>Abrir</b>
-                            </a>
+                            @if(in_array($role, [App\Models\User::ROLE_MANAGER, App\Models\User::ROLE_EDITOR], true) && $action['column']['key'] === 'receive')
+                                <form class="executive-action-card is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" method="POST" action="{{ route('legislative.receive', $action['proposal']) }}" data-prevent-double-submit>
+                                    @csrf
+                                    <input name="_submission_token" type="hidden" value="{{ $action['receive_token'] }}">
+                                    <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>
+                                    <div>
+                                        <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
+                                        <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
+                                        <em>{{ $action['proposal']->author_name }} · processo e pendencias serao sugeridos automaticamente</em>
+                                    </div>
+                                    <button type="submit">Confirmar</button>
+                                </form>
+                            @else
+                                <a class="executive-action-card is-{{ $action['column']['tone'] }} {{ $action['late'] ? 'is-late' : '' }}" href="{{ $action['url'] }}">
+                                    <span><i data-lucide="{{ $action['late'] ? 'timer-reset' : $action['column']['icon'] }}" aria-hidden="true"></i></span>
+                                    <div>
+                                        <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
+                                        <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
+                                        <em>{{ $action['proposal']->author_name }} · R$ {{ number_format((float) $action['proposal']->estimated_amount, 2, ',', '.') }} · {{ $action['age'] }} dia(s)</em>
+                                    </div>
+                                    <b>Abrir</b>
+                                </a>
+                            @endif
                         @endforeach
                     </div>
                 </div>

@@ -617,6 +617,8 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Ordem sugerida pelo prazo')
             ->assertSee('prioridade(s)')
             ->assertSee('fora do prazo')
+            ->assertSee('processo e pendencias serao sugeridos automaticamente')
+            ->assertSee('Confirmar')
             ->assertSee('Atenção imediata')
             ->assertSee('Abrir prioridade')
             ->assertSee('Triagem rapida do Legislativo')

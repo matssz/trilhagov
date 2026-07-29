@@ -25,6 +25,7 @@ class LegislativeProposalController extends Controller
         Request $request,
         CurrentMunicipality $currentMunicipality,
         LegislativeProposalService $service,
+        FormSubmission $formSubmission,
     ): View {
         $municipality = $currentMunicipality->get($request);
         $role = $request->user()->roleForMunicipality($municipality->id);
@@ -59,7 +60,7 @@ class LegislativeProposalController extends Controller
             ? null
             : $this->executiveBoard($boardQuery->latest('id')->get());
         $executiveDesk = $executiveBoard
-            ? $this->executiveDesk($executiveBoard)
+            ? $this->executiveDesk($executiveBoard, $request, $formSubmission)
             : null;
 
         return view('legislative.index', [
@@ -343,7 +344,7 @@ class LegislativeProposalController extends Controller
      * @param array<int, array<string, mixed>> $board
      * @return array<string, mixed>
      */
-    private function executiveDesk(array $board): array
+    private function executiveDesk(array $board, Request $request, FormSubmission $formSubmission): array
     {
         $actionable = collect($board)->whereIn('key', ['review', 'receive', 'budget']);
         $total = (int) $actionable->sum('count');
@@ -367,6 +368,9 @@ class LegislativeProposalController extends Controller
                 'age' => $this->proposalAgeDays($proposal),
                 'late' => $this->proposalAgeDays($proposal) >= (int) $column['sla_days'],
                 'url' => route('legislative.show', $proposal).$column['fragment'],
+                'receive_token' => $column['key'] === 'receive'
+                    ? $formSubmission->issue($request, "legislative-proposal-receive-{$proposal->id}")
+                    : null,
             ]))
             ->sortBy([
                 ['late', 'desc'],
