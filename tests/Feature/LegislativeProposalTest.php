@@ -334,6 +334,9 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Recebimento pela Prefeitura')
             ->assertSee('Receber agora')
+            ->assertSee('Recebimento automatico preparado')
+            ->assertSee('Processo sugerido')
+            ->assertSee('Secretaria sugerida')
             ->assertSee('Processo executivo');
 
         $this->actingAs($manager)->post(route('legislative.receive', $proposal), [
@@ -437,6 +440,41 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Análise executiva')
             ->assertSee('Pagamento')
             ->assertDontSee('Abrir fluxo executivo');
+    }
+
+    public function test_executive_can_receive_proposal_with_automatic_defaults(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Automatico',
+            'legislative_party' => 'PSD',
+        ]);
+        $proposal = $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'protocol_number' => 'CAM-2027-044',
+            'sent_at' => now(),
+            'responsible_department' => 'Secretaria Municipal de Saude',
+            'health_related' => true,
+        ]);
+
+        $expectedProcess = 'PREF-2027-'.Str::after($proposal->reference, 'LEG-2027-');
+
+        $this->actingAs($manager)->withSession(['active_municipality_id' => $municipality->id])
+            ->post(route('legislative.receive', $proposal), [
+                '_submission_token' => $this->token($municipality, "legislative-proposal-receive-{$proposal->id}"),
+            ])->assertSessionHas('status');
+
+        $proposal->refresh();
+        $this->assertSame(LegislativeProposal::STATUS_RECEIVED, $proposal->status);
+        $this->assertSame($expectedProcess, $proposal->executive_process_number);
+        $this->assertStringContainsString('Recebimento automatico', $proposal->executive_notes);
+        $this->assertNotNull($proposal->amendment);
+        $this->assertSame($expectedProcess, $proposal->amendment->administrative_process);
+        $this->assertDatabaseHas('municipal_work_items', [
+            'source_key' => "amendment:{$proposal->amendment->id}:municipal-work-plan:create",
+            'status' => MunicipalWorkItem::STATUS_PENDING,
+        ]);
     }
 
     public function test_executive_sees_single_board_for_chamber_intake_and_councilor_keeps_simple_view(): void

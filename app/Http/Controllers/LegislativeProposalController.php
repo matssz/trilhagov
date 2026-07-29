@@ -487,6 +487,7 @@ class LegislativeProposalController extends Controller
             'canEdit' => $role === User::ROLE_COUNCILOR && $proposal->submitted_by === $request->user()->id && $proposal->isEditable(),
             'canReview' => in_array($role, [User::ROLE_MANAGER, User::ROLE_LEGISLATIVE_REVIEWER], true),
             'canReceive' => in_array($role, [User::ROLE_MANAGER, User::ROLE_EDITOR], true),
+            'executiveReceiveSuggestion' => $this->executiveReceiveSuggestion($proposal),
             'updateToken' => $formSubmission->issue($request, "legislative-proposal-update-{$proposal->id}"),
             'submitToken' => $formSubmission->issue($request, "legislative-proposal-submit-{$proposal->id}"),
             'reviewToken' => $formSubmission->issue($request, "legislative-proposal-review-{$proposal->id}"),
@@ -642,15 +643,19 @@ class LegislativeProposalController extends Controller
         FormSubmission $formSubmission,
         LegislativeNotificationService $notifications,
         MunicipalTransparencyTrail $transparencyTrail,
+        MunicipalWorkItemService $workItems,
         AuditTrail $auditTrail,
     ): RedirectResponse {
         $municipality = $currentMunicipality->get($request);
         $proposal = $this->proposal($request, $municipality, $proposal);
+        $suggestion = $this->executiveReceiveSuggestion($proposal);
         $validated = $request->validate([
             '_submission_token' => ['nullable', 'string'],
-            'executive_process_number' => ['required', 'string', 'min:3', 'max:180'],
-            'executive_notes' => ['required', 'string', 'min:20', 'max:5000'],
+            'executive_process_number' => ['nullable', 'string', 'min:3', 'max:180'],
+            'executive_notes' => ['nullable', 'string', 'min:20', 'max:5000'],
         ], ['executive_notes.min' => 'Registre a conferência inicial do Executivo com pelo menos 20 caracteres.']);
+        $validated['executive_process_number'] = trim((string) (($validated['executive_process_number'] ?? null) ?: $suggestion['process_number']));
+        $validated['executive_notes'] = trim((string) (($validated['executive_notes'] ?? null) ?: $suggestion['notes']));
         $formSubmission->consume($request, "legislative-proposal-receive-{$proposal->id}");
         if ($proposal->status !== LegislativeProposal::STATUS_SENT) {
             $proposal->load('amendment');
@@ -703,9 +708,10 @@ class LegislativeProposalController extends Controller
             return $amendment;
         });
         $auditTrail->recordMunicipalityOperation($request, $municipality, 'legislative_proposal_received', ['proposal_id' => $proposal->id, 'reference' => $proposal->reference, 'amendment_id' => $amendment->id]);
+        $stats = $workItems->synchronize($municipality->fresh());
         $notifications->submitter($proposal->fresh(), 'Proposta recebida pelo Executivo', "A proposta {$proposal->reference} foi vinculada ao processo {$validated['executive_process_number']}.");
 
-        return back()->with('status', 'Recebimento confirmado. A emenda foi aberta para reanálise do Executivo.');
+        return back()->with('status', 'Recebimento confirmado. A emenda foi aberta e a Central recebeu '.$stats['created'].' pendencia(s) automatica(s).');
     }
 
     public function reserve(
@@ -756,6 +762,33 @@ class LegislativeProposalController extends Controller
         $notifications->submitter($proposal, 'Reserva orçamentária registrada', "A proposta {$proposal->reference} avançou para a solicitação e análise do Plano de Trabalho.");
 
         return back()->with('status', 'Reserva registrada. O fluxo executivo avançou para o Plano de Trabalho e a Central recebeu '.$stats['created'].' pendência(s) automática(s).');
+    }
+
+    /** @return array<string, mixed> */
+    private function executiveReceiveSuggestion(LegislativeProposal $proposal): array
+    {
+        $sequence = preg_replace('/^LEG-\d{4}-/i', '', $proposal->reference) ?: str_pad((string) $proposal->id, 3, '0', STR_PAD_LEFT);
+        $processNumber = 'PREF-'.$proposal->fiscal_year.'-'.$sequence;
+        $department = $proposal->responsible_department ?: ($proposal->health_related ? 'Secretaria Municipal de Saude' : 'Unidade executora a confirmar');
+        $classification = $proposal->health_related ? 'Saude / ASPS' : ($proposal->expense_destination === 'investment' ? 'Investimento municipal' : 'Custeio municipal');
+        $notes = 'Recebimento automatico da proposta '.$proposal->reference
+            .' protocolada pela Camara'.($proposal->protocol_number ? ' sob '.$proposal->protocol_number : '')
+            .'. Secretaria sugerida: '.$department
+            .'. Classificacao inicial: '.$classification
+            .'. Valor a reanalisar e reservar: R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.').'.';
+
+        return [
+            'process_number' => $processNumber,
+            'department' => $department,
+            'classification' => $classification,
+            'notes' => $notes,
+            'items' => [
+                ['label' => 'Processo sugerido', 'value' => $processNumber],
+                ['label' => 'Secretaria sugerida', 'value' => $department],
+                ['label' => 'Classificacao', 'value' => $classification],
+                ['label' => 'Valor recebido', 'value' => 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.')],
+            ],
+        ];
     }
 
     /** @return array<string, mixed> */

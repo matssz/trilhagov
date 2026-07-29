@@ -272,17 +272,31 @@
             @if($canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT)
                 <section class="legislative-action-panel executive" id="recebimento-executivo">
                     <div><span><i data-lucide="download" aria-hidden="true"></i></span><div><strong>Recebimento pelo Executivo</strong><p>Abre a emenda no núcleo executivo sem dispensar a reanálise técnica.</p></div></div>
+                    <div class="executive-receive-assistant">
+                        <div>
+                            <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                            <div>
+                                <strong>Recebimento automatico preparado</strong>
+                                <p>O TrilhaGov sugere processo, secretaria, classificacao e observacao inicial. Confirme para abrir a emenda executiva e gerar pendencias na Central de Trabalho.</p>
+                            </div>
+                        </div>
+                        <dl>
+                            @foreach($executiveReceiveSuggestion['items'] as $item)
+                                <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                            @endforeach
+                        </dl>
+                    </div>
                     <form method="POST" action="{{ route('legislative.receive', $proposal) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $receiveToken }}">
                         <label>
                             <span>Processo administrativo <b>*</b></span>
-                            <input class="form-control @error('executive_process_number') is-invalid @enderror" name="executive_process_number" value="{{ old('executive_process_number') }}" required>
+                            <input class="form-control @error('executive_process_number') is-invalid @enderror" name="executive_process_number" value="{{ old('executive_process_number', $executiveReceiveSuggestion['process_number']) }}" required>
                             @error('executive_process_number')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                         </label>
                         <label class="span-2">
                             <span>Conferência inicial <b>*</b></span>
-                            <textarea class="form-control @error('executive_notes') is-invalid @enderror" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes') }}</textarea>
+                            <textarea class="form-control @error('executive_notes') is-invalid @enderror" name="executive_notes" rows="3" minlength="20" required>{{ old('executive_notes', $executiveReceiveSuggestion['notes']) }}</textarea>
                             @error('executive_notes')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                         </label>
                         <button class="btn btn-primary" type="submit"><i data-lucide="download" aria-hidden="true"></i>Confirmar recebimento</button>
