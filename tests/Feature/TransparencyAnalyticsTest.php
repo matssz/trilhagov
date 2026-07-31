@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AmendmentTransparencyEvent;
 use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
+use App\Models\LegislativeProposal;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -33,6 +34,19 @@ class TransparencyAnalyticsTest extends TestCase
             'accountability_deadline' => '2026-12-20',
         ]);
         $this->execution($municipality, $amendment, $manager, 60, 70000, 40000);
+        $this->proposal($municipality, $manager, [
+            'reference' => 'LEG-EXEC-001',
+            'status' => LegislativeProposal::STATUS_SENT,
+            'estimated_amount' => 25000,
+            'object' => 'Compra de equipamentos para unidade municipal de saude',
+        ]);
+        $this->amendment($municipality, $manager, [
+            'reference' => 'EM-CONTAS-2026',
+            'fiscal_year' => 2026,
+            'expected_amount' => 30000,
+            'received_amount' => 30000,
+            'status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
+        ]);
         $this->amendment($municipality, $manager, [
             'reference' => 'EM-FORA-2025',
             'fiscal_year' => 2025,
@@ -44,14 +58,19 @@ class TransparencyAnalyticsTest extends TestCase
             ->get(route('dashboard', ['year' => 2026]))
             ->assertOk()
             ->assertSee('Inteligência gerencial')
-            ->assertSee('R$ 100.000,00')
-            ->assertSee('R$ 80.000,00')
+            ->assertSee('R$ 130.000,00')
+            ->assertSee('R$ 110.000,00')
             ->assertSee('R$ 40.000,00')
-            ->assertSee('60%')
+            ->assertSee('30%')
             ->assertSee('Saúde do sistema municipal')
             ->assertSee('Município ainda exige atenção')
             ->assertSee('Ativar exercício')
-            ->assertSee('Nenhum ponto crítico no recorte')
+            ->assertSee('Ciclo executivo municipal')
+            ->assertSee('Protocolo e reserva')
+            ->assertSee('Resolver agora')
+            ->assertSee('LEG-EXEC-001')
+            ->assertSee('Prestar contas')
+            ->assertSee('EM-CONTAS-2026')
             ->assertDontSee('EM-FORA-2025');
     }
 
@@ -301,6 +320,32 @@ class TransparencyAnalyticsTest extends TestCase
             ->for($municipality)
             ->for($user, 'creator')
             ->create($attributes);
+    }
+
+    private function proposal(Municipality $municipality, User $user, array $attributes = []): LegislativeProposal
+    {
+        return $municipality->legislativeProposals()->create([
+            'submitted_by' => $user->id,
+            'reference' => 'LEG-2026-001',
+            'fiscal_year' => 2026,
+            'author_name' => 'Vereador Bruno Almeida',
+            'author_party' => 'PSD',
+            'object' => 'Indicacao municipal de teste.',
+            'justification' => 'Atendimento de demanda municipal prioritaria.',
+            'priority' => 'normal',
+            'beneficiary_type' => 'municipal_body',
+            'beneficiary_name' => 'Prefeitura Municipal',
+            'beneficiary_location' => 'Centro',
+            'expense_destination' => 'investment',
+            'transfer_type' => 'direct_execution',
+            'health_related' => false,
+            'responsible_department' => 'Secretaria de Saude',
+            'public_need' => 'Melhorar atendimento publico municipal.',
+            'estimated_amount' => 10000,
+            'estimate_source' => 'Cotacao preliminar',
+            'status' => LegislativeProposal::STATUS_SUBMITTED,
+            ...$attributes,
+        ]);
     }
 
     private function execution(

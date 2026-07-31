@@ -157,6 +157,67 @@
         </div>
     </section>
 
+    <section class="executive-cycle-panel" aria-label="Esteira executiva municipal">
+        <div class="executive-cycle-heading">
+            <div>
+                <p class="panel-kicker">Ciclo executivo municipal</p>
+                <h2>Da indicacao a prestacao de contas</h2>
+                <p>Visao rapida para gestor, Executivo e prefeito acompanharem o que precisa andar agora.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ $executiveCycle['focus']['route'] }}">
+                <i data-lucide="{{ $executiveCycle['focus']['icon'] }}" aria-hidden="true"></i>{{ $executiveCycle['focus']['action'] }}
+            </a>
+        </div>
+
+        <div class="executive-cycle-focus tone-{{ $executiveCycle['focus']['tone'] }}">
+            <span><i data-lucide="{{ $executiveCycle['focus']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <small>Foco recomendado</small>
+                <strong>{{ $executiveCycle['focus']['title'] }}</strong>
+                <p>{{ $executiveCycle['focus']['description'] }}</p>
+            </div>
+            <div>
+                <strong>{{ $executiveCycle['focus']['count'] }}</strong>
+                <small>item(ns)</small>
+            </div>
+            <a class="btn btn-primary" href="{{ $executiveCycle['focus']['route'] }}">
+                <i data-lucide="arrow-right" aria-hidden="true"></i>Resolver agora
+            </a>
+        </div>
+
+        <div class="executive-cycle-lane">
+            @foreach ($executiveCycle['cards'] as $card)
+                <a class="tone-{{ $card['tone'] }}" href="{{ $card['route'] }}">
+                    <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                    <small>{{ $card['label'] }}</small>
+                    <strong>{{ $card['count'] }}</strong>
+                    <p>{{ $card['title'] }}</p>
+                    <em>R$ {{ number_format($card['amount'], 2, ',', '.') }}</em>
+                </a>
+            @endforeach
+        </div>
+
+        <div class="executive-cycle-next">
+            <div>
+                <p class="panel-kicker">Proximas acoes</p>
+                <h3>Acoes que encurtam o caminho do recurso</h3>
+                <p>{{ $executiveCycle['reserved_count'] }} proposta(s) ja possuem reserva orcamentaria registrada.</p>
+            </div>
+            <div class="executive-cycle-next-list">
+                @forelse ($executiveCycle['next_items'] as $item)
+                    <a href="{{ $item['url'] }}">
+                        <span>{{ $item['label'] }}</span>
+                        <strong>{{ $item['reference'] }}</strong>
+                        <small>{{ Str::limit($item['object'], 74) }}</small>
+                        <em>R$ {{ number_format($item['value'], 2, ',', '.') }}</em>
+                    </a>
+                @empty
+                    <div class="empty-state compact"><i data-lucide="circle-check-big" aria-hidden="true"></i><h3>Nenhuma acao executiva pendente</h3><p>Quando houver proposta recebida, execucao ou prestacao aberta, ela aparecera aqui.</p></div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
     <div class="analytics-grid analytics-grid-primary">
         <section class="content-panel analytics-chart-panel">
             <div class="content-panel-header">

@@ -6,11 +6,14 @@ use App\Models\MunicipalRegulatoryProfile;
 use App\Models\MunicipalWorkItem;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
+use App\Models\AccountabilityProcess;
+use App\Models\LegislativeProposal;
 use App\Services\AmendmentAnalyticsService;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\IntegrityAlertService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -48,6 +51,7 @@ class DashboardController extends Controller
             'municipality' => $municipality,
             'analytics' => $analytics,
             'municipalHealth' => $this->municipalHealth($municipality, $isManager, $canEdit),
+            'executiveCycle' => $this->executiveCycle($municipality, $amendments),
             'filters' => $filters,
             'years' => $options['years'],
             'departments' => $options['departments'],
@@ -61,6 +65,131 @@ class DashboardController extends Controller
                 ? $formSubmission->issue($request, "transparency-settings-{$municipality->id}")
                 : null,
         ]);
+    }
+
+    /** @param Collection<int, ParliamentaryAmendment> $amendments @return array<string, mixed> */
+    private function executiveCycle($municipality, Collection $amendments): array
+    {
+        $proposals = $municipality->legislativeProposals()
+            ->with('amendment')
+            ->latest('fiscal_year')
+            ->latest('id')
+            ->get();
+        $waitingCouncil = $proposals->whereIn('status', [
+            LegislativeProposal::STATUS_SUBMITTED,
+            LegislativeProposal::STATUS_APPROVED,
+        ]);
+        $waitingExecutive = $proposals->whereIn('status', [
+            LegislativeProposal::STATUS_SENT,
+            LegislativeProposal::STATUS_RECEIVED,
+        ]);
+        $reserved = $proposals->where('status', LegislativeProposal::STATUS_RESERVED);
+        $inExecution = $amendments->whereIn('status', [
+            ParliamentaryAmendment::STATUS_RESOURCE_RECEIVED,
+            ParliamentaryAmendment::STATUS_EXECUTING,
+        ]);
+        $accountability = $amendments->filter(fn (ParliamentaryAmendment $amendment) => $amendment->status === ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING
+            || ($amendment->accountabilityProcess && $amendment->accountabilityProcess->status !== AccountabilityProcess::STATUS_APPROVED));
+        $completed = $amendments->where('status', ParliamentaryAmendment::STATUS_COMPLETED);
+
+        $cards = [
+            [
+                'key' => 'council',
+                'label' => 'Camara',
+                'title' => 'Conferencia legislativa',
+                'description' => 'Propostas aguardando aprovacao, ajuste ou protocolo pela Camara.',
+                'count' => $waitingCouncil->count(),
+                'amount' => (float) $waitingCouncil->sum('estimated_amount'),
+                'icon' => 'landmark',
+                'tone' => $waitingCouncil->isEmpty() ? 'ok' : 'attention',
+                'route' => route('legislative.index', ['status' => LegislativeProposal::STATUS_SUBMITTED]),
+                'action' => 'Abrir Portal Legislativo',
+            ],
+            [
+                'key' => 'reserve',
+                'label' => 'Executivo',
+                'title' => 'Protocolo e reserva',
+                'description' => 'Itens recebidos pelo Executivo que ainda precisam de processo ou reserva.',
+                'count' => $waitingExecutive->count(),
+                'amount' => (float) $waitingExecutive->sum('estimated_amount'),
+                'icon' => 'stamp',
+                'tone' => $waitingExecutive->isEmpty() ? 'ok' : 'warning',
+                'route' => route('legislative.index', ['status' => LegislativeProposal::STATUS_SENT]),
+                'action' => 'Tratar reservas',
+            ],
+            [
+                'key' => 'execution',
+                'label' => 'Execucao',
+                'title' => 'Entrega fisica e pagamentos',
+                'description' => 'Emendas com recurso recebido ou em execucao simplificada.',
+                'count' => $inExecution->count(),
+                'amount' => (float) $inExecution->sum('received_amount'),
+                'icon' => 'gauge',
+                'tone' => $inExecution->isEmpty() ? 'neutral' : 'info',
+                'route' => route('emendas.index', ['status' => ParliamentaryAmendment::STATUS_EXECUTING]),
+                'action' => 'Acompanhar execucao',
+            ],
+            [
+                'key' => 'accountability',
+                'label' => 'Contas',
+                'title' => 'Prestacao de contas',
+                'description' => 'Fechamentos pendentes, em revisao ou com diligencia aberta.',
+                'count' => $accountability->count(),
+                'amount' => (float) $accountability->sum('received_amount'),
+                'icon' => 'clipboard-check',
+                'tone' => $accountability->isEmpty() ? 'ok' : 'attention',
+                'route' => route('emendas.index', ['status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING]),
+                'action' => 'Fechar prestacoes',
+            ],
+            [
+                'key' => 'completed',
+                'label' => 'Concluidas',
+                'title' => 'Ciclo encerrado',
+                'description' => 'Emendas entregues e aprovadas para consulta do gestor e prefeito.',
+                'count' => $completed->count(),
+                'amount' => (float) $completed->sum('received_amount'),
+                'icon' => 'badge-check',
+                'tone' => 'ok',
+                'route' => route('emendas.index', ['status' => ParliamentaryAmendment::STATUS_COMPLETED]),
+                'action' => 'Ver concluidas',
+            ],
+        ];
+
+        $focus = collect($cards)
+            ->first(fn (array $card) => in_array($card['tone'], ['attention', 'warning'], true) && $card['count'] > 0)
+            ?? $cards[2];
+
+        $nextItems = collect()
+            ->merge($waitingExecutive->map(fn (LegislativeProposal $proposal) => [
+                'label' => 'Reservar',
+                'reference' => $proposal->reference,
+                'object' => $proposal->object,
+                'value' => (float) $proposal->estimated_amount,
+                'url' => route('legislative.show', $proposal),
+            ]))
+            ->merge($inExecution->take(4)->map(fn (ParliamentaryAmendment $amendment) => [
+                'label' => 'Executar',
+                'reference' => $amendment->reference,
+                'object' => $amendment->object,
+                'value' => (float) ($amendment->received_amount ?? $amendment->expected_amount),
+                'url' => route('emendas.execution', $amendment),
+            ]))
+            ->merge($accountability->take(4)->map(fn (ParliamentaryAmendment $amendment) => [
+                'label' => 'Prestar contas',
+                'reference' => $amendment->reference,
+                'object' => $amendment->object,
+                'value' => (float) ($amendment->received_amount ?? $amendment->expected_amount),
+                'url' => route('emendas.accountability', $amendment),
+            ]))
+            ->take(5)
+            ->values();
+
+        return [
+            'focus' => $focus,
+            'cards' => $cards,
+            'reserved_count' => $reserved->count(),
+            'next_items' => $nextItems,
+        ];
     }
 
     /** @return array{score: int, tone: string, title: string, subtitle: string, checks: array<int, array{label: string, value: string, ok: bool, icon: string, route: string, action: string}>} */
