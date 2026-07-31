@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContractAddendum;
 use App\Models\ContractMeasurement;
 use App\Models\MunicipalContract;
+use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
 use App\Services\AuditTrail;
 use App\Services\CurrentMunicipality;
@@ -126,6 +127,7 @@ class MunicipalContractController extends Controller
             'planningChecklist' => $framework->planningChecklist(),
             'addendumTypes' => $framework->addendumTypes(),
             'members' => $municipality->users()->wherePivotIn('role', ['manager', 'editor', 'auditor'])->orderBy('name')->get(['users.id', 'users.name']),
+            'institutionSuggestions' => $this->institutionSuggestions($municipality),
             'documents' => $contract->amendment->documents->sortByDesc('created_at'),
             'canEdit' => $canEdit,
             'canReview' => $canReview,
@@ -470,6 +472,25 @@ class MunicipalContractController extends Controller
             'object.min' => 'Descreva o objeto com pelo menos 20 caracteres.',
             'effective_end_at.after_or_equal' => 'O fim da vigência não pode ser anterior ao início.',
         ]);
+    }
+
+    /** @return array<string, \Illuminate\Support\Collection<int, MunicipalInstitution>> */
+    private function institutionSuggestions(Municipality $municipality): array
+    {
+        $institutions = $municipality->institutions()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return [
+            'suppliers' => $institutions->where('type', MunicipalInstitution::TYPE_SUPPLIER)->values(),
+            'inspectors' => $institutions->where('type', MunicipalInstitution::TYPE_INSPECTOR)->values(),
+            'locations' => $institutions->whereIn('type', [
+                MunicipalInstitution::TYPE_DEPARTMENT,
+                MunicipalInstitution::TYPE_EXECUTING_UNIT,
+                MunicipalInstitution::TYPE_BENEFICIARY,
+            ])->values(),
+        ];
     }
 
     /** @param array<string, mixed> $validated @return array<string, mixed> */

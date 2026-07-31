@@ -113,6 +113,40 @@ class MunicipalInstitutionTest extends TestCase
             ->assertDontSee($own->name);
     }
 
+    public function test_amendment_form_uses_active_institutional_records_as_suggestions(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_COUNCILOR,
+            'name' => 'Vereador Bruno Almeida',
+            'party' => 'PSD',
+            'is_active' => true,
+        ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_DEPARTMENT,
+            'name' => 'Secretaria Municipal de Saude',
+            'is_active' => true,
+        ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_BENEFICIARY,
+            'name' => 'UBS Vila Nova',
+            'city' => $municipality->name,
+            'state' => $municipality->state,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.create'))
+            ->assertOk()
+            ->assertSee('list="institution-authors"', false)
+            ->assertSee('list="institution-departments"', false)
+            ->assertSee('list="institution-beneficiaries"', false)
+            ->assertSee('Vereador Bruno Almeida')
+            ->assertSee('Secretaria Municipal de Saude')
+            ->assertSee('UBS Vila Nova');
+    }
+
     /** @return array{User, Municipality} */
     private function memberWithMunicipality(string $role): array
     {

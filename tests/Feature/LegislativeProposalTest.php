@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\LegislativeProposal;
+use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\MunicipalWorkItem;
@@ -228,6 +229,18 @@ class LegislativeProposalTest extends TestCase
             'legislative_name' => 'Vereadora Automacao',
             'legislative_party' => 'PSD',
         ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_DEPARTMENT,
+            'name' => 'Secretaria Municipal de Saude',
+            'is_active' => true,
+        ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_BENEFICIARY,
+            'name' => 'UBS Central',
+            'city' => $municipality->name,
+            'state' => $municipality->state,
+            'is_active' => true,
+        ]);
         $this->proposal($municipality, $profile, $councilor, [
             'author_name' => 'Vereadora Automacao',
             'estimated_amount' => 50000,
@@ -253,6 +266,10 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('data-auto-health-toggle', false)
             ->assertSee('data-auto-department', false)
             ->assertSee('data-auto-estimate-source', false)
+            ->assertSee('list="legislative-departments"', false)
+            ->assertSee('list="legislative-beneficiaries"', false)
+            ->assertSee('Secretaria Municipal de Saude')
+            ->assertSee('UBS Central')
             ->assertSee('data-fill-available', false)
             ->assertSee('data-fill-health', false)
             ->assertSee('data-health-amount="25000"', false)

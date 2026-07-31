@@ -2,6 +2,22 @@
 @php($minimumAmount = $automation['minimum_amount'] ?? 0.01)
 @php($maximumAmount = $automation['maximum_amount'] ?? null)
 @php($htmlMinimumAmount = $maximumAmount !== null && $maximumAmount < $minimumAmount ? 0.01 : $minimumAmount)
+@php($institutionSuggestions = $institutionSuggestions ?? ['departments' => collect(), 'beneficiaries' => collect()])
+
+@if($institutionSuggestions['departments']->isNotEmpty())
+    <datalist id="legislative-departments">
+        @foreach($institutionSuggestions['departments'] as $item)
+            <option value="{{ $item->name }}" label="{{ $item->document ?: $item->role_title }}"></option>
+        @endforeach
+    </datalist>
+@endif
+@if($institutionSuggestions['beneficiaries']->isNotEmpty())
+    <datalist id="legislative-beneficiaries">
+        @foreach($institutionSuggestions['beneficiaries'] as $item)
+            <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}"></option>
+        @endforeach
+    </datalist>
+@endif
 
 <div class="legislative-simple-form">
     <section class="legislative-form-section span-2">
@@ -15,7 +31,7 @@
             @endunless
             <label><span>Valor estimado (R$) <b>*</b></span><input class="form-control @error('estimated_amount') is-invalid @enderror" name="estimated_amount" type="number" min="{{ $htmlMinimumAmount }}" @if($maximumAmount !== null) max="{{ $maximumAmount }}" @endif step="0.01" value="{{ old('estimated_amount', $proposal->estimated_amount ?? '') }}" required>@error('estimated_amount')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label class="{{ $editing ? 'span-2' : '' }}"><span>Objeto especifico <b>*</b></span><textarea class="form-control @error('object') is-invalid @enderror" name="object" rows="3" minlength="20" maxlength="5000" required placeholder="Ex.: Aquisicao de equipamento para a unidade de saude do bairro..." data-auto-health-source>{{ old('object', $proposal->object ?? '') }}</textarea>@error('object')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
-            <label><span>Secretaria ou orgao executor <b>*</b></span><input class="form-control @error('responsible_department') is-invalid @enderror" name="responsible_department" value="{{ old('responsible_department', $proposal->responsible_department ?? '') }}" maxlength="255" required placeholder="Ex.: Secretaria de Saude" data-auto-department>@error('responsible_department')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+            <label><span>Secretaria ou orgao executor <b>*</b></span><input class="form-control @error('responsible_department') is-invalid @enderror" name="responsible_department" value="{{ old('responsible_department', $proposal->responsible_department ?? '') }}" maxlength="255" required placeholder="Ex.: Secretaria de Saude" @if($institutionSuggestions['departments']->isNotEmpty()) list="legislative-departments" @endif data-auto-department>@error('responsible_department')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label><span>Natureza da despesa <b>*</b></span><select class="form-select @error('expense_destination') is-invalid @enderror" name="expense_destination" required><option value="">Selecione</option>@foreach($expenseDestinations as $value => $label)<option value="{{ $value }}" @selected(old('expense_destination', $proposal->expense_destination ?? '') === $value)>{{ $label }}</option>@endforeach</select>@error('expense_destination')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label class="legislative-switch health"><input class="form-check-input" name="health_related" type="checkbox" value="1" @checked(old('health_related', $proposal->health_related ?? false)) data-auto-health-toggle><span><strong>Destinar para saude</strong><small>O sistema usa esta marcacao para conferir a reserva minima do vereador.</small></span></label>
         </div>
@@ -27,8 +43,8 @@
             <div><h2>Destino e justificativa</h2><p>Use linguagem simples. A equipe tecnica complementa o que for necessario depois.</p></div>
         </div>
         <div class="legislative-fields">
-            <label><span>Beneficiario ou local atendido <b>*</b></span><input class="form-control @error('beneficiary_name') is-invalid @enderror" name="beneficiary_name" value="{{ old('beneficiary_name', $proposal->beneficiary_name ?? '') }}" maxlength="255" required placeholder="Ex.: UBS Central, Escola Municipal..." data-auto-health-source>@error('beneficiary_name')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
-            <label><span>Localidade</span><input class="form-control @error('beneficiary_location') is-invalid @enderror" name="beneficiary_location" value="{{ old('beneficiary_location', $proposal->beneficiary_location ?? $municipality->name) }}" maxlength="255" data-auto-location data-default-location="{{ $municipality->name }}">@error('beneficiary_location')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+            <label><span>Beneficiario ou local atendido <b>*</b></span><input class="form-control @error('beneficiary_name') is-invalid @enderror" name="beneficiary_name" value="{{ old('beneficiary_name', $proposal->beneficiary_name ?? '') }}" maxlength="255" required placeholder="Ex.: UBS Central, Escola Municipal..." @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="legislative-beneficiaries" @endif data-auto-health-source>@error('beneficiary_name')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
+            <label><span>Localidade</span><input class="form-control @error('beneficiary_location') is-invalid @enderror" name="beneficiary_location" value="{{ old('beneficiary_location', $proposal->beneficiary_location ?? $municipality->name) }}" maxlength="255" @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="legislative-beneficiaries" @endif data-auto-location data-default-location="{{ $municipality->name }}">@error('beneficiary_location')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
             <label class="span-2"><span>Justificativa de interesse publico <b>*</b></span><textarea class="form-control @error('justification') is-invalid @enderror" name="justification" rows="4" minlength="30" maxlength="5000" required placeholder="Explique o problema, quem sera atendido e por que essa entrega importa." data-auto-justification>{{ old('justification', $proposal->justification ?? '') }}</textarea>@error('justification')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>
         </div>
     </section>

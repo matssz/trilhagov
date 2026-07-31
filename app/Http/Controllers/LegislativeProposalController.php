@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LegislativeProposal;
+use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -954,6 +955,28 @@ class LegislativeProposalController extends Controller
             'transferTypes' => collect(ParliamentaryAmendment::transferTypes())->only(['direct_execution', 'defined_purpose', 'fund_to_fund', 'other'])->all(),
             'quota' => $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name)),
             'automation' => $service->proposalAutomation($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name)),
+            'institutionSuggestions' => $this->institutionSuggestions($municipality),
+        ];
+    }
+
+    /** @return array<string, \Illuminate\Support\Collection<int, MunicipalInstitution>> */
+    private function institutionSuggestions(Municipality $municipality): array
+    {
+        $institutions = $municipality->institutions()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return [
+            'departments' => $institutions->whereIn('type', [
+                MunicipalInstitution::TYPE_DEPARTMENT,
+                MunicipalInstitution::TYPE_EXECUTING_UNIT,
+            ])->values(),
+            'beneficiaries' => $institutions->whereIn('type', [
+                MunicipalInstitution::TYPE_BENEFICIARY,
+                MunicipalInstitution::TYPE_DEPARTMENT,
+                MunicipalInstitution::TYPE_EXECUTING_UNIT,
+            ])->values(),
         ];
     }
 

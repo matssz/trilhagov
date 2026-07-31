@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ContractAddendum;
 use App\Models\ContractMeasurement;
 use App\Models\MunicipalContract;
+use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
@@ -36,12 +37,38 @@ class MunicipalContractTest extends TestCase
 
         $this->post(route('municipal-contracts.store'), $payload)->assertRedirect();
         $contract = MunicipalContract::firstOrFail();
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_SUPPLIER,
+            'name' => 'Construtora Municipal Ltda',
+            'document' => '12.345.678/0001-90',
+            'is_active' => true,
+        ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_INSPECTOR,
+            'name' => 'Engenheira Ana Fiscal',
+            'role_title' => 'Fiscal de obras',
+            'is_active' => true,
+        ]);
+        $municipality->institutions()->create([
+            'type' => MunicipalInstitution::TYPE_EXECUTING_UNIT,
+            'name' => 'Unidade de Obras Urbanas',
+            'is_active' => true,
+        ]);
         $this->assertSame(MunicipalContract::STATUS_PLANNING, $contract->status);
         $this->assertSame($amendment->id, $contract->parliamentary_amendment_id);
         $this->post(route('municipal-contracts.store'), $payload)->assertSessionHas('warning');
         $this->assertSame(1, MunicipalContract::count());
         $this->get(route('municipal-contracts.index'))->assertOk()->assertSee('Obras e contratos')->assertSee('PROC-2026-0042');
-        $this->get(route('municipal-contracts.show', $contract))->assertOk()->assertSee('Planejamento e seleção')->assertSee('Medições e atestes');
+        $this->get(route('municipal-contracts.show', $contract))
+            ->assertOk()
+            ->assertSee('Planejamento e seleção')
+            ->assertSee('Medições e atestes')
+            ->assertSee('list="contract-suppliers"', false)
+            ->assertSee('list="contract-inspectors"', false)
+            ->assertSee('list="contract-locations"', false)
+            ->assertSee('Construtora Municipal Ltda')
+            ->assertSee('Engenheira Ana Fiscal')
+            ->assertSee('Unidade de Obras Urbanas');
     }
 
     public function test_contract_cannot_advance_without_controls_and_complete_contract_reaches_execution(): void

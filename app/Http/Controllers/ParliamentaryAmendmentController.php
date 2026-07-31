@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ParliamentaryAmendmentRequest;
+use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Services\AuditTrail;
@@ -263,10 +264,33 @@ class ParliamentaryAmendmentController extends Controller
             'transferTypes' => ParliamentaryAmendment::transferTypes(),
             'expenseDestinations' => ParliamentaryAmendment::expenseDestinations(),
             'bankTrackingTypes' => ParliamentaryAmendment::bankTrackingTypes(),
+            'institutionSuggestions' => $this->institutionSuggestions($municipality),
             'activeRegulatoryProfiles' => $municipality->regulatoryProfiles()
                 ->where('status', 'active')
                 ->orderByDesc('fiscal_year')
                 ->get(),
+        ];
+    }
+
+    /** @return array<string, \Illuminate\Support\Collection<int, MunicipalInstitution>> */
+    private function institutionSuggestions(Municipality $municipality): array
+    {
+        $institutions = $municipality->institutions()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return [
+            'authors' => $institutions->where('type', MunicipalInstitution::TYPE_COUNCILOR)->values(),
+            'departments' => $institutions->whereIn('type', [
+                MunicipalInstitution::TYPE_DEPARTMENT,
+                MunicipalInstitution::TYPE_EXECUTING_UNIT,
+            ])->values(),
+            'beneficiaries' => $institutions->whereIn('type', [
+                MunicipalInstitution::TYPE_BENEFICIARY,
+                MunicipalInstitution::TYPE_DEPARTMENT,
+                MunicipalInstitution::TYPE_EXECUTING_UNIT,
+            ])->values(),
         ];
     }
 }

@@ -1,6 +1,29 @@
 @php($amendment = $amendment ?? null)
 @php($hasExternalSpheres = count($governmentSpheres) > 1)
 @php($showFederalFields = $municipality->federal_amendments_enabled || $amendment?->government_sphere === 'federal')
+@php($institutionSuggestions = $institutionSuggestions ?? ['authors' => collect(), 'departments' => collect(), 'beneficiaries' => collect()])
+
+@if($institutionSuggestions['authors']->isNotEmpty())
+    <datalist id="institution-authors">
+        @foreach($institutionSuggestions['authors'] as $item)
+            <option value="{{ $item->name }}" label="{{ trim(($item->party ? $item->party.' - ' : '').($item->role_title ?? '')) }}"></option>
+        @endforeach
+    </datalist>
+@endif
+@if($institutionSuggestions['departments']->isNotEmpty())
+    <datalist id="institution-departments">
+        @foreach($institutionSuggestions['departments'] as $item)
+            <option value="{{ $item->name }}" label="{{ $item->document ?: $item->role_title }}"></option>
+        @endforeach
+    </datalist>
+@endif
+@if($institutionSuggestions['beneficiaries']->isNotEmpty())
+    <datalist id="institution-beneficiaries">
+        @foreach($institutionSuggestions['beneficiaries'] as $item)
+            <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}"></option>
+        @endforeach
+    </datalist>
+@endif
 
 @if ($activeRegulatoryProfiles->isNotEmpty())
     <div class="normative-form-context">
@@ -75,7 +98,8 @@
     <div class="row g-3">
         <div class="col-md-8">
             <label class="form-label" for="author_name">Autor da emenda <span class="required-mark">*</span></label>
-            <input class="form-control @error('author_name') is-invalid @enderror" id="author_name" name="author_name" value="{{ old('author_name', $amendment?->author_name) }}" maxlength="255" required>
+            <input class="form-control @error('author_name') is-invalid @enderror" id="author_name" name="author_name" value="{{ old('author_name', $amendment?->author_name) }}" maxlength="255" @if($institutionSuggestions['authors']->isNotEmpty()) list="institution-authors" @endif required>
+            @if($institutionSuggestions['authors']->isNotEmpty())<div class="form-text">Vereadores cadastrados aparecem como sugestao oficial do municipio.</div>@endif
             @error('author_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-4">
@@ -91,7 +115,8 @@
         </div>
         <div class="col-md-6">
             <label class="form-label" for="responsible_department">Secretaria ou órgão responsável <span class="required-mark">*</span></label>
-            <input class="form-control @error('responsible_department') is-invalid @enderror" id="responsible_department" name="responsible_department" value="{{ old('responsible_department', $amendment?->responsible_department) }}" maxlength="255" required>
+            <input class="form-control @error('responsible_department') is-invalid @enderror" id="responsible_department" name="responsible_department" value="{{ old('responsible_department', $amendment?->responsible_department) }}" maxlength="255" @if($institutionSuggestions['departments']->isNotEmpty()) list="institution-departments" @endif required>
+            @if($institutionSuggestions['departments']->isNotEmpty())<div class="form-text">Use os cadastros municipais para padronizar secretarias e unidades.</div>@endif
             @error('responsible_department')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6">
@@ -123,7 +148,7 @@
         </div>
         <div class="col-md-8">
             <label class="form-label" for="beneficiary_location">Município ou localidade beneficiada</label>
-            <input class="form-control @error('beneficiary_location') is-invalid @enderror" id="beneficiary_location" name="beneficiary_location" value="{{ old('beneficiary_location', $amendment?->beneficiary_location ?? $municipality->name) }}" maxlength="255">
+            <input class="form-control @error('beneficiary_location') is-invalid @enderror" id="beneficiary_location" name="beneficiary_location" value="{{ old('beneficiary_location', $amendment?->beneficiary_location ?? $municipality->name) }}" maxlength="255" @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="institution-beneficiaries" @endif>
             @error('beneficiary_location')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6">
