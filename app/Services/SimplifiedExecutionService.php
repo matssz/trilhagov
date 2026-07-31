@@ -22,6 +22,10 @@ class SimplifiedExecutionService
         $hasEvidence = $documents->isNotEmpty();
         $financialPercentage = $receivedAmount > 0 ? (int) round(($paidAmount / $receivedAmount) * 100) : 0;
         $readyForAccountability = $hasStages && $physicalPercentage >= 100 && $receivedAmount > 0 && $paidAmount >= $receivedAmount && $hasEvidence;
+        $doneCount = collect([$hasStages, $hasCommitments, $paidAmount > 0, $hasEvidence, $readyForAccountability])
+            ->filter()
+            ->count();
+        $readinessPercentage = (int) round($doneCount / 5 * 100);
 
         $next = [
             'icon' => 'route',
@@ -82,6 +86,26 @@ class SimplifiedExecutionService
                 ['label' => 'Etapas', 'value' => $stages->count().' etapa(s)'],
                 ['label' => 'Evidencias', 'value' => $documents->count().' evidencia(s)'],
                 ['label' => 'Financeiro', 'value' => $financialPercentage.'% financeiro'],
+            ],
+            'readiness' => [
+                'percentage' => $readinessPercentage,
+                'done' => $doneCount,
+                'total' => 5,
+                'label' => $readyForAccountability ? 'Pronta para prestacao' : ($doneCount >= 3 ? 'Execucao em andamento' : 'Execucao a estruturar'),
+                'tone' => $readyForAccountability ? 'success' : ($doneCount >= 3 ? 'warning' : 'neutral'),
+                'physical' => $physicalPercentage,
+                'financial' => $financialPercentage,
+                'evidence_count' => $documents->count(),
+                'paid_amount' => $paidAmount,
+                'committed_amount' => $committedAmount,
+                'received_amount' => $receivedAmount,
+            ],
+            'flow' => [
+                ['label' => 'Abrir etapas', 'icon' => 'clipboard-list', 'done' => $hasStages, 'href' => '#stages'],
+                ['label' => 'Empenhar', 'icon' => 'briefcase-business', 'done' => $hasCommitments, 'href' => '#commitments'],
+                ['label' => 'Liquidar e pagar', 'icon' => 'receipt-text', 'done' => $paidAmount > 0, 'href' => '#commitments'],
+                ['label' => 'Comprovar entrega', 'icon' => 'file-check-2', 'done' => $hasEvidence, 'href' => '#evidence'],
+                ['label' => 'Prestar contas', 'icon' => 'archive', 'done' => $readyForAccountability, 'href' => route('emendas.accountability', $amendment)],
             ],
         ];
     }

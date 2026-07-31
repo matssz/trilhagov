@@ -74,7 +74,14 @@ class AmendmentExecutionTest extends TestCase
             ->assertOk()
             ->assertSee('Execucao simplificada')
             ->assertSee('Gerar etapas do plano')
-            ->assertSee('Plano aprovado localizado');
+            ->assertSee('Plano aprovado localizado')
+            ->assertSee('Entrega, dinheiro e evidencia em uma trilha')
+            ->assertSee('Abrir etapas')
+            ->assertSee('Empenhar')
+            ->assertSee('Liquidar e pagar')
+            ->assertSee('Comprovar entrega')
+            ->assertSee('Prestar contas')
+            ->assertSee('Execucao a estruturar');
 
         $token = $this->sessionFor($municipality, "execution-start-{$amendment->id}");
         $payload = ['_submission_token' => $token];
@@ -245,7 +252,8 @@ class AmendmentExecutionTest extends TestCase
             ->get(route('emendas.execution', $amendment))
             ->assertOk()
             ->assertSee('Termo de recebimento')
-            ->assertSee('entrega.pdf');
+            ->assertSee('entrega.pdf')
+            ->assertSee('Evidencias');
     }
 
     public function test_execution_records_are_scoped_to_active_municipality_and_roles(): void

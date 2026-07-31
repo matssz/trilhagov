@@ -69,6 +69,31 @@
             @endif
         </div>
 
+        <div class="execution-readiness is-{{ $executionGuide['readiness']['tone'] }}" aria-label="Prontidao da execucao">
+            <div class="execution-readiness-score">
+                <strong>{{ $executionGuide['readiness']['percentage'] }}%</strong>
+                <span>{{ $executionGuide['readiness']['label'] }}</span>
+            </div>
+            <div class="execution-readiness-copy">
+                <strong>Entrega, dinheiro e evidencia em uma trilha</strong>
+                <p>O Executivo acompanha o que ja foi aberto, empenhado, pago e comprovado antes de mandar para prestacao de contas.</p>
+            </div>
+            <div class="execution-readiness-facts">
+                <div><small>Fisico</small><strong>{{ $executionGuide['readiness']['physical'] }}%</strong></div>
+                <div><small>Financeiro</small><strong>{{ $executionGuide['readiness']['financial'] }}%</strong></div>
+                <div><small>Evidencias</small><strong>{{ $executionGuide['readiness']['evidence_count'] }}</strong></div>
+            </div>
+        </div>
+
+        <div class="execution-flow-lane" aria-label="Fluxo simplificado da execucao">
+            @foreach ($executionGuide['flow'] as $step)
+                <a class="{{ $step['done'] ? 'is-done' : '' }}" href="{{ $step['href'] }}">
+                    <span><i data-lucide="{{ $step['done'] ? 'circle-check' : $step['icon'] }}" aria-hidden="true"></i></span>
+                    <strong>{{ $step['label'] }}</strong>
+                </a>
+            @endforeach
+        </div>
+
         <div class="execution-guide-steps">
             @foreach ($executionGuide['steps'] as $step)
                 <div class="{{ $step['done'] ? 'is-done' : '' }}">
