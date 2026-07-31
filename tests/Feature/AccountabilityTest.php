@@ -67,7 +67,13 @@ class AccountabilityTest extends TestCase
             ->assertOk()
             ->assertSee('Prestacao simplificada')
             ->assertSee('Pre-conferir checklist')
-            ->assertSee('Fechamento municipal guiado');
+            ->assertSee('Fechamento municipal guiado')
+            ->assertSee('Fechamento, checklist e dossie em uma trilha')
+            ->assertSee('Abrir processo')
+            ->assertSee('Pre-conferir')
+            ->assertSee('Conciliar saldo')
+            ->assertSee('Resolver pendencias')
+            ->assertSee('Gerar dossie');
 
         $token = $this->sessionFor($municipality, "accountability-quick-check-{$process->id}");
         $this->post(route('emendas.accountability.quick-check', $amendment), [
@@ -85,7 +91,9 @@ class AccountabilityTest extends TestCase
         $this->get(route('emendas.accountability', $amendment))
             ->assertOk()
             ->assertSee('Enviar prestacao de contas')
-            ->assertSee('Informar protocolo');
+            ->assertSee('Informar protocolo')
+            ->assertSee('Pronta para protocolo')
+            ->assertSee('#dossie-prestacao', false);
     }
 
     public function test_viewer_can_consult_but_cannot_change_accountability(): void

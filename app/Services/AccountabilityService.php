@@ -82,6 +82,10 @@ class AccountabilityService
             : false;
         $financialReady = $amendment->received_amount !== null && abs($financial['unreconciled']) <= 0.01;
         $ready = (bool) ($readiness['ready'] ?? false);
+        $openDiligences = $process?->diligences->where('status', 'open')->count() ?? 0;
+        $score = (int) ($readiness['score'] ?? 0);
+        $closingTone = $ready ? 'success' : ($hasProcess && $score >= 60 ? 'warning' : 'neutral');
+        $closingLabel = $ready ? 'Pronta para protocolo' : ($hasProcess ? 'Fechamento em andamento' : 'Prestacao nao iniciada');
 
         $next = [
             'icon' => 'clipboard-list',
@@ -127,6 +131,24 @@ class AccountabilityService
 
         return [
             'next' => $next,
+            'closing' => [
+                'score' => $score,
+                'label' => $closingLabel,
+                'tone' => $closingTone,
+                'description' => 'Fechamento, checklist e dossie em uma trilha.',
+                'facts' => [
+                    ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Nao iniciado'],
+                    ['label' => 'Saldo', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                    ['label' => 'Diligencias', 'value' => $openDiligences.' aberta(s)'],
+                ],
+            ],
+            'flow' => [
+                ['label' => 'Abrir processo', 'description' => 'Cria checklist e responsavel.', 'done' => $hasProcess, 'href' => $hasProcess ? '#process' : '#iniciar-prestacao'],
+                ['label' => 'Pre-conferir', 'description' => 'Resolve itens com dados ja registrados.', 'done' => $checklistReady, 'href' => '#assistente-prestacao'],
+                ['label' => 'Conciliar saldo', 'description' => 'Fecha recebido, pago e devolvido.', 'done' => $financialReady, 'href' => '#reconciliation'],
+                ['label' => 'Resolver pendencias', 'description' => 'Checklist, evidencias e diligencias.', 'done' => $ready, 'href' => '#requirements'],
+                ['label' => 'Gerar dossie', 'description' => 'Baixa PDF e pacote de anexos.', 'done' => $ready, 'href' => '#dossie-prestacao'],
+            ],
             'steps' => [
                 ['label' => 'Processo aberto', 'description' => 'Checklist municipal criado.', 'done' => $hasProcess],
                 ['label' => 'Execucao concluida', 'description' => 'Etapas fisicas em 100%.', 'done' => $physicalPercentage >= 100],

@@ -70,6 +70,32 @@
             @endif
         </div>
 
+        <div class="accountability-readiness tone-{{ $accountabilityGuide['closing']['tone'] }}">
+            <div class="accountability-readiness-score">
+                <strong>{{ $accountabilityGuide['closing']['score'] }}%</strong>
+                <span>pronto</span>
+            </div>
+            <div class="accountability-readiness-copy">
+                <strong>{{ $accountabilityGuide['closing']['label'] }}</strong>
+                <p>{{ $accountabilityGuide['closing']['description'] }}</p>
+            </div>
+            <div class="accountability-readiness-facts">
+                @foreach ($accountabilityGuide['closing']['facts'] as $fact)
+                    <div><span>{{ $fact['label'] }}</span><strong>{{ $fact['value'] }}</strong></div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="accountability-flow-lane" aria-label="Fluxo de fechamento da prestacao de contas">
+            @foreach ($accountabilityGuide['flow'] as $flowStep)
+                <a class="{{ $flowStep['done'] ? 'is-done' : '' }}" href="{{ $flowStep['href'] }}">
+                    <span><i data-lucide="{{ $flowStep['done'] ? 'check' : 'arrow-right' }}" aria-hidden="true"></i></span>
+                    <strong>{{ $flowStep['label'] }}</strong>
+                    <small>{{ $flowStep['description'] }}</small>
+                </a>
+            @endforeach
+        </div>
+
         <div class="accountability-guide-steps">
             @foreach ($accountabilityGuide['steps'] as $step)
                 <div class="{{ $step['done'] ? 'is-done' : '' }}">
@@ -289,7 +315,7 @@
             </div>
         </section>
 
-        <section class="content-panel dossier-actions">
+        <section class="content-panel dossier-actions" id="dossie-prestacao">
             <div><span class="dossier-icon"><i data-lucide="package-check" aria-hidden="true"></i></span><div><h2 class="h5 mb-1">Dossiê de auditoria</h2><p class="text-secondary mb-0">{{ $amendment->documents->count() }} documento(s), {{ $amendment->executionStages->count() }} etapa(s) e {{ $amendment->financialCommitments->count() }} empenho(s).</p></div></div>
             <div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-down" aria-hidden="true"></i>PDF</a><a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package" aria-hidden="true"></i>PDF + documentos</a></div>
         </section>
