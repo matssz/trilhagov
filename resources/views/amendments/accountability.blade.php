@@ -183,6 +183,42 @@
             @endif
         </section>
 
+        <section class="content-panel mb-4 accountability-submit-panel {{ $readiness['ready'] ? 'is-ready' : 'has-blockers' }}" id="envio-prestacao">
+            <div class="accountability-submit-copy">
+                <span><i data-lucide="{{ $readiness['ready'] ? 'send' : 'lock-keyhole' }}" aria-hidden="true"></i></span>
+                <div>
+                    <p class="page-kicker mb-1">Envio ao controle</p>
+                    <h2 class="h5 mb-1">{{ $readiness['ready'] ? 'Prestacao pronta para protocolo' : 'Envio bloqueado por pendencias' }}</h2>
+                    <p>{{ $readiness['ready'] ? 'Informe o protocolo recebido e o TrilhaGov marca a prestacao como enviada, mantendo o dossie disponivel para auditoria.' : 'Finalize checklist, conciliacao, evidencias e diligencias antes de registrar o protocolo.' }}</p>
+                </div>
+            </div>
+            @if ($canEdit && $readiness['ready'])
+                <form class="accountability-submit-form" method="POST" action="{{ route('emendas.accountability.submit', $amendment) }}">
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $processSubmitToken }}">
+                    <div>
+                        <label class="form-label" for="quick_submitted_at">Data de envio <span class="required-mark">*</span></label>
+                        <input class="form-control @error('submitted_at') is-invalid @enderror" id="quick_submitted_at" name="submitted_at" type="date" value="{{ old('submitted_at', today()->toDateString()) }}" required>
+                        @error('submitted_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label" for="quick_protocol_number">Protocolo <span class="required-mark">*</span></label>
+                        <input class="form-control @error('protocol_number') is-invalid @enderror" id="quick_protocol_number" name="protocol_number" value="{{ old('protocol_number', $process->protocol_number) }}" maxlength="100" required>
+                        @error('protocol_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="span-2">
+                        <label class="form-label" for="quick_submission_notes">Observacao do envio</label>
+                        <input class="form-control" id="quick_submission_notes" name="submission_notes" value="{{ old('submission_notes', $process->submission_notes) }}" maxlength="3000">
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Registrar envio</button>
+                </form>
+            @elseif (! $canEdit)
+                <span class="btn btn-outline-secondary disabled" aria-disabled="true">Somente consulta</span>
+            @else
+                <a class="btn btn-outline-primary" href="#requirements"><i data-lucide="list-checks" aria-hidden="true"></i>Ver pendencias</a>
+            @endif
+        </section>
+
         <section class="content-panel mb-4" id="process">
             <div class="content-panel-header d-flex align-items-center gap-2"><i data-lucide="clipboard-list" aria-hidden="true"></i><h2 class="h5 mb-0">Processo e protocolo</h2></div>
             @if ($canEdit)

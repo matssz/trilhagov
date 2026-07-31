@@ -145,6 +145,7 @@ class AccountabilityTest extends TestCase
             ->assertDontSee('Iniciar processo');
         $this->post(route('emendas.accountability.store', $amendment), [])->assertForbidden();
         $this->post(route('emendas.accountability.prepare', $amendment), [])->assertForbidden();
+        $this->post(route('emendas.accountability.submit', $amendment), [])->assertForbidden();
     }
 
     public function test_checklist_can_link_own_document_and_requires_reason_for_not_applicable(): void
@@ -239,6 +240,41 @@ class AccountabilityTest extends TestCase
 
         $this->assertSame(ParliamentaryAmendment::STATUS_COMPLETED, $amendment->fresh()->status);
         $this->assertSame('2026-07-20', $amendment->fresh()->accountability_completed_at->toDateString());
+    }
+
+    public function test_ready_process_can_be_submitted_with_guided_protocol(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $this->completeExecution($municipality, $amendment, $manager, 100000);
+        $process = $this->process($municipality, $amendment, $manager);
+        app(AccountabilityService::class)->seedRequirements($process, $manager);
+        app(AccountabilityService::class)->quickCheck($process, $amendment->load('executionStages', 'financialCommitments.payments', 'documents.documentType'), $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Prestacao pronta para protocolo')
+            ->assertSee('Registrar envio');
+
+        $token = $this->sessionFor($municipality, "accountability-submit-{$process->id}");
+        $this->post(route('emendas.accountability.submit', $amendment), [
+            '_submission_token' => $token,
+            'submitted_at' => '2026-07-22',
+            'protocol_number' => 'PC-2026-445',
+            'submission_notes' => 'Enviado pelo fluxo simplificado.',
+        ])->assertSessionHas('status');
+
+        $this->assertSame(AccountabilityProcess::STATUS_SUBMITTED, $process->fresh()->status);
+        $this->assertSame('2026-07-22', $process->fresh()->submitted_at->toDateString());
+        $this->assertSame('PC-2026-445', $process->fresh()->protocol_number);
+        $this->assertSame(ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING, $amendment->fresh()->status);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_submitted']);
     }
 
     public function test_diligence_deadline_alert_reaches_assigned_person_and_response_is_audited(): void

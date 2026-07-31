@@ -71,6 +71,9 @@ class AccountabilityController extends Controller
             'processUpdateToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-update-{$process->id}")
                 : null,
+            'processSubmitToken' => $canEdit && $process !== null
+                ? $formSubmission->issue($request, "accountability-submit-{$process->id}")
+                : null,
             'requirementCreateToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-requirement-create-{$process->id}")
                 : null,
@@ -230,6 +233,60 @@ class AccountabilityController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', 'Pre-conferencia concluida: '.$stats['updated'].' item(ns) atualizado(s), '.$stats['completed'].' concluido(s) e '.$stats['notApplicable'].' nao aplicavel(is).');
+    }
+
+    public function submit(
+        Request $request,
+        int $emenda,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        AccountabilityService $accountabilityService,
+        AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $amendment = $municipality->amendments()
+            ->with(['executionStages', 'financialCommitments.payments', 'documents', 'accountabilityProcess.requirements', 'accountabilityProcess.diligences'])
+            ->findOrFail($emenda);
+        $process = $amendment->accountabilityProcess ?? abort(404);
+        $validated = $request->validate([
+            '_submission_token' => ['required', 'string'],
+            'submitted_at' => ['required', 'date'],
+            'protocol_number' => ['required', 'string', 'max:100'],
+            'submission_notes' => ['nullable', 'string', 'max:3000'],
+        ], [
+            'submitted_at.required' => 'Informe a data de envio da prestacao.',
+            'protocol_number.required' => 'Informe o numero do protocolo de envio.',
+        ]);
+
+        if (! $formSubmission->consume($request, "accountability-submit-{$process->id}")) {
+            return back()->with('warning', 'Este envio da prestacao ja foi processado.');
+        }
+
+        DB::transaction(function () use ($request, $validated, $amendment, $process, $accountabilityService, $auditTrail): void {
+            $accountabilityService->ensureReadyForSubmission($amendment, $process);
+            $oldValues = $process->only(['status', 'submitted_at', 'protocol_number', 'submission_notes']);
+
+            $process->update([
+                'status' => AccountabilityProcess::STATUS_SUBMITTED,
+                'submitted_at' => $validated['submitted_at'],
+                'protocol_number' => trim($validated['protocol_number']),
+                'submission_notes' => $validated['submission_notes'] ?? $process->submission_notes,
+            ]);
+            $amendment->update(['status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING]);
+
+            $auditTrail->recordOperation(
+                $request,
+                $amendment,
+                'accountability_submitted',
+                $process->only(array_keys($oldValues)),
+                $oldValues,
+            );
+        });
+
+        $integrityAlertService->sync($municipality->fresh());
+
+        return back()->with('status', 'Prestacao enviada e protocolo registrado. O dossie final ja pode ser baixado.');
     }
 
     public function update(

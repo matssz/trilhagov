@@ -5804,6 +5804,71 @@ h6 {
     background: var(--success);
 }
 
+.accountability-submit-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1.2rem;
+    overflow: hidden;
+}
+
+.accountability-submit-panel.is-ready {
+    border-color: rgba(16, 185, 129, .32);
+    background: linear-gradient(135deg, rgba(236, 253, 245, .76), #fff);
+}
+
+.accountability-submit-panel.has-blockers {
+    border-color: rgba(214, 159, 37, .34);
+    background: linear-gradient(135deg, rgba(255, 251, 235, .72), #fff);
+}
+
+.accountability-submit-copy {
+    display: flex;
+    gap: .9rem;
+    align-items: flex-start;
+}
+
+.accountability-submit-copy > span {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(9, 58, 103, .08);
+    color: var(--navy-800);
+}
+
+.accountability-submit-copy svg {
+    width: 22px;
+    height: 22px;
+}
+
+.accountability-submit-copy p:last-child {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.accountability-submit-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 1fr)) auto;
+    gap: .75rem;
+    align-items: end;
+    min-width: min(540px, 100%);
+    margin: 0;
+}
+
+.accountability-submit-form .span-2 {
+    grid-column: span 2;
+}
+
+.accountability-submit-form .btn {
+    min-height: 42px;
+    white-space: nowrap;
+}
+
 .readiness-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6216,6 +6281,20 @@ h6 {
         grid-template-columns: 1fr;
     }
 
+    .accountability-submit-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-submit-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        min-width: 0;
+    }
+
+    .accountability-submit-form .btn {
+        grid-column: 1 / -1;
+        justify-content: center;
+    }
+
     .reconciliation-grid > div {
         border-right: 0;
         border-bottom: 1px solid var(--line);
@@ -6242,12 +6321,14 @@ h6 {
 
 @media (max-width: 575.98px) {
     .accountability-process-grid,
+    .accountability-submit-form,
     .requirement-create-grid,
     .diligence-create-grid {
         grid-template-columns: 1fr;
     }
 
     .accountability-process-grid .span-2,
+    .accountability-submit-form .span-2,
     .requirement-create-grid .span-2,
     .diligence-create-grid .span-2,
     .diligence-create-grid .span-3 {
