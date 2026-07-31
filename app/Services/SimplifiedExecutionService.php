@@ -21,11 +21,14 @@ class SimplifiedExecutionService
         $hasCommitments = $activeCommitments->isNotEmpty();
         $hasEvidence = $documents->isNotEmpty();
         $financialPercentage = $receivedAmount > 0 ? (int) round(($paidAmount / $receivedAmount) * 100) : 0;
-        $readyForAccountability = $hasStages && $physicalPercentage >= 100 && $receivedAmount > 0 && $paidAmount >= $receivedAmount && $hasEvidence;
+        $hasFinancialClosure = $receivedAmount > 0 && $paidAmount > 0 && abs($paidAmount - $receivedAmount) <= 0.01;
+        $readyForAccountability = $hasStages && $physicalPercentage >= 100 && $hasFinancialClosure && $hasEvidence;
         $doneCount = collect([$hasStages, $hasCommitments, $paidAmount > 0, $hasEvidence, $readyForAccountability])
             ->filter()
             ->count();
         $readinessPercentage = (int) round($doneCount / 5 * 100);
+        $releaseChecks = $this->releaseChecks($amendment, $receivedAmount, $committedAmount, $paidAmount, $physicalPercentage, $hasStages, $hasEvidence, $hasFinancialClosure);
+        $releaseBlockers = collect($releaseChecks)->where('done', false)->pluck('description')->values();
 
         $next = [
             'icon' => 'route',
@@ -100,6 +103,17 @@ class SimplifiedExecutionService
                 'committed_amount' => $committedAmount,
                 'received_amount' => $receivedAmount,
             ],
+            'release' => [
+                'ready' => $readyForAccountability,
+                'label' => $readyForAccountability ? 'Liberada para prestacao de contas' : 'Ainda nao liberada para prestacao',
+                'description' => $readyForAccountability
+                    ? 'A emenda tem entrega fisica, financeiro conciliado e evidencia minima para abrir o fechamento formal.'
+                    : 'Resolva os pontos abaixo antes de iniciar ou enviar a prestacao de contas.',
+                'checks' => $releaseChecks,
+                'blockers' => $releaseBlockers,
+                'next_href' => $readyForAccountability ? route('emendas.accountability', $amendment) : ($releaseChecks->firstWhere('done', false)['href'] ?? '#stages'),
+                'next_label' => $readyForAccountability ? 'Abrir prestacao' : 'Resolver proxima pendencia',
+            ],
             'flow' => [
                 ['label' => 'Abrir etapas', 'icon' => 'clipboard-list', 'done' => $hasStages, 'href' => '#stages'],
                 ['label' => 'Empenhar', 'icon' => 'briefcase-business', 'done' => $hasCommitments, 'href' => '#commitments'],
@@ -108,6 +122,59 @@ class SimplifiedExecutionService
                 ['label' => 'Prestar contas', 'icon' => 'archive', 'done' => $readyForAccountability, 'href' => route('emendas.accountability', $amendment)],
             ],
         ];
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array{label: string, description: string, done: bool, href: string}>
+     */
+    private function releaseChecks(
+        ParliamentaryAmendment $amendment,
+        float $receivedAmount,
+        float $committedAmount,
+        float $paidAmount,
+        int $physicalPercentage,
+        bool $hasStages,
+        bool $hasEvidence,
+        bool $hasFinancialClosure,
+    ): Collection {
+        return collect([
+            [
+                'label' => 'Etapa fisica aberta',
+                'description' => 'Inicie a execucao com ao menos uma etapa verificavel.',
+                'done' => $hasStages,
+                'href' => '#stages',
+            ],
+            [
+                'label' => 'Entrega concluida',
+                'description' => 'Atualize a etapa para 100% quando o objeto estiver entregue.',
+                'done' => $physicalPercentage >= 100,
+                'href' => '#stages',
+            ],
+            [
+                'label' => 'Recurso recebido informado',
+                'description' => 'Informe o valor recebido na emenda para permitir conciliacao.',
+                'done' => $receivedAmount > 0,
+                'href' => route('emendas.edit', $amendment),
+            ],
+            [
+                'label' => 'Empenho registrado',
+                'description' => 'Registre ao menos um empenho vinculado a execucao.',
+                'done' => $committedAmount > 0,
+                'href' => '#commitments',
+            ],
+            [
+                'label' => 'Financeiro conciliado',
+                'description' => 'Pagamentos devem corresponder ao valor recebido antes da prestacao.',
+                'done' => $hasFinancialClosure,
+                'href' => '#commitments',
+            ],
+            [
+                'label' => 'Evidencia anexada',
+                'description' => 'Anexe medicao, foto, termo de recebimento ou relatorio ligado a etapa.',
+                'done' => $hasEvidence,
+                'href' => '#evidence',
+            ],
+        ]);
     }
 
     public function createStagesFromPlan(ParliamentaryAmendment $amendment, int $userId): int

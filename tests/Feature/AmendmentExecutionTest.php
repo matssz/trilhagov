@@ -256,6 +256,95 @@ class AmendmentExecutionTest extends TestCase
             ->assertSee('Evidencias');
     }
 
+    public function test_execution_release_panel_guides_before_accountability(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $this->stage($municipality, $amendment, $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.execution', $amendment))
+            ->assertOk()
+            ->assertSee('Ainda nao liberada para prestacao')
+            ->assertSee('Resolver proxima pendencia')
+            ->assertSee('Entrega concluida')
+            ->assertSee('Financeiro conciliado')
+            ->assertSee('Evidencia anexada');
+    }
+
+    public function test_completed_execution_is_released_to_accountability(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $stage = $this->stage($municipality, $amendment, $manager);
+        $stage->update([
+            'status' => ExecutionStage::STATUS_COMPLETED,
+            'progress_percentage' => 100,
+            'completed_at' => today(),
+        ]);
+        $commitment = $amendment->financialCommitments()->create([
+            'municipality_id' => $municipality->id,
+            'execution_stage_id' => $stage->id,
+            'created_by' => $manager->id,
+            'commitment_number' => 'NE-2026-900',
+            'supplier_name' => 'Fornecedor Municipal',
+            'object_description' => 'Execucao integral do objeto.',
+            'procurement_process' => 'PROC-2026-900',
+            'committed_amount' => 100000,
+            'committed_at' => today(),
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ]);
+        $liquidation = $commitment->liquidations()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'liquidation_reference' => 'LIQ-2026-900',
+            'amount' => 100000,
+            'liquidated_at' => today(),
+            'supporting_document' => 'NF-900',
+            'acceptance_reference' => 'TR-900',
+        ]);
+        $commitment->payments()->create([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'financial_liquidation_id' => $liquidation->id,
+            'created_by' => $manager->id,
+            'payment_reference' => 'OB-2026-900',
+            'amount' => 100000,
+            'paid_at' => today(),
+        ]);
+        $type = $municipality->documentTypes()->create(['name' => 'Termo de recebimento', 'is_active' => true]);
+        $amendment->documents()->create([
+            'municipality_id' => $municipality->id,
+            'document_type_id' => $type->id,
+            'execution_stage_id' => $stage->id,
+            'uploaded_by' => $manager->id,
+            'uploader_name' => $manager->name,
+            'original_name' => 'termo.pdf',
+            'storage_path' => 'tests/'.Str::uuid().'.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 1024,
+            'version' => 1,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.execution', $amendment))
+            ->assertOk()
+            ->assertSee('Liberada para prestacao de contas')
+            ->assertSee('A emenda tem entrega fisica')
+            ->assertSee('Abrir prestacao')
+            ->assertSee('Pronta para prestacao');
+    }
+
     public function test_execution_records_are_scoped_to_active_municipality_and_roles(): void
     {
         [$viewer, $municipality] = $this->memberWithMunicipality(User::ROLE_VIEWER);

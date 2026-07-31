@@ -131,6 +131,30 @@
                 </div>
             </div>
         </div>
+
+        <div class="execution-release-panel {{ $executionGuide['release']['ready'] ? 'is-ready' : 'has-blockers' }}" aria-label="Liberacao para prestacao de contas">
+            <div class="execution-release-heading">
+                <span><i data-lucide="{{ $executionGuide['release']['ready'] ? 'badge-check' : 'shield-alert' }}" aria-hidden="true"></i></span>
+                <div>
+                    <strong>{{ $executionGuide['release']['label'] }}</strong>
+                    <p>{{ $executionGuide['release']['description'] }}</p>
+                </div>
+                <a class="btn btn-outline-primary" href="{{ $executionGuide['release']['next_href'] }}">
+                    <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $executionGuide['release']['next_label'] }}
+                </a>
+            </div>
+            <div class="execution-release-checks">
+                @foreach($executionGuide['release']['checks'] as $check)
+                    <a class="{{ $check['done'] ? 'is-done' : '' }}" href="{{ $check['href'] }}">
+                        <i data-lucide="{{ $check['done'] ? 'circle-check' : 'circle-alert' }}" aria-hidden="true"></i>
+                        <span>
+                            <strong>{{ $check['label'] }}</strong>
+                            <small>{{ $check['description'] }}</small>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
     </section>
 
     @if ($availableBalance < 0 || $uncommittedBalance < 0)
