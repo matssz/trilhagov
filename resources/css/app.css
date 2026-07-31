@@ -17,6 +17,7 @@
 @import './municipal-contracts.css';
 @import './legislative.css';
 @import './municipal-onboarding.css';
+@import './municipal-institutions.css';
 
 :root {
     --navy-950: #071f3d;

@@ -1,0 +1,188 @@
+.institutions-heading {
+    align-items: flex-end;
+}
+
+.institution-create-panel {
+    margin-bottom: .85rem;
+}
+
+.institution-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+    padding: 1rem;
+}
+
+.institution-form-grid.compact {
+    padding: .85rem;
+    background: #f8fbfd;
+    border-top: 1px solid var(--line);
+}
+
+.institution-form-grid .span-2 {
+    grid-column: span 2;
+}
+
+.institution-form-grid .span-4 {
+    grid-column: span 4;
+}
+
+.institution-form-grid .form-label {
+    color: #536174;
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.institution-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.institution-list {
+    display: grid;
+}
+
+.institution-row {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.5fr) minmax(210px, .8fr) auto auto;
+    gap: .9rem;
+    align-items: center;
+    padding: .95rem 1rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.institution-row:last-child {
+    border-bottom: 0;
+}
+
+.institution-row.is-inactive {
+    background: #f8f9fb;
+}
+
+.institution-main {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .85rem;
+}
+
+.institution-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--navy-100);
+    color: var(--navy-800);
+}
+
+.institution-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.institution-main strong,
+.institution-main small,
+.institution-contact strong,
+.institution-contact span {
+    display: block;
+}
+
+.institution-main strong {
+    overflow-wrap: anywhere;
+    color: var(--navy-950);
+    line-height: 1.25;
+}
+
+.institution-main small,
+.institution-contact small,
+.institution-contact span {
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.institution-contact {
+    min-width: 0;
+}
+
+.institution-contact strong {
+    overflow: hidden;
+    color: var(--navy-900);
+    font-size: .82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.institution-editor {
+    position: relative;
+}
+
+.institution-editor > summary {
+    list-style: none;
+}
+
+.institution-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+.institution-editor[open] {
+    grid-column: 1 / -1;
+}
+
+.institution-editor[open] > summary {
+    margin-left: auto;
+}
+
+@media (max-width: 1199.98px) {
+    .institution-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .institution-form-grid .span-4 {
+        grid-column: span 2;
+    }
+
+    .institution-row {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    .institution-contact {
+        grid-column: 1 / -1;
+        padding-left: 57px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .institutions-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .institution-form-grid,
+    .institution-form-grid.compact {
+        grid-template-columns: 1fr;
+    }
+
+    .institution-form-grid .span-2,
+    .institution-form-grid .span-4 {
+        grid-column: auto;
+    }
+
+    .institution-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .institution-contact {
+        padding-left: 0;
+    }
+
+    .institution-row > .status-pill {
+        justify-self: start;
+    }
+
+    .institution-editor {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}

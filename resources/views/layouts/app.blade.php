@@ -68,6 +68,10 @@
                             <i data-lucide="file-text" aria-hidden="true"></i>
                             <span>Emendas</span>
                         </a>
+                        <a class="sidebar-link {{ request()->routeIs('municipal-institutions.*') ? 'active' : '' }}" href="{{ route('municipal-institutions.index') }}">
+                            <i data-lucide="building-2" aria-hidden="true"></i>
+                            <span>Cadastros municipais</span>
+                        </a>
                         <a class="sidebar-link {{ request()->routeIs('official-documents.*') || request()->routeIs('official-document-templates.*') ? 'active' : '' }}" href="{{ route('official-documents.index') }}">
                             <i data-lucide="send" aria-hidden="true"></i>
                             <span>Comunicações</span>

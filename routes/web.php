@@ -28,6 +28,7 @@ use App\Http\Controllers\MunicipalAuditPlanController;
 use App\Http\Controllers\MunicipalAuditProgramController;
 use App\Http\Controllers\MunicipalContractController;
 use App\Http\Controllers\MunicipalGovernanceReportController;
+use App\Http\Controllers\MunicipalInstitutionController;
 use App\Http\Controllers\MunicipalInternalControlController;
 use App\Http\Controllers\MunicipalitySelectionController;
 use App\Http\Controllers\MunicipalOfficialDocumentController;
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/integracoes', [ExternalIntegrationController::class, 'index'])->name('integrations.index');
         Route::get('/trabalho', [WorkCenterController::class, 'index'])->name('work-center.index');
         Route::get('/emendas', [ParliamentaryAmendmentController::class, 'index'])->name('emendas.index');
+        Route::get('/cadastros-municipais', [MunicipalInstitutionController::class, 'index'])->name('municipal-institutions.index');
         Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
         Route::middleware('municipality.module:tcesp_audesp')->group(function () {
             Route::get('/audesp/homologacoes', [AudespHomologationController::class, 'index'])->name('audesp-homologations.index');
@@ -149,6 +151,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::post('/alertas/verificar', [AlertCenterController::class, 'process'])->name('alerts.process')->block(10, 10);
         Route::get('/emendas/create', [ParliamentaryAmendmentController::class, 'create'])->name('emendas.create');
         Route::post('/emendas', [ParliamentaryAmendmentController::class, 'store'])->name('emendas.store')->block(10, 10);
+        Route::post('/cadastros-municipais', [MunicipalInstitutionController::class, 'store'])->name('municipal-institutions.store')->block(10, 10);
+        Route::patch('/cadastros-municipais/{institution}', [MunicipalInstitutionController::class, 'update'])->name('municipal-institutions.update')->block(10, 10);
     });
 
     Route::middleware('municipality.role:manager,editor,viewer,auditor')->group(function () {

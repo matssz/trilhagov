@@ -348,6 +348,11 @@ class Municipality extends Model
         return $this->hasMany(MunicipalContract::class);
     }
 
+    public function institutions(): HasMany
+    {
+        return $this->hasMany(MunicipalInstitution::class);
+    }
+
     public function contractMeasurements(): HasMany
     {
         return $this->hasMany(ContractMeasurement::class);
