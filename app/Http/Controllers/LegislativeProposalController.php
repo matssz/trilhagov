@@ -333,6 +333,8 @@ class LegislativeProposalController extends Controller
                 'items' => $items,
                 'count' => $allItems->count(),
                 'amount' => (float) $proposals->whereIn('status', $column['statuses'])->sum('estimated_amount'),
+                'health_count' => $allItems->where('health_related', true)->count(),
+                'health_amount' => (float) $allItems->where('health_related', true)->sum('estimated_amount'),
                 'oldest' => $oldest,
                 'hidden_count' => max(0, $allItems->count() - $items->count()),
                 'stale_count' => $allItems->filter(fn (LegislativeProposal $proposal): bool => $this->proposalAgeDays($proposal) >= (int) $column['sla_days'])->count(),
@@ -350,6 +352,7 @@ class LegislativeProposalController extends Controller
         $total = (int) $actionable->sum('count');
         $amount = (float) $actionable->sum('amount');
         $focus = $actionable->first(fn (array $column): bool => (int) $column['count'] > 0);
+        $execution = collect($board)->firstWhere('key', 'execution') ?? ['count' => 0, 'amount' => 0, 'health_amount' => 0];
         $staleItems = $actionable
             ->flatMap(fn (array $column) => $column['items']->map(fn (LegislativeProposal $proposal): array => [
                 'proposal' => $proposal,
@@ -388,7 +391,10 @@ class LegislativeProposalController extends Controller
             'amount' => $amount,
             'focus' => $focus,
             'ready' => $total === 0,
-            'done' => (int) collect($board)->firstWhere('key', 'execution')['count'],
+            'done' => (int) $execution['count'],
+            'execution_amount' => (float) $execution['amount'],
+            'health_amount' => (float) collect($board)->sum('health_amount'),
+            'health_decision_amount' => (float) $actionable->sum('health_amount'),
             'stale' => $staleItems,
             'stale_count' => (int) $actionable->sum('stale_count'),
             'quick_actions' => $quickActions,
@@ -399,6 +405,38 @@ class LegislativeProposalController extends Controller
             'focus_kicker' => $total === 0 ? 'Sem gargalo operacional' : 'Foco recomendado agora',
             'focus_title' => $total === 0 ? 'Nenhuma proposta aguardando acao do Executivo' : ($focus['title'] ?? 'Revisar fila'),
             'focus_text' => $total === 0 ? 'As propostas ativas estao sem pendencia imediata de decisao, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.'),
+            'command_cards' => [
+                [
+                    'icon' => 'inbox',
+                    'label' => 'Receber',
+                    'value' => (int) collect($board)->firstWhere('key', 'receive')['count'],
+                    'description' => 'Protocolos da Camara que ainda precisam virar processo municipal.',
+                ],
+                [
+                    'icon' => 'wallet-cards',
+                    'label' => 'Reservar',
+                    'value' => (int) collect($board)->firstWhere('key', 'budget')['count'],
+                    'description' => 'Propostas recebidas aguardando confirmacao orcamentaria.',
+                ],
+                [
+                    'icon' => 'heart-pulse',
+                    'label' => 'Saude',
+                    'value' => 'R$ '.number_format((float) $actionable->sum('health_amount'), 2, ',', '.'),
+                    'description' => 'Valor marcado como saude ainda sob decisao do Executivo.',
+                ],
+                [
+                    'icon' => 'gauge',
+                    'label' => 'Execucao',
+                    'value' => (int) $execution['count'],
+                    'description' => 'Emendas ja reservadas que devem seguir para plano e entrega.',
+                ],
+            ],
+            'flow_steps' => [
+                ['label' => 'Camara envia', 'description' => 'Proposta aprovada chega protocolada.'],
+                ['label' => 'Executivo recebe', 'description' => 'Sistema sugere processo e secretaria.'],
+                ['label' => 'Reserva orcamentaria', 'description' => 'Valor integral e dotacao ficam registrados.'],
+                ['label' => 'Plano e execucao', 'description' => 'Central cria pendencias para entregar e prestar contas.'],
+            ],
         ];
     }
 

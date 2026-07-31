@@ -208,6 +208,41 @@
                     <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
                 </div>
             </div>
+            <div class="executive-command-panel" aria-label="Painel de comando do Executivo">
+                <div class="executive-command-summary">
+                    <div>
+                        <p class="panel-kicker">Comando municipal</p>
+                        <h3>O que o gestor precisa decidir agora</h3>
+                        <p>Receba propostas da Camara, confirme reserva e libere plano, execucao e prestacao de contas sem sair desta mesa.</p>
+                    </div>
+                    @if ($executiveDesk['focus_url'] ?? null)
+                        <a class="btn btn-outline-primary" href="{{ $executiveDesk['focus_url'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Executar foco</a>
+                    @endif
+                </div>
+                <div class="executive-command-cards">
+                    @foreach($executiveDesk['command_cards'] as $card)
+                        <article>
+                            <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                            <div>
+                                <small>{{ $card['label'] }}</small>
+                                <strong>{{ $card['value'] }}</strong>
+                                <p>{{ $card['description'] }}</p>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+                <ol class="executive-flow-lane">
+                    @foreach($executiveDesk['flow_steps'] as $index => $step)
+                        <li>
+                            <span>{{ $index + 1 }}</span>
+                            <div>
+                                <strong>{{ $step['label'] }}</strong>
+                                <small>{{ $step['description'] }}</small>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
             @if (($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
                 <div class="executive-action-queue" aria-label="Fila rapida do Executivo">
                     <header>
