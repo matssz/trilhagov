@@ -161,6 +161,18 @@
         </div>
     </section>
 
+    @if($isCouncilor)
+        <section class="legislative-councilor-money-status">
+            <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
+            <div>
+                <small>Entenda o valor desta proposta</small>
+                <strong>R$ {{ number_format((float) $proposal->estimated_amount, 2, ',', '.') }} estao comprometidos nesta indicacao</strong>
+                <p>Esse valor saiu do saldo disponivel para impedir que sua carteira ultrapasse a cota. Ele ainda nao foi pago, transferido ou executado. A Prefeitura so usa esse recurso depois da analise, protocolo, recebimento e reserva orcamentaria.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="#acompanhamento-executivo"><i data-lucide="route" aria-hidden="true"></i>Ver caminho</a>
+        </section>
+    @endif
+
     @if($currentStepDelayed)
         <section class="legislative-stale-alert">
             <span><i data-lucide="timer-reset" aria-hidden="true"></i></span>

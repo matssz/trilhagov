@@ -86,6 +86,21 @@
                         </div>
                     </article>
                 </div>
+                <div class="councilor-money-guide" aria-label="Como a cota e consumida">
+                    <div>
+                        <span><i data-lucide="info" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>O valor nao some da cota</strong>
+                            <p>Quando voce salva uma proposta, o valor fica comprometido nela. Ele ainda nao foi pago nem transferido: so vira execucao depois da conferencia da Camara, recebimento do Executivo e reserva orcamentaria.</p>
+                        </div>
+                    </div>
+                    <ol>
+                        <li><span>1</span><strong>Indicado</strong><small>Abate do saldo para evitar ultrapassar a cota.</small></li>
+                        <li><span>2</span><strong>Conferido</strong><small>Camara valida valor, objeto e saude.</small></li>
+                        <li><span>3</span><strong>Reservado</strong><small>Executivo confirma dotacao para executar.</small></li>
+                        <li><span>4</span><strong>Executado</strong><small>Prefeitura empenha, paga e entrega.</small></li>
+                    </ol>
+                </div>
                 <div class="councilor-home-steps">
                     <span><i data-lucide="edit-3" aria-hidden="true"></i>Vereador indica</span>
                     <span><i data-lucide="badge-check" aria-hidden="true"></i>Camara confere</span>

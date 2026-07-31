@@ -229,6 +229,101 @@
     line-height: 1.35;
 }
 
+.councilor-money-guide {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, .92fr) minmax(420px, 1.08fr);
+    gap: 12px;
+    align-items: stretch;
+    padding: 13px;
+    border: 1px solid #bfd4e5;
+    border-left: 4px solid var(--navy-850);
+    border-radius: 7px;
+    background: linear-gradient(120deg, #f8fbfe 0%, #fff 70%, #f5f9fc 100%);
+}
+
+.councilor-money-guide > div {
+    display: flex;
+    gap: 11px;
+    min-width: 0;
+}
+
+.councilor-money-guide > div > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: #e8f1f8;
+    color: var(--navy-850);
+}
+
+.councilor-money-guide svg {
+    width: 18px;
+    height: 18px;
+}
+
+.councilor-money-guide strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: .9rem;
+    font-weight: 900;
+}
+
+.councilor-money-guide p {
+    margin: 4px 0 0;
+    color: #52677c;
+    font-size: .75rem;
+    line-height: 1.45;
+}
+
+.councilor-money-guide ol {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.councilor-money-guide li {
+    min-width: 0;
+    padding: 9px;
+    border: 1px solid #d5e1eb;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.councilor-money-guide li > span {
+    display: inline-grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--navy-900);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 900;
+}
+
+.councilor-money-guide li strong,
+.councilor-money-guide li small {
+    display: block;
+}
+
+.councilor-money-guide li strong {
+    margin-top: 7px;
+    font-size: .76rem;
+}
+
+.councilor-money-guide li small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: .67rem;
+    line-height: 1.3;
+}
+
 .councilor-home-steps {
     display: grid;
     grid-column: 1 / -1;
@@ -1888,6 +1983,62 @@
     overflow-wrap: anywhere;
 }
 
+.legislative-councilor-money-status {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 15px 17px;
+    border: 1px solid #bdd2e4;
+    border-left: 4px solid var(--navy-900);
+    border-radius: 7px;
+    background: linear-gradient(120deg, #fbfdff 0%, #f1f7fb 100%);
+    box-shadow: var(--shadow-soft);
+}
+
+.legislative-councilor-money-status > span {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.legislative-councilor-money-status svg {
+    width: 20px;
+    height: 20px;
+}
+
+.legislative-councilor-money-status small {
+    display: block;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.legislative-councilor-money-status strong {
+    display: block;
+    margin: 2px 0 3px;
+    color: var(--navy-950);
+    font-size: .95rem;
+    font-weight: 900;
+}
+
+.legislative-councilor-money-status p {
+    margin: 0;
+    color: #53677c;
+    font-size: .78rem;
+    line-height: 1.45;
+}
+
+.legislative-councilor-money-status .btn {
+    white-space: nowrap;
+}
+
 .legislative-process-map {
     margin-bottom: 20px;
     overflow: hidden;
@@ -2753,6 +2904,14 @@
         grid-template-columns: 1fr;
     }
 
+    .councilor-money-guide {
+        grid-template-columns: 1fr;
+    }
+
+    .councilor-money-guide ol {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .councilor-home-progress > div:nth-child(2n) {
         border-right: 0;
     }
@@ -2912,6 +3071,16 @@
         grid-template-columns: 40px minmax(0, 1fr);
     }
 
+    .legislative-councilor-money-status {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .legislative-councilor-money-status .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        white-space: normal;
+    }
+
     .legislative-stale-alert .btn {
         grid-column: 1 / -1;
         width: 100%;
@@ -3009,6 +3178,10 @@
 
     .councilor-home-steps {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .councilor-money-guide ol {
+        grid-template-columns: 1fr;
     }
 
     .legislative-row {
