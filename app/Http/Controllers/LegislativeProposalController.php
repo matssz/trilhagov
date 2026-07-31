@@ -33,12 +33,21 @@ class LegislativeProposalController extends Controller
         $year = ctype_digit((string) $request->query('year')) ? (int) $request->query('year') : $service->defaultYear($municipality);
         $status = (string) $request->query('status');
         $search = trim((string) $request->query('search'));
+        $author = trim((string) $request->query('author'));
+        $department = trim((string) $request->query('department'));
+        $health = (string) $request->query('health');
         $membership = $request->user()->municipalities()->whereKey($municipality->id)->firstOrFail()->pivot;
+        $filterBase = $municipality->legislativeProposals()
+            ->where('fiscal_year', $year)
+            ->when($role === User::ROLE_COUNCILOR, fn ($query) => $query->where('submitted_by', $request->user()->id));
         $query = $municipality->legislativeProposals()
             ->with(['submitter:id,name', 'amendment:id,reference,status'])
             ->where('fiscal_year', $year)
             ->when($role === User::ROLE_COUNCILOR, fn ($query) => $query->where('submitted_by', $request->user()->id))
             ->when(array_key_exists($status, LegislativeProposal::statuses()), fn ($query) => $query->where('status', $status))
+            ->when($author !== '', fn ($query) => $query->where('author_name', $author))
+            ->when($department !== '', fn ($query) => $query->where('responsible_department', $department))
+            ->when(in_array($health, ['yes', 'no'], true), fn ($query) => $query->where('health_related', $health === 'yes'))
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
                 $query->where('reference', 'like', "%{$search}%")
                     ->orWhere('author_name', 'like', "%{$search}%")
@@ -70,8 +79,15 @@ class LegislativeProposalController extends Controller
             'membership' => $membership,
             'year' => $year,
             'selectedStatus' => $status,
+            'selectedAuthor' => $author,
+            'selectedDepartment' => $department,
+            'selectedHealth' => $health,
             'search' => $search,
             'statuses' => LegislativeProposal::statuses(),
+            'filterOptions' => [
+                'authors' => (clone $filterBase)->select('author_name')->distinct()->orderBy('author_name')->pluck('author_name')->filter()->values(),
+                'departments' => (clone $filterBase)->select('responsible_department')->distinct()->orderBy('responsible_department')->pluck('responsible_department')->filter()->values(),
+            ],
             'activeYears' => $service->activeYears($municipality),
             'profile' => $profile,
             'quota' => $quota,

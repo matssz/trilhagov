@@ -356,8 +356,16 @@
     <form class="legislative-filters" method="GET">
         <label><span>Exercício</span><select class="form-select" name="year">@foreach(collect([$year, ...$activeYears])->unique()->sortDesc() as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}{{ in_array($availableYear, $activeYears, true) ? ' · ativo' : ' · sem regra ativa' }}</option>@endforeach</select></label>
         <label><span>Situação</span><select class="form-select" name="status"><option value="">Todas</option>@foreach($statuses as $value => $label)<option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>@endforeach</select></label>
+        @if($executiveBoard)
+            <label><span>Vereador</span><select class="form-select" name="author"><option value="">Todos</option>@foreach($filterOptions['authors'] as $option)<option value="{{ $option }}" @selected($selectedAuthor === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label><span>Secretaria</span><select class="form-select" name="department"><option value="">Todas</option>@foreach($filterOptions['departments'] as $option)<option value="{{ $option }}" @selected($selectedDepartment === $option)>{{ $option }}</option>@endforeach</select></label>
+            <label><span>Saude</span><select class="form-select" name="health"><option value="">Todas</option><option value="yes" @selected($selectedHealth === 'yes')>Somente saude</option><option value="no" @selected($selectedHealth === 'no')>Nao saude</option></select></label>
+        @endif
         <label class="search"><span>Busca</span><input class="form-control" name="search" value="{{ $search }}" placeholder="Referência, autor, objeto ou beneficiário"></label>
         <button class="btn btn-outline-primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i>Filtrar</button>
+        @if($executiveBoard && ($selectedStatus || $selectedAuthor || $selectedDepartment || $selectedHealth || $search))
+            <a class="btn btn-outline-secondary" href="{{ route('legislative.index', ['year' => $year]) }}"><i data-lucide="x" aria-hidden="true"></i>Limpar</a>
+        @endif
     </form>
 
     <section class="content-panel legislative-list" id="minhas-propostas">

@@ -682,6 +682,55 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('#reserva-orcamentaria');
     }
 
+    public function test_executive_queue_filters_by_author_department_and_health_scope(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $healthCouncilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereadora Saude',
+            'legislative_party' => 'PSD',
+        ]);
+        $worksCouncilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Obras',
+            'legislative_party' => 'MDB',
+        ]);
+
+        $this->proposal($municipality, $profile, $healthCouncilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'author_name' => 'Vereadora Saude',
+            'object' => 'Aquisicao de equipamentos para UBS municipal do bairro Central.',
+            'responsible_department' => 'Secretaria Municipal de Saude',
+            'health_related' => true,
+            'protocol_number' => 'CAM-2027-301',
+            'sent_at' => now(),
+        ]);
+        $this->proposal($municipality, $profile, $worksCouncilor, [
+            'status' => LegislativeProposal::STATUS_SENT,
+            'author_name' => 'Vereador Obras',
+            'object' => 'Pavimentacao de via municipal no bairro Jardim Norte.',
+            'responsible_department' => 'Secretaria Municipal de Obras',
+            'health_related' => false,
+            'protocol_number' => 'CAM-2027-302',
+            'sent_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', [
+                'year' => 2027,
+                'author' => 'Vereadora Saude',
+                'department' => 'Secretaria Municipal de Saude',
+                'health' => 'yes',
+            ]))
+            ->assertOk()
+            ->assertSee('Vereador')
+            ->assertSee('Secretaria')
+            ->assertSee('Somente saude')
+            ->assertSee('Limpar')
+            ->assertSee('Aquisicao de equipamentos para UBS municipal')
+            ->assertDontSee('Pavimentacao de via municipal');
+    }
+
     public function test_stale_legislative_proposal_shows_internal_deadline_alert(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
