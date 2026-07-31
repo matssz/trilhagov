@@ -57,10 +57,10 @@
                 <strong>{{ $accountabilityGuide['next']['title'] }}</strong>
                 <p>{{ $accountabilityGuide['next']['description'] }}</p>
             </div>
-            @if ($canEdit && $process && $accountabilityGuide['next']['href'] === '#assistente-prestacao')
-                <form method="POST" action="{{ route('emendas.accountability.quick-check', $amendment) }}">
+            @if ($canEdit && (! $process || $accountabilityGuide['next']['href'] === '#assistente-prestacao'))
+                <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}">
                     @csrf
-                    <input name="_submission_token" type="hidden" value="{{ $quickCheckToken }}">
+                    <input name="_submission_token" type="hidden" value="{{ $prepareToken }}">
                     <button class="btn btn-primary" type="submit">{{ $accountabilityGuide['next']['label'] }}</button>
                 </form>
             @elseif (! $canEdit && ! $process)
@@ -118,6 +118,7 @@
             <div class="accountability-start-icon"><i data-lucide="clipboard-list" aria-hidden="true"></i></div>
             <div>
                 <h2 class="h5">Iniciar prestação de contas</h2>
+                <p class="text-secondary mb-3">Use o assistente para abrir o processo, montar o checklist e conferir automaticamente execucao, financeiro e evidencias.</p>
                 <dl class="data-list mb-0">
                     <dt>Prazo cadastrado</dt><dd>{{ $amendment->accountability_deadline?->format('d/m/Y') ?? 'Não definido' }}</dd>
                     <dt>Responsável inicial</dt><dd>{{ $amendment->responsibleUser?->name ?? 'Não definido' }}</dd>
@@ -126,11 +127,18 @@
                 </dl>
             </div>
             @if ($canEdit)
-                <form method="POST" action="{{ route('emendas.accountability.store', $amendment) }}">
-                    @csrf
-                    <input name="_submission_token" type="hidden" value="{{ $processCreateToken }}">
-                    <button class="btn btn-primary" type="submit"><i data-lucide="plus" aria-hidden="true"></i>Iniciar processo</button>
-                </form>
+                <div class="accountability-start-actions">
+                    <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}">
+                        @csrf
+                        <input name="_submission_token" type="hidden" value="{{ $prepareToken }}">
+                        <button class="btn btn-primary" type="submit"><i data-lucide="wand-sparkles" aria-hidden="true"></i>Preparar automaticamente</button>
+                    </form>
+                    <form method="POST" action="{{ route('emendas.accountability.store', $amendment) }}">
+                        @csrf
+                        <input name="_submission_token" type="hidden" value="{{ $processCreateToken }}">
+                        <button class="btn btn-outline-primary" type="submit"><i data-lucide="plus" aria-hidden="true"></i>So iniciar checklist</button>
+                    </form>
+                </div>
             @endif
         </section>
     @else

@@ -339,6 +339,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::put('/emendas/{emenda}/audesp', [AudespRegistrationController::class, 'update'])->name('emendas.audesp.update')->block(10, 10);
         Route::post('/emendas/{emenda}/audesp/previa', [AudespRegistrationController::class, 'preview'])->name('emendas.audesp.preview')->block(10, 10);
         Route::post('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'store'])->name('emendas.accountability.store')->block(10, 10);
+        Route::post('/emendas/{emenda}/prestacao-de-contas/preparar', [AccountabilityController::class, 'prepare'])->name('emendas.accountability.prepare')->block(10, 10);
         Route::post('/emendas/{emenda}/prestacao-de-contas/pre-conferir', [AccountabilityController::class, 'quickCheck'])->name('emendas.accountability.quick-check')->block(10, 10);
         Route::patch('/emendas/{emenda}/prestacao-de-contas', [AccountabilityController::class, 'update'])->name('emendas.accountability.update')->block(10, 10);
         Route::post('/emendas/{emenda}/prestacao-de-contas/requisitos', [AccountabilityRequirementController::class, 'store'])->name('emendas.accountability.requirements.store')->block(10, 10);

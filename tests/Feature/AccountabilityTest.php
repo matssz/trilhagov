@@ -96,6 +96,43 @@ class AccountabilityTest extends TestCase
             ->assertSee('#dossie-prestacao', false);
     }
 
+    public function test_automatic_accountability_assistant_starts_and_prepares_process(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $this->completeExecution($municipality, $amendment, $manager, 100000);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Preparar automaticamente')
+            ->assertSee('So iniciar checklist');
+
+        $token = $this->sessionFor($municipality, "accountability-prepare-{$amendment->id}");
+        $this->post(route('emendas.accountability.prepare', $amendment), [
+            '_submission_token' => $token,
+        ])->assertSessionHas('status');
+
+        $process = $amendment->fresh()->accountabilityProcess()->with('requirements')->firstOrFail();
+        $this->assertDatabaseCount('accountability_processes', 1);
+        $this->assertSame(5, $process->requirements->count());
+        $this->assertSame(5, $process->requirements->whereIn('status', [
+            AccountabilityRequirement::STATUS_COMPLETED,
+            AccountabilityRequirement::STATUS_NOT_APPLICABLE,
+        ])->count());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_auto_prepared']);
+
+        $this->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Enviar prestacao de contas')
+            ->assertSee('Pronta para protocolo');
+    }
+
     public function test_viewer_can_consult_but_cannot_change_accountability(): void
     {
         [$viewer, $municipality] = $this->memberWithMunicipality(User::ROLE_VIEWER);
@@ -107,6 +144,7 @@ class AccountabilityTest extends TestCase
             ->assertOk()
             ->assertDontSee('Iniciar processo');
         $this->post(route('emendas.accountability.store', $amendment), [])->assertForbidden();
+        $this->post(route('emendas.accountability.prepare', $amendment), [])->assertForbidden();
     }
 
     public function test_checklist_can_link_own_document_and_requires_reason_for_not_applicable(): void

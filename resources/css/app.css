@@ -5759,6 +5759,23 @@ h6 {
     grid-template-columns: 180px minmax(0, 1fr);
 }
 
+.accountability-start-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    align-items: stretch;
+}
+
+.accountability-start-actions form {
+    margin: 0;
+}
+
+.accountability-start-actions .btn {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+}
+
 .readiness-panel {
     overflow: hidden;
 }
@@ -6185,7 +6202,8 @@ h6 {
         grid-template-columns: 52px minmax(0, 1fr);
     }
 
-    .accountability-start form {
+    .accountability-start form,
+    .accountability-start-actions {
         grid-column: 2;
     }
 
@@ -6269,7 +6287,8 @@ h6 {
         height: 48px;
     }
 
-    .accountability-start form {
+    .accountability-start form,
+    .accountability-start-actions {
         grid-column: auto;
     }
 }

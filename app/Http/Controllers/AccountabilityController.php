@@ -62,11 +62,11 @@ class AccountabilityController extends Controller
             'requirementStatuses' => AccountabilityRequirement::statuses(),
             'readiness' => $readiness,
             'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness),
+            'prepareToken' => $canEdit
+                ? $formSubmission->issue($request, "accountability-prepare-{$amendment->id}")
+                : null,
             'processCreateToken' => $canEdit && $process === null
                 ? $formSubmission->issue($request, "accountability-create-{$amendment->id}")
-                : null,
-            'quickCheckToken' => $canEdit && $process !== null
-                ? $formSubmission->issue($request, "accountability-quick-check-{$process->id}")
                 : null,
             'processUpdateToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-update-{$process->id}")
@@ -129,6 +129,75 @@ class AccountabilityController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', 'Prestação de contas iniciada com checklist operacional.');
+    }
+
+    public function prepare(
+        Request $request,
+        int $emenda,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        AccountabilityService $accountabilityService,
+        AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $amendment = $municipality->amendments()
+            ->with(['executionStages', 'financialCommitments.payments', 'documents.documentType', 'accountabilityProcess.requirements'])
+            ->findOrFail($emenda);
+        $request->validate(['_submission_token' => ['required', 'string']]);
+
+        if (! $formSubmission->consume($request, "accountability-prepare-{$amendment->id}")) {
+            return back()->with('warning', 'A preparacao automatica desta prestacao ja foi processada.');
+        }
+
+        $result = DB::transaction(function () use ($request, $municipality, $amendment, $accountabilityService, $auditTrail): array {
+            $process = $amendment->accountabilityProcess;
+            $created = false;
+
+            if ($process === null) {
+                $process = $amendment->accountabilityProcess()->create([
+                    'municipality_id' => $municipality->id,
+                    'responsible_user_id' => $amendment->responsible_user_id,
+                    'created_by' => $request->user()->id,
+                    'status' => AccountabilityProcess::STATUS_PREPARING,
+                    'due_at' => $amendment->accountability_deadline,
+                ]);
+                $created = true;
+            }
+
+            if (! $process->requirements()->exists()) {
+                $accountabilityService->seedRequirements($process, $request->user());
+            }
+
+            $process->load('requirements');
+            $amendment->setRelation('accountabilityProcess', $process);
+            $stats = $accountabilityService->quickCheck($process, $amendment, $request->user());
+            $freshAmendment = $amendment->fresh(['executionStages', 'financialCommitments.payments', 'documents']);
+            $freshProcess = $process->fresh(['requirements', 'diligences']);
+            $readiness = $accountabilityService->readiness($freshAmendment, $freshProcess);
+
+            $auditTrail->recordOperation($request, $amendment, 'accountability_auto_prepared', [
+                'created' => $created,
+                'updated' => $stats['updated'],
+                'score' => $readiness['score'],
+                'ready' => $readiness['ready'],
+            ]);
+
+            return [
+                'updated' => $stats['updated'],
+                'score' => $readiness['score'],
+                'ready' => $readiness['ready'],
+                'first_blocker' => $readiness['blockers']->first(),
+            ];
+        });
+
+        $integrityAlertService->sync($municipality->fresh());
+
+        $message = $result['ready']
+            ? 'Prestacao preparada automaticamente e pronta para informar protocolo.'
+            : 'Prestacao preparada automaticamente. Proxima pendencia: '.$result['first_blocker'];
+
+        return back()->with('status', $message);
     }
 
     public function quickCheck(
