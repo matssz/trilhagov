@@ -221,7 +221,7 @@
                 </div>
                 <div class="executive-command-cards">
                     @foreach($executiveDesk['command_cards'] as $card)
-                        <article>
+                        <article class="is-{{ $card['tone'] ?? 'neutral' }}">
                             <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
                             <div>
                                 <small>{{ $card['label'] }}</small>
@@ -233,7 +233,7 @@
                 </div>
                 <ol class="executive-flow-lane">
                     @foreach($executiveDesk['flow_steps'] as $index => $step)
-                        <li>
+                        <li class="{{ ((int) ($step['count'] ?? 0)) > 0 ? 'has-items' : 'is-empty' }}">
                             <span>{{ $index + 1 }}</span>
                             <div>
                                 <strong>{{ $step['label'] }}</strong>
