@@ -6,21 +6,21 @@
 @if($institutionSuggestions['authors']->isNotEmpty())
     <datalist id="institution-authors">
         @foreach($institutionSuggestions['authors'] as $item)
-            <option value="{{ $item->name }}" label="{{ trim(($item->party ? $item->party.' - ' : '').($item->role_title ?? '')) }}"></option>
+            <option value="{{ $item->name }}" label="{{ trim(($item->party ? $item->party.' - ' : '').($item->role_title ?? '')) }}" data-party="{{ $item->party }}" data-document="{{ $item->document }}" data-department="{{ $item->department }}"></option>
         @endforeach
     </datalist>
 @endif
 @if($institutionSuggestions['departments']->isNotEmpty())
     <datalist id="institution-departments">
         @foreach($institutionSuggestions['departments'] as $item)
-            <option value="{{ $item->name }}" label="{{ $item->document ?: $item->role_title }}"></option>
+            <option value="{{ $item->name }}" label="{{ $item->document ?: $item->role_title }}" data-document="{{ $item->document }}" data-department="{{ $item->department }}" data-address="{{ $item->address }}" data-city="{{ $item->city }}" data-state="{{ $item->state }}"></option>
         @endforeach
     </datalist>
 @endif
 @if($institutionSuggestions['beneficiaries']->isNotEmpty())
     <datalist id="institution-beneficiaries">
         @foreach($institutionSuggestions['beneficiaries'] as $item)
-            <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}"></option>
+            <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}" data-document="{{ $item->document }}" data-department="{{ $item->department }}" data-address="{{ $item->address }}" data-city="{{ $item->city }}" data-state="{{ $item->state }}"></option>
         @endforeach
     </datalist>
 @endif
@@ -98,13 +98,13 @@
     <div class="row g-3">
         <div class="col-md-8">
             <label class="form-label" for="author_name">Autor da emenda <span class="required-mark">*</span></label>
-            <input class="form-control @error('author_name') is-invalid @enderror" id="author_name" name="author_name" value="{{ old('author_name', $amendment?->author_name) }}" maxlength="255" @if($institutionSuggestions['authors']->isNotEmpty()) list="institution-authors" @endif required>
+            <input class="form-control @error('author_name') is-invalid @enderror" id="author_name" name="author_name" value="{{ old('author_name', $amendment?->author_name) }}" maxlength="255" @if($institutionSuggestions['authors']->isNotEmpty()) list="institution-authors" @endif data-institution-source="institution-authors" required>
             @if($institutionSuggestions['authors']->isNotEmpty())<div class="form-text">Vereadores cadastrados aparecem como sugestao oficial do municipio.</div>@endif
             @error('author_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-4">
             <label class="form-label" for="author_party">Partido <span class="required-mark">*</span></label>
-            <input class="form-control text-uppercase @error('author_party') is-invalid @enderror" id="author_party" name="author_party" value="{{ old('author_party', $amendment?->author_party) }}" maxlength="20">
+            <input class="form-control text-uppercase @error('author_party') is-invalid @enderror" id="author_party" name="author_party" value="{{ old('author_party', $amendment?->author_party) }}" maxlength="20" data-institution-party-target>
             <div class="form-text">Obrigatório para autoria individual.</div>
             @error('author_party')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
@@ -115,7 +115,7 @@
         </div>
         <div class="col-md-6">
             <label class="form-label" for="responsible_department">Secretaria ou órgão responsável <span class="required-mark">*</span></label>
-            <input class="form-control @error('responsible_department') is-invalid @enderror" id="responsible_department" name="responsible_department" value="{{ old('responsible_department', $amendment?->responsible_department) }}" maxlength="255" @if($institutionSuggestions['departments']->isNotEmpty()) list="institution-departments" @endif required>
+            <input class="form-control @error('responsible_department') is-invalid @enderror" id="responsible_department" name="responsible_department" value="{{ old('responsible_department', $amendment?->responsible_department) }}" maxlength="255" @if($institutionSuggestions['departments']->isNotEmpty()) list="institution-departments" @endif data-institution-source="institution-departments" required>
             @if($institutionSuggestions['departments']->isNotEmpty())<div class="form-text">Use os cadastros municipais para padronizar secretarias e unidades.</div>@endif
             @error('responsible_department')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
@@ -148,7 +148,7 @@
         </div>
         <div class="col-md-8">
             <label class="form-label" for="beneficiary_location">Município ou localidade beneficiada</label>
-            <input class="form-control @error('beneficiary_location') is-invalid @enderror" id="beneficiary_location" name="beneficiary_location" value="{{ old('beneficiary_location', $amendment?->beneficiary_location ?? $municipality->name) }}" maxlength="255" @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="institution-beneficiaries" @endif>
+            <input class="form-control @error('beneficiary_location') is-invalid @enderror" id="beneficiary_location" name="beneficiary_location" value="{{ old('beneficiary_location', $amendment?->beneficiary_location ?? $municipality->name) }}" maxlength="255" @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="institution-beneficiaries" @endif data-institution-source="institution-beneficiaries">
             @error('beneficiary_location')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6">

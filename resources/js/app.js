@@ -487,6 +487,115 @@ function syncOfficialSources() {
 officialAmendment?.addEventListener('change', syncOfficialSources);
 syncOfficialSources();
 
+const normalizeInstitutionText = (value) => String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+const fillFieldIfBlank = (field, value) => {
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) || !value) {
+        return false;
+    }
+
+    if (field.value.trim() !== '') {
+        return false;
+    }
+
+    field.value = value;
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+
+    return true;
+};
+
+const formatInstitutionLocation = (option) => {
+    const address = option.dataset.address?.trim();
+    const city = option.dataset.city?.trim();
+    const state = option.dataset.state?.trim();
+
+    if (address && city && state) {
+        return `${address} - ${city}/${state}`;
+    }
+
+    if (address) {
+        return address;
+    }
+
+    if (city && state) {
+        return `${city}/${state}`;
+    }
+
+    return city || '';
+};
+
+const institutionalHealthTerms = [
+    'saude',
+    'ubs',
+    'unidade basica',
+    'posto de saude',
+    'vacina',
+    'vacinacao',
+    'medicamento',
+    'hospital',
+    'ambulatorio',
+    'enfermagem',
+    'odontologico',
+    'atencao basica',
+];
+
+const looksLikeHealthInstitution = (option) => {
+    const text = normalizeInstitutionText([
+        option.value,
+        option.label,
+        option.dataset.department,
+        option.dataset.address,
+    ].filter(Boolean).join(' '));
+
+    return institutionalHealthTerms.some((term) => text.includes(normalizeInstitutionText(term)));
+};
+
+document.querySelectorAll('[data-institution-source]').forEach((source) => {
+    if (!(source instanceof HTMLInputElement)) {
+        return;
+    }
+
+    const listId = source.dataset.institutionSource;
+    const list = listId ? document.getElementById(listId) : null;
+    const form = source.closest('form');
+
+    if (!(list instanceof HTMLDataListElement) || !(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const findOption = () => Array.from(list.options).find((option) => option.value === source.value.trim());
+    const applyInstitution = () => {
+        const option = findOption();
+
+        if (!option) {
+            return;
+        }
+
+        fillFieldIfBlank(form.querySelector('[data-institution-party-target]'), option.dataset.party);
+        fillFieldIfBlank(form.querySelector('[data-institution-document-target]'), option.dataset.document);
+        fillFieldIfBlank(form.querySelector('[data-institution-location-target]'), formatInstitutionLocation(option));
+
+        const departmentTarget = form.querySelector('[name="responsible_department"]');
+        if (source.name !== 'responsible_department') {
+            fillFieldIfBlank(departmentTarget, option.dataset.department);
+        }
+
+        const healthTarget = form.querySelector('input[name="health_related"]');
+        if (healthTarget instanceof HTMLInputElement && looksLikeHealthInstitution(option) && !healthTarget.checked) {
+            healthTarget.checked = true;
+            healthTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    source.addEventListener('change', applyInstitution);
+    source.addEventListener('blur', applyInstitution);
+});
+
 const legislativeAutomation = document.querySelector('[data-legislative-automation]');
 const legislativeProjection = document.querySelector('[data-legislative-projection]');
 

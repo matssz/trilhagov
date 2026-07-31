@@ -14,21 +14,21 @@
     @if($institutionSuggestions['suppliers']->isNotEmpty())
         <datalist id="contract-suppliers">
             @foreach($institutionSuggestions['suppliers'] as $item)
-                <option value="{{ $item->name }}" label="{{ $item->document ?: $item->email }}"></option>
+                <option value="{{ $item->name }}" label="{{ $item->document ?: $item->email }}" data-document="{{ $item->document }}" data-email="{{ $item->email }}" data-address="{{ $item->address }}" data-city="{{ $item->city }}" data-state="{{ $item->state }}"></option>
             @endforeach
         </datalist>
     @endif
     @if($institutionSuggestions['inspectors']->isNotEmpty())
         <datalist id="contract-inspectors">
             @foreach($institutionSuggestions['inspectors'] as $item)
-                <option value="{{ $item->name }}" label="{{ $item->role_title ?: $item->email }}"></option>
+                <option value="{{ $item->name }}" label="{{ $item->role_title ?: $item->email }}" data-document="{{ $item->document }}" data-email="{{ $item->email }}" data-department="{{ $item->department }}"></option>
             @endforeach
         </datalist>
     @endif
     @if($institutionSuggestions['locations']->isNotEmpty())
         <datalist id="contract-locations">
             @foreach($institutionSuggestions['locations'] as $item)
-                <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}"></option>
+                <option value="{{ $item->name }}" label="{{ trim(($item->city ? $item->city.'/'.$item->state : '').($item->address ? ' - '.$item->address : '')) }}" data-document="{{ $item->document }}" data-department="{{ $item->department }}" data-address="{{ $item->address }}" data-city="{{ $item->city }}" data-state="{{ $item->state }}"></option>
             @endforeach
         </datalist>
     @endif
@@ -78,7 +78,7 @@
                     <div><label class="form-label">Regime de execução</label><select class="form-select" name="execution_regime"><option value="">Selecione</option>@foreach($executionRegimes as $value => $label)<option value="{{ $value }}" @selected(old('execution_regime', $contract->execution_regime) === $value)>{{ $label }}</option>@endforeach</select></div>
                     <div><label class="form-label">Critério de julgamento</label><input class="form-control" name="judgment_criterion" value="{{ old('judgment_criterion', $contract->judgment_criterion) }}"></div>
                     <div><label class="form-label">Valor estimado <span class="required-mark">*</span></label><input class="form-control" name="estimated_amount" type="number" min="0.01" step="0.01" value="{{ old('estimated_amount', $contract->estimated_amount) }}" required></div>
-                    <div><label class="form-label">Local da obra ou entrega</label><input class="form-control" name="site_location" value="{{ old('site_location', $contract->site_location) }}" @if($institutionSuggestions['locations']->isNotEmpty()) list="contract-locations" @endif></div>
+                    <div><label class="form-label">Local da obra ou entrega</label><input class="form-control" name="site_location" value="{{ old('site_location', $contract->site_location) }}" @if($institutionSuggestions['locations']->isNotEmpty()) list="contract-locations" @endif data-institution-source="contract-locations"></div>
                     <div class="span-2"><label class="form-label">Objeto <span class="required-mark">*</span></label><textarea class="form-control" name="object" rows="2" required>{{ old('object', $contract->object) }}</textarea></div>
                 </div>
                 <div class="planning-check-grid">
@@ -89,8 +89,8 @@
             <section class="content-panel">
                 <div class="content-panel-header"><div><span class="step-index">2</span><h2 class="h5 mb-0">Instrumento contratual e fiscalização</h2></div><span class="legal-badge">Arts. 94 e 117</span></div>
                 <div class="contract-form-grid">
-                    <div><label class="form-label">Contratada</label><input class="form-control" name="supplier_name" value="{{ old('supplier_name', $contract->supplier_name) }}" @if($institutionSuggestions['suppliers']->isNotEmpty()) list="contract-suppliers" @endif></div>
-                    <div><label class="form-label">CNPJ ou CPF</label><input class="form-control" name="supplier_document" value="{{ old('supplier_document', $contract->supplier_document) }}"></div>
+                    <div><label class="form-label">Contratada</label><input class="form-control" name="supplier_name" value="{{ old('supplier_name', $contract->supplier_name) }}" @if($institutionSuggestions['suppliers']->isNotEmpty()) list="contract-suppliers" @endif data-institution-source="contract-suppliers"></div>
+                    <div><label class="form-label">CNPJ ou CPF</label><input class="form-control" name="supplier_document" value="{{ old('supplier_document', $contract->supplier_document) }}" data-institution-document-target></div>
                     <div><label class="form-label">Valor original</label><input class="form-control" name="original_amount" type="number" min="0.01" step="0.01" value="{{ old('original_amount', $contract->original_amount) }}"></div>
                     <div><label class="form-label">Assinatura</label><input class="form-control" name="signed_at" type="date" value="{{ old('signed_at', $contract->signed_at?->toDateString()) }}"></div>
                     <div><label class="form-label">Início da vigência</label><input class="form-control" name="effective_start_at" type="date" value="{{ old('effective_start_at', $contract->effective_start_at?->toDateString()) }}"></div>
@@ -99,7 +99,7 @@
                     <div><label class="form-label">Garantia do objeto em meses</label><input class="form-control" name="warranty_months" type="number" min="0" max="600" value="{{ old('warranty_months', $contract->warranty_months) }}"></div>
                     <div><label class="form-label">Gestor do contrato</label><select class="form-select" name="contract_manager_id"><option value="">Selecione</option>@foreach($members as $member)<option value="{{ $member->id }}" @selected((string) old('contract_manager_id', $contract->contract_manager_id) === (string) $member->id)>{{ $member->name }}</option>@endforeach</select></div>
                     <div><label class="form-label">Fiscal do contrato</label><select class="form-select" name="contract_inspector_id"><option value="">Selecione</option>@foreach($members as $member)<option value="{{ $member->id }}" @selected((string) old('contract_inspector_id', $contract->contract_inspector_id) === (string) $member->id)>{{ $member->name }}</option>@endforeach</select></div>
-                    <div><label class="form-label">Responsável técnico</label><input class="form-control" name="technical_responsible" value="{{ old('technical_responsible', $contract->technical_responsible) }}" @if($institutionSuggestions['inspectors']->isNotEmpty()) list="contract-inspectors" @endif></div>
+                    <div><label class="form-label">Responsável técnico</label><input class="form-control" name="technical_responsible" value="{{ old('technical_responsible', $contract->technical_responsible) }}" @if($institutionSuggestions['inspectors']->isNotEmpty()) list="contract-inspectors" @endif data-institution-source="contract-inspectors"></div>
                     <div><label class="form-label">ART, RRT ou registro técnico</label><input class="form-control" name="technical_registration" value="{{ old('technical_registration', $contract->technical_registration) }}"></div>
                     <div><label class="form-label">Canal de publicidade</label><select class="form-select" name="publication_type"><option value="">Selecione</option>@foreach($publicationTypes as $value => $label)<option value="{{ $value }}" @selected(old('publication_type', $contract->publication_type) === $value)>{{ $label }}</option>@endforeach</select></div>
                     <div><label class="form-label">Data da publicação</label><input class="form-control" name="published_at" type="date" value="{{ old('published_at', $contract->published_at?->toDateString()) }}"></div>

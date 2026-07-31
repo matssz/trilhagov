@@ -142,6 +142,8 @@ class MunicipalInstitutionTest extends TestCase
             ->assertSee('list="institution-authors"', false)
             ->assertSee('list="institution-departments"', false)
             ->assertSee('list="institution-beneficiaries"', false)
+            ->assertSee('data-institution-party-target', false)
+            ->assertSee('data-institution-source="institution-authors"', false)
             ->assertSee('Vereador Bruno Almeida')
             ->assertSee('Secretaria Municipal de Saude')
             ->assertSee('UBS Vila Nova');

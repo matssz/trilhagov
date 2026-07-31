@@ -66,6 +66,8 @@ class MunicipalContractTest extends TestCase
             ->assertSee('list="contract-suppliers"', false)
             ->assertSee('list="contract-inspectors"', false)
             ->assertSee('list="contract-locations"', false)
+            ->assertSee('data-institution-source="contract-suppliers"', false)
+            ->assertSee('data-institution-document-target', false)
             ->assertSee('Construtora Municipal Ltda')
             ->assertSee('Engenheira Ana Fiscal')
             ->assertSee('Unidade de Obras Urbanas');
