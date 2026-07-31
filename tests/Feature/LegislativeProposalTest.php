@@ -576,6 +576,10 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Executivo recebe')
             ->assertSee('Reserva orcamentaria')
             ->assertSee('Plano e execucao')
+            ->assertSee('Ir para conferencia')
+            ->assertSee('Receber agora')
+            ->assertSee('Reservar agora')
+            ->assertSee('Acompanhar')
             ->assertSee('Compra de computadores')
             ->assertSee('Receber proposta')
             ->assertSee('Registrar reserva');
@@ -678,6 +682,8 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('1 atrasada(s)')
             ->assertSee('4 dia(s)')
             ->assertSee('Filtrar')
+            ->assertSee('Receber agora')
+            ->assertSee('Reservar agora')
             ->assertSee('#recebimento-executivo')
             ->assertSee('#reserva-orcamentaria');
     }

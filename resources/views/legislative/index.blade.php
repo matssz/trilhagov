@@ -238,6 +238,10 @@
                             <div>
                                 <strong>{{ $step['label'] }}</strong>
                                 <small>{{ $step['description'] }}</small>
+                                <a href="{{ $step['url'] }}">
+                                    <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $step['action'] }}
+                                    <em>{{ $step['count'] }}</em>
+                                </a>
                             </div>
                         </li>
                     @endforeach

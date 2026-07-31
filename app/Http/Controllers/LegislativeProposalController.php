@@ -68,7 +68,7 @@ class LegislativeProposalController extends Controller
             : null;
         $executiveBoard = $role === User::ROLE_COUNCILOR
             ? null
-            : $this->executiveBoard($boardQuery->latest('id')->get());
+            : $this->executiveBoard($boardQuery->latest('id')->get(), $year);
         $executiveDesk = $executiveBoard
             ? $this->executiveDesk($executiveBoard, $request, $formSubmission)
             : null;
@@ -281,7 +281,7 @@ class LegislativeProposalController extends Controller
      * @param \Illuminate\Support\Collection<int, LegislativeProposal> $proposals
      * @return array<int, array<string, mixed>>
      */
-    private function executiveBoard(\Illuminate\Support\Collection $proposals): array
+    private function executiveBoard(\Illuminate\Support\Collection $proposals, int $year): array
     {
         return collect([
             [
@@ -332,7 +332,7 @@ class LegislativeProposalController extends Controller
                 'sla_days' => 7,
                 'tone' => 'execution',
             ],
-        ])->map(function (array $column) use ($proposals): array {
+        ])->map(function (array $column) use ($proposals, $year): array {
             $allItems = $proposals->whereIn('status', $column['statuses'])->values();
             $items = $proposals
                 ->whereIn('status', $column['statuses'])
@@ -350,6 +350,7 @@ class LegislativeProposalController extends Controller
                 'items' => $items,
                 'count' => $allItems->count(),
                 'amount' => (float) $proposals->whereIn('status', $column['statuses'])->sum('estimated_amount'),
+                'filter_url' => route('legislative.index', ['year' => $year, 'status' => $column['statuses'][0]]),
                 'health_count' => $allItems->where('health_related', true)->count(),
                 'health_amount' => (float) $allItems->where('health_related', true)->sum('estimated_amount'),
                 'oldest' => $oldest,
@@ -402,6 +403,10 @@ class LegislativeProposalController extends Controller
             ->take(6)
             ->values();
         $focusItem = $focus ? $focus['items']->first() : null;
+        $review = collect($board)->firstWhere('key', 'review');
+        $receive = collect($board)->firstWhere('key', 'receive');
+        $budget = collect($board)->firstWhere('key', 'budget');
+        $executionColumn = collect($board)->firstWhere('key', 'execution');
 
         return [
             'total' => $total,
@@ -449,10 +454,34 @@ class LegislativeProposalController extends Controller
                 ],
             ],
             'flow_steps' => [
-                ['label' => 'Camara envia', 'description' => 'Proposta aprovada chega protocolada.'],
-                ['label' => 'Executivo recebe', 'description' => 'Sistema sugere processo e secretaria.'],
-                ['label' => 'Reserva orcamentaria', 'description' => 'Valor integral e dotacao ficam registrados.'],
-                ['label' => 'Plano e execucao', 'description' => 'Central cria pendencias para entregar e prestar contas.'],
+                [
+                    'label' => 'Camara envia',
+                    'description' => 'Proposta aprovada chega protocolada.',
+                    'action' => 'Ir para conferencia',
+                    'url' => $review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url'],
+                    'count' => (int) $review['count'],
+                ],
+                [
+                    'label' => 'Executivo recebe',
+                    'description' => 'Sistema sugere processo e secretaria.',
+                    'action' => 'Receber agora',
+                    'url' => $receive['items']->first()?->getAttribute('executive_board_url') ?? $receive['filter_url'],
+                    'count' => (int) $receive['count'],
+                ],
+                [
+                    'label' => 'Reserva orcamentaria',
+                    'description' => 'Valor integral e dotacao ficam registrados.',
+                    'action' => 'Reservar agora',
+                    'url' => $budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url'],
+                    'count' => (int) $budget['count'],
+                ],
+                [
+                    'label' => 'Plano e execucao',
+                    'description' => 'Central cria pendencias para entregar e prestar contas.',
+                    'action' => 'Acompanhar',
+                    'url' => $executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url'],
+                    'count' => (int) $executionColumn['count'],
+                ],
             ],
         ];
     }
