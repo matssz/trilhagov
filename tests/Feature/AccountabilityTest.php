@@ -73,7 +73,10 @@ class AccountabilityTest extends TestCase
             ->assertSee('Pre-conferir')
             ->assertSee('Conciliar saldo')
             ->assertSee('Resolver pendencias')
-            ->assertSee('Gerar dossie');
+            ->assertSee('Gerar dossie')
+            ->assertSee('Acoes para finalizar')
+            ->assertSee('Pre-conferir agora')
+            ->assertSee(route('emendas.accountability.quick-check', $amendment), false);
 
         $token = $this->sessionFor($municipality, "accountability-quick-check-{$process->id}");
         $this->post(route('emendas.accountability.quick-check', $amendment), [
@@ -93,6 +96,8 @@ class AccountabilityTest extends TestCase
             ->assertSee('Enviar prestacao de contas')
             ->assertSee('Informar protocolo')
             ->assertSee('Pronta para protocolo')
+            ->assertSee('Registrar envio')
+            ->assertSee('Baixar dossie')
             ->assertSee('#dossie-prestacao', false);
     }
 

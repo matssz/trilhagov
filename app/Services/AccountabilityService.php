@@ -86,6 +86,8 @@ class AccountabilityService
         $score = (int) ($readiness['score'] ?? 0);
         $closingTone = $ready ? 'success' : ($hasProcess && $score >= 60 ? 'warning' : 'neutral');
         $closingLabel = $ready ? 'Pronta para protocolo' : ($hasProcess ? 'Fechamento em andamento' : 'Prestacao nao iniciada');
+        $physicalComplete = $physicalPercentage >= 100;
+        $hasEvidence = $evidenceCount > 0;
 
         $next = [
             'icon' => 'clipboard-list',
@@ -149,11 +151,63 @@ class AccountabilityService
                 ['label' => 'Resolver pendencias', 'description' => 'Checklist, evidencias e diligencias.', 'done' => $ready, 'href' => '#requirements'],
                 ['label' => 'Gerar dossie', 'description' => 'Baixa PDF e pacote de anexos.', 'done' => $ready, 'href' => '#dossie-prestacao'],
             ],
+            'actions' => [
+                [
+                    'key' => 'quick-check',
+                    'icon' => 'wand-sparkles',
+                    'label' => 'Pre-conferir agora',
+                    'description' => 'Marca automaticamente checklist, saldo e evidencias que ja possuem base no sistema.',
+                    'href' => '#assistente-prestacao',
+                    'enabled' => $hasProcess && ! $checklistReady,
+                ],
+                [
+                    'key' => 'execution',
+                    'icon' => 'route',
+                    'label' => $physicalComplete && $hasEvidence ? 'Revisar execucao' : 'Completar execucao',
+                    'description' => $physicalComplete && $hasEvidence
+                        ? 'Confira etapas, pagamentos e documentos usados na prestacao.'
+                        : 'Conclua etapas fisicas, pagamentos e evidencias antes de enviar.',
+                    'href' => route('emendas.execution', $amendment),
+                    'enabled' => $hasProcess && (! $physicalComplete || ! $hasEvidence),
+                ],
+                [
+                    'key' => 'reconciliation',
+                    'icon' => 'scale',
+                    'label' => 'Conciliar saldo',
+                    'description' => 'Ajuste valor devolvido, referencia e observacoes quando houver diferenca financeira.',
+                    'href' => '#process',
+                    'enabled' => $hasProcess && ! $financialReady,
+                ],
+                [
+                    'key' => 'diligences',
+                    'icon' => 'message-square-warning',
+                    'label' => 'Resolver diligencias',
+                    'description' => 'Responda pendencias abertas e registre protocolo de retorno quando existir.',
+                    'href' => '#diligences',
+                    'enabled' => $hasProcess && $openDiligences > 0,
+                ],
+                [
+                    'key' => 'submit',
+                    'icon' => 'send',
+                    'label' => 'Registrar envio',
+                    'description' => 'Informe data e protocolo quando a prestacao estiver pronta.',
+                    'href' => '#envio-prestacao',
+                    'enabled' => $ready,
+                ],
+                [
+                    'key' => 'dossier',
+                    'icon' => 'package-check',
+                    'label' => 'Baixar dossie',
+                    'description' => 'Gere PDF executivo e pacote com anexos para auditoria ou arquivo municipal.',
+                    'href' => '#dossie-prestacao',
+                    'enabled' => $hasProcess,
+                ],
+            ],
             'steps' => [
                 ['label' => 'Processo aberto', 'description' => 'Checklist municipal criado.', 'done' => $hasProcess],
-                ['label' => 'Execucao concluida', 'description' => 'Etapas fisicas em 100%.', 'done' => $physicalPercentage >= 100],
+                ['label' => 'Execucao concluida', 'description' => 'Etapas fisicas em 100%.', 'done' => $physicalComplete],
                 ['label' => 'Financeiro conciliado', 'description' => 'Recebido, pago e devolvido fecham.', 'done' => $financialReady],
-                ['label' => 'Evidencias vinculadas', 'description' => 'Documentos ligados as entregas.', 'done' => $evidenceCount > 0],
+                ['label' => 'Evidencias vinculadas', 'description' => 'Documentos ligados as entregas.', 'done' => $hasEvidence],
                 ['label' => 'Pronta para envio', 'description' => 'Sem bloqueios para protocolo.', 'done' => $ready],
             ],
             'summary' => [

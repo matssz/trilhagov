@@ -74,6 +74,9 @@ class AccountabilityController extends Controller
             'processSubmitToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-submit-{$process->id}")
                 : null,
+            'quickCheckToken' => $canEdit && $process !== null
+                ? $formSubmission->issue($request, "accountability-quick-check-{$process->id}")
+                : null,
             'requirementCreateToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-requirement-create-{$process->id}")
                 : null,

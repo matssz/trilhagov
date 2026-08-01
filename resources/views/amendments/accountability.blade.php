@@ -86,6 +86,36 @@
             </div>
         </div>
 
+        @if ($process)
+            <div class="accountability-action-strip" aria-label="Acoes recomendadas para finalizar a prestacao">
+                <div class="accountability-action-strip-heading">
+                    <p class="page-kicker mb-1">Acoes para finalizar</p>
+                    <strong>Resolva o proximo bloqueio sem sair do fluxo</strong>
+                </div>
+                <div class="accountability-action-list">
+                    @foreach ($accountabilityGuide['actions'] as $action)
+                        @if ($action['key'] === 'quick-check' && $canEdit && $action['enabled'])
+                            <form method="POST" action="{{ route('emendas.accountability.quick-check', $amendment) }}" data-prevent-double-submit>
+                                @csrf
+                                <input name="_submission_token" type="hidden" value="{{ $quickCheckToken }}">
+                                <button class="accountability-action-card is-active" type="submit">
+                                    <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                                    <strong>{{ $action['label'] }}</strong>
+                                    <small>{{ $action['description'] }}</small>
+                                </button>
+                            </form>
+                        @else
+                            <a class="accountability-action-card {{ $action['enabled'] ? 'is-active' : 'is-muted' }}" href="{{ $action['href'] }}" aria-disabled="{{ $action['enabled'] ? 'false' : 'true' }}">
+                                <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                                <strong>{{ $action['label'] }}</strong>
+                                <small>{{ $action['description'] }}</small>
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div class="accountability-flow-lane" aria-label="Fluxo de fechamento da prestacao de contas">
             @foreach ($accountabilityGuide['flow'] as $flowStep)
                 <a class="{{ $flowStep['done'] ? 'is-done' : '' }}" href="{{ $flowStep['href'] }}">

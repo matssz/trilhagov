@@ -5676,6 +5676,104 @@ h6 {
 .accountability-flow-lane strong { color: var(--navy-900); font-size: .88rem; }
 .accountability-flow-lane small { color: var(--muted); line-height: 1.3; }
 
+.accountability-action-strip {
+    display: grid;
+    gap: .85rem;
+    padding: .95rem;
+    border: 1px solid rgba(9, 58, 103, .12);
+    border-radius: 10px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(246, 250, 253, .98)),
+        radial-gradient(circle at 100% 0, rgba(44, 123, 166, .1), transparent 18rem);
+}
+
+.accountability-action-strip-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.accountability-action-strip-heading strong {
+    color: var(--navy-900);
+    font-size: .95rem;
+}
+
+.accountability-action-list {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: .65rem;
+}
+
+.accountability-action-list form {
+    margin: 0;
+}
+
+.accountability-action-card {
+    display: grid;
+    width: 100%;
+    min-height: 136px;
+    gap: .4rem;
+    align-content: start;
+    padding: .75rem;
+    border: 1px solid rgba(9, 58, 103, .12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .88);
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(8, 35, 64, .05);
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+button.accountability-action-card {
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+}
+
+.accountability-action-card.is-active {
+    border-color: rgba(9, 58, 103, .28);
+}
+
+.accountability-action-card.is-active:hover {
+    border-color: rgba(9, 58, 103, .46);
+    box-shadow: 0 16px 28px rgba(8, 35, 64, .1);
+    transform: translateY(-1px);
+}
+
+.accountability-action-card.is-muted {
+    opacity: .62;
+}
+
+.accountability-action-card > span {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid #c7d8e6;
+    border-radius: 9px;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.accountability-action-card svg {
+    width: 17px;
+    height: 17px;
+}
+
+.accountability-action-card strong {
+    color: var(--navy-900);
+    font-size: .82rem;
+    line-height: 1.22;
+}
+
+.accountability-action-card small {
+    color: var(--muted);
+    font-size: .7rem;
+    line-height: 1.35;
+}
+
 .accountability-guide-steps,
 .accountability-guide-summary {
     display: grid;
@@ -6180,6 +6278,10 @@ h6 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .accountability-action-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .accountability-guide-steps {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -6221,6 +6323,14 @@ h6 {
     .accountability-readiness,
     .accountability-flow-lane {
         grid-template-columns: 1fr;
+    }
+
+    .accountability-action-strip-heading {
+        display: grid;
+    }
+
+    .accountability-action-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .accountability-readiness-score {
@@ -6325,6 +6435,14 @@ h6 {
     .requirement-create-grid,
     .diligence-create-grid {
         grid-template-columns: 1fr;
+    }
+
+    .accountability-action-list {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-action-card {
+        min-height: auto;
     }
 
     .accountability-process-grid .span-2,
