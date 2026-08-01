@@ -218,7 +218,11 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Sem saldo')
             ->assertSee('Saldo individual esgotado')
-            ->assertSee('Aguardando liberacao');
+            ->assertSee('Aguardando liberacao')
+            ->assertSee('O que voce faz')
+            ->assertSee('Escolhe destino, valor e motivo')
+            ->assertSee('O que o sistema faz')
+            ->assertSee('Voce acompanha tudo aqui');
     }
 
     public function test_create_screen_projects_available_quota_and_recommends_health_automatically(): void
@@ -482,6 +486,9 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Pagamento')
             ->assertSee('Esteira da proposta')
             ->assertSee('Entenda o valor desta proposta')
+            ->assertSee('Leitura simples para o vereador')
+            ->assertSee('Agora esta com:')
+            ->assertSee('Ir para etapa')
             ->assertSee('estao comprometidos nesta indicacao')
             ->assertSee('ainda nao foi pago, transferido ou executado')
             ->assertSee('Onde esta e quem precisa agir')

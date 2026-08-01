@@ -48,6 +48,7 @@ class AudespHomologationController extends Controller
             'municipality' => $municipality,
             'batches' => $batches,
             'counts' => $counts,
+            'realValidationPlan' => $this->realValidationPlan($municipality),
             'canEdit' => $canEdit,
             'uploadToken' => $canEdit ? $formSubmission->issue($request, 'audesp-homologation-upload') : null,
             'rejectedBatches' => $canEdit
@@ -482,6 +483,72 @@ class AudespHomologationController extends Controller
     private function ensureAudespScope(Municipality $municipality): void
     {
         abort_unless($municipality->supportsTcespAudesp(), 404);
+    }
+
+    /** @return array<string, mixed> */
+    private function realValidationPlan(Municipality $municipality): array
+    {
+        $year = 2026;
+        $registrations = $municipality->audespAmendmentRegistrations()
+            ->where('amendment_year', $year)
+            ->count();
+        $monthlyBatches = $municipality->audespHomologationBatches()
+            ->where('fiscal_year', $year)
+            ->where('source_document_type', AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL);
+        $readyMonthlyBatches = (clone $monthlyBatches)->whereIn('status', [
+            AudespHomologationBatch::STATUS_READY,
+            AudespHomologationBatch::STATUS_SUBMITTED,
+            AudespHomologationBatch::STATUS_RECEIVED,
+            AudespHomologationBatch::STATUS_VALIDATED,
+            AudespHomologationBatch::STATUS_STORED,
+        ])->count();
+        $rejectedBatches = $municipality->audespHomologationBatches()
+            ->where('fiscal_year', $year)
+            ->where('status', AudespHomologationBatch::STATUS_REJECTED)
+            ->count();
+        $latestRealBatch = $municipality->audespHomologationBatches()
+            ->where('fiscal_year', $year)
+            ->latest('created_at')
+            ->first();
+        $checks = collect([
+            [
+                'label' => 'Cadastro Audesp das emendas',
+                'status' => $registrations > 0 ? 'ok' : 'pending',
+                'detail' => $registrations.' cadastro(s) preparado(s) no TrilhaGov.',
+                'action' => 'Prepare pelo menos uma emenda municipal com codigo de aplicacao antes do XML real.',
+            ],
+            [
+                'label' => 'Movimento mensal real do Siafic',
+                'status' => $readyMonthlyBatches > 0 ? 'ok' : 'pending',
+                'detail' => $readyMonthlyBatches.' lote(s) mensal(is) pronto(s), transmitido(s) ou armazenado(s).',
+                'action' => 'Importe o Detalhe do Movimento Mensal exportado pelo fornecedor do Siafic.',
+            ],
+            [
+                'label' => 'Rejeicoes tratadas',
+                'status' => $rejectedBatches === 0 ? 'ok' : 'attention',
+                'detail' => $rejectedBatches.' lote(s) rejeitado(s) ainda preservado(s) para saneamento.',
+                'action' => 'Vincule reenvio ao lote rejeitado e guarde o retorno do Audesp.',
+            ],
+            [
+                'label' => 'Evidencia mais recente',
+                'status' => $latestRealBatch ? 'ok' : 'pending',
+                'detail' => $latestRealBatch
+                    ? $latestRealBatch->documentTypeLabel().' em '.$latestRealBatch->created_at->format('d/m/Y H:i')
+                    : 'Nenhum XML real foi registrado ainda.',
+                'action' => 'Registre arquivo, protocolo, recibo ou rejeicao antes de validar o procedimento.',
+            ],
+        ]);
+        $score = (int) round(($checks->where('status', 'ok')->count() / max(1, $checks->count())) * 100);
+
+        return [
+            'year' => $year,
+            'score' => $score,
+            'status' => $score >= 75 && $rejectedBatches === 0 ? 'ready' : ($score >= 50 ? 'attention' : 'pending'),
+            'label' => $score >= 75 && $rejectedBatches === 0
+                ? 'Pronto para validacao assistida'
+                : ($score >= 50 ? 'Validacao em andamento' : 'Ainda falta arquivo real'),
+            'checks' => $checks->values()->all(),
+        ];
     }
 
     /** @return array<string, string> */

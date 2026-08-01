@@ -107,6 +107,32 @@
                     <span><i data-lucide="send" aria-hidden="true"></i>Executivo recebe</span>
                     <span><i data-lucide="building-2" aria-hidden="true"></i>Prefeitura executa</span>
                 </div>
+                <div class="councilor-simple-guide" aria-label="Guia simples para o vereador">
+                    <article>
+                        <span><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></span>
+                        <div>
+                            <small>O que voce faz</small>
+                            <strong>Escolhe destino, valor e motivo</strong>
+                            <p>O formulario pede o minimo. Campos tecnicos podem ser completados pela equipe municipal depois.</p>
+                        </div>
+                    </article>
+                    <article>
+                        <span><i data-lucide="calculator" aria-hidden="true"></i></span>
+                        <div>
+                            <small>O que o sistema faz</small>
+                            <strong>Confere saldo e saude</strong>
+                            <p>A cota vem da RCL e da Lei Organica ativa. Saude e sinalizada automaticamente quando houver indicios.</p>
+                        </div>
+                    </article>
+                    <article>
+                        <span><i data-lucide="eye" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Depois do envio</small>
+                            <strong>Voce acompanha tudo aqui</strong>
+                            <p>Cada proposta mostra se esta com voce, com a Camara, com o Executivo ou em execucao.</p>
+                        </div>
+                    </article>
+                </div>
             </section>
 
             <section class="councilor-workspace" aria-label="Painel do vereador">

@@ -162,6 +162,15 @@
     </section>
 
     @if($isCouncilor)
+        <section class="legislative-councilor-current-step">
+            <span><i data-lucide="{{ $currentStepDelayed ? 'timer-reset' : 'map-pin-check' }}" aria-hidden="true"></i></span>
+            <div>
+                <small>Leitura simples para o vereador</small>
+                <strong>Agora esta com: {{ $currentTrackingStep['owner'] }}</strong>
+                <p>{{ $currentTrackingStep['title'] }}. {{ $currentTrackingStep['description'] }} @if($currentStepDelayed) Esta etapa passou do prazo operacional recomendado. @endif</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ $currentTrackingStep['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Ir para etapa</a>
+        </section>
         <section class="legislative-councilor-money-status">
             <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
             <div>

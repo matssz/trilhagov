@@ -62,6 +62,29 @@
         </div>
     </section>
 
+    <section class="homologation-real-validation is-{{ $realValidationPlan['status'] }} mb-4" aria-label="Plano de validacao real">
+        <header>
+            <div>
+                <p class="page-kicker mb-1">Validacao real {{ $realValidationPlan['year'] }}</p>
+                <h2>{{ $realValidationPlan['label'] }}</h2>
+                <p>Use este painel para chamar contador, fornecedor do Siafic e controle interno sem depender de memoria ou planilha paralela.</p>
+            </div>
+            <strong>{{ $realValidationPlan['score'] }}%</strong>
+        </header>
+        <div>
+            @foreach($realValidationPlan['checks'] as $check)
+                <article class="status-{{ $check['status'] }}">
+                    <span><i data-lucide="{{ $check['status'] === 'ok' ? 'circle-check' : ($check['status'] === 'attention' ? 'triangle-alert' : 'circle-dot') }}" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>{{ $check['label'] }}</strong>
+                        <small>{{ $check['detail'] }}</small>
+                        <em>{{ $check['action'] }}</em>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
+
     @if ($canEdit)
         <section class="content-panel mb-4" id="novo-lote">
             <div class="content-panel-header homologation-panel-header">
