@@ -9,13 +9,37 @@
             <h1>Importar planilha</h1>
             <p>{{ $municipality->name }} · conferência antes de gravar</p>
         </div>
-        <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.template') }}"><i data-lucide="download" aria-hidden="true"></i>Baixar modelo CSV</a>
+        <div class="import-heading-actions">
+            <a class="btn btn-primary" href="{{ route('spreadsheet-imports.template.simplified') }}"><i data-lucide="download" aria-hidden="true"></i>Modelo simplificado</a>
+            <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.template') }}"><i data-lucide="file-down" aria-hidden="true"></i>Modelo completo</a>
+        </div>
     </header>
 
     <section class="import-status-band">
         <span><i data-lucide="file-spreadsheet" aria-hidden="true"></i></span>
         <div><strong>Até 500 linhas por lote</strong><small>CSV com vírgula ou ponto e vírgula · máximo de 2 MB</small></div>
         <p>Registros existentes são sinalizados e nunca sobrescritos.</p>
+    </section>
+
+    <section class="import-model-grid" aria-label="Modelos de importacao">
+        <article>
+            <span><i data-lucide="zap" aria-hidden="true"></i></span>
+            <div>
+                <small>Comece rapido</small>
+                <strong>Modelo municipal simplificado</strong>
+                <p>Use quando a Camara ou o gestor so tem autor, objeto, secretaria, valor e data. O TrilhaGov completa esfera municipal, execucao direta, prazos e indicio de saude.</p>
+            </div>
+            <a href="{{ route('spreadsheet-imports.template.simplified') }}">Baixar</a>
+        </article>
+        <article>
+            <span><i data-lucide="settings-2" aria-hidden="true"></i></span>
+            <div>
+                <small>Migracao tecnica</small>
+                <strong>Modelo completo</strong>
+                <p>Use quando o municipio ja possui processo, rastreabilidade, codigos contabeis, prazos e situacao de execucao para cada emenda.</p>
+            </div>
+            <a href="{{ route('spreadsheet-imports.template') }}">Baixar</a>
+        </article>
     </section>
 
     <section class="import-upload-band">

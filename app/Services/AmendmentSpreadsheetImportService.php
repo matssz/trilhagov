@@ -63,15 +63,20 @@ class AmendmentSpreadsheetImportService
     private const REQUIRED_COLUMNS = [
         'reference',
         'fiscal_year',
-        'government_sphere',
-        'authorship_type',
-        'transfer_type',
         'author_name',
         'object',
         'responsible_department',
         'expected_amount',
-        'status',
         'indicated_at',
+    ];
+
+    /** @var array<int, string> */
+    private const COMPLETE_REQUIRED_COLUMNS = [
+        ...self::REQUIRED_COLUMNS,
+        'government_sphere',
+        'authorship_type',
+        'transfer_type',
+        'status',
         'communication_deadline',
         'execution_deadline',
         'accountability_deadline',
@@ -118,7 +123,7 @@ class AmendmentSpreadsheetImportService
         $preparedRows = [];
 
         foreach ($parsedRows as $parsedRow) {
-            $normalized = $this->normalize($parsedRow['data']);
+            $normalized = $this->normalize($municipality, $parsedRow['data']);
             $errors = $this->validationErrors($municipality, $normalized);
             $status = AmendmentImportRow::STATUS_INVALID;
 
@@ -194,6 +199,14 @@ class AmendmentSpreadsheetImportService
 
             foreach ($rows as $row) {
                 $data = $row->normalized_data;
+                $importMode = (string) ($data['_import_mode'] ?? 'complete');
+                unset($data['_import_mode']);
+                if ($importMode === 'municipal_simplified') {
+                    $data['notes'] = trim(implode("\n\n", array_filter([
+                        (string) ($data['notes'] ?? ''),
+                        'Importado pelo modelo municipal simplificado. Complete processo, rastreabilidade e documentos no fluxo executivo.',
+                    ])));
+                }
                 $alreadyExists = $municipality->amendments()
                     ->where('reference', $data['reference'])
                     ->where('fiscal_year', $data['fiscal_year'])
@@ -296,6 +309,41 @@ class AmendmentSpreadsheetImportService
         return $contents ?: '';
     }
 
+    public function simplifiedMunicipalTemplateContents(): string
+    {
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, "\xEF\xBB\xBF");
+        fputcsv($stream, [
+            'Identificacao da emenda',
+            'Exercicio',
+            'Autor',
+            'Partido',
+            'Objeto',
+            'Secretaria responsavel',
+            'Municipio ou localidade beneficiada',
+            'Valor previsto',
+            'Data da indicacao',
+            'Observacoes',
+        ], ';');
+        fputcsv($stream, [
+            'CAM-2026-001',
+            '2026',
+            'Vereadora Ana Lima',
+            'PSD',
+            'Aquisicao de equipamentos para UBS Central',
+            'Secretaria Municipal de Saude',
+            'Municipio de Exemplo',
+            'R$ 80.000,00',
+            '15/03/2026',
+            'Linha simplificada: o TrilhaGov completa esfera municipal, execucao direta, prazos e sinalizacao de saude.',
+        ], ';');
+        rewind($stream);
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+
+        return $contents ?: '';
+    }
+
     /** @return array<int, array{row_number: int, data: array<string, string|null>}> */
     private function parse(string $contents): array
     {
@@ -319,7 +367,15 @@ class AmendmentSpreadsheetImportService
             }
         }
 
-        $missing = array_diff(self::REQUIRED_COLUMNS, $columnMap);
+        $missing = array_diff(self::COMPLETE_REQUIRED_COLUMNS, $columnMap);
+        $isSimplifiedMunicipal = $missing !== []
+            && array_diff(self::REQUIRED_COLUMNS, $columnMap) === [];
+        if ($missing !== []) {
+            if ($isSimplifiedMunicipal) {
+                $missing = [];
+            }
+        }
+
         if ($missing !== []) {
             fclose($stream);
             $labels = array_map(fn (string $field) => self::TEMPLATE_HEADERS[$field], $missing);
@@ -340,6 +396,9 @@ class AmendmentSpreadsheetImportService
             foreach ($columnMap as $index => $field) {
                 $value = $values[$index] ?? null;
                 $data[$field] = is_string($value) ? trim($value) : null;
+            }
+            if ($isSimplifiedMunicipal) {
+                $data['_import_mode'] = 'municipal_simplified';
             }
             $rows[] = ['row_number' => $rowNumber, 'data' => $data];
         }
@@ -417,8 +476,9 @@ class AmendmentSpreadsheetImportService
     }
 
     /** @param array<string, string|null> $data @return array<string, mixed> */
-    private function normalize(array $data): array
+    private function normalize(Municipality $municipality, array $data): array
     {
+        $importMode = (string) ($data['_import_mode'] ?? 'complete');
         $nullableFields = [
             'author_party', 'transferegov_code', 'received_amount', 'received_at',
             'communication_completed_at', 'execution_completed_at',
@@ -432,6 +492,31 @@ class AmendmentSpreadsheetImportService
         foreach (array_keys(self::TEMPLATE_HEADERS) as $field) {
             $value = trim((string) ($data[$field] ?? ''));
             $normalized[$field] = in_array($field, $nullableFields, true) && $value === '' ? null : $value;
+        }
+        $normalized['_import_mode'] = $importMode;
+
+        if ($importMode === 'municipal_simplified') {
+            $indicatedAt = $this->date($normalized['indicated_at']);
+            $baseDate = is_string($indicatedAt) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $indicatedAt)
+                ? Carbon::createFromFormat('Y-m-d', $indicatedAt)
+                : today();
+            $year = ctype_digit((string) $normalized['fiscal_year'])
+                ? (int) $normalized['fiscal_year']
+                : (int) $baseDate->year;
+            $isHealth = $this->looksLikeHealth((string) $normalized['object'], (string) $normalized['responsible_department']);
+
+            $normalized['government_sphere'] = 'Municipal';
+            $normalized['authorship_type'] = 'Individual';
+            $normalized['transfer_type'] = 'Execucao direta pelo municipio';
+            $normalized['status'] = 'Identificada';
+            $normalized['expense_destination'] = $isHealth ? 'Custeio' : 'Investimento';
+            $normalized['beneficiary_location'] = $normalized['beneficiary_location']
+                ?: trim($municipality->name.' / '.$municipality->state, ' /');
+            $normalized['communication_deadline'] = $normalized['communication_deadline'] ?: $baseDate->copy()->addDays(15)->format('Y-m-d');
+            $normalized['execution_deadline'] = $normalized['execution_deadline'] ?: Carbon::create($year, 12, 31)->format('Y-m-d');
+            $normalized['application_deadline'] = $normalized['application_deadline'] ?: Carbon::create($year, 12, 31)->format('Y-m-d');
+            $normalized['accountability_deadline'] = $normalized['accountability_deadline'] ?: Carbon::create($year + 1, 3, 31)->format('Y-m-d');
+            $normalized['indicated_for_health'] = $isHealth;
         }
 
         $normalized['fiscal_year'] = ctype_digit((string) $normalized['fiscal_year'])
@@ -495,6 +580,7 @@ class AmendmentSpreadsheetImportService
     /** @param array<string, mixed> $data @return array<int, string> */
     private function validationErrors(Municipality $municipality, array $data): array
     {
+        $isSimplifiedMunicipal = ($data['_import_mode'] ?? null) === 'municipal_simplified';
         $validator = Validator::make($data, [
             'reference' => ['required', 'string', 'max:100'],
             'fiscal_year' => ['required', 'integer', 'between:2000,'.(now()->year + 1)],
@@ -502,15 +588,15 @@ class AmendmentSpreadsheetImportService
             'authorship_type' => ['required', Rule::in(array_keys(ParliamentaryAmendment::authorshipTypes()))],
             'transfer_type' => ['required', Rule::in(array_keys(ParliamentaryAmendment::transferTypes()))],
             'author_name' => ['required', 'string', 'max:255'],
-            'author_party' => ['nullable', 'required_if:authorship_type,individual', 'string', 'max:20'],
+            'author_party' => ['nullable', $isSimplifiedMunicipal ? 'sometimes' : 'required_if:authorship_type,individual', 'string', 'max:20'],
             'object' => ['required', 'string', 'max:5000'],
             'expense_destination' => ['nullable', 'required_if:government_sphere,municipal', Rule::in(array_keys(ParliamentaryAmendment::expenseDestinations()))],
             'responsible_department' => ['required', 'string', 'max:255'],
             'beneficiary_location' => ['nullable', 'required_if:government_sphere,municipal', 'string', 'max:255'],
             'transferegov_code' => ['nullable', 'required_if:government_sphere,federal', 'string', 'max:100'],
             'legal_instrument' => ['nullable', 'string', 'max:255'],
-            'administrative_process' => ['nullable', 'required_if:government_sphere,municipal', 'string', 'max:255'],
-            'bank_tracking_type' => ['nullable', 'required_if:government_sphere,municipal', Rule::in(array_keys(ParliamentaryAmendment::bankTrackingTypes()))],
+            'administrative_process' => ['nullable', $isSimplifiedMunicipal ? 'sometimes' : 'required_if:government_sphere,municipal', 'string', 'max:255'],
+            'bank_tracking_type' => ['nullable', $isSimplifiedMunicipal ? 'sometimes' : 'required_if:government_sphere,municipal', Rule::in(array_keys(ParliamentaryAmendment::bankTrackingTypes()))],
             'bank_account_number' => ['nullable', 'required_if:bank_tracking_type,specific_account', 'string', 'max:100'],
             'funding_source_code' => ['nullable', 'required_if:bank_tracking_type,municipal_direct_codes', 'string', 'max:100'],
             'application_code_fixed' => ['nullable', 'required_if:bank_tracking_type,municipal_direct_codes', 'string', 'max:100'],
@@ -650,5 +736,22 @@ class AmendmentSpreadsheetImportService
     private function canonical(string $value): string
     {
         return trim((string) preg_replace('/[^a-z0-9]+/', '_', Str::lower(Str::ascii($value))), '_');
+    }
+
+    private function looksLikeHealth(string $object, string $department): bool
+    {
+        $text = $this->canonical($object.' '.$department);
+
+        return Str::contains($text, [
+            'saude',
+            'ubs',
+            'upa',
+            'hospital',
+            'posto_de_saude',
+            'vacin',
+            'medic',
+            'enferm',
+            'ambulancia',
+        ]);
     }
 }

@@ -26,7 +26,8 @@ class SpreadsheetImportTest extends TestCase
             ->get(route('spreadsheet-imports.index'))
             ->assertOk()
             ->assertSee('Importar planilha')
-            ->assertSee('Baixar modelo CSV');
+            ->assertSee('Modelo simplificado')
+            ->assertSee('Modelo completo');
 
         $response = $this->get(route('spreadsheet-imports.template'));
         $response->assertOk()
@@ -34,6 +35,65 @@ class SpreadsheetImportTest extends TestCase
             ->assertDownload('modelo-importacao-emendas.csv');
         $this->assertStringContainsString('Identificacao da emenda', (string) $response->getContent());
         $this->assertStringContainsString(';Exercicio;Esfera;', (string) $response->getContent());
+
+        $simplified = $this->get(route('spreadsheet-imports.template.simplified'));
+        $simplified->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertDownload('modelo-municipal-simplificado.csv');
+        $this->assertStringContainsString('Secretaria responsavel', (string) $simplified->getContent());
+        $this->assertStringNotContainsString('Codigo Transferegov', (string) $simplified->getContent());
+    }
+
+    public function test_simplified_municipal_csv_is_auto_completed_before_import(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $token = $this->sessionToken($municipality, "spreadsheet-preview-{$municipality->id}");
+
+        $this->actingAs($manager)->post(route('spreadsheet-imports.preview'), [
+            '_submission_token' => $token,
+            'spreadsheet' => UploadedFile::fake()->createWithContent('camara.csv', $this->simplifiedCsv([
+                [
+                    'Identificacao da emenda' => 'CAM-2026-001',
+                    'Exercicio' => '2026',
+                    'Autor' => 'Vereador Bruno Almeida',
+                    'Partido' => '',
+                    'Objeto' => 'Aquisicao de equipamentos para UBS Central',
+                    'Secretaria responsavel' => 'Secretaria Municipal de Saude',
+                    'Municipio ou localidade beneficiada' => '',
+                    'Valor previsto' => 'R$ 80.000,00',
+                    'Data da indicacao' => '15/03/2026',
+                    'Observacoes' => 'Planilha inicial da Camara.',
+                ],
+            ])),
+        ])->assertRedirect();
+
+        $batch = AmendmentImportBatch::firstOrFail();
+        $row = $batch->rows()->firstOrFail();
+        $this->assertSame(AmendmentImportRow::STATUS_VALID, $row->status);
+        $this->assertSame('municipal', $row->normalized_data['government_sphere']);
+        $this->assertSame('direct_execution', $row->normalized_data['transfer_type']);
+        $this->assertTrue($row->normalized_data['indicated_for_health']);
+        $this->assertSame('2026-03-30', $row->normalized_data['communication_deadline']);
+        $this->assertSame('2026-12-31', $row->normalized_data['execution_deadline']);
+        $this->assertSame('2027-03-31', $row->normalized_data['accountability_deadline']);
+
+        $confirmToken = $this->sessionToken($municipality, "spreadsheet-confirm-{$batch->id}");
+        $this->post(route('spreadsheet-imports.confirm', $batch), [
+            '_submission_token' => $confirmToken,
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'CAM-2026-001',
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'indicated_for_health' => true,
+            'expected_amount' => 80000,
+        ]);
+        $this->assertStringContainsString(
+            'modelo municipal simplificado',
+            ParliamentaryAmendment::where('reference', 'CAM-2026-001')->firstOrFail()->notes,
+        );
     }
 
     public function test_preview_classifies_valid_duplicate_and_invalid_rows(): void
@@ -262,6 +322,33 @@ class SpreadsheetImportTest extends TestCase
     private function csv(array $rows, string $delimiter = ';'): string
     {
         $headers = array_keys($this->validRow());
+        $stream = fopen('php://temp', 'r+');
+        fputcsv($stream, $headers, $delimiter);
+        foreach ($rows as $row) {
+            fputcsv($stream, array_map(fn (string $header) => $row[$header] ?? '', $headers), $delimiter);
+        }
+        rewind($stream);
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+
+        return $contents ?: '';
+    }
+
+    /** @param array<int, array<string, string>> $rows */
+    private function simplifiedCsv(array $rows, string $delimiter = ';'): string
+    {
+        $headers = [
+            'Identificacao da emenda',
+            'Exercicio',
+            'Autor',
+            'Partido',
+            'Objeto',
+            'Secretaria responsavel',
+            'Municipio ou localidade beneficiada',
+            'Valor previsto',
+            'Data da indicacao',
+            'Observacoes',
+        ];
         $stream = fopen('php://temp', 'r+');
         fputcsv($stream, $headers, $delimiter);
         foreach ($rows as $row) {

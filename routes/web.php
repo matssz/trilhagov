@@ -300,6 +300,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::middleware('municipality.module:spreadsheet_import')->group(function () {
             Route::get('/importacoes/planilhas', [SpreadsheetImportController::class, 'index'])->name('spreadsheet-imports.index');
             Route::get('/importacoes/planilhas/modelo.csv', [SpreadsheetImportController::class, 'template'])->name('spreadsheet-imports.template');
+            Route::get('/importacoes/planilhas/modelo-municipal-simplificado.csv', [SpreadsheetImportController::class, 'simplifiedTemplate'])->name('spreadsheet-imports.template.simplified');
             Route::post('/importacoes/planilhas/pre-visualizar', [SpreadsheetImportController::class, 'preview'])->name('spreadsheet-imports.preview')->block(20, 20);
             Route::get('/importacoes/planilhas/{batch}', [SpreadsheetImportController::class, 'show'])->name('spreadsheet-imports.show');
             Route::post('/importacoes/planilhas/{batch}/confirmar', [SpreadsheetImportController::class, 'confirm'])->name('spreadsheet-imports.confirm')->block(20, 20);

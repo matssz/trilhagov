@@ -41,6 +41,15 @@ class SpreadsheetImportController extends Controller
         ]);
     }
 
+    public function simplifiedTemplate(AmendmentSpreadsheetImportService $importService): Response
+    {
+        return response($importService->simplifiedMunicipalTemplateContents(), 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="modelo-municipal-simplificado.csv"',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
     public function preview(
         Request $request,
         CurrentMunicipality $currentMunicipality,
