@@ -23,7 +23,7 @@
     <section class="legislative-form-section span-2">
         <div class="legislative-section-heading">
             <span>1</span>
-            <div><h2>Pedido principal</h2><p>Informe o que deseja indicar e o valor estimado. O sistema confere cota e saude automaticamente.</p></div>
+            <div><h2>Pedido principal</h2><p>Informe o minimo necessario para a Camara receber a indicacao. O sistema confere cota, quantidade e saude automaticamente.</p></div>
         </div>
         <div class="legislative-fields">
             @unless($editing)
@@ -40,7 +40,7 @@
     <section class="legislative-form-section span-2">
         <div class="legislative-section-heading">
             <span>2</span>
-            <div><h2>Destino e justificativa</h2><p>Use linguagem simples. A equipe tecnica complementa o que for necessario depois.</p></div>
+            <div><h2>Destino e justificativa</h2><p>Use linguagem simples: quem recebe, onde sera aplicado e qual problema municipal sera atendido.</p></div>
         </div>
         <div class="legislative-fields">
             <label><span>Beneficiario ou local atendido <b>*</b></span><input class="form-control @error('beneficiary_name') is-invalid @enderror" name="beneficiary_name" value="{{ old('beneficiary_name', $proposal->beneficiary_name ?? '') }}" maxlength="255" required placeholder="Ex.: UBS Central, Escola Municipal..." @if($institutionSuggestions['beneficiaries']->isNotEmpty()) list="legislative-beneficiaries" @endif data-auto-health-source data-institution-source="legislative-beneficiaries">@error('beneficiary_name')<small class="invalid-feedback">{{ $message }}</small>@enderror</label>

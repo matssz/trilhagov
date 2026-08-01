@@ -43,6 +43,25 @@
         <article class="is-success"><span><i data-lucide="badge-check" aria-hidden="true"></i></span><div><small>Armazenados</small><strong>{{ (int) ($counts[\App\Models\AudespHomologationBatch::STATUS_STORED] ?? 0) }}</strong></div></article>
     </div>
 
+    <section class="homologation-real-file mb-4" aria-label="Homologacao com arquivo real do Siafic">
+        <header>
+            <span><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
+            <div>
+                <p class="page-kicker mb-1">Etapa TCESP 4</p>
+                <h2>Homologacao com arquivo real do Siafic</h2>
+                <p>Use este roteiro com contador e fornecedor antes de considerar a competencia pronta para remessa oficial.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="#novo-lote"><i data-lucide="upload" aria-hidden="true"></i>Importar XML</a>
+        </header>
+        <div>
+            <article><strong>1</strong><span>Exportar XML real</span><small>Cadastro de Emendas ou Detalhe do Movimento Mensal produzido pelo Siafic.</small></article>
+            <article><strong>2</strong><span>Conferir codigos</span><small>Codigo de aplicacao, fonte, conta, pre-empenho, empenho, liquidacao e pagamento.</small></article>
+            <article><strong>3</strong><span>Importar sem alterar</span><small>O TrilhaGov compara e preserva o hash; nenhuma informacao contabil e sobrescrita.</small></article>
+            <article><strong>4</strong><span>Registrar Coletor</span><small>A transmissao continua no ambiente oficial do Audesp, com protocolo e evidencia.</small></article>
+            <article><strong>5</strong><span>Guardar retorno</span><small>Recibo, rejeicao, reenvio e validacao ficam no dossie municipal.</small></article>
+        </div>
+    </section>
+
     @if ($canEdit)
         <section class="content-panel mb-4" id="novo-lote">
             <div class="content-panel-header homologation-panel-header">

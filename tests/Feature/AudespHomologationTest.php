@@ -128,6 +128,8 @@ class AudespHomologationTest extends TestCase
         $this->assertNull($item->differences);
         $this->get(route('audesp-homologations.show', $batch))
             ->assertOk()
+            ->assertSee('Decisao da competencia')
+            ->assertSee('Pode registrar transmissao externa')
             ->assertSee('Movimento contábil mensal')
             ->assertSee('Execução financeira da emenda');
     }
@@ -275,6 +277,9 @@ class AudespHomologationTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('audesp-homologations.index'))
             ->assertOk()
+            ->assertSee('Homologacao com arquivo real do Siafic')
+            ->assertSee('Exportar XML real')
+            ->assertSee('Importar sem alterar')
             ->assertDontSee('Novo lote de conferência');
         $this->get(route('audesp-homologations.show', $batch))->assertNotFound();
         $this->post(route('audesp-homologations.store'), [])->assertForbidden();

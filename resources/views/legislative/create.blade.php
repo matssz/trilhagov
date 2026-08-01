@@ -34,6 +34,32 @@
             </div>
             <span>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Saúde em dia' }}</span>
         </section>
+        <section class="legislative-minimum-flow" aria-label="Fluxo minimo para a indicacao do vereador">
+            <article>
+                <span><i data-lucide="file-pen-line" aria-hidden="true"></i></span>
+                <div>
+                    <small>1 · Pedido do vereador</small>
+                    <strong>Informe so o essencial</strong>
+                    <p>Objeto, beneficiario ou local, natureza da despesa e valor estimado.</p>
+                </div>
+            </article>
+            <article>
+                <span><i data-lucide="calculator" aria-hidden="true"></i></span>
+                <div>
+                    <small>2 · Conferencia automatica</small>
+                    <strong>Cota, quantidade e saude</strong>
+                    <p>O TrilhaGov usa RCL, cadeiras da Camara e percentual de saude da norma ativa.</p>
+                </div>
+            </article>
+            <article>
+                <span><i data-lucide="route" aria-hidden="true"></i></span>
+                <div>
+                    <small>3 · Proximo passo</small>
+                    <strong>Camara e Executivo</strong>
+                    <p>Depois de salva, a proposta segue para conferencia, protocolo e reserva municipal.</p>
+                </div>
+            </article>
+        </section>
         <section class="legislative-projection-panel" data-legislative-projection>
             <div>
                 <span>Saldo que sobrara na cota</span>

@@ -47,6 +47,27 @@
         @endforeach
     </ol>
 
+    <section class="homologation-decision mb-4" aria-label="Decisao operacional do lote">
+        <div>
+            <small>Decisao da competencia</small>
+            <strong>{{ $batch->status === \App\Models\AudespHomologationBatch::STATUS_READY ? 'Pode registrar transmissao externa' : ($rejected ? 'Corrigir e reenviar com contador' : 'Ainda requer conferencia') }}</strong>
+            <p>
+                @if ($batch->status === \App\Models\AudespHomologationBatch::STATUS_READY)
+                    Todos os itens do XML coincidem com o TrilhaGov. Transmita no Coletor Audesp e anexe o protocolo.
+                @elseif ($rejected)
+                    A tentativa rejeitada fica preservada. Corrija a origem do erro e crie novo lote vinculado.
+                @else
+                    Resolva divergencias ou vinculos ausentes antes de qualquer remessa oficial.
+                @endif
+            </p>
+        </div>
+        <div>
+            <span><b>{{ $batch->matched_count }}</b><small>coincidente(s)</small></span>
+            <span class="{{ $batch->divergent_count ? 'has-risk' : '' }}"><b>{{ $batch->divergent_count }}</b><small>divergente(s)</small></span>
+            <span class="{{ $batch->unmatched_count ? 'has-risk' : '' }}"><b>{{ $batch->unmatched_count }}</b><small>sem vinculo</small></span>
+        </div>
+    </section>
+
     @if ($rejected)
         <div class="homologation-alert is-danger mb-4"><i data-lucide="shield-alert" aria-hidden="true"></i><div><strong>Retorno rejeitado preservado</strong><p>Corrija o cadastro ou o XML com a contabilidade e crie um novo lote vinculando esta tentativa. O arquivo, o protocolo e a evidência originais não serão substituídos.</p></div><a class="btn btn-outline-danger" href="{{ route('audesp-homologations.index') }}#novo-lote">Criar reenvio</a></div>
     @elseif ($batch->status === \App\Models\AudespHomologationBatch::STATUS_STORED)
