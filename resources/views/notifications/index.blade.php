@@ -68,6 +68,15 @@
             <section class="content-panel mb-4">
                 <div class="content-panel-header"><h2 class="h5 mb-0">Meus avisos</h2></div>
                 <div class="content-panel-body">
+                    <div class="mail-delivery-card mail-delivery-{{ $mailStatus['status'] }}">
+                        <span><i data-lucide="{{ $mailStatus['icon'] }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Canal externo</small>
+                            <strong>{{ $mailStatus['label'] }}</strong>
+                            <p>{{ $mailStatus['message'] }}</p>
+                            <em>Mailer: {{ strtoupper($mailStatus['mailer']) }}</em>
+                        </div>
+                    </div>
                     <form method="POST" action="{{ route('notifications.preferences.update') }}">
                         @csrf
                         @method('PATCH')

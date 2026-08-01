@@ -92,6 +92,33 @@ class IntegrityAlertTest extends TestCase
             ->assertSee('Prazo próximo');
     }
 
+    public function test_notification_center_explains_real_email_delivery_status(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        config(['mail.default' => 'log']);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('Canal externo')
+            ->assertSee('Ambiente em modo teste/log')
+            ->assertSee('Mailer: LOG');
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.from.address' => 'no-reply@trilhagov.test',
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('E-mail real ativo')
+            ->assertSee('Mailer: SMTP');
+    }
+
     public function test_enabled_channels_are_respected_per_user(): void
     {
         Notification::fake();

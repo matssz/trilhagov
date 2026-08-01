@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\CurrentMunicipality;
+use App\Services\MailDeliveryStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -10,7 +11,11 @@ use Illuminate\View\View;
 
 class NotificationCenterController extends Controller
 {
-    public function index(Request $request, CurrentMunicipality $currentMunicipality): View
+    public function index(
+        Request $request,
+        CurrentMunicipality $currentMunicipality,
+        MailDeliveryStatus $mailDeliveryStatus,
+    ): View
     {
         $municipality = $currentMunicipality->get($request);
         $membership = $request->user()->municipalities()->findOrFail($municipality->id)->pivot;
@@ -23,6 +28,7 @@ class NotificationCenterController extends Controller
             'municipality' => $municipality,
             'notifications' => $notifications,
             'membership' => $membership,
+            'mailStatus' => $mailDeliveryStatus->summary(),
         ]);
     }
 

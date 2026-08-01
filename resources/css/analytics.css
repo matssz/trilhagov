@@ -671,6 +671,77 @@
     font-size: .78rem;
 }
 
+.public-open-data-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 1px;
+    align-items: stretch;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    border: 1px solid #c8d8e8;
+    border-radius: 7px;
+    background: #c8d8e8;
+    box-shadow: var(--shadow-soft);
+}
+
+.public-open-data-strip article,
+.public-open-data-strip .btn {
+    min-width: 0;
+    min-height: 82px;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+}
+
+.public-open-data-strip article {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: .7rem;
+    align-items: center;
+    padding: .9rem 1rem;
+}
+
+.public-open-data-strip svg {
+    width: 18px;
+    height: 18px;
+}
+
+.public-open-data-strip article > svg {
+    width: 34px;
+    height: 34px;
+    padding: .45rem;
+    border: 1px solid #c9d9ea;
+    border-radius: 7px;
+    background: var(--navy-50);
+    color: var(--navy-800);
+}
+
+.public-open-data-strip strong,
+.public-open-data-strip span {
+    display: block;
+}
+
+.public-open-data-strip strong {
+    color: var(--navy-950);
+    font-size: .86rem;
+}
+
+.public-open-data-strip span {
+    margin-top: .18rem;
+    color: var(--muted);
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+.public-open-data-strip .btn {
+    height: 100%;
+    align-self: stretch;
+    border: 0;
+    border-radius: 0;
+    color: var(--navy-900);
+    font-size: .78rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
 .public-metric-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -949,6 +1020,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .public-open-data-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .analytics-filters {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1029,6 +1104,7 @@
     .analytics-filters,
     .analytics-metrics,
     .public-metric-grid,
+    .public-open-data-strip,
     .analytics-pulse {
         grid-template-columns: minmax(0, 1fr);
     }
