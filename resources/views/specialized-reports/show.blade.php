@@ -69,6 +69,23 @@
             @endif
         </section>
     @else
+        <section class="annual-readiness tone-{{ $snapshot['readiness']['status'] ?? 'attention' }}">
+            <div class="annual-readiness-score">
+                <strong>{{ $snapshot['readiness']['score'] ?? 0 }}%</strong>
+                <span>pronto</span>
+            </div>
+            <div>
+                <p class="page-kicker mb-1">Dossie anual consolidado</p>
+                <h2>{{ $snapshot['readiness']['label'] ?? 'Revisao pendente' }}</h2>
+                <p>Conferencia de normas, relatorios mensais, Audesp/Siafic, transparencia, prestacao de contas e documentos oficiais antes do encaminhamento institucional.</p>
+            </div>
+            <div class="annual-readiness-validations">
+                @foreach (($snapshot['readiness']['external_validation'] ?? []) as $owner => $instruction)
+                    <span><strong>{{ $owner }}</strong><small>{{ $instruction }}</small></span>
+                @endforeach
+            </div>
+        </section>
+
         <div class="metric-strip report-metrics">
             <article><span>Emendas</span><strong>{{ $summary['amendments'] }}</strong><small>{{ $money($summary['expected']) }} previsto</small></article>
             <article><span>Pago no período</span><strong>{{ $money($summary['paid']) }}</strong><small>{{ $money($summary['balance']) }} de saldo</small></article>
@@ -90,6 +107,25 @@
         <section class="content-panel">
             <div class="content-panel-header"><h2 class="h5 mb-0">Cobertura dos controles</h2></div>
             <div class="control-grid">@foreach ($snapshot['control_matrix'] as $control)<article><div><strong>{{ $control['label'] }}</strong><span>{{ $control['met'] }} atendida(s) · {{ $control['pending'] }} pendente(s)</span></div><span class="status-pill {{ $control['status'] === 'controlled' ? 'is-success' : 'is-warning' }}">{{ $control['status'] === 'controlled' ? 'Controlado' : 'Atenção' }}</span></article>@endforeach</div>
+        </section>
+    @endif
+
+    @if ($report->report_type === 'annual_dossier')
+        <section class="content-panel">
+            <div class="content-panel-header"><h2 class="h5 mb-0">Checklist de encaminhamento</h2><span class="record-count">{{ count($snapshot['readiness']['checks'] ?? []) }}</span></div>
+            <div class="annual-check-grid">
+                @foreach (($snapshot['readiness']['checks'] ?? []) as $check)
+                    <article class="status-{{ $check['status'] }}">
+                        <span><i data-lucide="{{ $check['status'] === 'ok' ? 'circle-check' : ($check['status'] === 'critical' ? 'circle-alert' : 'triangle-alert') }}" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>{{ $check['label'] }}</strong>
+                            <small>{{ $check['detail'] }}</small>
+                            <em>{{ $check['action'] }}</em>
+                        </div>
+                        <a class="icon-button" href="{{ $check['href'] }}" title="Abrir acao" aria-label="Abrir {{ $check['label'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i></a>
+                    </article>
+                @endforeach
+            </div>
         </section>
     @endif
 

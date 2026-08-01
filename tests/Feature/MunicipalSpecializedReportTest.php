@@ -94,6 +94,15 @@ class MunicipalSpecializedReportTest extends TestCase
             'fiscal_year' => 2026, 'reference_month' => 7,
         ]);
         $report = MunicipalSpecializedReport::firstOrFail();
+        $this->assertArrayHasKey('readiness', $report->snapshot);
+        $this->assertSame('Nao encaminhar sem saneamento', $report->snapshot['readiness']['label']);
+        $this->assertSame(7, count($report->snapshot['readiness']['checks']));
+        $this->get(route('specialized-reports.show', $report))
+            ->assertOk()
+            ->assertSee('Dossie anual consolidado')
+            ->assertSee('Checklist de encaminhamento')
+            ->assertSee('Audesp/Siafic validado')
+            ->assertSee('Contabilidade/Siafic');
         $this->post(route('specialized-reports.issue', $report), [
             '_submission_token' => $this->token($municipality, "specialized-report-issue-{$report->id}"),
             'confirm_snapshot' => 1,

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AccountabilityProcess;
+use App\Models\AudespHomologationBatch;
 use App\Models\MunicipalAuditProgram;
 use App\Models\Municipality;
 use App\Models\MunicipalOfficialDocument;
@@ -202,24 +203,38 @@ class MunicipalSpecializedReportService
             ->whereHas('planItem.plan', fn ($query) => $query->where('fiscal_year', $year));
         $reviews = $municipality->internalControlReviews()
             ->whereHas('amendment', fn ($query) => $query->where('fiscal_year', $year));
+        $batches = $municipality->audespHomologationBatches()
+            ->where('fiscal_year', $year)
+            ->where('reference_month', '<=', $month);
+        $rows = collect($base['amendments']);
+        $coverage = [
+            'months_expected' => $month,
+            'months_with_issued_report' => (clone $governanceReports)->where('status', 'issued')->distinct()->count('reference_month'),
+            'monthly_reports_issued' => (clone $governanceReports)->where('status', 'issued')->count(),
+            'official_documents' => (clone $officialDocuments)->count(),
+            'official_documents_sent' => (clone $officialDocuments)->whereIn('status', [MunicipalOfficialDocument::STATUS_SENT, MunicipalOfficialDocument::STATUS_ACKNOWLEDGED])->count(),
+            'official_documents_acknowledged' => (clone $officialDocuments)->where('status', MunicipalOfficialDocument::STATUS_ACKNOWLEDGED)->count(),
+            'audit_plans_issued' => $municipality->auditPlans()->where('fiscal_year', $year)->where('status', 'issued')->count(),
+            'audit_programs' => (clone $programs)->count(),
+            'audit_programs_concluded' => (clone $programs)->where('status', MunicipalAuditProgram::STATUS_CONCLUDED)->count(),
+            'internal_control_reviews' => (clone $reviews)->count(),
+            'accountability_processes' => (clone $accountability)->count(),
+            'accountability_approved' => (clone $accountability)->where('status', AccountabilityProcess::STATUS_APPROVED)->count(),
+            'accountability_with_pending_issues' => (clone $accountability)->whereIn('status', [AccountabilityProcess::STATUS_PENDING_CORRECTION, AccountabilityProcess::STATUS_REJECTED])->count(),
+            'audesp_batches' => (clone $batches)->count(),
+            'audesp_ready_or_validated_batches' => (clone $batches)->whereIn('status', [
+                AudespHomologationBatch::STATUS_READY,
+                AudespHomologationBatch::STATUS_SUBMITTED,
+                AudespHomologationBatch::STATUS_RECEIVED,
+                AudespHomologationBatch::STATUS_VALIDATED,
+            ])->count(),
+            'audesp_rejected_batches' => (clone $batches)->where('status', AudespHomologationBatch::STATUS_REJECTED)->count(),
+        ];
 
         return $this->envelope($base, MunicipalSpecializedReport::TYPE_ANNUAL_DOSSIER, [
             'summary' => $base['totals'],
-            'coverage' => [
-                'months_expected' => $month,
-                'months_with_issued_report' => (clone $governanceReports)->where('status', 'issued')->distinct()->count('reference_month'),
-                'monthly_reports_issued' => (clone $governanceReports)->where('status', 'issued')->count(),
-                'official_documents' => (clone $officialDocuments)->count(),
-                'official_documents_sent' => (clone $officialDocuments)->whereIn('status', [MunicipalOfficialDocument::STATUS_SENT, MunicipalOfficialDocument::STATUS_ACKNOWLEDGED])->count(),
-                'official_documents_acknowledged' => (clone $officialDocuments)->where('status', MunicipalOfficialDocument::STATUS_ACKNOWLEDGED)->count(),
-                'audit_plans_issued' => $municipality->auditPlans()->where('fiscal_year', $year)->where('status', 'issued')->count(),
-                'audit_programs' => (clone $programs)->count(),
-                'audit_programs_concluded' => (clone $programs)->where('status', MunicipalAuditProgram::STATUS_CONCLUDED)->count(),
-                'internal_control_reviews' => (clone $reviews)->count(),
-                'accountability_processes' => (clone $accountability)->count(),
-                'accountability_approved' => (clone $accountability)->where('status', AccountabilityProcess::STATUS_APPROVED)->count(),
-                'accountability_with_pending_issues' => (clone $accountability)->whereIn('status', [AccountabilityProcess::STATUS_PENDING_CORRECTION, AccountabilityProcess::STATUS_REJECTED])->count(),
-            ],
+            'coverage' => $coverage,
+            'readiness' => $this->annualReadiness($municipality, $rows, $coverage, $base, $month),
             'control_matrix' => $base['control_matrix'],
             'attention' => $base['attention'],
             'rows' => $base['amendments'],
@@ -256,5 +271,86 @@ class MunicipalSpecializedReportService
             'difference' => abs((float) $actual - (float) $expected),
             'unit' => $unit,
         ]);
+    }
+
+    /** @param Collection<int, array<string, mixed>> $rows
+     * @param array<string, mixed> $coverage
+     * @param array<string, mixed> $base
+     * @return array<string, mixed>
+     */
+    private function annualReadiness(Municipality $municipality, Collection $rows, array $coverage, array $base, int $month): array
+    {
+        $checks = collect([
+            [
+                'key' => 'monthly_reports',
+                'label' => 'Relatorios mensais emitidos',
+                'status' => $coverage['months_with_issued_report'] >= $month ? 'ok' : 'attention',
+                'detail' => $coverage['months_with_issued_report'].' de '.$month.' competencia(s) emitida(s).',
+                'action' => 'Emitir relatorios mensais faltantes.',
+                'href' => route('governance-reports.index'),
+            ],
+            [
+                'key' => 'normative',
+                'label' => 'Norma municipal ativa',
+                'status' => ($base['governance']['active_normative_profile'] ?? false) ? 'ok' : 'critical',
+                'detail' => ($base['governance']['active_normative_profile'] ?? false) ? 'Versao normativa vigente localizada.' : 'Sem versao normativa ativa para o exercicio.',
+                'action' => 'Ativar ou revisar normas municipais.',
+                'href' => route('municipal-rules.index'),
+            ],
+            [
+                'key' => 'transparency',
+                'label' => 'Transparencia publica',
+                'status' => $municipality->transparency_enabled ? 'ok' : 'attention',
+                'detail' => $municipality->transparency_enabled ? 'Portal publico habilitado.' : 'Portal publico ainda nao habilitado.',
+                'action' => 'Conferir configuracao de transparencia.',
+                'href' => route('emendas.index'),
+            ],
+            [
+                'key' => 'audesp',
+                'label' => 'Audesp/Siafic validado',
+                'status' => $coverage['audesp_batches'] === 0 || $coverage['audesp_rejected_batches'] > 0 ? 'attention' : 'ok',
+                'detail' => $coverage['audesp_batches'].' lote(s), '.$coverage['audesp_ready_or_validated_batches'].' pronto(s)/transmitido(s), '.$coverage['audesp_rejected_batches'].' rejeitado(s).',
+                'action' => 'Importar ou reconferir XML real do Siafic/Audesp.',
+                'href' => route('audesp-homologations.index'),
+            ],
+            [
+                'key' => 'accountability',
+                'label' => 'Prestacoes de contas',
+                'status' => $coverage['accountability_with_pending_issues'] > 0 || ($coverage['accountability_processes'] < $rows->count() && $rows->isNotEmpty()) ? 'attention' : 'ok',
+                'detail' => $coverage['accountability_processes'].' processo(s), '.$coverage['accountability_approved'].' aprovado(s), '.$coverage['accountability_with_pending_issues'].' com pendencia.',
+                'action' => 'Finalizar prestacoes pendentes.',
+                'href' => route('work-center.index', ['queue' => 'execution']),
+            ],
+            [
+                'key' => 'control',
+                'label' => 'Controle interno e TCESP',
+                'status' => collect($base['control_matrix'])->contains(fn (array $item) => $item['status'] !== 'controlled') ? 'attention' : 'ok',
+                'detail' => collect($base['control_matrix'])->where('status', 'controlled')->count().' de '.count($base['control_matrix']).' controle(s) sem pendencia.',
+                'action' => 'Resolver matriz de aderencia TCESP.',
+                'href' => route('municipal-tcesp-adherence.index'),
+            ],
+            [
+                'key' => 'documents',
+                'label' => 'Documentos e comunicacoes',
+                'status' => $coverage['official_documents'] > 0 && $coverage['official_documents_sent'] === 0 ? 'attention' : 'ok',
+                'detail' => $coverage['official_documents'].' documento(s), '.$coverage['official_documents_sent'].' protocolado(s), '.$coverage['official_documents_acknowledged'].' recebido(s).',
+                'action' => 'Protocolar documentos oficiais pendentes.',
+                'href' => route('official-documents.index'),
+            ],
+        ]);
+        $score = $checks->isEmpty() ? 100 : (int) round(($checks->where('status', 'ok')->count() / $checks->count()) * 100);
+
+        return [
+            'score' => $score,
+            'status' => $score >= 85 ? 'ready' : ($score >= 60 ? 'attention' : 'critical'),
+            'label' => $score >= 85 ? 'Pronto para revisao final' : ($score >= 60 ? 'Requer validacao antes do envio' : 'Nao encaminhar sem saneamento'),
+            'checks' => $checks->values()->all(),
+            'external_validation' => [
+                'Contabilidade/Siafic' => 'Conferir balancete, XML mensal, codigo de aplicacao e retorno do fornecedor.',
+                'Controle Interno' => 'Revisar matriz TCESP, documentos essenciais, transparencia e achados.',
+                'Camara Municipal' => 'Confirmar protocolos, impedimentos, remanejamentos e ciencia dos autores.',
+                'Audesp/TCESP' => 'Guardar recibos, rejeicoes, reenvios e justificativas no dossie municipal.',
+            ],
+        ];
     }
 }

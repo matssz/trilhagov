@@ -49,6 +49,30 @@
         <article><span class="metric-owner"><i data-lucide="user-round-check" aria-hidden="true"></i></span><div><small>Sem responsável</small><strong>{{ $metrics['unassigned'] }}</strong></div></article>
     </section>
 
+    <section class="work-decision-panel" aria-label="Decisoes prioritarias do gestor">
+        <div class="work-decision-heading">
+            <div>
+                <p class="panel-kicker">Comando do gestor</p>
+                <h2>O que decidir primeiro hoje</h2>
+                <span>Atalhos para as filas que seguram Camara, Executivo, saude, TCESP, execucao e prestacao de contas.</span>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ route('work-center.index', ['status' => 'active']) }}"><i data-lucide="list-checks" aria-hidden="true"></i>Ver fila completa</a>
+        </div>
+        <div class="work-decision-grid">
+            @foreach ($decisionCards as $decision)
+                <a class="work-decision-card tone-{{ $decision['tone'] }}" href="{{ $decision['href'] }}">
+                    <span><i data-lucide="{{ $decision['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $decision['label'] }}</small>
+                        <strong>{{ $decision['count'] }}</strong>
+                        <em>{{ $decision['description'] }}</em>
+                    </div>
+                    <i data-lucide="arrow-right" aria-hidden="true"></i>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
     <section class="work-lanes" aria-label="Filas por perfil e frente de trabalho">
         <div class="work-lanes-heading">
             <div>

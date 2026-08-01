@@ -71,6 +71,7 @@ class WorkCenterController extends Controller
             'selectedResponsible' => $selectedResponsible,
             'selectedQueue' => $selectedQueue,
             'queueCards' => $this->queueCards($activeQuery, $request->user()->id, $selectedQueue),
+            'decisionCards' => $this->decisionCards($activeQuery, $request->user()->id),
             'metrics' => [
                 'active' => (clone $activeQuery)->count(),
                 'overdue' => (clone $activeQuery)->whereDate('due_at', '<', today())->count(),
@@ -120,6 +121,32 @@ class WorkCenterController extends Controller
         }
 
         return $cards;
+    }
+
+    /**
+     * @return array<int, array{label: string, description: string, icon: string, count: int, href: string, tone: string}>
+     */
+    private function decisionCards($baseQuery, int $userId): array
+    {
+        return collect([
+            ['queue' => 'overdue', 'label' => 'Resolver atrasos', 'description' => 'Prazos vencidos que podem gerar apontamento.', 'icon' => 'triangle-alert', 'tone' => 'danger'],
+            ['queue' => 'unassigned', 'label' => 'Definir responsaveis', 'description' => 'Itens sem dono tendem a parar o fluxo.', 'icon' => 'user-round-plus', 'tone' => 'warning'],
+            ['queue' => 'chamber', 'label' => 'Tratar Camara', 'description' => 'Protocolos, comunicacoes e retornos legislativos.', 'icon' => 'landmark', 'tone' => 'primary'],
+            ['queue' => 'execution', 'label' => 'Fechar execucao e contas', 'description' => 'Empenhos, pagamentos e prestacoes pendentes.', 'icon' => 'chart-no-axes-combined', 'tone' => 'success'],
+            ['queue' => 'health_control', 'label' => 'Conferir saude e TCESP', 'description' => 'Reserva, ASPS, controle interno e matriz TCESP.', 'icon' => 'shield-check', 'tone' => 'primary'],
+        ])->map(function (array $definition) use ($baseQuery, $userId): array {
+            $query = clone $baseQuery;
+            $this->applyQueueFilter($query, $definition['queue'], $userId);
+
+            return [
+                'label' => $definition['label'],
+                'description' => $definition['description'],
+                'icon' => $definition['icon'],
+                'count' => $query->count(),
+                'href' => route('work-center.index', ['queue' => $definition['queue']]),
+                'tone' => $definition['tone'],
+            ];
+        })->all();
     }
 
     private function applyQueueFilter($query, string $queue, int $userId): void
