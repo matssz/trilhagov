@@ -51,10 +51,13 @@
                 <h2>Homologacao com arquivo real do Siafic</h2>
                 <p>Use este roteiro com contador e fornecedor antes de considerar a competencia pronta para remessa oficial.</p>
             </div>
-            <a class="btn btn-outline-primary" href="#novo-lote"><i data-lucide="upload" aria-hidden="true"></i>Importar XML</a>
+            <div class="homologation-real-actions">
+                <a class="btn btn-outline-secondary" href="{{ route('audesp-homologations.financial-template') }}"><i data-lucide="file-down" aria-hidden="true"></i>Modelo CSV financeiro</a>
+                <a class="btn btn-outline-primary" href="#novo-lote"><i data-lucide="upload" aria-hidden="true"></i>Importar arquivo</a>
+            </div>
         </header>
         <div>
-            <article><strong>1</strong><span>Exportar XML real</span><small>Cadastro de Emendas ou Detalhe do Movimento Mensal produzido pelo Siafic.</small></article>
+            <article><strong>1</strong><span>Exportar arquivo real</span><small>XML Audesp oficial ou CSV financeiro operacional produzido pelo Siafic.</small></article>
             <article><strong>2</strong><span>Conferir codigos</span><small>Codigo de aplicacao, fonte, conta, pre-empenho, empenho, liquidacao e pagamento.</small></article>
             <article><strong>3</strong><span>Importar sem alterar</span><small>O TrilhaGov compara e preserva o hash; nenhuma informacao contabil e sobrescrita.</small></article>
             <article><strong>4</strong><span>Registrar Coletor</span><small>A transmissao continua no ambiente oficial do Audesp, com protocolo e evidencia.</small></article>
@@ -119,8 +122,9 @@
                     @error('source_version')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">
-                    <label class="form-label" for="source_file">Arquivo XML Audesp <span class="required-mark">*</span></label>
-                    <input class="form-control @error('source_file') is-invalid @enderror" id="source_file" name="source_file" type="file" accept=".xml,application/xml,text/xml" required>
+                    <label class="form-label" for="source_file">Arquivo Audesp/Siafic <span class="required-mark">*</span></label>
+                    <input class="form-control @error('source_file') is-invalid @enderror" id="source_file" name="source_file" type="file" accept=".xml,.csv,.txt,application/xml,text/xml,text/csv,text/plain" required>
+                    <div class="form-text">Use XML para remessa oficial Audesp ou CSV para conferência financeira inicial com contador e fornecedor.</div>
                     @error('source_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">

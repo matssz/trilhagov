@@ -81,12 +81,12 @@ class AudespHomologationController extends Controller
                     ->where('municipality_id', $municipality->id)
                     ->where('status', AudespHomologationBatch::STATUS_REJECTED)),
             ],
-            'source_file' => ['required', File::types(['xml'])->max('5mb')],
+            'source_file' => ['required', File::types(['xml', 'csv', 'txt'])->max('5mb')],
             'notes' => ['nullable', 'string', 'max:2000'],
         ], [
             'fiscal_year.in' => 'Este módulo está homologado somente para o XSD 2026_A. Um novo exercício exigirá a publicação e a validação do schema correspondente.',
-            'source_file.required' => 'Selecione o XML produzido pelo Siafic.',
-            'source_file.mimes' => 'O arquivo do lote deve estar no formato XML.',
+            'source_file.required' => 'Selecione o XML Audesp ou o CSV financeiro exportado pelo Siafic.',
+            'source_file.mimes' => 'O arquivo do lote deve estar em XML ou CSV.',
         ]);
 
         if (! $formSubmission->consume($request, 'audesp-homologation-upload')) {
@@ -102,14 +102,23 @@ class AudespHomologationController extends Controller
             ]);
         }
 
-        $inspection = $homologation->inspect(
-            $contents,
-            $municipality,
-            (int) $validated['fiscal_year'],
-            (int) $validated['reference_month'],
-        );
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'xml');
+        $isCsv = in_array($extension, ['csv', 'txt'], true);
+        $inspection = $isCsv
+            ? $homologation->inspectMonthlyFinancialCsv(
+                $contents,
+                $municipality,
+                (int) $validated['fiscal_year'],
+                (int) $validated['reference_month'],
+            )
+            : $homologation->inspect(
+                $contents,
+                $municipality,
+                (int) $validated['fiscal_year'],
+                (int) $validated['reference_month'],
+            );
         $directory = "audesp-homologations/{$municipality->id}/sources";
-        $storagePath = Storage::putFileAs($directory, $file, Str::uuid().'.xml');
+        $storagePath = Storage::putFileAs($directory, $file, Str::uuid().'.'.$extension);
         if (! $storagePath) {
             throw ValidationException::withMessages(['source_file' => 'Não foi possível armazenar o XML com segurança. Tente novamente.']);
         }
@@ -435,6 +444,39 @@ class AudespHomologationController extends Controller
         return Storage::download($event->evidence_storage_path, $event->evidence_original_name, [
             'Content-Type' => $event->evidence_mime_type,
             'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function financialCsvTemplate(Request $request, CurrentMunicipality $currentMunicipality): StreamedResponse
+    {
+        $municipality = $currentMunicipality->get($request);
+        $this->ensureAudespScope($municipality);
+
+        return response()->streamDownload(function (): void {
+            $output = fopen('php://output', 'w');
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, [
+                'Codigo de Aplicacao',
+                'Reserva orcamentaria',
+                'Empenhado',
+                'Liquidado',
+                'Pago',
+                'Saldo disponivel',
+                'Numero empenho',
+            ], ';');
+            fputcsv($output, [
+                '8001',
+                'R$ 1.000,00',
+                'R$ 800,00',
+                'R$ 600,00',
+                'R$ 500,00',
+                'R$ 200,00',
+                '2026NE0001',
+            ], ';');
+            fclose($output);
+        }, 'modelo-siafic-financeiro.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, private',
         ]);
     }
 

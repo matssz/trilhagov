@@ -65,6 +65,23 @@ class AudespHomologationService
         ]);
     }
 
+    /**
+     * @return array{document_type: string, items: array<int, array<string, mixed>>, stats: array{total: int, matched: int, divergent: int, unmatched: int}}
+     */
+    public function inspectMonthlyFinancialCsv(
+        string $contents,
+        Municipality $municipality,
+        int $fiscalYear,
+        int $referenceMonth,
+    ): array {
+        return $this->reconcileMonthlyFinancialSources(
+            $municipality,
+            $fiscalYear,
+            $referenceMonth,
+            $this->monthlyCsvSourceSnapshots($contents),
+        );
+    }
+
     /** @return array{DOMDocument, DOMXPath} */
     private function parse(string $contents): array
     {
@@ -220,6 +237,77 @@ class AudespHomologationService
         ];
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $sourceByCode
+     * @return array{document_type: string, items: array<int, array<string, mixed>>, stats: array{total: int, matched: int, divergent: int, unmatched: int}}
+     */
+    private function reconcileMonthlyFinancialSources(
+        Municipality $municipality,
+        int $fiscalYear,
+        int $referenceMonth,
+        array $sourceByCode,
+    ): array {
+        $registrations = $municipality->audespAmendmentRegistrations()
+            ->where('amendment_year', $fiscalYear)
+            ->with([
+                'amendment:id,reference',
+                'amendment.legislativeProposal:id,parliamentary_amendment_id,budget_reservation_number,budget_reserved_amount,budget_reserved_at',
+                'amendment.financialCommitments:id,parliamentary_amendment_id,commitment_number,committed_amount,committed_at,status',
+                'amendment.financialLiquidations:id,parliamentary_amendment_id,liquidation_reference,amount,liquidated_at',
+                'amendment.financialPayments:id,parliamentary_amendment_id,payment_reference,amount,paid_at',
+            ])
+            ->get();
+        $registrationsByCode = $registrations->groupBy(fn (AudespAmendmentRegistration $registration) => $this->normalizeCode($registration->application_code));
+
+        foreach ($registrations as $registration) {
+            $code = $this->normalizeCode($registration->application_code);
+            if ($code === '' || isset($sourceByCode[$code])) {
+                continue;
+            }
+            $local = $this->financialLocalSnapshot($registration, $fiscalYear, $referenceMonth);
+            if ($this->hasFinancialActivity($local)) {
+                $sourceByCode[$code] = $this->emptyFinancialSource($code);
+            }
+        }
+
+        if ($sourceByCode === []) {
+            throw ValidationException::withMessages([
+                'source_file' => 'Nenhum movimento de emenda com Codigo de Aplicacao foi localizado no arquivo financeiro.',
+            ]);
+        }
+
+        ksort($sourceByCode);
+        $items = [];
+        $stats = $this->emptyStats();
+        foreach ($sourceByCode as $code => $source) {
+            /** @var Collection<int, AudespAmendmentRegistration> $matches */
+            $matches = $registrationsByCode->get($code, collect());
+            $registration = $matches->count() === 1 ? $matches->first() : null;
+            $local = $registration ? $this->financialLocalSnapshot($registration, $fiscalYear, $referenceMonth) : null;
+            $differences = $local ? $this->financialDifferences($source, $local) : [];
+            $status = $registration === null
+                ? AudespHomologationItem::STATUS_UNMATCHED
+                : ($differences === [] ? AudespHomologationItem::STATUS_MATCHED : AudespHomologationItem::STATUS_DIVERGENT);
+
+            $source['scope'] = $registration?->scope ?? 'M';
+            $source['amendment_number'] = $registration?->amendment_number ?? 'Cod. '.$code;
+            $source['amendment_year'] = $registration?->amendment_year ?? $fiscalYear;
+            $source['operation'] = 'monthly_reconciliation';
+            if ($matches->count() > 1) {
+                $source['link_issue'] = 'Mais de um cadastro local utiliza este Codigo de Aplicacao.';
+            }
+
+            $this->countStatus($stats, $status);
+            $items[] = $this->item($municipality, $registration, $status, $source, $local, $differences);
+        }
+
+        return [
+            'document_type' => AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL,
+            'items' => $items,
+            'stats' => $stats,
+        ];
+    }
+
     /** @return array<string, array<string, mixed>> */
     private function monthlySourceSnapshots(DOMXPath $xpath): array
     {
@@ -314,6 +402,112 @@ class AudespHomologationService
         }
 
         return $snapshots;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    private function monthlyCsvSourceSnapshots(string $contents): array
+    {
+        $contents = $this->toUtf8($contents);
+        if (trim($contents) === '') {
+            throw ValidationException::withMessages(['source_file' => 'O arquivo financeiro esta vazio.']);
+        }
+
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $contents);
+        rewind($stream);
+
+        $firstLine = strtok($contents, "\r\n") ?: '';
+        $delimiter = substr_count($firstLine, ';') >= substr_count($firstLine, ',') ? ';' : ',';
+        $headers = fgetcsv($stream, 0, $delimiter);
+        if (! is_array($headers)) {
+            fclose($stream);
+            throw ValidationException::withMessages(['source_file' => 'Nao foi possivel identificar o cabecalho do CSV financeiro.']);
+        }
+
+        $columnMap = [];
+        foreach ($headers as $index => $header) {
+            $field = $this->financialCsvField((string) $header);
+            if ($field !== null && ! in_array($field, $columnMap, true)) {
+                $columnMap[$index] = $field;
+            }
+        }
+
+        if (! in_array('application_code', $columnMap, true)) {
+            fclose($stream);
+            throw ValidationException::withMessages(['source_file' => 'O CSV precisa ter a coluna Codigo de Aplicacao.']);
+        }
+
+        $snapshots = [];
+        $rowNumber = 1;
+        while (($values = fgetcsv($stream, 0, $delimiter)) !== false) {
+            $rowNumber++;
+            if (collect($values)->every(fn ($value) => trim((string) $value) === '')) {
+                continue;
+            }
+
+            $row = [];
+            foreach ($columnMap as $index => $field) {
+                $row[$field] = trim((string) ($values[$index] ?? ''));
+            }
+
+            $code = $this->normalizeCode($row['application_code'] ?? '');
+            if ($code === '') {
+                continue;
+            }
+
+            $snapshot = &$this->sourceSnapshot($snapshots, $code);
+            foreach (array_keys(self::FINANCIAL_FIELD_LABELS) as $field) {
+                $amount = $this->parseAmount($row[$field] ?? null);
+                $snapshot[$field] += $amount;
+            }
+            $snapshot['available_appropriation'] += $this->parseAmount($row['available_appropriation'] ?? null);
+            $snapshot['source_rows'][] = [
+                'type' => 'csv_financeiro',
+                'row_number' => $rowNumber,
+                'account' => null,
+                'commitment_number' => $row['commitment_number'] ?? null,
+                'amount' => $this->money(
+                    $this->parseAmount($row['committed_amount'] ?? null)
+                    + $this->parseAmount($row['liquidated_amount'] ?? null)
+                    + $this->parseAmount($row['paid_amount'] ?? null)
+                ),
+                'credit' => '0.00',
+                'debit' => '0.00',
+            ];
+            unset($snapshot);
+        }
+        fclose($stream);
+
+        foreach ($snapshots as &$snapshot) {
+            foreach (array_keys(self::FINANCIAL_FIELD_LABELS) as $field) {
+                $snapshot[$field] = $this->money($snapshot[$field]);
+            }
+            $snapshot['available_appropriation'] = $this->money($snapshot['available_appropriation']);
+        }
+
+        return $snapshots;
+    }
+
+    private function financialCsvField(string $header): ?string
+    {
+        $canonical = $this->canonicalHeader($header);
+        $aliases = [
+            'application_code' => ['codigo_de_aplicacao', 'codigo_aplicacao', 'cod_aplicacao', 'aplicacao', 'codigo'],
+            'pre_commitment_amount' => ['pre_empenho', 'preempenho', 'reserva', 'reserva_orcamentaria', 'valor_reservado'],
+            'committed_amount' => ['empenhado', 'valor_empenhado', 'empenho', 'empenhado_liquido'],
+            'liquidated_amount' => ['liquidado', 'valor_liquidado', 'liquidacao', 'liquidado_liquido'],
+            'paid_amount' => ['pago', 'valor_pago', 'pagamento', 'pago_liquido'],
+            'available_appropriation' => ['saldo_disponivel', 'credito_disponivel', 'disponivel'],
+            'commitment_number' => ['numero_empenho', 'empenho_numero', 'ne'],
+        ];
+
+        foreach ($aliases as $field => $fieldAliases) {
+            if (in_array($canonical, $fieldAliases, true)) {
+                return $field;
+            }
+        }
+
+        return null;
     }
 
     /** @param array<string, array<string, mixed>> $snapshots @return array<string, mixed> */
@@ -584,6 +778,52 @@ class AudespHomologationService
     private function normalizeCode(mixed $value): string
     {
         return preg_replace('/\s+/', '', trim((string) $value)) ?? '';
+    }
+
+    private function toUtf8(string $contents): string
+    {
+        $contents = str_replace("\0", '', $contents);
+        $contents = preg_replace('/^\xEF\xBB\xBF/', '', $contents) ?? $contents;
+        if (mb_check_encoding($contents, 'UTF-8')) {
+            return $contents;
+        }
+
+        $encoding = mb_detect_encoding($contents, ['Windows-1252', 'ISO-8859-1'], true) ?: 'Windows-1252';
+
+        return mb_convert_encoding($contents, 'UTF-8', $encoding);
+    }
+
+    private function parseAmount(mixed $value): float
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return 0.0;
+        }
+
+        $amount = preg_replace('/[^0-9,.-]/', '', (string) $value) ?? '';
+        $lastComma = strrpos($amount, ',');
+        $lastDot = strrpos($amount, '.');
+        if ($lastComma !== false && $lastDot !== false) {
+            $decimalSeparator = $lastComma > $lastDot ? ',' : '.';
+            $thousandsSeparator = $decimalSeparator === ',' ? '.' : ',';
+            $amount = str_replace($thousandsSeparator, '', $amount);
+            $amount = str_replace($decimalSeparator, '.', $amount);
+        } elseif ($lastComma !== false) {
+            $amount = str_replace('.', '', $amount);
+            $amount = str_replace(',', '.', $amount);
+        } elseif (substr_count($amount, '.') > 1) {
+            $parts = explode('.', $amount);
+            $decimal = array_pop($parts);
+            $amount = implode('', $parts).'.'.$decimal;
+        }
+
+        return is_numeric($amount) ? (float) $amount : 0.0;
+    }
+
+    private function canonicalHeader(string $value): string
+    {
+        $value = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value) ?: $value;
+
+        return trim((string) preg_replace('/[^a-z0-9]+/', '_', mb_strtolower($value)), '_');
     }
 
     private function normalize(string $value): string

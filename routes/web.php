@@ -134,6 +134,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/alertas', [AlertCenterController::class, 'index'])->name('alerts.index');
         Route::middleware('municipality.module:tcesp_audesp')->group(function () {
             Route::get('/audesp/homologacoes', [AudespHomologationController::class, 'index'])->name('audesp-homologations.index');
+            Route::get('/audesp/homologacoes/modelo-siafic-financeiro.csv', [AudespHomologationController::class, 'financialCsvTemplate'])->name('audesp-homologations.financial-template');
             Route::get('/audesp/homologacoes/{batch}', [AudespHomologationController::class, 'show'])->name('audesp-homologations.show');
             Route::get('/audesp/homologacoes/{batch}/arquivo', [AudespHomologationController::class, 'source'])->name('audesp-homologations.source');
             Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');

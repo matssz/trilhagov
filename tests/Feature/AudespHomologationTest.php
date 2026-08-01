@@ -134,6 +134,38 @@ class AudespHomologationTest extends TestCase
             ->assertSee('Execução financeira da emenda');
     }
 
+    public function test_monthly_financial_csv_reconciles_siafic_export_without_xml(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $registration = $this->registration($municipality, $manager);
+        $this->financialExecution($registration->amendment, $municipality, $manager);
+        $token = $this->sessionFor($municipality, 'audesp-homologation-upload');
+
+        $response = $this->actingAs($manager)->post(route('audesp-homologations.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+            'source_system' => 'Siafic CSV',
+            'source_file' => UploadedFile::fake()->createWithContent('financeiro.csv', $this->monthlyFinancialCsv()),
+        ]);
+
+        $batch = AudespHomologationBatch::firstOrFail();
+        $response->assertRedirect(route('audesp-homologations.show', $batch));
+        $this->assertSame(AudespHomologationBatch::TYPE_MONTHLY_FINANCIAL, $batch->source_document_type);
+        $this->assertSame(AudespHomologationBatch::STATUS_READY, $batch->status);
+        $this->assertSame('financeiro.csv', $batch->source_original_name);
+        $this->assertStringEndsWith('.csv', $batch->source_storage_path);
+        $item = $batch->items()->firstOrFail();
+        $this->assertSame($registration->id, $item->audesp_amendment_registration_id);
+        $this->assertSame('1000.00', $item->source_snapshot['pre_commitment_amount']);
+        $this->assertSame('800.00', $item->source_snapshot['committed_amount']);
+        $this->assertSame('600.00', $item->source_snapshot['liquidated_amount']);
+        $this->assertSame('500.00', $item->source_snapshot['paid_amount']);
+        $this->assertNull($item->differences);
+        Storage::disk('local')->assertExists($batch->source_storage_path);
+    }
+
     public function test_monthly_financial_xml_flags_unknown_application_code_without_guessing_a_link(): void
     {
         Storage::fake('local');
@@ -282,11 +314,16 @@ class AudespHomologationTest extends TestCase
             ->assertSee('Cadastro Audesp das emendas')
             ->assertSee('Movimento mensal real do Siafic')
             ->assertSee('Homologacao com arquivo real do Siafic')
-            ->assertSee('Exportar XML real')
+            ->assertSee('Modelo CSV financeiro')
+            ->assertSee('Exportar arquivo real')
             ->assertSee('Importar sem alterar')
             ->assertDontSee('Novo lote de conferência');
         $this->get(route('audesp-homologations.show', $batch))->assertNotFound();
         $this->post(route('audesp-homologations.store'), [])->assertForbidden();
+
+        $template = $this->get(route('audesp-homologations.financial-template'));
+        $template->assertOk()->assertDownload('modelo-siafic-financeiro.csv');
+        $this->assertStringContainsString('Codigo de Aplicacao', $template->streamedContent());
     }
 
     public function test_xml_with_doctype_is_rejected_without_being_stored(): void
@@ -439,6 +476,34 @@ class AudespHomologationTest extends TestCase
             'amount' => 500,
             'paid_at' => '2026-07-25',
         ]);
+    }
+
+    private function monthlyFinancialCsv(string $applicationCode = '8001', float $committedAmount = 800): string
+    {
+        $stream = fopen('php://temp', 'r+');
+        fputcsv($stream, [
+            'Codigo de Aplicacao',
+            'Reserva orcamentaria',
+            'Empenhado',
+            'Liquidado',
+            'Pago',
+            'Saldo disponivel',
+            'Numero empenho',
+        ], ';');
+        fputcsv($stream, [
+            $applicationCode,
+            'R$ 1.000,00',
+            'R$ '.number_format($committedAmount, 2, ',', '.'),
+            'R$ 600,00',
+            'R$ 500,00',
+            'R$ 200,00',
+            '2026NE0001',
+        ], ';');
+        rewind($stream);
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+
+        return $contents ?: '';
     }
 
     private function monthlyFinancialXml(string $applicationCode = '8001', float $committedAmount = 800): string
