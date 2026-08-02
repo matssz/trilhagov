@@ -436,8 +436,14 @@ class AudespHomologationService
             fclose($stream);
             throw ValidationException::withMessages(['source_file' => 'O CSV precisa ter a coluna Codigo de Aplicacao.']);
         }
+        $financialColumns = array_intersect(array_keys(self::FINANCIAL_FIELD_LABELS), $columnMap);
+        if ($financialColumns === []) {
+            fclose($stream);
+            throw ValidationException::withMessages(['source_file' => 'O CSV financeiro precisa ter pelo menos uma coluna de valor: reserva, empenhado, liquidado ou pago.']);
+        }
 
         $snapshots = [];
+        $rowErrors = [];
         $rowNumber = 1;
         while (($values = fgetcsv($stream, 0, $delimiter)) !== false) {
             $rowNumber++;
@@ -457,10 +463,19 @@ class AudespHomologationService
 
             $snapshot = &$this->sourceSnapshot($snapshots, $code);
             foreach (array_keys(self::FINANCIAL_FIELD_LABELS) as $field) {
-                $amount = $this->parseAmount($row[$field] ?? null);
+                try {
+                    $amount = $this->parseCsvAmount($row[$field] ?? null, $rowNumber, self::FINANCIAL_FIELD_LABELS[$field]);
+                } catch (ValidationException $exception) {
+                    $rowErrors = array_merge($rowErrors, $exception->errors()['source_file'] ?? []);
+                    $amount = 0.0;
+                }
                 $snapshot[$field] += $amount;
             }
-            $snapshot['available_appropriation'] += $this->parseAmount($row['available_appropriation'] ?? null);
+            try {
+                $snapshot['available_appropriation'] += $this->parseCsvAmount($row['available_appropriation'] ?? null, $rowNumber, 'Saldo disponivel');
+            } catch (ValidationException $exception) {
+                $rowErrors = array_merge($rowErrors, $exception->errors()['source_file'] ?? []);
+            }
             $snapshot['source_rows'][] = [
                 'type' => 'csv_financeiro',
                 'row_number' => $rowNumber,
@@ -477,6 +492,12 @@ class AudespHomologationService
             unset($snapshot);
         }
         fclose($stream);
+
+        if ($rowErrors !== []) {
+            throw ValidationException::withMessages([
+                'source_file' => array_slice(array_values(array_unique($rowErrors)), 0, 8),
+            ]);
+        }
 
         foreach ($snapshots as &$snapshot) {
             foreach (array_keys(self::FINANCIAL_FIELD_LABELS) as $field) {
@@ -817,6 +838,29 @@ class AudespHomologationService
         }
 
         return is_numeric($amount) ? (float) $amount : 0.0;
+    }
+
+    private function parseCsvAmount(mixed $value, int $rowNumber, string $label): float
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return 0.0;
+        }
+
+        $amount = preg_replace('/[^0-9,.-]/', '', (string) $value) ?? '';
+        if ($amount === '' || ! preg_match('/\d/', $amount)) {
+            throw ValidationException::withMessages([
+                'source_file' => "Linha {$rowNumber}: {$label} precisa ser um valor numerico.",
+            ]);
+        }
+
+        $parsed = $this->parseAmount($value);
+        if (! is_finite($parsed) || (abs($parsed) < 0.0001 && ! preg_match('/(^|[^0-9])0([,.]0+)?($|[^0-9])/', (string) $value))) {
+            throw ValidationException::withMessages([
+                'source_file' => "Linha {$rowNumber}: {$label} nao foi reconhecido como valor financeiro.",
+            ]);
+        }
+
+        return $parsed;
     }
 
     private function canonicalHeader(string $value): string

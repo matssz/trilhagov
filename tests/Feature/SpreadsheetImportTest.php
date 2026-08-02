@@ -126,6 +126,12 @@ class SpreadsheetImportTest extends TestCase
             'row_number' => 2,
             'status' => AmendmentImportRow::STATUS_VALID,
         ]);
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('spreadsheet-imports.show', $batch))
+            ->assertOk()
+            ->assertSee('Plano de correcao')
+            ->assertSee('Revise a planilha antes de reenviar');
         $validRow = $batch->rows()->where('status', AmendmentImportRow::STATUS_VALID)->firstOrFail();
         $this->assertSame('500000.00', $validRow->normalized_data['expected_amount']);
         $this->assertSame('2026-03-15', $validRow->normalized_data['indicated_at']);

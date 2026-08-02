@@ -166,6 +166,27 @@ class AudespHomologationTest extends TestCase
         Storage::disk('local')->assertExists($batch->source_storage_path);
     }
 
+    public function test_monthly_financial_csv_rejects_invalid_money_values(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->registration($municipality, $manager);
+        $token = $this->sessionFor($municipality, 'audesp-homologation-upload');
+
+        $this->actingAs($manager)->post(route('audesp-homologations.store'), [
+            '_submission_token' => $token,
+            'fiscal_year' => 2026,
+            'reference_month' => 7,
+            'source_system' => 'Siafic CSV',
+            'source_file' => UploadedFile::fake()->createWithContent(
+                'financeiro.csv',
+                "Codigo de Aplicacao;Reserva orcamentaria;Empenhado;Liquidado;Pago\n100.0000;R$ 1.000,00;valor quebrado;R$ 600,00;R$ 500,00",
+            ),
+        ])->assertSessionHasErrors('source_file');
+
+        $this->assertDatabaseCount('audesp_homologation_batches', 0);
+    }
+
     public function test_monthly_financial_xml_flags_unknown_application_code_without_guessing_a_link(): void
     {
         Storage::fake('local');

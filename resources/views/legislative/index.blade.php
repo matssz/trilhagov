@@ -60,6 +60,41 @@
                         <strong>{{ ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_SENT] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RECEIVED] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RESERVED] ?? 0) }}</strong>
                     </div>
                 </div>
+                <div class="councilor-action-summary" aria-label="Resumo de andamento do vereador">
+                    <article class="{{ ($councilorGroups['summary']['action']['count'] ?? 0) > 0 ? 'needs-action' : 'is-clear' }}">
+                        <span><i data-lucide="pencil-line" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Depende de voce</small>
+                            <strong>{{ $councilorGroups['summary']['action']['count'] ?? 0 }} proposta(s)</strong>
+                            <p>Rascunhos ou devolucoes que precisam de ajuste antes de seguir.</p>
+                        </div>
+                        <a href="{{ $councilorGroups['summary']['action']['url'] ?? route('legislative.index', ['year' => $year]) }}">Abrir</a>
+                    </article>
+                    <article>
+                        <span><i data-lucide="landmark" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Com a Camara</small>
+                            <strong>{{ $councilorGroups['summary']['chamber']['count'] ?? 0 }} proposta(s)</strong>
+                            <p>Itens em conferencia legislativa ou prontos para protocolo.</p>
+                        </div>
+                        <a href="{{ $councilorGroups['summary']['chamber']['url'] ?? route('legislative.index', ['year' => $year]) }}">Ver</a>
+                    </article>
+                    <article>
+                        <span><i data-lucide="building-2" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Com o Executivo</small>
+                            <strong>{{ $councilorGroups['summary']['executive']['count'] ?? 0 }} proposta(s)</strong>
+                            <p>Protocoladas, recebidas ou com reserva orcamentaria aberta.</p>
+                        </div>
+                        <a href="{{ $councilorGroups['summary']['executive']['url'] ?? route('legislative.index', ['year' => $year]) }}">Acompanhar</a>
+                    </article>
+                    @if($councilorGroups['next_url'] ?? null)
+                        <a class="councilor-next-action" href="{{ $councilorGroups['next_url'] }}">
+                            <i data-lucide="arrow-right" aria-hidden="true"></i>
+                            <span><small>Proxima acao sugerida</small><strong>{{ $councilorGroups['next_label'] }}</strong></span>
+                        </a>
+                    @endif
+                </div>
                 <div class="councilor-decision-strip" aria-label="Resumo automatico para o vereador">
                     <article>
                         <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>

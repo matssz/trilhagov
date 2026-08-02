@@ -263,9 +263,19 @@ class LegislativeProposalController extends Controller
         $executiveItem = collect($groups)->firstWhere('key', 'executive')['items']->first() ?? null;
         $chamberItem = collect($groups)->firstWhere('key', 'chamber')['items']->first() ?? null;
         $createUrl = ($guide['canCreate'] ?? false) ? route('legislative.create', ['year' => $year]) : null;
+        $summary = collect($groups)->mapWithKeys(fn (array $group): array => [
+            $group['key'] => [
+                'count' => $group['count'],
+                'amount' => $group['amount'],
+                'url' => $group['filter_url'],
+            ],
+        ]);
 
         return [
             'groups' => $groups,
+            'summary' => $summary->all(),
+            'total_count' => (int) $proposals->count(),
+            'total_amount' => (float) $proposals->sum('estimated_amount'),
             'next_url' => $actionItem?->getAttribute('councilor_action_url')
                 ?? $createUrl
                 ?? $executiveItem?->getAttribute('councilor_action_url')

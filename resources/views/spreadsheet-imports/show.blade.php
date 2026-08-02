@@ -40,6 +40,18 @@
         </section>
     @endif
 
+    @if ($batch->invalid_rows > 0 || $batch->duplicate_rows > 0)
+        <section class="import-correction-guide">
+            <span><i data-lucide="file-warning" aria-hidden="true"></i></span>
+            <div>
+                <small>Plano de correcao</small>
+                <strong>Revise a planilha antes de reenviar</strong>
+                <p>Abra os motivos por linha, corrija campos obrigatorios, datas, valores e registros repetidos. O TrilhaGov nao sobrescreve emendas ja existentes.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.index') }}"><i data-lucide="upload" aria-hidden="true"></i>Enviar corrigida</a>
+        </section>
+    @endif
+
     <section class="import-preview">
         <header><div><p class="panel-kicker">Resultado por linha</p><h2>Dados reconhecidos</h2></div><span>{{ $rows->total() }} resultado(s)</span></header>
         <div class="table-responsive">
