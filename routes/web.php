@@ -42,6 +42,7 @@ use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
 use App\Http\Controllers\MunicipalWorkPlanStageController;
 use App\Http\Controllers\NotificationCenterController;
+use App\Http\Controllers\OfficialDocumentVerificationController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
@@ -72,6 +73,9 @@ Route::post('/convites/{token}/trocar-conta', [InvitationAcceptanceController::c
 Route::get('/transparencia/{municipality:transparency_slug}', [PublicTransparencyController::class, 'show'])->name('transparency.show');
 Route::get('/transparencia/{municipality:transparency_slug}/emendas.csv', [PublicTransparencyController::class, 'export'])->name('transparency.export');
 Route::get('/transparencia/{municipality:transparency_slug}/emendas/{emenda}', [PublicTransparencyController::class, 'detail'])->name('transparency.detail');
+Route::get('/documentos/verificar/{hash}', OfficialDocumentVerificationController::class)
+    ->where('hash', '[A-Fa-f0-9]{64}')
+    ->name('official-documents.verify');
 
 Route::middleware('guest')->group(function () {
     Route::get('/cadastro', [RegisteredUserController::class, 'create'])->name('register');

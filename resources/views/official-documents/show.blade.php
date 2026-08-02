@@ -21,7 +21,18 @@
             <section class="content-panel official-paper-panel">
                 <div class="official-paper-meta"><span><small>Destinatário</small><strong>{{ $document->recipient_name }}</strong><em>{{ $document->recipient_role ?: 'Função não informada' }} · {{ $document->recipient_entity }}</em></span><span><small>Referência</small><strong>{{ $document->amendment?->reference ?: 'Comunicação geral' }}</strong><em>{{ $document->response_due_at ? 'Resposta até '.$document->response_due_at->format('d/m/Y') : 'Sem prazo de resposta' }}</em></span></div>
                 <article class="official-paper"><h2>{{ $document->subject }}</h2><div>{!! nl2br(e($document->body)) !!}</div></article>
-                @if($document->snapshot_sha256)<div class="official-hash"><i data-lucide="fingerprint" aria-hidden="true"></i><span><small>SHA-256 do conteúdo emitido</small><code>{{ $document->snapshot_sha256 }}</code></span></div>@endif
+                @if($document->snapshot_sha256)
+                    <div class="official-hash"><i data-lucide="fingerprint" aria-hidden="true"></i><span><small>SHA-256 do conteúdo emitido</small><code>{{ $document->snapshot_sha256 }}</code></span></div>
+                    <div class="official-signature-card">
+                        <i data-lucide="badge-check" aria-hidden="true"></i>
+                        <div>
+                            <small>Assinatura institucional verificável</small>
+                            <strong>Documento emitido, numerado e preservado</strong>
+                            <p>Use o endereço abaixo para confirmar autenticidade, situação, município emissor e protocolo sem expor o conteúdo interno.</p>
+                            <a href="{{ route('official-documents.verify', $document->snapshot_sha256) }}" target="_blank" rel="noopener">{{ route('official-documents.verify', $document->snapshot_sha256) }}</a>
+                        </div>
+                    </div>
+                @endif
             </section>
 
             @if($canDraft && $document->isDraft())

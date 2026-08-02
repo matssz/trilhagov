@@ -107,6 +107,34 @@ class MunicipalOfficialDocumentTest extends TestCase
         $document->update(['subject' => 'Tentativa de alterar documento emitido']);
     }
 
+    public function test_issued_document_has_public_verification_by_hash(): void
+    {
+        [$manager, $municipality] = $this->context(User::ROLE_MANAGER);
+        $document = $this->draft($manager, $municipality);
+
+        $this->get(route('official-documents.verify', str_repeat('a', 64)))
+            ->assertNotFound();
+
+        $issueToken = $this->token($municipality, "official-document-issue-{$document->id}");
+        $this->post(route('official-documents.issue', $document), [
+            '_submission_token' => $issueToken,
+            'confirm_content' => '1',
+        ])->assertSessionHas('status');
+        $document->refresh();
+
+        $this->get(route('official-documents.show', $document))
+            ->assertOk()
+            ->assertSee('Assinatura institucional verificável')
+            ->assertSee(route('official-documents.verify', $document->snapshot_sha256));
+
+        $this->get(route('official-documents.verify', $document->snapshot_sha256))
+            ->assertOk()
+            ->assertSee('Documento localizado')
+            ->assertSee($document->official_number)
+            ->assertSee($municipality->name)
+            ->assertDontSee($document->body);
+    }
+
     public function test_protocol_and_return_preserve_hashed_evidence_and_allow_revision(): void
     {
         Storage::fake('local');
