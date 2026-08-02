@@ -146,6 +146,10 @@
                                 <i data-lucide="users" aria-hidden="true"></i>
                                 <span>Usuários</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('security-privacy.*') ? 'active' : '' }}" href="{{ route('security-privacy.index') }}">
+                                <i data-lucide="shield-check" aria-hidden="true"></i>
+                                <span>LGPD e defesa</span>
+                            </a>
                             @if ($activeMunicipality?->moduleEnabled('document_checklist'))
                             <a class="sidebar-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}" href="{{ route('document-types.index') }}">
                                 <i data-lucide="list-checks" aria-hidden="true"></i>

@@ -47,6 +47,7 @@ use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\SecurityPrivacyController;
 use App\Http\Controllers\SpreadsheetImportController;
 use App\Http\Controllers\TcespDossierController;
 use App\Http\Controllers\TechnicalDiligenceController;
@@ -205,6 +206,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager')->group(function () {
         Route::get('/implantacao', [MunicipalOnboardingController::class, 'index'])->name('municipal-onboarding.index');
+        Route::get('/configuracoes/lgpd-seguranca', SecurityPrivacyController::class)->name('security-privacy.index');
         Route::post('/implantacao/ativar-exercicio', [MunicipalOnboardingController::class, 'activate'])->name('municipal-onboarding.activate')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/{template}/revisar', [MunicipalOfficialDocumentController::class, 'reviseTemplate'])->name('official-document-templates.revise')->block(10, 10);

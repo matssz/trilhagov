@@ -18,6 +18,7 @@
 @import './legislative.css';
 @import './municipal-onboarding.css';
 @import './municipal-institutions.css';
+@import './security-privacy.css';
 
 :root {
     --navy-950: #071f3d;

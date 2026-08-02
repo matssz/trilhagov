@@ -1,0 +1,219 @@
+.security-privacy-page h1 {
+    margin: .2rem 0 .25rem;
+    color: var(--navy-950);
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 900;
+}
+
+.privacy-hero,
+.privacy-panel,
+.privacy-guidance,
+.privacy-check {
+    border: 1px solid #d2dde8;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fafc 58%, #f4f1e8 100%);
+    box-shadow: var(--shadow-soft);
+}
+
+.privacy-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.35rem;
+    border-top: 4px solid var(--navy-800);
+}
+
+.privacy-hero h2,
+.privacy-check h2,
+.privacy-guidance h2 {
+    margin: .35rem 0 .3rem;
+    color: var(--navy-950);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.privacy-hero p,
+.privacy-check p,
+.privacy-guidance p {
+    margin: 0;
+    color: #536278;
+}
+
+.privacy-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--navy-900);
+    font-size: .78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.privacy-pill svg,
+.privacy-guidance svg {
+    width: 18px;
+    height: 18px;
+}
+
+.privacy-score {
+    display: grid;
+    place-items: center;
+    width: 132px;
+    min-width: 132px;
+    aspect-ratio: 1;
+    border: 10px solid #dbe8f4;
+    border-right-color: var(--navy-900);
+    border-radius: 50%;
+    background: #fff;
+    text-align: center;
+}
+
+.privacy-score strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.privacy-score span {
+    color: #68778d;
+    font-size: .68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.privacy-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    min-height: 122px;
+    padding: 1rem;
+}
+
+.privacy-check-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: #eaf4ff;
+    color: var(--navy-900);
+}
+
+.privacy-check-ok .privacy-check-icon { background: #e8f7ef; color: var(--success); }
+.privacy-check-attention .privacy-check-icon { background: #fff3d6; color: var(--warning); }
+.privacy-check-critical .privacy-check-icon { background: #fde8e8; color: var(--danger); }
+.privacy-check-planned .privacy-check-icon { background: #eef3f8; color: #52627a; }
+
+.privacy-panel {
+    padding: 1rem;
+}
+
+.privacy-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.privacy-panel-heading span {
+    color: var(--gold-600);
+    font-size: .72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.privacy-panel-heading strong {
+    color: var(--navy-950);
+}
+
+.privacy-map,
+.privacy-stats {
+    display: grid;
+    gap: .75rem;
+}
+
+.privacy-map {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.privacy-map > div,
+.privacy-stats > div {
+    min-height: 92px;
+    padding: .9rem;
+    border: 1px solid #dce5ee;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .72);
+}
+
+.privacy-map span,
+.privacy-stats span {
+    display: block;
+    color: #67768d;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.privacy-map strong,
+.privacy-stats strong {
+    display: block;
+    margin-top: .2rem;
+    color: var(--navy-950);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.privacy-map small {
+    display: block;
+    margin-top: .35rem;
+    color: #66758a;
+}
+
+.privacy-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.privacy-invitations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: 1rem;
+}
+
+.privacy-invitations span {
+    padding: .35rem .55rem;
+    border: 1px solid #dce5ee;
+    border-radius: 999px;
+    background: #fff;
+    color: #52627a;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.privacy-guidance {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    padding: 1rem;
+}
+
+.privacy-guidance > svg {
+    margin-top: .1rem;
+    color: var(--navy-900);
+}
+
+@media (max-width: 768px) {
+    .privacy-hero,
+    .privacy-guidance {
+        flex-direction: column;
+    }
+
+    .privacy-map,
+    .privacy-stats {
+        grid-template-columns: 1fr;
+    }
+}
