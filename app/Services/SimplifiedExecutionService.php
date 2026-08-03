@@ -76,6 +76,52 @@ class SimplifiedExecutionService
 
         return [
             'next' => $next,
+            'command' => [
+                [
+                    'icon' => 'clipboard-check',
+                    'label' => 'Executar objeto',
+                    'metric' => $stages->count().' etapa(s)',
+                    'description' => $hasStages
+                        ? 'Acompanhe progresso, responsavel e prazo de cada entrega.'
+                        : 'Abra uma etapa fisica para transformar a emenda em entrega acompanhavel.',
+                    'href' => '#stages',
+                    'cta' => $hasStages ? 'Ver etapas' : 'Abrir etapa',
+                    'tone' => $hasStages ? 'success' : 'warning',
+                ],
+                [
+                    'icon' => 'briefcase-business',
+                    'label' => 'Empenhar e pagar',
+                    'metric' => 'R$ '.number_format($paidAmount, 2, ',', '.'),
+                    'description' => $hasCommitments
+                        ? 'Registre liquidacao e pagamento sem perder o vinculo com a entrega.'
+                        : 'Cadastre o empenho para ligar orcamento, fornecedor e processo.',
+                    'href' => '#commitments',
+                    'cta' => $hasCommitments ? 'Ver financeiro' : 'Registrar empenho',
+                    'tone' => $paidAmount > 0 ? 'success' : ($hasCommitments ? 'primary' : 'warning'),
+                ],
+                [
+                    'icon' => 'file-check-2',
+                    'label' => 'Comprovar entrega',
+                    'metric' => $documents->count().' evidencia(s)',
+                    'description' => $hasEvidence
+                        ? 'Documentos ja vinculados as etapas para sustentar a prestacao.'
+                        : 'Anexe termo, medicao, foto ou relatorio antes do fechamento.',
+                    'href' => '#evidence',
+                    'cta' => $hasEvidence ? 'Ver evidencias' : 'Anexar evidencia',
+                    'tone' => $hasEvidence ? 'success' : 'warning',
+                ],
+                [
+                    'icon' => 'archive',
+                    'label' => 'Prestar contas',
+                    'metric' => $readyForAccountability ? 'Liberada' : 'Bloqueada',
+                    'description' => $readyForAccountability
+                        ? 'Base minima pronta para abrir o processo de prestacao.'
+                        : 'O TrilhaGov mostra abaixo o que ainda impede o envio.',
+                    'href' => $readyForAccountability ? route('emendas.accountability', $amendment) : '#liberacao-prestacao',
+                    'cta' => $readyForAccountability ? 'Abrir prestacao' : 'Ver bloqueios',
+                    'tone' => $readyForAccountability ? 'success' : 'danger',
+                ],
+            ],
             'steps' => [
                 ['label' => 'Etapas abertas', 'description' => 'Cronograma real criado para a entrega.', 'done' => $hasStages],
                 ['label' => 'Empenho vinculado', 'description' => 'Fornecedor e processo conectados a execucao.', 'done' => $hasCommitments],

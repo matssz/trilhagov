@@ -47,12 +47,11 @@ class TcespDossierController extends Controller
         abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote TCESP.');
 
         $zip->addFromString('dossie/'.$this->baseFilename($amendment).'.pdf', $pdf->output());
-        $temporaryDocuments = [];
         $includedDocuments = [];
         $skippedDocuments = [];
 
         foreach ($amendment->documents as $document) {
-            if (! Storage::exists($document->storage_path)) {
+            if (! Storage::disk('local')->exists($document->storage_path)) {
                 $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao encontrado no armazenamento');
 
                 continue;
@@ -70,32 +69,20 @@ class TcespDossierController extends Controller
                 $document->version,
                 $originalName !== '' ? $originalName : 'arquivo',
             );
-            $source = Storage::readStream($document->storage_path);
-            $temporaryDocument = tmpfile();
+            $contents = Storage::disk('local')->get($document->storage_path);
 
-            if ($source === false || $temporaryDocument === false) {
-                if (is_resource($source)) {
-                    fclose($source);
-                }
+            if ($contents === null || $contents === false) {
                 $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao pode ser lido');
 
                 continue;
             }
 
-            stream_copy_to_stream($source, $temporaryDocument);
-            fclose($source);
-            $metadata = stream_get_meta_data($temporaryDocument);
-            $temporaryDocuments[] = $temporaryDocument;
-            $zip->addFile($metadata['uri'], $archiveName);
+            $zip->addFromString($archiveName, $contents);
             $includedDocuments[] = $this->manifestDocumentLine($document, $archiveName);
         }
 
         $zip->addFromString('MANIFESTO.txt', $this->manifest($amendment, $includedDocuments, $skippedDocuments));
         $zip->close();
-
-        foreach ($temporaryDocuments as $temporaryDocument) {
-            fclose($temporaryDocument);
-        }
 
         return response()
             ->download($temporaryPath, $this->baseFilename($amendment).'.zip', ['Content-Type' => 'application/zip'])

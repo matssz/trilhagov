@@ -86,6 +86,27 @@
             </div>
         </div>
 
+        <div class="accountability-command-board" aria-label="Mesa simples da prestacao">
+            <div class="accountability-command-heading">
+                <div>
+                    <p class="page-kicker mb-1">Mesa simples da prestacao</p>
+                    <strong>Prepare, confira, concilie e envie sem perder contexto</strong>
+                </div>
+                <small>Os atalhos abaixo seguem a ordem operacional do fechamento municipal.</small>
+            </div>
+            <div class="accountability-command-grid">
+                @foreach ($accountabilityGuide['command'] as $action)
+                    <a class="accountability-command-card tone-{{ $action['tone'] }}" href="{{ $action['href'] }}">
+                        <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                        <small>{{ $action['label'] }}</small>
+                        <strong>{{ $action['metric'] }}</strong>
+                        <p>{{ $action['description'] }}</p>
+                        <em><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $action['cta'] }}</em>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
         @if ($process)
             <div class="accountability-action-strip" aria-label="Acoes recomendadas para finalizar a prestacao">
                 <div class="accountability-action-strip-heading">

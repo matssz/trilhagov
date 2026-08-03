@@ -4642,6 +4642,150 @@ h6 {
     font-size: .98rem;
 }
 
+.execution-command-board,
+.accountability-command-board {
+    display: grid;
+    gap: .85rem;
+    padding: .95rem;
+    border: 1px solid rgba(9, 58, 103, .14);
+    border-radius: 10px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(247, 251, 253, .94)),
+        radial-gradient(circle at 100% 0, rgba(34, 103, 165, .08), transparent 18rem);
+}
+
+.execution-command-heading,
+.accountability-command-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.execution-command-heading strong,
+.accountability-command-heading strong {
+    color: var(--navy-900);
+    font-size: .95rem;
+}
+
+.execution-command-heading small,
+.accountability-command-heading small {
+    color: var(--muted);
+    font-size: .74rem;
+    text-align: right;
+}
+
+.execution-command-grid,
+.accountability-command-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .7rem;
+}
+
+.accountability-command-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.execution-command-card,
+.accountability-command-card {
+    display: grid;
+    min-width: 0;
+    min-height: 156px;
+    gap: .35rem;
+    align-content: start;
+    padding: .85rem;
+    border: 1px solid #d2dfeb;
+    border-top: 3px solid var(--navy-700);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .92);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 12px 24px rgba(8, 35, 64, .06);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.execution-command-card:hover,
+.accountability-command-card:hover {
+    border-color: #9eb7cf;
+    box-shadow: 0 16px 30px rgba(8, 35, 64, .1);
+    transform: translateY(-1px);
+}
+
+.execution-command-card.tone-success,
+.accountability-command-card.tone-success {
+    border-top-color: var(--success);
+}
+
+.execution-command-card.tone-warning,
+.accountability-command-card.tone-warning {
+    border-top-color: var(--warning);
+}
+
+.execution-command-card.tone-danger,
+.accountability-command-card.tone-danger {
+    border-top-color: var(--danger);
+}
+
+.execution-command-card > span,
+.accountability-command-card > span {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid #c7d8e6;
+    border-radius: 8px;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.execution-command-card svg,
+.accountability-command-card svg {
+    width: 17px;
+    height: 17px;
+}
+
+.execution-command-card small,
+.accountability-command-card small {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.execution-command-card strong,
+.accountability-command-card strong {
+    color: var(--navy-950);
+    font-size: 1rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.execution-command-card p,
+.accountability-command-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .72rem;
+    line-height: 1.35;
+}
+
+.execution-command-card em,
+.accountability-command-card em {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: auto;
+    color: var(--navy-800);
+    font-size: .72rem;
+    font-style: normal;
+    font-weight: 850;
+}
+
+.execution-command-card em svg,
+.accountability-command-card em svg {
+    width: 14px;
+    height: 14px;
+}
+
 .execution-flow-lane {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -6592,5 +6736,35 @@ button.accountability-action-card {
     .municipal-health-grid a {
         grid-column: 2;
         justify-self: start;
+    }
+}
+
+@media (max-width: 1100px) {
+    .execution-command-grid,
+    .accountability-command-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .execution-command-heading,
+    .accountability-command-heading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .execution-command-heading small,
+    .accountability-command-heading small {
+        text-align: left;
+    }
+
+    .execution-command-grid,
+    .accountability-command-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .execution-command-card,
+    .accountability-command-card {
+        min-height: 0;
     }
 }

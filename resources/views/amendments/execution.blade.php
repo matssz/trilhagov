@@ -85,6 +85,27 @@
             </div>
         </div>
 
+        <div class="execution-command-board" aria-label="Mesa simples da execucao">
+            <div class="execution-command-heading">
+                <div>
+                    <p class="page-kicker mb-1">Mesa simples da execucao</p>
+                    <strong>O que o gestor precisa fazer nesta emenda</strong>
+                </div>
+                <small>Atalhos diretos para executar, pagar, comprovar e prestar contas.</small>
+            </div>
+            <div class="execution-command-grid">
+                @foreach ($executionGuide['command'] as $action)
+                    <a class="execution-command-card tone-{{ $action['tone'] }}" href="{{ $action['href'] }}">
+                        <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                        <small>{{ $action['label'] }}</small>
+                        <strong>{{ $action['metric'] }}</strong>
+                        <p>{{ $action['description'] }}</p>
+                        <em><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $action['cta'] }}</em>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
         <div class="execution-flow-lane" aria-label="Fluxo simplificado da execucao">
             @foreach ($executionGuide['flow'] as $step)
                 <a class="{{ $step['done'] ? 'is-done' : '' }}" href="{{ $step['href'] }}">
@@ -132,7 +153,7 @@
             </div>
         </div>
 
-        <div class="execution-release-panel {{ $executionGuide['release']['ready'] ? 'is-ready' : 'has-blockers' }}" aria-label="Liberacao para prestacao de contas">
+        <div class="execution-release-panel {{ $executionGuide['release']['ready'] ? 'is-ready' : 'has-blockers' }}" id="liberacao-prestacao" aria-label="Liberacao para prestacao de contas">
             <div class="execution-release-heading">
                 <span><i data-lucide="{{ $executionGuide['release']['ready'] ? 'badge-check' : 'shield-alert' }}" aria-hidden="true"></i></span>
                 <div>

@@ -133,6 +133,61 @@ class AccountabilityService
 
         return [
             'next' => $next,
+            'command' => [
+                [
+                    'icon' => 'wand-sparkles',
+                    'label' => 'Preparar processo',
+                    'metric' => $hasProcess ? 'Aberto' : 'Nao iniciado',
+                    'description' => $hasProcess
+                        ? 'Checklist e responsavel ja existem para esta emenda.'
+                        : 'Cria a prestacao e preenche o que o sistema ja consegue validar.',
+                    'href' => $hasProcess ? '#process' : '#iniciar-prestacao',
+                    'cta' => $hasProcess ? 'Ver processo' : 'Preparar agora',
+                    'tone' => $hasProcess ? 'success' : 'warning',
+                ],
+                [
+                    'icon' => 'list-checks',
+                    'label' => 'Conferir checklist',
+                    'metric' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : '0/0',
+                    'description' => $checklistReady
+                        ? 'Itens obrigatorios resolvidos ou marcados como nao aplicaveis.'
+                        : 'Use a pre-conferencia para aproveitar dados de execucao e documentos.',
+                    'href' => $process && ! $checklistReady ? '#assistente-prestacao' : '#requirements',
+                    'cta' => $checklistReady ? 'Ver checklist' : 'Pre-conferir',
+                    'tone' => $checklistReady ? 'success' : 'warning',
+                ],
+                [
+                    'icon' => 'scale',
+                    'label' => 'Conciliar saldo',
+                    'metric' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.'),
+                    'description' => $financialReady
+                        ? 'Recebido, pago e devolvido estao fechados.'
+                        : 'Ajuste pagamento ou devolucao antes de registrar envio.',
+                    'href' => '#reconciliation',
+                    'cta' => 'Abrir conciliacao',
+                    'tone' => $financialReady ? 'success' : 'danger',
+                ],
+                [
+                    'icon' => 'send',
+                    'label' => 'Enviar prestacao',
+                    'metric' => $ready ? 'Liberada' : $score.'%',
+                    'description' => $ready
+                        ? 'Informe protocolo e mantenha o dossie pronto para auditoria.'
+                        : 'Finalize pendencias antes de protocolar.',
+                    'href' => $ready ? '#envio-prestacao' : '#requirements',
+                    'cta' => $ready ? 'Informar protocolo' : 'Ver pendencias',
+                    'tone' => $ready ? 'success' : 'warning',
+                ],
+                [
+                    'icon' => 'package-check',
+                    'label' => 'Dossie',
+                    'metric' => $hasProcess ? 'Disponivel' : 'Aguardando',
+                    'description' => 'Baixe PDF executivo e pacote de anexos quando o processo existir.',
+                    'href' => $hasProcess ? '#dossie-prestacao' : '#iniciar-prestacao',
+                    'cta' => $hasProcess ? 'Baixar arquivos' : 'Abrir processo',
+                    'tone' => $hasProcess ? 'primary' : 'warning',
+                ],
+            ],
             'closing' => [
                 'score' => $score,
                 'label' => $closingLabel,

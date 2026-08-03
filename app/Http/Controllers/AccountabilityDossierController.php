@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AmendmentDocument;
 use App\Models\ParliamentaryAmendment;
 use App\Services\AccountabilityService;
 use App\Services\CurrentMunicipality;
@@ -29,25 +30,20 @@ class AccountabilityDossierController extends Controller
         $pdf = $this->makePdf($amendment, $accountabilityService);
         $temporaryPath = tempnam(sys_get_temp_dir(), 'trilhagov-dossier-');
 
-        abort_if($temporaryPath === false, 500, 'Não foi possível preparar o pacote do dossiê.');
+        abort_if($temporaryPath === false, 500, 'Nao foi possivel preparar o pacote do dossie.');
 
         $zip = new ZipArchive;
         $opened = $zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        abort_unless($opened === true, 500, 'Não foi possível criar o pacote do dossiê.');
+        abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote do dossie.');
 
         $zip->addFromString('dossie/'.$this->baseFilename($amendment).'.pdf', $pdf->output());
-        $manifest = [
-            'TrilhaGov - Pacote de prestação de contas',
-            'Emenda: '.$amendment->reference,
-            'Município: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
-            'Gerado em: '.now()->format('d/m/Y H:i:s'),
-            'Documentos incluídos: '.$amendment->documents->count(),
-        ];
-        $zip->addFromString('MANIFESTO.txt', implode(PHP_EOL, $manifest).PHP_EOL);
-        $temporaryDocuments = [];
+        $includedDocuments = [];
+        $skippedDocuments = [];
 
         foreach ($amendment->documents as $document) {
-            if (! Storage::exists($document->storage_path)) {
+            if (! Storage::disk('local')->exists($document->storage_path)) {
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao encontrado no armazenamento');
+
                 continue;
             }
 
@@ -63,29 +59,20 @@ class AccountabilityDossierController extends Controller
                 $document->version,
                 $originalName !== '' ? $originalName : 'arquivo',
             );
-            $source = Storage::readStream($document->storage_path);
-            $temporaryDocument = tmpfile();
+            $contents = Storage::disk('local')->get($document->storage_path);
 
-            if ($source === false || $temporaryDocument === false) {
-                if (is_resource($source)) {
-                    fclose($source);
-                }
+            if ($contents === null || $contents === false) {
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao pode ser lido');
 
                 continue;
             }
 
-            stream_copy_to_stream($source, $temporaryDocument);
-            fclose($source);
-            $metadata = stream_get_meta_data($temporaryDocument);
-            $temporaryDocuments[] = $temporaryDocument;
-            $zip->addFile($metadata['uri'], $archiveName);
+            $zip->addFromString($archiveName, $contents);
+            $includedDocuments[] = $this->manifestDocumentLine($document, $archiveName);
         }
 
+        $zip->addFromString('MANIFESTO.txt', $this->manifest($amendment, $includedDocuments, $skippedDocuments));
         $zip->close();
-
-        foreach ($temporaryDocuments as $temporaryDocument) {
-            fclose($temporaryDocument);
-        }
 
         return response()
             ->download($temporaryPath, $this->baseFilename($amendment).'.zip', ['Content-Type' => 'application/zip'])
@@ -129,5 +116,44 @@ class AccountabilityDossierController extends Controller
     private function baseFilename(ParliamentaryAmendment $amendment): string
     {
         return 'dossie-prestacao-'.(Str::slug($amendment->reference) ?: $amendment->id);
+    }
+
+    /** @param array<int, string> $includedDocuments @param array<int, string> $skippedDocuments */
+    private function manifest(ParliamentaryAmendment $amendment, array $includedDocuments, array $skippedDocuments): string
+    {
+        $lines = [
+            'TrilhaGov - Pacote de prestacao de contas',
+            'Emenda: '.$amendment->reference,
+            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Gerado em: '.now()->format('d/m/Y H:i:s'),
+            'Documentos catalogados: '.$amendment->documents->count(),
+            'Documentos incluidos no pacote: '.count($includedDocuments),
+            'Documentos nao incluidos: '.count($skippedDocuments),
+            '',
+            'Arquivos incluidos:',
+            ...($includedDocuments === [] ? ['- nenhum anexo incluido'] : array_map(fn (string $line) => '- '.$line, $includedDocuments)),
+        ];
+
+        if ($skippedDocuments !== []) {
+            $lines = [
+                ...$lines,
+                '',
+                'Atencao: documentos catalogados que nao entraram no pacote:',
+                ...array_map(fn (string $line) => '- '.$line, $skippedDocuments),
+            ];
+        }
+
+        return implode(PHP_EOL, $lines).PHP_EOL;
+    }
+
+    private function manifestDocumentLine(AmendmentDocument $document, string $detail): string
+    {
+        return sprintf(
+            '%s | tipo: %s | v%d | %s',
+            $document->original_name,
+            $document->documentType->name,
+            $document->version,
+            $detail,
+        );
     }
 }

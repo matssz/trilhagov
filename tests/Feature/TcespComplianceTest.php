@@ -205,7 +205,7 @@ class TcespComplianceTest extends TestCase
             'name' => 'Parecer tecnico',
             'is_active' => true,
         ]);
-        Storage::put('documents/tcesp/parecer.pdf', 'conteudo do parecer');
+        Storage::disk('local')->put('documents/tcesp/parecer.pdf', 'conteudo do parecer');
         $amendment->documents()->create([
             'municipality_id' => $municipality->id,
             'document_type_id' => $documentType->id,
@@ -246,7 +246,7 @@ class TcespComplianceTest extends TestCase
             'name' => 'Parecer tecnico',
             'is_active' => true,
         ]);
-        Storage::put('documents/tcesp/presente.pdf', 'conteudo presente');
+        Storage::disk('local')->put('documents/tcesp/presente.pdf', 'conteudo presente');
         foreach ([
             ['original_name' => 'presente.pdf', 'storage_path' => 'documents/tcesp/presente.pdf', 'size_bytes' => 16, 'version' => 1],
             ['original_name' => 'ausente.pdf', 'storage_path' => 'documents/tcesp/ausente.pdf', 'size_bytes' => 100, 'version' => 2],
