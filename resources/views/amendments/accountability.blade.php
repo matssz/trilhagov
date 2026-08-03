@@ -414,5 +414,32 @@
             <div><span class="dossier-icon"><i data-lucide="package-check" aria-hidden="true"></i></span><div><h2 class="h5 mb-1">Dossiê de auditoria</h2><p class="text-secondary mb-0">{{ $amendment->documents->count() }} documento(s), {{ $amendment->executionStages->count() }} etapa(s) e {{ $amendment->financialCommitments->count() }} empenho(s).</p></div></div>
             <div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-down" aria-hidden="true"></i>PDF</a><a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package" aria-hidden="true"></i>PDF + documentos</a></div>
         </section>
+
+        <section class="accountability-final-package mb-4" id="prestacao-final">
+            <div class="accountability-final-copy">
+                <span><i data-lucide="{{ $accountabilityGuide['finalPackage']['ready'] ? 'badge-check' : 'loader-circle' }}" aria-hidden="true"></i>Fechamento final</span>
+                <h2>{{ $accountabilityGuide['finalPackage']['title'] }}</h2>
+                <p>{{ $accountabilityGuide['finalPackage']['description'] }}</p>
+            </div>
+            <div class="accountability-final-checks">
+                @foreach ($accountabilityGuide['finalPackage']['checks'] as $check)
+                    <article class="{{ $check['done'] ? 'is-done' : 'is-pending' }}">
+                        <i data-lucide="{{ $check['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i>
+                        <div>
+                            <strong>{{ $check['label'] }}</strong>
+                            <small>{{ $check['detail'] }}</small>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="accountability-final-actions">
+                @if ($accountabilityGuide['finalPackage']['ready'])
+                    <a class="btn btn-primary" href="#envio-prestacao"><i data-lucide="send" aria-hidden="true"></i>Protocolar prestacao</a>
+                    <a class="btn btn-outline-primary" href="#dossie-prestacao"><i data-lucide="package-check" aria-hidden="true"></i>Baixar pacote final</a>
+                @else
+                    <a class="btn btn-outline-primary" href="{{ $accountabilityGuide['next']['href'] }}"><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i>{{ $accountabilityGuide['next']['label'] }}</a>
+                @endif
+            </div>
+        </section>
     @endif
 @endsection

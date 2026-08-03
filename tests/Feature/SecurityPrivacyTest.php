@@ -28,7 +28,26 @@ class SecurityPrivacyTest extends TestCase
             ->assertSee('Matriz de risco')
             ->assertSee('Retencao e descarte')
             ->assertSee('Resposta a incidente')
-            ->assertSee('Roteiro para vazamento');
+            ->assertSee('Roteiro para vazamento')
+            ->assertSee('Protecao extra para a sua conta de gestor')
+            ->assertSee('Ativar MFA');
+    }
+
+    public function test_manager_can_toggle_own_mfa_from_security_panel(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->patch(route('security-privacy.mfa.update'), ['enabled' => '1'])
+            ->assertSessionHas('status');
+
+        $this->assertTrue($user->fresh()->mfa_enabled);
+
+        $this->patch(route('security-privacy.mfa.update'), ['enabled' => '0'])
+            ->assertSessionHas('status');
+
+        $this->assertFalse($user->fresh()->mfa_enabled);
     }
 
     public function test_non_manager_cannot_view_security_privacy_panel(): void

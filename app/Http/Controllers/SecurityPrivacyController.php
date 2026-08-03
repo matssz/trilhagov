@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\Municipality;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -25,6 +26,12 @@ class SecurityPrivacyController extends Controller
         $pendingInvitations = $invitations->whereNull('accepted_at')->where('expires_at', '>', now())->count();
         $expiredInvitations = $invitations->whereNull('accepted_at')->where('expires_at', '<=', now())->count();
         $transparencyStatus = $municipality->transparency_enabled ? 'attention' : 'ok';
+        $sensitiveUsers = $users->filter(fn (User $user) => in_array($user->pivot->role, [
+            User::ROLE_MANAGER,
+            User::ROLE_AUDITOR,
+        ], true));
+        $mfaEnabledCount = $sensitiveUsers->where('mfa_enabled', true)->count();
+        $allSensitiveMfa = $sensitiveUsers->isEmpty() || $mfaEnabledCount === $sensitiveUsers->count();
 
         $checks = [
             [
@@ -64,9 +71,9 @@ class SecurityPrivacyController extends Controller
                     : 'Ative uma norma municipal com prazo de retencao para orientar descarte e guarda minima.',
             ],
             [
-                'status' => 'planned',
-                'title' => 'MFA para gestores',
-                'description' => 'Proximo endurecimento tecnico: segundo fator para gestor e usuarios sensiveis, sem bloquear o piloto atual.',
+                'status' => $allSensitiveMfa ? 'ok' : 'attention',
+                'title' => 'MFA para gestores e auditoria',
+                'description' => $mfaEnabledCount.' de '.$sensitiveUsers->count().' usuario(s) sensiveis com segundo fator ativo.',
             ],
         ];
 
@@ -85,7 +92,25 @@ class SecurityPrivacyController extends Controller
             'riskMatrix' => $this->riskMatrix($municipality, $pendingInvitations, $expiredInvitations, $auditLogCount, $transparencyStatus),
             'retentionPlan' => $this->retentionPlan($activeProfile),
             'incidentPlaybook' => $this->incidentPlaybook(),
+            'currentUserMfaEnabled' => (bool) $request->user()->mfa_enabled,
         ]);
+    }
+
+    public function updateMfa(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'enabled' => ['required', 'boolean'],
+        ]);
+
+        $request->user()->forceFill([
+            'mfa_enabled' => (bool) $validated['enabled'],
+            'mfa_code_hash' => null,
+            'mfa_code_expires_at' => null,
+        ])->save();
+
+        return back()->with('status', (bool) $validated['enabled']
+            ? 'Verificacao em duas etapas ativada para sua conta.'
+            : 'Verificacao em duas etapas desativada para sua conta.');
     }
 
     /** @return array<int, array{area: string, data: string, count: string, purpose: string, exposure: string}> */

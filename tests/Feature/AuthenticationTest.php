@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Municipality;
 use App\Models\User;
+use App\Notifications\MfaCodeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -114,6 +116,39 @@ class AuthenticationTest extends TestCase
         ])->assertCookie(Auth::guard()->getRecallerName());
 
         $this->assertNotNull($user->fresh()->remember_token);
+    }
+
+    public function test_mfa_enabled_user_must_confirm_code_before_workspace(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create([
+            'password' => 'senha-segura',
+            'mfa_enabled' => true,
+        ]);
+        $municipality = Municipality::factory()->create();
+        $municipality->users()->attach($user, ['role' => 'manager']);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertRedirect(route('mfa.challenge'))
+            ->assertSessionHas('mfa_user_id', $user->id);
+
+        $this->assertGuest();
+        Notification::assertSentTo($user, MfaCodeNotification::class);
+        $this->get(route('mfa.challenge'))
+            ->assertOk()
+            ->assertSee('Verificacao em duas etapas');
+
+        $this->post(route('mfa.verify'), ['code' => '000000'])
+            ->assertSessionHasErrors('code');
+
+        $this->post(route('mfa.verify'), ['code' => '123456'])
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame($municipality->id, session('active_municipality_id'));
+        $this->assertNull($user->fresh()->mfa_code_hash);
     }
 
     public function test_user_without_complete_municipality_cannot_login(): void

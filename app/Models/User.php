@@ -40,6 +40,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'mfa_enabled',
+        'mfa_code_hash',
+        'mfa_code_expires_at',
     ];
 
     /**
@@ -50,6 +53,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'mfa_code_hash',
     ];
 
     /**
@@ -62,6 +66,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'mfa_enabled' => 'boolean',
+            'mfa_code_expires_at' => 'datetime',
         ];
     }
 

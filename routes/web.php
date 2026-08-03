@@ -12,6 +12,7 @@ use App\Http\Controllers\AmendmentRemappingController;
 use App\Http\Controllers\AudespHomologationController;
 use App\Http\Controllers\AudespRegistrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\MfaChallengeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentTypeController;
@@ -83,6 +84,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/cadastro', [RegisteredUserController::class, 'store'])->block(10, 10);
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->block(10, 10);
+    Route::get('/login/verificacao', [MfaChallengeController::class, 'show'])->name('mfa.challenge');
+    Route::post('/login/verificacao', [MfaChallengeController::class, 'verify'])->name('mfa.verify')->block(10, 10);
 });
 
 Route::middleware('auth')->group(function () {
@@ -207,6 +210,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::middleware('municipality.role:manager')->group(function () {
         Route::get('/implantacao', [MunicipalOnboardingController::class, 'index'])->name('municipal-onboarding.index');
         Route::get('/configuracoes/lgpd-seguranca', SecurityPrivacyController::class)->name('security-privacy.index');
+        Route::patch('/configuracoes/lgpd-seguranca/mfa', [SecurityPrivacyController::class, 'updateMfa'])->name('security-privacy.mfa.update')->block(10, 10);
         Route::post('/implantacao/ativar-exercicio', [MunicipalOnboardingController::class, 'activate'])->name('municipal-onboarding.activate')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/{template}/revisar', [MunicipalOfficialDocumentController::class, 'reviseTemplate'])->name('official-document-templates.revise')->block(10, 10);

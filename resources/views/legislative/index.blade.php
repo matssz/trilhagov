@@ -72,6 +72,21 @@
                         </article>
                     @endforeach
                 </div>
+                <div class="councilor-simple-checklist" aria-label="Visao simples do vereador">
+                    <div>
+                        <span class="page-kicker">Visao simples do vereador</span>
+                        <strong>Antes de cadastrar, confira estes pontos</strong>
+                    </div>
+                    <div class="councilor-simple-checklist-items">
+                        @foreach($councilorGuide['plainChecklist'] as $item)
+                            <article class="{{ $item['done'] ? 'is-done' : 'is-pending' }}">
+                                <i data-lucide="{{ $item['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i>
+                                <span>{{ $item['label'] }}</span>
+                                <small>{{ $item['detail'] }}</small>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
                 <div class="councilor-action-summary" aria-label="Resumo de andamento do vereador">
                     <article class="{{ ($councilorGroups['summary']['action']['count'] ?? 0) > 0 ? 'needs-action' : 'is-clear' }}">
                         <span><i data-lucide="pencil-line" aria-hidden="true"></i></span>

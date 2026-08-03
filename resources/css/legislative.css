@@ -259,6 +259,101 @@
     background: linear-gradient(90deg, var(--navy-900), #2f6fa3);
 }
 
+.councilor-simple-checklist {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(210px, .42fr) minmax(0, 1fr);
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid #cbd9e7;
+    border-radius: 7px;
+    background: #cbd9e7;
+}
+
+.councilor-simple-checklist > div {
+    min-width: 0;
+    padding: .95rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+}
+
+.councilor-simple-checklist > div:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.councilor-simple-checklist strong {
+    color: var(--navy-950);
+    font-size: .95rem;
+    line-height: 1.25;
+}
+
+.councilor-simple-checklist-items {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    padding: 0 !important;
+    background: #d8e3ee !important;
+}
+
+.councilor-simple-checklist-items article {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: .35rem .5rem;
+    min-width: 0;
+    padding: .85rem;
+    background: #ffffff;
+}
+
+.councilor-simple-checklist-items svg {
+    width: 18px;
+    height: 18px;
+    margin-top: .05rem;
+}
+
+.councilor-simple-checklist-items .is-done svg {
+    color: #147647;
+}
+
+.councilor-simple-checklist-items .is-pending svg {
+    color: #9a6700;
+}
+
+.councilor-simple-checklist-items span,
+.councilor-simple-checklist-items small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.councilor-simple-checklist-items span {
+    color: var(--navy-950);
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+.councilor-simple-checklist-items small {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+    .councilor-simple-checklist {
+        grid-template-columns: 1fr;
+    }
+
+    .councilor-simple-checklist-items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .councilor-simple-checklist-items {
+        grid-template-columns: 1fr;
+    }
+}
+
 .councilor-progress-track.is-health i {
     background: linear-gradient(90deg, #19705b, #43b88d);
 }

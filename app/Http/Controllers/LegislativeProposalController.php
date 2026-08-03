@@ -206,6 +206,28 @@ class LegislativeProposalController extends Controller
                     'tone' => $badgeTone,
                 ],
             ],
+            'plainChecklist' => [
+                [
+                    'label' => 'Saldo disponivel',
+                    'done' => $remaining !== null && (float) $remaining > 0.005,
+                    'detail' => $remaining === null ? 'Aguardando norma ativa' : 'R$ '.number_format((float) $remaining, 2, ',', '.'),
+                ],
+                [
+                    'label' => 'Regra municipal ativa',
+                    'done' => $profile !== null,
+                    'detail' => $profile ? 'Exercicio '.$profile->fiscal_year.' liberado' : 'Gestor precisa ativar',
+                ],
+                [
+                    'label' => 'Saude calculada',
+                    'done' => $healthGap === null || (float) $healthGap <= 0.005,
+                    'detail' => $healthGap !== null && (float) $healthGap > 0.005 ? 'Priorize saude' : 'Sem bloqueio',
+                ],
+                [
+                    'label' => 'Pode enviar',
+                    'done' => $canCreate,
+                    'detail' => $canCreate ? 'Formulario liberado' : $badge,
+                ],
+            ],
             'statusCounts' => $statusCounts,
         ];
     }

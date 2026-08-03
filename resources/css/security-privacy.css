@@ -8,7 +8,8 @@
 .privacy-hero,
 .privacy-panel,
 .privacy-guidance,
-.privacy-check {
+.privacy-check,
+.privacy-mfa-card {
     border: 1px solid #d2dde8;
     border-radius: 8px;
     background: linear-gradient(135deg, #ffffff 0%, #f7fafc 58%, #eef5fb 100%);
@@ -35,9 +36,29 @@
 
 .privacy-hero p,
 .privacy-check p,
-.privacy-guidance p {
+.privacy-guidance p,
+.privacy-mfa-card p {
     margin: 0;
     color: #536278;
+}
+
+.privacy-mfa-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.privacy-mfa-card h2 {
+    margin: .25rem 0;
+    color: var(--navy-950);
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.privacy-mfa-card form {
+    flex: 0 0 auto;
 }
 
 .privacy-pill {
@@ -343,8 +364,18 @@
 
 @media (max-width: 768px) {
     .privacy-hero,
-    .privacy-guidance {
+    .privacy-guidance,
+    .privacy-mfa-card {
         flex-direction: column;
+    }
+
+    .privacy-mfa-card {
+        align-items: stretch;
+    }
+
+    .privacy-mfa-card button {
+        width: 100%;
+        justify-content: center;
     }
 
     .privacy-map,

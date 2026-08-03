@@ -271,6 +271,20 @@ class AccountabilityService
                 ['label' => 'Saldo sem conciliacao', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
                 ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Nao iniciado'],
             ],
+            'finalPackage' => [
+                'ready' => $ready,
+                'title' => $ready ? 'Prestacao final pronta' : 'Prestacao final em preparacao',
+                'description' => $ready
+                    ? 'O processo ja possui base para protocolo, PDF executivo e pacote de documentos.'
+                    : 'O sistema mostra exatamente o que falta antes do envio final ao controle interno ou externo.',
+                'checks' => [
+                    ['label' => 'Processo aberto', 'done' => $hasProcess, 'detail' => $hasProcess ? 'Prestacao criada' : 'Inicie o processo'],
+                    ['label' => 'Checklist resolvido', 'done' => $checklistReady, 'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' itens') : 'Nao iniciado'],
+                    ['label' => 'Financeiro conciliado', 'done' => $financialReady, 'detail' => 'Diferenca R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                    ['label' => 'Evidencias anexadas', 'done' => $hasEvidence, 'detail' => $evidenceCount.' documento(s)'],
+                    ['label' => 'Sem bloqueios', 'done' => $ready, 'detail' => $ready ? 'Pronto para protocolo' : (($readiness['blockers'] ?? collect())->first() ?? 'Aguardando preparo')],
+                ],
+            ],
         ];
     }
 

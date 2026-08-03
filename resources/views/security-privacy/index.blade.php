@@ -30,6 +30,23 @@
             </div>
         </div>
 
+        <article class="privacy-mfa-card mt-3">
+            <div>
+                <span class="privacy-pill"><i data-lucide="shield-check" aria-hidden="true"></i>Segundo fator</span>
+                <h2>Protecao extra para a sua conta de gestor</h2>
+                <p>{{ $currentUserMfaEnabled ? 'Seu login ja exige uma verificacao adicional depois da senha.' : 'Ative a verificacao em duas etapas para reduzir risco caso a senha seja exposta.' }}</p>
+            </div>
+            <form method="POST" action="{{ route('security-privacy.mfa.update') }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="enabled" value="{{ $currentUserMfaEnabled ? 0 : 1 }}">
+                <button class="btn {{ $currentUserMfaEnabled ? 'btn-outline-primary' : 'btn-primary' }}" type="submit">
+                    <i data-lucide="{{ $currentUserMfaEnabled ? 'shield-off' : 'shield-check' }}" aria-hidden="true"></i>
+                    {{ $currentUserMfaEnabled ? 'Desativar MFA' : 'Ativar MFA' }}
+                </button>
+            </form>
+        </article>
+
         <div class="row g-3 mt-1">
             @foreach ($checks as $check)
                 <div class="col-12 col-xl-6">
