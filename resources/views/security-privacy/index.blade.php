@@ -25,7 +25,7 @@
                 </p>
             </div>
             <div class="privacy-score">
-                <strong>{{ collect($checks)->where('status', 'ok')->count() }}/{{ count($checks) }}</strong>
+                <strong>{{ $okChecks }}/{{ count($checks) }}</strong>
                 <span>controles prontos</span>
             </div>
         </div>
@@ -44,6 +44,45 @@
                     </article>
                 </div>
             @endforeach
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-xl-8">
+                <article class="privacy-panel">
+                    <div class="privacy-panel-heading">
+                        <span>Inventario LGPD</span>
+                        <strong>Dados tratados pelo municipio</strong>
+                    </div>
+                    <div class="privacy-inventory">
+                        @foreach ($dataInventory as $item)
+                            <div>
+                                <span>{{ $item['area'] }}</span>
+                                <strong>{{ $item['data'] }}</strong>
+                                <small>{{ $item['count'] }}</small>
+                                <p>{{ $item['purpose'] }}</p>
+                                <em>{{ $item['exposure'] }}</em>
+                            </div>
+                        @endforeach
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-xl-4">
+                <article class="privacy-panel">
+                    <div class="privacy-panel-heading">
+                        <span>Bases de tratamento</span>
+                        <strong>Por que o dado existe</strong>
+                    </div>
+                    <div class="privacy-legal-bases">
+                        @foreach ($legalBases as $basis)
+                            <div>
+                                <i data-lucide="scale" aria-hidden="true"></i>
+                                <strong>{{ $basis['title'] }}</strong>
+                                <p>{{ $basis['description'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </article>
+            </div>
         </div>
 
         <div class="row g-3 mt-1">
@@ -94,6 +133,61 @@
                 </article>
             </div>
         </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-xl-7">
+                <article class="privacy-panel">
+                    <div class="privacy-panel-heading">
+                        <span>Matriz de risco</span>
+                        <strong>Defesa operacional</strong>
+                    </div>
+                    <div class="privacy-risk-list">
+                        @foreach ($riskMatrix as $risk)
+                            <div class="privacy-risk privacy-risk-{{ $risk['status'] }}">
+                                <i data-lucide="{{ $risk['status'] === 'ok' ? 'circle-check' : ($risk['status'] === 'critical' ? 'triangle-alert' : 'shield-alert') }}" aria-hidden="true"></i>
+                                <div>
+                                    <strong>{{ $risk['title'] }}</strong>
+                                    <span>{{ $risk['signal'] }}</span>
+                                    <p>{{ $risk['action'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-xl-5">
+                <article class="privacy-panel">
+                    <div class="privacy-panel-heading">
+                        <span>Retencao e descarte</span>
+                        <strong>Regras praticas</strong>
+                    </div>
+                    <div class="privacy-retention">
+                        @foreach ($retentionPlan as $rule)
+                            <div>
+                                <span>{{ $rule['item'] }}</span>
+                                <p>{{ $rule['rule'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <article class="privacy-panel mt-3">
+            <div class="privacy-panel-heading">
+                <span>Resposta a incidente</span>
+                <strong>Roteiro para vazamento, acesso indevido ou erro de permissao</strong>
+            </div>
+            <div class="privacy-playbook">
+                @foreach ($incidentPlaybook as $step)
+                    <div>
+                        <span>{{ $step['step'] }}</span>
+                        <strong>{{ $step['title'] }}</strong>
+                        <p>{{ $step['description'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </article>
 
         <article class="privacy-guidance mt-3">
             <i data-lucide="lock-keyhole" aria-hidden="true"></i>
