@@ -32,6 +32,7 @@ class SecurityPrivacyController extends Controller
         ], true));
         $mfaEnabledCount = $sensitiveUsers->where('mfa_enabled', true)->count();
         $allSensitiveMfa = $sensitiveUsers->isEmpty() || $mfaEnabledCount === $sensitiveUsers->count();
+        $mfaDeliveryReady = $this->mfaDeliveryReady();
 
         $checks = [
             [
@@ -71,9 +72,11 @@ class SecurityPrivacyController extends Controller
                     : 'Ative uma norma municipal com prazo de retencao para orientar descarte e guarda minima.',
             ],
             [
-                'status' => $allSensitiveMfa ? 'ok' : 'attention',
+                'status' => $allSensitiveMfa && $mfaDeliveryReady ? 'ok' : 'attention',
                 'title' => 'MFA para gestores e auditoria',
-                'description' => $mfaEnabledCount.' de '.$sensitiveUsers->count().' usuario(s) sensiveis com segundo fator ativo.',
+                'description' => $mfaDeliveryReady
+                    ? $mfaEnabledCount.' de '.$sensitiveUsers->count().' usuario(s) sensiveis com segundo fator ativo.'
+                    : 'Configure um mailer real antes de ativar MFA em producao.',
             ],
         ];
 
@@ -93,6 +96,7 @@ class SecurityPrivacyController extends Controller
             'retentionPlan' => $this->retentionPlan($activeProfile),
             'incidentPlaybook' => $this->incidentPlaybook(),
             'currentUserMfaEnabled' => (bool) $request->user()->mfa_enabled,
+            'mfaDeliveryReady' => $mfaDeliveryReady,
         ]);
     }
 
@@ -101,6 +105,12 @@ class SecurityPrivacyController extends Controller
         $validated = $request->validate([
             'enabled' => ['required', 'boolean'],
         ]);
+
+        if ((bool) $validated['enabled'] && ! $this->mfaDeliveryReady()) {
+            return back()->withErrors([
+                'mfa' => 'Configure um envio de e-mail real antes de ativar MFA em producao.',
+            ]);
+        }
 
         $request->user()->forceFill([
             'mfa_enabled' => (bool) $validated['enabled'],
@@ -111,6 +121,12 @@ class SecurityPrivacyController extends Controller
         return back()->with('status', (bool) $validated['enabled']
             ? 'Verificacao em duas etapas ativada para sua conta.'
             : 'Verificacao em duas etapas desativada para sua conta.');
+    }
+
+    private function mfaDeliveryReady(): bool
+    {
+        return config('app.env') !== 'production'
+            || ! in_array(config('mail.default'), ['log', 'array'], true);
     }
 
     /** @return array<int, array{area: string, data: string, count: string, purpose: string, exposure: string}> */

@@ -34,13 +34,19 @@
             <div>
                 <span class="privacy-pill"><i data-lucide="shield-check" aria-hidden="true"></i>Segundo fator</span>
                 <h2>Protecao extra para a sua conta de gestor</h2>
-                <p>{{ $currentUserMfaEnabled ? 'Seu login ja exige uma verificacao adicional depois da senha.' : 'Ative a verificacao em duas etapas para reduzir risco caso a senha seja exposta.' }}</p>
+                <p>
+                    @if (! $mfaDeliveryReady)
+                        Configure um envio de e-mail real antes de ativar MFA em producao. Assim o gestor nao fica sem receber o codigo de acesso.
+                    @else
+                        {{ $currentUserMfaEnabled ? 'Seu login ja exige uma verificacao adicional depois da senha.' : 'Ative a verificacao em duas etapas para reduzir risco caso a senha seja exposta.' }}
+                    @endif
+                </p>
             </div>
             <form method="POST" action="{{ route('security-privacy.mfa.update') }}">
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="enabled" value="{{ $currentUserMfaEnabled ? 0 : 1 }}">
-                <button class="btn {{ $currentUserMfaEnabled ? 'btn-outline-primary' : 'btn-primary' }}" type="submit">
+                <button class="btn {{ $currentUserMfaEnabled ? 'btn-outline-primary' : 'btn-primary' }}" type="submit" @disabled(! $mfaDeliveryReady && ! $currentUserMfaEnabled)>
                     <i data-lucide="{{ $currentUserMfaEnabled ? 'shield-off' : 'shield-check' }}" aria-hidden="true"></i>
                     {{ $currentUserMfaEnabled ? 'Desativar MFA' : 'Ativar MFA' }}
                 </button>

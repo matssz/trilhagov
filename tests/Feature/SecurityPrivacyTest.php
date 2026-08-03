@@ -50,6 +50,19 @@ class SecurityPrivacyTest extends TestCase
         $this->assertFalse($user->fresh()->mfa_enabled);
     }
 
+    public function test_mfa_cannot_be_enabled_in_production_without_real_mailer(): void
+    {
+        config(['app.env' => 'production', 'mail.default' => 'log']);
+        [$user, $municipality] = $this->userAndMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->patch(route('security-privacy.mfa.update'), ['enabled' => '1'])
+            ->assertSessionHasErrors('mfa');
+
+        $this->assertFalse($user->fresh()->mfa_enabled);
+    }
+
     public function test_non_manager_cannot_view_security_privacy_panel(): void
     {
         [$user, $municipality] = $this->userAndMunicipality(User::ROLE_VIEWER);
