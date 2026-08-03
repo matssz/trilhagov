@@ -181,6 +181,31 @@ class LegislativeProposalController extends Controller
             'nextText' => $nextText,
             'badge' => $badge,
             'badgeTone' => $badgeTone,
+            'simpleCards' => [
+                [
+                    'icon' => 'wallet-cards',
+                    'label' => 'Saldo para novas propostas',
+                    'value' => $remaining === null ? 'A configurar' : 'R$ '.number_format((float) $remaining, 2, ',', '.'),
+                    'description' => 'Valor ainda livre dentro da sua cota individual.',
+                    'tone' => $remaining !== null && (float) $remaining <= 0.005 ? 'warning' : 'neutral',
+                ],
+                [
+                    'icon' => 'heart-pulse',
+                    'label' => 'Saude obrigatoria',
+                    'value' => $healthGap !== null && (float) $healthGap > 0.005
+                        ? 'Faltam R$ '.number_format((float) $healthGap, 2, ',', '.')
+                        : 'Em dia',
+                    'description' => 'O sistema calcula a reserva minima pela norma municipal ativa.',
+                    'tone' => $healthGap !== null && (float) $healthGap > 0.005 ? 'warning' : 'success',
+                ],
+                [
+                    'icon' => 'file-plus-2',
+                    'label' => 'Seu proximo passo',
+                    'value' => $nextTitle,
+                    'description' => $nextText,
+                    'tone' => $badgeTone,
+                ],
+            ],
             'statusCounts' => $statusCounts,
         ];
     }
@@ -430,6 +455,19 @@ class LegislativeProposalController extends Controller
             'stale' => $staleItems,
             'stale_count' => (int) $actionable->sum('stale_count'),
             'quick_actions' => $quickActions,
+            'next_decisions' => $quickActions->take(3)->map(fn (array $action): array => [
+                'proposal' => $action['proposal'],
+                'column' => $action['column'],
+                'age' => $action['age'],
+                'late' => $action['late'],
+                'url' => $action['url'],
+                'label' => match ($action['column']['key']) {
+                    'receive' => 'Receber como processo municipal',
+                    'budget' => 'Confirmar reserva orcamentaria',
+                    'review' => 'Concluir conferencia ou protocolo',
+                    default => 'Abrir acompanhamento',
+                },
+            ])->values(),
             'focus_item' => $focusItem,
             'focus_url' => $focusItem ? route('legislative.show', $focusItem).$focus['fragment'] : null,
             'focus_class' => $total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : ''),

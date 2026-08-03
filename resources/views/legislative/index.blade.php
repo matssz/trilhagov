@@ -60,6 +60,18 @@
                         <strong>{{ ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_SENT] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RECEIVED] ?? 0) + ($councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_RESERVED] ?? 0) }}</strong>
                     </div>
                 </div>
+                <div class="councilor-plain-cards" aria-label="Resumo simples para o vereador">
+                    @foreach($councilorGuide['simpleCards'] as $card)
+                        <article class="is-{{ $card['tone'] }}">
+                            <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                            <div>
+                                <small>{{ $card['label'] }}</small>
+                                <strong>{{ $card['value'] }}</strong>
+                                <p>{{ $card['description'] }}</p>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
                 <div class="councilor-action-summary" aria-label="Resumo de andamento do vereador">
                     <article class="{{ ($councilorGroups['summary']['action']['count'] ?? 0) > 0 ? 'needs-action' : 'is-clear' }}">
                         <span><i data-lucide="pencil-line" aria-hidden="true"></i></span>
@@ -307,6 +319,26 @@
                         </li>
                     @endforeach
                 </ol>
+                <div class="executive-next-decisions" aria-label="Decisoes executivas priorizadas">
+                    <header>
+                        <span><i data-lucide="list-checks" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>3 decisoes mais importantes</strong>
+                            <small>Atalhos para o gestor resolver o que destrava Camara, reserva e execucao.</small>
+                        </div>
+                    </header>
+                    <div>
+                        @forelse(($executiveDesk['next_decisions'] ?? collect()) as $decision)
+                            <a class="{{ $decision['late'] ? 'is-late' : '' }}" href="{{ $decision['url'] }}">
+                                <span>{{ $decision['label'] }}</span>
+                                <strong>{{ $decision['proposal']->reference }} · {{ $decision['proposal']->object }}</strong>
+                                <small>{{ $decision['proposal']->author_name }} · {{ $decision['age'] }} dia(s) em {{ $decision['column']['title'] }}</small>
+                            </a>
+                        @empty
+                            <p>Nenhuma decisao executiva pendente agora.</p>
+                        @endforelse
+                    </div>
+                </div>
             </div>
             @if (($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
                 <div class="executive-action-queue" aria-label="Fila rapida do Executivo">
