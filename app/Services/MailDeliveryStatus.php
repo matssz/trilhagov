@@ -10,7 +10,8 @@ class MailDeliveryStatus
         $mailer = (string) config('mail.default', 'log');
         $from = trim((string) config('mail.from.address', ''));
         $isSimulation = in_array($mailer, ['log', 'array'], true);
-        $isReady = ! $isSimulation && $from !== '';
+        $isValidFrom = $from !== '' && ! str_ends_with($from, '.local') && filter_var($from, FILTER_VALIDATE_EMAIL);
+        $isReady = ! $isSimulation && $isValidFrom && $this->mailerHasRequiredConfiguration($mailer);
 
         if ($isReady) {
             return [
@@ -36,11 +37,25 @@ class MailDeliveryStatus
 
         return [
             'mailer' => $mailer,
-            'from' => null,
+            'from' => $from !== '' ? $from : null,
             'status' => 'attention',
-            'label' => 'E-mail precisa de remetente',
-            'message' => 'Configure o remetente institucional para liberar envio externo com rastreabilidade.',
+            'label' => 'E-mail precisa de configuracao',
+            'message' => 'Configure remetente institucional e credenciais SMTP reais para liberar envio externo com rastreabilidade.',
             'icon' => 'mail-x',
         ];
+    }
+
+    private function mailerHasRequiredConfiguration(string $mailer): bool
+    {
+        if ($mailer !== 'smtp') {
+            return true;
+        }
+
+        $smtp = config('mail.mailers.smtp', []);
+
+        return filled($smtp['host'] ?? null)
+            && filled($smtp['port'] ?? null)
+            && filled($smtp['username'] ?? null)
+            && filled($smtp['password'] ?? null);
     }
 }

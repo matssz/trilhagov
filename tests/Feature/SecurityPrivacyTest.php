@@ -52,7 +52,15 @@ class SecurityPrivacyTest extends TestCase
 
     public function test_mfa_cannot_be_enabled_in_production_without_real_mailer(): void
     {
-        config(['app.env' => 'production', 'mail.default' => 'log']);
+        config([
+            'app.env' => 'production',
+            'mail.default' => 'smtp',
+            'mail.from.address' => 'alertas@trilhagov.local',
+            'mail.mailers.smtp.host' => null,
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.username' => null,
+            'mail.mailers.smtp.password' => null,
+        ]);
         [$user, $municipality] = $this->userAndMunicipality(User::ROLE_MANAGER);
 
         $this->actingAs($user)
@@ -61,6 +69,27 @@ class SecurityPrivacyTest extends TestCase
             ->assertSessionHasErrors('mfa');
 
         $this->assertFalse($user->fresh()->mfa_enabled);
+    }
+
+    public function test_mfa_can_be_enabled_in_production_with_real_smtp_configuration(): void
+    {
+        config([
+            'app.env' => 'production',
+            'mail.default' => 'smtp',
+            'mail.from.address' => 'alertas@trilhagov.com.br',
+            'mail.mailers.smtp.host' => 'smtp.example.test',
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.username' => 'smtp-user',
+            'mail.mailers.smtp.password' => 'smtp-password',
+        ]);
+        [$user, $municipality] = $this->userAndMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->patch(route('security-privacy.mfa.update'), ['enabled' => '1'])
+            ->assertSessionHas('status');
+
+        $this->assertTrue($user->fresh()->mfa_enabled);
     }
 
     public function test_non_manager_cannot_view_security_privacy_panel(): void

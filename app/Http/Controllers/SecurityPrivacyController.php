@@ -125,8 +125,30 @@ class SecurityPrivacyController extends Controller
 
     private function mfaDeliveryReady(): bool
     {
-        return config('app.env') !== 'production'
-            || ! in_array(config('mail.default'), ['log', 'array'], true);
+        if (config('app.env') !== 'production') {
+            return true;
+        }
+
+        $mailer = (string) config('mail.default');
+        if (in_array($mailer, ['log', 'array'], true)) {
+            return false;
+        }
+
+        $from = (string) config('mail.from.address');
+        if ($from === '' || str_ends_with($from, '.local') || ! filter_var($from, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        if ($mailer !== 'smtp') {
+            return true;
+        }
+
+        $smtp = config('mail.mailers.smtp', []);
+
+        return filled($smtp['host'] ?? null)
+            && filled($smtp['port'] ?? null)
+            && filled($smtp['username'] ?? null)
+            && filled($smtp['password'] ?? null);
     }
 
     /** @return array<int, array{area: string, data: string, count: string, purpose: string, exposure: string}> */

@@ -59,9 +59,19 @@ services:
       - key: AWS_USE_PATH_STYLE_ENDPOINT
         value: "true"
       - key: MAIL_MAILER
-        value: log
+        value: smtp
+      - key: MAIL_SCHEME
+        value: tls
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
       - key: MAIL_FROM_ADDRESS
-        value: alertas@trilhagov.local
+        sync: false
       - key: MAIL_FROM_NAME
         value: TrilhaGov
       - key: SCHEDULER_TOKEN

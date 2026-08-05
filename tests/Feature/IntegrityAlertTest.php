@@ -109,6 +109,26 @@ class IntegrityAlertTest extends TestCase
         config([
             'mail.default' => 'smtp',
             'mail.from.address' => 'no-reply@trilhagov.test',
+            'mail.mailers.smtp.host' => null,
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.username' => null,
+            'mail.mailers.smtp.password' => null,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('E-mail precisa de configuracao')
+            ->assertSee('Mailer: SMTP');
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.from.address' => 'no-reply@trilhagov.com.br',
+            'mail.mailers.smtp.host' => 'smtp.example.test',
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.username' => 'smtp-user',
+            'mail.mailers.smtp.password' => 'smtp-password',
         ]);
 
         $this->actingAs($manager)

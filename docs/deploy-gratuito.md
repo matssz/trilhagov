@@ -55,10 +55,20 @@ token do agendador tambem sera cadastrado como segredo do GitHub Actions.
 | `AWS_DEFAULT_REGION` | Regiao mostrada na configuracao S3 |
 | `AWS_BUCKET` | `trilhagov-documents` |
 | `AWS_ENDPOINT` | Endpoint direto terminado em `/storage/v1/s3` |
+| `MAIL_HOST` | Servidor SMTP do provedor de e-mail |
+| `MAIL_USERNAME` | Usuario SMTP |
+| `MAIL_PASSWORD` | Senha ou token SMTP |
+| `MAIL_FROM_ADDRESS` | Remetente verificado, por exemplo `alertas@seudominio.com` |
 | `SCHEDULER_TOKEN` | Token aleatorio de 64 caracteres |
 
 O primeiro build instala PHP, compila a interface, cria as tabelas e pode levar
 alguns minutos. Ao terminar, o Render mostra o dominio HTTPS `onrender.com`.
+
+O blueprint usa `MAIL_MAILER=smtp`, `MAIL_SCHEME=tls` e `MAIL_PORT=587`.
+Enquanto os segredos SMTP nao forem preenchidos com um provedor real, o painel
+LGPD bloqueia a ativacao do MFA para evitar que gestores fiquem sem receber o
+codigo de acesso. Para piloto, use um provedor transacional ou SMTP institucional
+com remetente verificado, SPF, DKIM e DMARC quando houver dominio proprio.
 
 ## 5. Ativar alertas horarios
 
@@ -79,13 +89,14 @@ somente o token e possui limite de requisicoes.
 3. Cadastre uma emenda sem informacoes pessoais reais.
 4. Envie e baixe um documento de teste.
 5. Rode manualmente o workflow **Agendador**.
-6. Reinicie o servico no Render e confirme que login, dados e documento continuam.
+6. Envie um convite de teste para um e-mail controlado por voce.
+7. Reinicie o servico no Render e confirme que login, dados e documento continuam.
 
 ## Limites gratuitos
 
 - O Render adormece depois de 15 minutos sem trafego e a primeira abertura pode
   levar aproximadamente um minuto.
 - O Supabase Free pode pausar depois de uma semana sem atividade.
-- O e-mail fica em modo de log; as notificacoes internas continuam funcionando.
+- E-mail real depende do limite gratuito e da reputacao do provedor SMTP escolhido.
 - Esta arquitetura nao oferece SLA ou garantias suficientes para producao
   municipal com dados reais.

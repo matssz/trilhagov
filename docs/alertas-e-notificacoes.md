@@ -70,6 +70,12 @@ preferências. No ambiente local, `MAIL_MAILER=log` grava o conteúdo em
 configurar um serviço SMTP ou transacional e validar remetente, reputação e
 entregabilidade.
 
+No Render, o blueprint espera SMTP real por variáveis secretas: `MAIL_HOST`,
+`MAIL_USERNAME`, `MAIL_PASSWORD` e `MAIL_FROM_ADDRESS`. O MFA também depende
+desse canal. Em produção, o TrilhaGov bloqueia a ativação do segundo fator
+quando o mailer está em `log`, `array`, sem credenciais SMTP ou com remetente
+local, evitando que um gestor fique sem receber o código de acesso.
+
 ## Processamento automático
 
 O comando abaixo detecta pendências e envia somente os ciclos ainda não entregues:
