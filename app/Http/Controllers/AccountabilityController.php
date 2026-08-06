@@ -74,6 +74,9 @@ class AccountabilityController extends Controller
             'processSubmitToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-submit-{$process->id}")
                 : null,
+            'processArchiveToken' => $canEdit && $process !== null
+                ? $formSubmission->issue($request, "accountability-archive-{$process->id}")
+                : null,
             'quickCheckToken' => $canEdit && $process !== null
                 ? $formSubmission->issue($request, "accountability-quick-check-{$process->id}")
                 : null,
@@ -290,6 +293,69 @@ class AccountabilityController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         return back()->with('status', 'Prestacao enviada e protocolo registrado. O dossie final ja pode ser baixado.');
+    }
+
+    public function archive(
+        Request $request,
+        int $emenda,
+        CurrentMunicipality $currentMunicipality,
+        FormSubmission $formSubmission,
+        AccountabilityService $accountabilityService,
+        AuditTrail $auditTrail,
+        IntegrityAlertService $integrityAlertService,
+    ): RedirectResponse {
+        $municipality = $currentMunicipality->get($request);
+        $amendment = $municipality->amendments()
+            ->with(['executionStages', 'financialCommitments.payments', 'documents', 'accountabilityProcess.requirements', 'accountabilityProcess.diligences'])
+            ->findOrFail($emenda);
+        $process = $amendment->accountabilityProcess ?? abort(404);
+        $validated = $request->validate([
+            '_submission_token' => ['required', 'string'],
+            'approved_at' => ['required', 'date'],
+            'submission_notes' => ['nullable', 'string', 'max:3000'],
+        ], [
+            'approved_at.required' => 'Informe a data da aprovacao final para arquivar a prestacao.',
+        ]);
+
+        if (! $formSubmission->consume($request, "accountability-archive-{$process->id}")) {
+            return back()->with('warning', 'Este arquivamento final ja foi processado.');
+        }
+
+        if (blank($process->submitted_at) || blank($process->protocol_number)) {
+            throw ValidationException::withMessages([
+                'protocol_number' => 'Registre o protocolo de envio antes de arquivar a prestacao final.',
+            ]);
+        }
+
+        DB::transaction(function () use ($request, $validated, $amendment, $process, $accountabilityService, $auditTrail): void {
+            $accountabilityService->ensureReadyForSubmission($amendment, $process);
+            $oldValues = $process->only(['status', 'approved_at', 'submission_notes']);
+            $notes = trim((string) ($validated['submission_notes'] ?? ''));
+
+            $process->update([
+                'status' => AccountabilityProcess::STATUS_APPROVED,
+                'approved_at' => $validated['approved_at'],
+                'submission_notes' => $notes !== ''
+                    ? trim((string) $process->submission_notes.PHP_EOL.PHP_EOL.'Fechamento final: '.$notes)
+                    : $process->submission_notes,
+            ]);
+            $amendment->update([
+                'status' => ParliamentaryAmendment::STATUS_COMPLETED,
+                'accountability_completed_at' => $validated['approved_at'],
+            ]);
+
+            $auditTrail->recordOperation(
+                $request,
+                $amendment,
+                'accountability_archived',
+                $process->only(array_keys($oldValues)),
+                $oldValues,
+            );
+        });
+
+        $integrityAlertService->sync($municipality->fresh());
+
+        return back()->with('status', 'Prestacao final aprovada, arquivada e marcada como concluida.');
     }
 
     public function update(

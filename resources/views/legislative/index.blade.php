@@ -40,6 +40,27 @@
                     @endif
                     <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
                 </div>
+                <div class="councilor-operating-strip" aria-label="Acoes principais do vereador">
+                    <article>
+                        <span>1</span>
+                        <div><strong>Indicar pedido</strong><small>Escolha objeto, valor e destino. O sistema confere cota e saude.</small></div>
+                        @if ($councilorGuide['canCreate'] ?? false)
+                            <a href="{{ route('legislative.create', ['year' => $year]) }}">Comecar</a>
+                        @else
+                            <em>Bloqueado</em>
+                        @endif
+                    </article>
+                    <article>
+                        <span>2</span>
+                        <div><strong>Acompanhar resposta</strong><small>Veja se esta com voce, Camara, Executivo ou em execucao.</small></div>
+                        <a href="#minhas-propostas">Ver etapas</a>
+                    </article>
+                    <article>
+                        <span>3</span>
+                        <div><strong>Entender saldo</strong><small>Valor indicado fica comprometido, mas so executa depois da reserva.</small></div>
+                        <a href="#explicacao-cota">Ver cota</a>
+                    </article>
+                </div>
                 <div class="councilor-home-progress">
                     <div>
                         <span>Uso da cota</span>
@@ -148,7 +169,7 @@
                         </div>
                     </article>
                 </div>
-                <div class="councilor-money-guide" aria-label="Como a cota e consumida">
+                <div class="councilor-money-guide" id="explicacao-cota" aria-label="Como a cota e consumida">
                     <div>
                         <span><i data-lucide="info" aria-hidden="true"></i></span>
                         <div>

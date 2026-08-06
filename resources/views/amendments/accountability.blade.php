@@ -480,5 +480,32 @@
                 <a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package-check" aria-hidden="true"></i>Pacote de auditoria</a>
             </div>
         </section>
+
+        <section class="accountability-archive-panel mb-4 {{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'is-archived' : '' }}" id="arquivamento-final">
+            <span><i data-lucide="{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'archive-check' : 'archive' }}" aria-hidden="true"></i></span>
+            <div>
+                <p class="page-kicker mb-1">Conclusao operacional</p>
+                <h2 class="h5 mb-1">{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Prestacao arquivada e concluida' : 'Aprovar e arquivar prestacao final' }}</h2>
+                <p>{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Esta emenda ja esta com status definitivo, data de conclusao e pacote preservado para consulta.' : 'Depois do protocolo e da aprovacao final, marque o processo como concluido para fechar a emenda e preservar o dossie.' }}</p>
+            </div>
+            @if ($process->status === App\Models\AccountabilityProcess::STATUS_APPROVED)
+                <strong>{{ $process->approved_at?->format('d/m/Y') ?? 'Concluida' }}</strong>
+            @elseif ($canEdit && $readiness['ready'] && $process->submitted_at && $process->protocol_number)
+                <form method="POST" action="{{ route('emendas.accountability.archive', $amendment) }}" data-prevent-double-submit>
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $processArchiveToken }}">
+                    <label class="form-label" for="archive_approved_at">Data da aprovacao final</label>
+                    <input class="form-control @error('approved_at') is-invalid @enderror" id="archive_approved_at" name="approved_at" type="date" value="{{ old('approved_at', today()->toDateString()) }}" required>
+                    @error('approved_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <label class="form-label" for="archive_notes">Observacao final</label>
+                    <input class="form-control" id="archive_notes" name="submission_notes" value="{{ old('submission_notes') }}" maxlength="3000" placeholder="Ex: aprovada pelo controle interno">
+                    <button class="btn btn-primary" type="submit"><i data-lucide="archive-check" aria-hidden="true"></i>Arquivar prestacao</button>
+                </form>
+            @else
+                <a class="btn btn-outline-primary" href="{{ $readiness['ready'] ? '#envio-prestacao' : $accountabilityGuide['next']['href'] }}">
+                    <i data-lucide="{{ $readiness['ready'] ? 'send' : $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i>{{ $readiness['ready'] ? 'Registrar protocolo' : $accountabilityGuide['next']['label'] }}
+                </a>
+            @endif
+        </section>
     @endif
 @endsection

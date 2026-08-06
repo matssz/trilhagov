@@ -138,6 +138,7 @@ hora sem repetir o mesmo envio.
 - [Evidência e hipótese](docs/evidencia-e-hipotese.md)
 - [Modelagem inicial](docs/modelagem-inicial.md)
 - [Roteiro de entrevista municipal](docs/roteiro-entrevista-municipal.md)
+- [Guia comercial do piloto municipal](docs/guia-comercial-piloto.md)
 - [Roadmap visual de módulos e foco atual](docs/roadmap-modulos.md)
 - [Identidade visual](docs/identidade-visual.md)
 - [Confiabilidade e atualizações](docs/confiabilidade-atualizacoes.md)

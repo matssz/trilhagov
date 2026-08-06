@@ -302,6 +302,48 @@ class AccountabilityTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_submitted']);
     }
 
+    public function test_submitted_ready_process_can_be_archived_as_final_accountability(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $amendment = $this->amendment($municipality, $manager, [
+            'received_amount' => 100000,
+            'responsible_user_id' => $manager->id,
+        ]);
+        $this->completeExecution($municipality, $amendment, $manager, 100000);
+        $process = $this->process($municipality, $amendment, $manager);
+        app(AccountabilityService::class)->seedRequirements($process, $manager);
+        app(AccountabilityService::class)->quickCheck($process, $amendment->load('executionStages', 'financialCommitments.payments', 'documents.documentType'), $manager);
+        $process->update([
+            'status' => AccountabilityProcess::STATUS_SUBMITTED,
+            'submitted_at' => '2026-07-22',
+            'protocol_number' => 'PC-2026-445',
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Aprovar e arquivar prestacao final')
+            ->assertSee('Arquivar prestacao');
+
+        $this->post(route('emendas.accountability.archive', $amendment), [
+            '_submission_token' => $this->sessionFor($municipality, "accountability-archive-{$process->id}"),
+            'approved_at' => '2026-07-25',
+            'submission_notes' => 'Aprovada pelo controle interno.',
+        ])->assertSessionHas('status');
+
+        $this->assertSame(AccountabilityProcess::STATUS_APPROVED, $process->fresh()->status);
+        $this->assertSame(ParliamentaryAmendment::STATUS_COMPLETED, $amendment->fresh()->status);
+        $this->assertSame('2026-07-25', $amendment->fresh()->accountability_completed_at->toDateString());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'accountability_archived']);
+
+        $this->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Prestacao arquivada e concluida')
+            ->assertSee('Prestacao aprovada e arquivavel');
+    }
+
     public function test_diligence_deadline_alert_reaches_assigned_person_and_response_is_audited(): void
     {
         Notification::fake();

@@ -7013,6 +7013,70 @@ button.accountability-action-card {
     background: rgba(255, 255, 255, .76);
 }
 
+.accountability-archive-panel {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) minmax(260px, .38fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #cbd9e7;
+    border-left: 4px solid var(--gold-600);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fff 0%, #f6f9fc 100%);
+    box-shadow: var(--shadow-soft);
+}
+
+.accountability-archive-panel > span {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #c5d5e4;
+    border-radius: 8px;
+    background: #eef6ff;
+    color: var(--navy-900);
+}
+
+.accountability-archive-panel h2 {
+    color: var(--navy-950);
+    font-weight: 900;
+}
+
+.accountability-archive-panel p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .84rem;
+}
+
+.accountability-archive-panel > strong {
+    justify-self: end;
+    padding: .55rem .8rem;
+    border-radius: 999px;
+    background: #e8f6ef;
+    color: #147647;
+    font-size: .78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.accountability-archive-panel form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .45rem;
+}
+
+.accountability-archive-panel form .form-label {
+    margin: 0;
+    font-size: .68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.accountability-archive-panel form .btn {
+    justify-content: center;
+    margin-top: .2rem;
+}
+
 @media (max-width: 1180px) {
     .accountability-final-package {
         grid-template-columns: 1fr;
@@ -7034,6 +7098,17 @@ button.accountability-action-card {
 
     .accountability-final-timeline {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .accountability-archive-panel {
+        grid-template-columns: 44px minmax(0, 1fr);
+    }
+
+    .accountability-archive-panel form,
+    .accountability-archive-panel > strong,
+    .accountability-archive-panel > .btn {
+        grid-column: 1 / -1;
+        justify-self: stretch;
     }
 }
 
