@@ -88,6 +88,20 @@ class AccountabilityService
         $closingLabel = $ready ? 'Pronta para protocolo' : ($hasProcess ? 'Fechamento em andamento' : 'Prestacao nao iniciada');
         $physicalComplete = $physicalPercentage >= 100;
         $hasEvidence = $evidenceCount > 0;
+        $protocolLabel = $process?->protocol_number ?: 'Aguardando protocolo';
+        $submittedLabel = $process?->submitted_at?->format('d/m/Y') ?? 'Nao enviado';
+        $approvedLabel = $process?->approved_at?->format('d/m/Y') ?? 'Nao aprovado';
+        $statusLabel = $process?->statusLabel() ?? 'Nao iniciada';
+        $responsibleLabel = $process?->responsibleUser?->name ?? $amendment->responsibleUser?->name ?? 'Nao definido';
+        $deadlineLabel = $process?->due_at?->format('d/m/Y') ?? $amendment->accountability_deadline?->format('d/m/Y') ?? 'Nao definido';
+        $receiptSeal = $process?->approved_at
+            ? 'Prestacao aprovada e arquivavel'
+            : ($process?->submitted_at
+                ? 'Prestacao protocolada'
+                : ($ready ? 'Pronta para apresentar' : 'Em preparacao'));
+        $timelineProtocolDetail = $process?->protocol_number
+            ? 'Protocolo '.$process->protocol_number.' em '.$submittedLabel
+            : 'Informe protocolo e data de envio quando a prestacao for apresentada.';
 
         $next = [
             'icon' => 'clipboard-list',
@@ -283,6 +297,47 @@ class AccountabilityService
                     ['label' => 'Financeiro conciliado', 'done' => $financialReady, 'detail' => 'Diferenca R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
                     ['label' => 'Evidencias anexadas', 'done' => $hasEvidence, 'detail' => $evidenceCount.' documento(s)'],
                     ['label' => 'Sem bloqueios', 'done' => $ready, 'detail' => $ready ? 'Pronto para protocolo' : (($readiness['blockers'] ?? collect())->first() ?? 'Aguardando preparo')],
+                ],
+            ],
+            'finalReceipt' => [
+                'seal' => $receiptSeal,
+                'protocol' => $protocolLabel,
+                'status' => $statusLabel,
+                'submitted_at' => $submittedLabel,
+                'approved_at' => $approvedLabel,
+                'responsible' => $responsibleLabel,
+                'deadline' => $deadlineLabel,
+                'readiness' => $score.'%',
+            ],
+            'finalTimeline' => [
+                [
+                    'title' => 'Recurso recebido',
+                    'detail' => $amendment->received_at
+                        ? 'Recebido em '.$amendment->received_at->format('d/m/Y').' no valor de R$ '.number_format((float) $amendment->received_amount, 2, ',', '.')
+                        : 'Informe o recebimento para fechar a conciliacao.',
+                    'done' => $amendment->received_at !== null,
+                ],
+                [
+                    'title' => 'Execucao comprovada',
+                    'detail' => $physicalPercentage.'% de execucao fisica e '.$evidenceCount.' evidencia(s) vinculada(s).',
+                    'done' => $physicalComplete && $hasEvidence,
+                ],
+                [
+                    'title' => 'Checklist final',
+                    'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' item(ns) obrigatorio(s) resolvido(s).') : 'Abra a prestacao para montar o checklist.',
+                    'done' => $checklistReady,
+                ],
+                [
+                    'title' => 'Protocolo da prestacao',
+                    'detail' => $timelineProtocolDetail,
+                    'done' => $process?->submitted_at !== null,
+                ],
+                [
+                    'title' => 'Arquivo para controle',
+                    'detail' => $process?->approved_at
+                        ? 'Aprovada em '.$approvedLabel.'.'
+                        : ($ready ? 'PDF executivo e pacote de auditoria prontos para apresentacao.' : 'Finalize os bloqueios para gerar uma entrega completa.'),
+                    'done' => $process?->approved_at !== null || $ready,
                 ],
             ],
         ];

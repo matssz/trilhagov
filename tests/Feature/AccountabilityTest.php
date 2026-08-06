@@ -85,6 +85,10 @@ class AccountabilityTest extends TestCase
             ->assertSee('Prestacao final em preparacao')
             ->assertSee('Fechamento final')
             ->assertSee('Checklist resolvido')
+            ->assertSee('Prestacao final para apresentacao')
+            ->assertSee('Recibo, linha do tempo e pacote de auditoria')
+            ->assertSee('Recibo de protocolo da prestacao')
+            ->assertSee('Linha do tempo final da prestacao')
             ->assertSee(route('emendas.accountability.quick-check', $amendment), false);
 
         $token = $this->sessionFor($municipality, "accountability-quick-check-{$process->id}");
@@ -108,6 +112,9 @@ class AccountabilityTest extends TestCase
             ->assertSee('Registrar envio')
             ->assertSee('Baixar dossie')
             ->assertSee('Prestacao final pronta')
+            ->assertSee('Pronta para apresentar')
+            ->assertSee('PDF executivo')
+            ->assertSee('Pacote de auditoria')
             ->assertSee('Protocolar prestacao')
             ->assertSee('Baixar pacote final')
             ->assertSee('#dossie-prestacao', false);
@@ -355,6 +362,9 @@ class AccountabilityTest extends TestCase
         $zip = new ZipArchive;
         $this->assertTrue($zip->open($path) === true);
         $this->assertNotFalse($zip->locateName('MANIFESTO.txt'));
+        $this->assertNotFalse($zip->locateName('RECIBO-PRESTACAO.txt'));
+        $this->assertStringContainsString('TrilhaGov - Recibo da prestacao de contas', (string) $zip->getFromName('RECIBO-PRESTACAO.txt'));
+        $this->assertStringContainsString('Linha do tempo final', (string) $zip->getFromName('RECIBO-PRESTACAO.txt'));
         $this->assertTrue(collect(range(0, $zip->numFiles - 1))->contains(
             fn (int $index) => str_contains((string) $zip->getNameIndex($index), $document->original_name),
         ));

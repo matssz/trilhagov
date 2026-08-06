@@ -36,7 +36,11 @@ class AccountabilityDossierController extends Controller
         $opened = $zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote do dossie.');
 
+        $readiness = $accountabilityService->readiness($amendment, $amendment->accountabilityProcess);
+        $guide = $accountabilityService->guide($amendment, $amendment->accountabilityProcess, $readiness);
+
         $zip->addFromString('dossie/'.$this->baseFilename($amendment).'.pdf', $pdf->output());
+        $zip->addFromString('RECIBO-PRESTACAO.txt', $this->receipt($amendment, $guide));
         $includedDocuments = [];
         $skippedDocuments = [];
 
@@ -105,10 +109,13 @@ class AccountabilityDossierController extends Controller
         $process = $amendment->accountabilityProcess;
         abort_if($process === null, 404);
 
+        $readiness = $accountabilityService->readiness($amendment, $process);
+
         return Pdf::loadView('amendments.accountability-dossier', [
             'amendment' => $amendment,
             'process' => $process,
-            'readiness' => $accountabilityService->readiness($amendment, $process),
+            'readiness' => $readiness,
+            'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness),
             'generatedAt' => now(),
         ])->setPaper('a4');
     }
@@ -155,5 +162,33 @@ class AccountabilityDossierController extends Controller
             $document->version,
             $detail,
         );
+    }
+
+    /** @param array<string, mixed> $guide */
+    private function receipt(ParliamentaryAmendment $amendment, array $guide): string
+    {
+        $receipt = $guide['finalReceipt'];
+        $timeline = $guide['finalTimeline'];
+        $lines = [
+            'TrilhaGov - Recibo da prestacao de contas',
+            'Emenda: '.$amendment->reference,
+            'Objeto: '.$amendment->object,
+            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Selo: '.$receipt['seal'],
+            'Situacao: '.$receipt['status'],
+            'Protocolo: '.$receipt['protocol'],
+            'Envio: '.$receipt['submitted_at'],
+            'Prazo: '.$receipt['deadline'],
+            'Responsavel: '.$receipt['responsible'],
+            'Prontidao: '.$receipt['readiness'],
+            '',
+            'Linha do tempo final:',
+        ];
+
+        foreach ($timeline as $item) {
+            $lines[] = ($item['done'] ? '[ok] ' : '[pendente] ').$item['title'].' - '.$item['detail'];
+        }
+
+        return implode(PHP_EOL, $lines).PHP_EOL;
     }
 }

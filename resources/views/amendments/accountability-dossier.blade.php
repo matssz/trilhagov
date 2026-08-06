@@ -25,6 +25,11 @@
         .status { display: inline-block; padding: 2px 5px; background: #e8eff7; color: #0a2f5a; font-weight: bold; }
         .ready { background: #e8f6ef; color: #157f57; }
         .blocked { background: #fde8e8; color: #bd2c2c; }
+        .receipt { border: 2px solid #d2a62b; }
+        .receipt th { width: 18%; }
+        .timeline td:first-child { width: 18%; font-weight: bold; }
+        .timeline .done { color: #157f57; }
+        .timeline .pending { color: #9a6700; }
         .page-break { page-break-before: always; }
         .footer-note { margin-top: 18px; padding-top: 8px; border-top: 1px solid #dce3ec; color: #647085; }
     </style>
@@ -50,6 +55,30 @@
         </table>
         <p><span class="status {{ $readiness['ready'] ? 'ready' : 'blocked' }}">{{ $readiness['ready'] ? 'Pronta para envio' : 'Com pendências' }}</span></p>
         @foreach ($readiness['blockers'] as $blocker)<p>• {{ $blocker }}</p>@endforeach
+    </section>
+
+    <section class="section">
+        <h2>Recibo de protocolo</h2>
+        <table class="receipt">
+            <tr><th>Selo final</th><td colspan="3">{{ $accountabilityGuide['finalReceipt']['seal'] }}</td></tr>
+            <tr><th>Protocolo</th><td>{{ $accountabilityGuide['finalReceipt']['protocol'] }}</td><th>Envio</th><td>{{ $accountabilityGuide['finalReceipt']['submitted_at'] }}</td></tr>
+            <tr><th>SituaÃ§Ã£o</th><td>{{ $accountabilityGuide['finalReceipt']['status'] }}</td><th>ProntidÃ£o</th><td>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</td></tr>
+            <tr><th>ResponsÃ¡vel</th><td>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</td><th>Prazo</th><td>{{ $accountabilityGuide['finalReceipt']['deadline'] }}</td></tr>
+        </table>
+    </section>
+
+    <section class="section">
+        <h2>Linha do tempo final</h2>
+        <table class="timeline">
+            <tbody>
+                @foreach ($accountabilityGuide['finalTimeline'] as $timelineItem)
+                    <tr>
+                        <td class="{{ $timelineItem['done'] ? 'done' : 'pending' }}">{{ $timelineItem['done'] ? 'Concluido' : 'Pendente' }}</td>
+                        <td><strong>{{ $timelineItem['title'] }}</strong><br>{{ $timelineItem['detail'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </section>
 
     <section class="section">

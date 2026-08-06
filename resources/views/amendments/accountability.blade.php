@@ -412,7 +412,7 @@
 
         <section class="content-panel dossier-actions" id="dossie-prestacao">
             <div><span class="dossier-icon"><i data-lucide="package-check" aria-hidden="true"></i></span><div><h2 class="h5 mb-1">Dossiê de auditoria</h2><p class="text-secondary mb-0">{{ $amendment->documents->count() }} documento(s), {{ $amendment->executionStages->count() }} etapa(s) e {{ $amendment->financialCommitments->count() }} empenho(s).</p></div></div>
-            <div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-down" aria-hidden="true"></i>PDF</a><a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package" aria-hidden="true"></i>PDF + documentos</a></div>
+            <div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-text" aria-hidden="true"></i>PDF executivo</a><a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package-check" aria-hidden="true"></i>Pacote com anexos</a></div>
         </section>
 
         <section class="accountability-final-package mb-4" id="prestacao-final">
@@ -439,6 +439,45 @@
                 @else
                     <a class="btn btn-outline-primary" href="{{ $accountabilityGuide['next']['href'] }}"><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i>{{ $accountabilityGuide['next']['label'] }}</a>
                 @endif
+            </div>
+        </section>
+
+        <section class="accountability-final-showcase mb-4" id="apresentacao-final">
+            <div class="accountability-final-showcase-header">
+                <div>
+                    <p class="page-kicker mb-1">Prestacao final para apresentacao</p>
+                    <h2 class="h5 mb-1">Recibo, linha do tempo e pacote de auditoria</h2>
+                    <p>Use esta area para conferir o que sera apresentado ao controle interno, Camara ou auditoria externa.</p>
+                </div>
+                <span class="accountability-final-seal">{{ $accountabilityGuide['finalReceipt']['seal'] }}</span>
+            </div>
+            <div class="accountability-receipt-grid" aria-label="Recibo de protocolo da prestacao">
+                <article><small>Protocolo</small><strong>{{ $accountabilityGuide['finalReceipt']['protocol'] }}</strong></article>
+                <article><small>Situacao</small><strong>{{ $accountabilityGuide['finalReceipt']['status'] }}</strong></article>
+                <article><small>Envio</small><strong>{{ $accountabilityGuide['finalReceipt']['submitted_at'] }}</strong></article>
+                <article><small>Responsavel</small><strong>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</strong></article>
+                <article><small>Prazo</small><strong>{{ $accountabilityGuide['finalReceipt']['deadline'] }}</strong></article>
+                <article><small>Prontidao</small><strong>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</strong></article>
+            </div>
+            <div class="accountability-final-timeline" aria-label="Linha do tempo final da prestacao">
+                @foreach ($accountabilityGuide['finalTimeline'] as $timelineItem)
+                    <article class="{{ $timelineItem['done'] ? 'is-done' : 'is-pending' }}">
+                        <span><i data-lucide="{{ $timelineItem['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>{{ $timelineItem['title'] }}</strong>
+                            <small>{{ $timelineItem['detail'] }}</small>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="accountability-final-showcase-actions">
+                @if ($readiness['ready'])
+                    <a class="btn btn-primary" href="#envio-prestacao"><i data-lucide="send" aria-hidden="true"></i>Informar protocolo</a>
+                @else
+                    <a class="btn btn-outline-primary" href="{{ $accountabilityGuide['next']['href'] }}"><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i>{{ $accountabilityGuide['next']['label'] }}</a>
+                @endif
+                <a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-text" aria-hidden="true"></i>PDF executivo</a>
+                <a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package-check" aria-hidden="true"></i>Pacote de auditoria</a>
             </div>
         </section>
     @endif
