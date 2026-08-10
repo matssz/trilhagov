@@ -93,7 +93,7 @@
                         </article>
                     @endforeach
                 </div>
-                <div class="councilor-simple-checklist" aria-label="Visao simples do vereador">
+                <div class="councilor-simple-checklist" aria-label="Visão simples do vereador">
                     <div>
                         <span class="page-kicker">Visão simples do vereador</span>
                         <strong>Antes de cadastrar, confira estes pontos</strong>
@@ -143,7 +143,7 @@
                         </a>
                     @endif
                 </div>
-                <div class="councilor-decision-strip" aria-label="Resumo automatico para o vereador">
+                <div class="councilor-decision-strip" aria-label="Resumo automático para o vereador">
                     <article>
                         <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
                         <div>
@@ -355,7 +355,7 @@
                         </li>
                     @endforeach
                 </ol>
-                <div class="executive-next-decisions" aria-label="Decisoes executivas priorizadas">
+                <div class="executive-next-decisions" aria-label="Decisões executivas priorizadas">
                     <header>
                         <span><i data-lucide="list-checks" aria-hidden="true"></i></span>
                         <div>
@@ -371,16 +371,16 @@
                                 <small>{{ $decision['proposal']->author_name }} · {{ $decision['age'] }} dia(s) em {{ $decision['column']['title'] }}</small>
                             </a>
                         @empty
-                            <p>Nenhuma decisao executiva pendente agora.</p>
+                            <p>Nenhuma decisão executiva pendente agora.</p>
                         @endforelse
                     </div>
                 </div>
             </div>
             @if (($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
-                <div class="executive-action-queue" aria-label="Fila rapida do Executivo">
+                <div class="executive-action-queue" aria-label="Fila rápida do Executivo">
                     <header>
                         <div>
-                            <strong>Fila rapida de atendimento</strong>
+                            <strong>Fila rápida de atendimento</strong>
                             <small>Ordem sugerida pelo prazo e pela etapa atual da proposta.</small>
                         </div>
                         <span>{{ $executiveDesk['quick_actions']->count() }} prioridade(s)</span>
@@ -436,7 +436,7 @@
                     @endforeach
                 </div>
             @endif
-            <div class="executive-triage-strip" aria-label="Triagem rapida do Legislativo">
+            <div class="executive-triage-strip" aria-label="Triagem rápida do Legislativo">
                 @foreach($executiveBoard as $column)
                     <a class="is-{{ $column['tone'] }}" href="{{ $column['items']->first()?->getAttribute('executive_board_url') ?? route('legislative.index', ['year' => $year, 'status' => $column['statuses'][0]]) }}">
                         <span><i data-lucide="{{ $column['icon'] }}" aria-hidden="true"></i></span>

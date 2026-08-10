@@ -10,9 +10,12 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_root_redirects_to_login(): void
+    public function test_root_shows_commercial_page_to_guests(): void
     {
-        $this->get('/')->assertRedirect(route('login'));
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Gestão municipal de emendas')
+            ->assertSee('Acessar demonstração');
     }
 
     public function test_not_found_page_uses_human_message_and_correct_status(): void

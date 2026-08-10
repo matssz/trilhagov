@@ -59,7 +59,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (! auth()->check()) {
-        return redirect()->route('login');
+        return view('marketing.home');
     }
 
     $municipalityId = (int) session('active_municipality_id');
