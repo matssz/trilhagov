@@ -19,23 +19,23 @@
                 <p>{{ $municipality->name }} / {{ $municipality->state }} · Código IBGE {{ $municipality->ibge_code }}</p>
             </div>
         </div>
-        <div class="public-update"><span>Dados atualizados</span><strong>{{ $lastUpdated?->format('d/m/Y \a\s H:i') ?? 'Sem movimentação' }}</strong></div>
+        <div class="public-update"><span>Dados atualizados</span><strong>{{ $lastUpdated?->format('d/m/Y \à\s H:i') ?? 'Sem movimentação' }}</strong></div>
     </header>
 
-    <section class="public-open-data-strip" aria-label="Recursos de transparencia disponiveis">
+    <section class="public-open-data-strip" aria-label="Recursos de transparência disponíveis">
         <article>
             <i data-lucide="shield-check" aria-hidden="true"></i>
-            <div><strong>Portal publico ativo</strong><span>Consulta sem login para vereadores, cidadaos, controle interno e imprensa.</span></div>
+            <div><strong>Portal público ativo</strong><span>Consulta sem login para vereadores, cidadãos, controle interno e imprensa.</span></div>
         </article>
         <article>
             <i data-lucide="history" aria-hidden="true"></i>
-            <div><strong>Historico por emenda</strong><span>Cada detalhe publicado mostra valores, execucao, prazos e movimentacoes.</span></div>
+            <div><strong>Histórico por emenda</strong><span>Cada detalhe publicado mostra valores, execução, prazos e movimentações.</span></div>
         </article>
         <article>
             <i data-lucide="sheet" aria-hidden="true"></i>
-            <div><strong>Dados em CSV</strong><span>Exportacao aberta para conferencia, planilhas e portais municipais.</span></div>
+            <div><strong>Dados em CSV</strong><span>Exportação aberta para conferência, planilhas e portais municipais.</span></div>
         </article>
-        <a class="btn btn-outline-primary" href="{{ route('transparency.export', ['municipality' => $routeMunicipality, ...$query]) }}"><i data-lucide="download" aria-hidden="true"></i>Baixar CSV publico</a>
+        <a class="btn btn-outline-primary" href="{{ route('transparency.export', ['municipality' => $routeMunicipality, ...$query]) }}"><i data-lucide="download" aria-hidden="true"></i>Baixar CSV público</a>
     </section>
 
     <form class="analytics-filters public-filters" method="GET" action="{{ route('transparency.show', ['municipality' => $routeMunicipality]) }}">

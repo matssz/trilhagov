@@ -17,7 +17,7 @@
         <div class="compliance-actions">
             <a class="btn btn-outline-primary compliance-action" href="{{ route('emendas.compliance.dossier.pdf', $amendment) }}">
                 <i data-lucide="file-text" aria-hidden="true"></i>
-                <span><strong>PDF executivo</strong><small>Dossie para leitura</small></span>
+                <span><strong>PDF executivo</strong><small>Dossiê para leitura</small></span>
             </a>
             <a class="btn btn-primary compliance-action" href="{{ route('emendas.compliance.dossier.package', $amendment) }}">
                 <i data-lucide="package" aria-hidden="true"></i>
@@ -75,11 +75,11 @@
     <section class="content-panel compliance-package-readiness mb-4" aria-labelledby="pacote-tcesp">
         <div class="content-panel-header">
             <div>
-                <p class="panel-kicker">Pre-fiscalizacao</p>
-                <h2 class="h5 mb-0" id="pacote-tcesp">Prontidao do pacote TCESP</h2>
+                <p class="panel-kicker">Pré-fiscalização</p>
+                <h2 class="h5 mb-0" id="pacote-tcesp">Prontidão do pacote TCESP</h2>
             </div>
             <span class="package-readiness-badge {{ $packageReadiness['ready'] ? 'is-ready' : 'is-pending' }}">
-                {{ $packageReadiness['ready'] ? 'Pronto para conferencia' : 'Revisao recomendada' }}
+                {{ $packageReadiness['ready'] ? 'Pronto para conferência' : 'Revisão recomendada' }}
             </span>
         </div>
 
@@ -90,12 +90,12 @@
                 <span>{{ $packageReadiness['linked_documents'] }} vinculado(s) a regra</span>
             </div>
             <div>
-                <small>Revisoes documentadas</small>
+                <small>Revisões documentadas</small>
                 <strong>{{ $packageReadiness['documented_reviews'] }}</strong>
                 <span>com arquivo no pacote</span>
             </div>
             <div>
-                <small>So com justificativa</small>
+                <small>Só com justificativa</small>
                 <strong>{{ $packageReadiness['justified_only_reviews'] }}</strong>
                 <span>sem anexo direto</span>
             </div>
@@ -111,7 +111,7 @@
                 <i data-lucide="triangle-alert" aria-hidden="true"></i>
                 <div>
                     <strong>{{ $packageReadiness['missing_documents']->count() }} documento(s) catalogado(s) sem arquivo no armazenamento</strong>
-                    <p>O pacote ZIP pode ser baixado, mas o manifesto indicara exatamente quais anexos nao entraram.</p>
+                    <p>O pacote ZIP pode ser baixado, mas o manifesto indicará exatamente quais anexos não entraram.</p>
                     <ul>
                         @foreach ($packageReadiness['missing_documents']->take(4) as $missingDocument)
                             <li>{{ $missingDocument->documentType->name }} - {{ $missingDocument->original_name }} - v{{ $missingDocument->version }}</li>
@@ -125,13 +125,13 @@
             <div class="package-readiness-alert">
                 <i data-lucide="file-warning" aria-hidden="true"></i>
                 <div>
-                    <strong>Antes de usar o pacote como evidencia oficial, revise {{ $packageReadiness['next_issue']['code'] }}.</strong>
+                    <strong>Antes de usar o pacote como evidência oficial, revise {{ $packageReadiness['next_issue']['code'] }}.</strong>
                     <p>
                         {{ $packageReadiness['next_issue']['title'] }} -
                         @if ($packageReadiness['next_issue']['code'] === 'DOC')
-                            reenvie o arquivo ausente ou registre uma nova versao do documento.
+                            reenvie o arquivo ausente ou registre uma nova versão do documento.
                         @else
-                            {{ $packageReadiness['next_issue']['review']?->amendment_document_id ? 'ha documento vinculado, mas a situacao ainda precisa de revisao.' : 'registre ou vincule um documento de suporte.' }}
+                            {{ $packageReadiness['next_issue']['review']?->amendment_document_id ? 'há documento vinculado, mas a situação ainda precisa de revisão.' : 'registre ou vincule um documento de suporte.' }}
                         @endif
                     </p>
                 </div>
@@ -145,7 +145,7 @@
             <div class="package-readiness-clear">
                 <i data-lucide="package-check" aria-hidden="true"></i>
                 <div>
-                    <strong>Pacote sem pendencia essencial aparente</strong>
+                    <strong>Pacote sem pendência essencial aparente</strong>
                     <p>Baixe o pacote TCESP e mantenha o manifesto junto ao processo administrativo da emenda.</p>
                 </div>
             </div>
@@ -156,7 +156,7 @@
         <div class="content-panel-header">
             <div>
                 <p class="panel-kicker">Saneamento guiado</p>
-                <h2 class="h5 mb-0" id="saneamento-tcesp">Proximo passo TCESP</h2>
+                <h2 class="h5 mb-0" id="saneamento-tcesp">Próximo passo TCESP</h2>
             </div>
             <span>{{ $remediationItems->count() }} essencial(is) em aberto</span>
         </div>
@@ -180,7 +180,7 @@
                             <span>{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                             <div>
                                 <strong>{{ $item['code'] }} - {{ $item['title'] }}</strong>
-                                <small>{{ $item['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'Sanear constatacao registrada' : 'Registrar evidencia ou decisao' }}</small>
+                                <small>{{ $item['status'] === App\Models\AmendmentComplianceReview::STATUS_NON_COMPLIANT ? 'Sanear constatação registrada' : 'Registrar evidência ou decisão' }}</small>
                             </div>
                             <i data-lucide="chevron-right" aria-hidden="true"></i>
                         </a>
@@ -190,8 +190,8 @@
                 <div class="compliance-clear-state">
                     <i data-lucide="shield-check" aria-hidden="true"></i>
                     <div>
-                        <strong>Itens essenciais sem pendencia aberta</strong>
-                        <p>Mantenha os documentos vinculados e revise a matriz quando houver novo parecer, pagamento, impedimento ou alteracao no objeto.</p>
+                        <strong>Itens essenciais sem pendência aberta</strong>
+                        <p>Mantenha os documentos vinculados e revise a matriz quando houver novo parecer, pagamento, impedimento ou alteração no objeto.</p>
                     </div>
                 </div>
             @endif
@@ -240,7 +240,7 @@
                                 </div>
 
                                 <div class="compliance-evidence-guide">
-                                    <strong>Evidencias que costumam resolver este item</strong>
+                                    <strong>Evidências que costumam resolver este item</strong>
                                     <ul>
                                         @foreach ($item['evidence_examples'] as $example)
                                             <li><i data-lucide="file-check-2" aria-hidden="true"></i>{{ $example }}</li>

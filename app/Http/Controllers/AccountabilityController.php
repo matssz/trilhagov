@@ -156,7 +156,7 @@ class AccountabilityController extends Controller
         $request->validate(['_submission_token' => ['required', 'string']]);
 
         if (! $formSubmission->consume($request, "accountability-prepare-{$amendment->id}")) {
-            return back()->with('warning', 'A preparacao automatica desta prestacao ja foi processada.');
+            return back()->with('warning', 'A preparação automática desta prestação já foi processada.');
         }
 
         $result = DB::transaction(function () use ($request, $municipality, $amendment, $accountabilityService, $auditTrail): array {
@@ -203,8 +203,8 @@ class AccountabilityController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         $message = $result['ready']
-            ? 'Prestacao preparada automaticamente e pronta para informar protocolo.'
-            : 'Prestacao preparada automaticamente. Proxima pendencia: '.$result['first_blocker'];
+            ? 'Prestação preparada automaticamente e pronta para informar protocolo.'
+            : 'Prestação preparada automaticamente. Próxima pendência: '.$result['first_blocker'];
 
         return back()->with('status', $message);
     }
@@ -226,7 +226,7 @@ class AccountabilityController extends Controller
         $request->validate(['_submission_token' => ['required', 'string']]);
 
         if (! $formSubmission->consume($request, "accountability-quick-check-{$process->id}")) {
-            return back()->with('warning', 'Esta pre-conferencia ja foi processada.');
+            return back()->with('warning', 'Esta pré-conferência já foi processada.');
         }
 
         $stats = DB::transaction(function () use ($request, $amendment, $process, $accountabilityService, $auditTrail): array {
@@ -238,7 +238,7 @@ class AccountabilityController extends Controller
 
         $integrityAlertService->sync($municipality->fresh());
 
-        return back()->with('status', 'Pre-conferencia concluida: '.$stats['updated'].' item(ns) atualizado(s), '.$stats['completed'].' concluido(s) e '.$stats['notApplicable'].' nao aplicavel(is).');
+        return back()->with('status', 'Pré-conferência concluída: '.$stats['updated'].' item(ns) atualizado(s), '.$stats['completed'].' concluído(s) e '.$stats['notApplicable'].' não aplicável(is).');
     }
 
     public function submit(
@@ -261,12 +261,12 @@ class AccountabilityController extends Controller
             'protocol_number' => ['required', 'string', 'max:100'],
             'submission_notes' => ['nullable', 'string', 'max:3000'],
         ], [
-            'submitted_at.required' => 'Informe a data de envio da prestacao.',
+            'submitted_at.required' => 'Informe a data de envio da prestação.',
             'protocol_number.required' => 'Informe o numero do protocolo de envio.',
         ]);
 
         if (! $formSubmission->consume($request, "accountability-submit-{$process->id}")) {
-            return back()->with('warning', 'Este envio da prestacao ja foi processado.');
+            return back()->with('warning', 'Este envio da prestação já foi processado.');
         }
 
         DB::transaction(function () use ($request, $validated, $amendment, $process, $accountabilityService, $auditTrail): void {
@@ -292,7 +292,7 @@ class AccountabilityController extends Controller
 
         $integrityAlertService->sync($municipality->fresh());
 
-        return back()->with('status', 'Prestacao enviada e protocolo registrado. O dossie final ja pode ser baixado.');
+        return back()->with('status', 'Prestação enviada e protocolo registrado. O dossiê final já pode ser baixado.');
     }
 
     public function archive(
@@ -314,7 +314,7 @@ class AccountabilityController extends Controller
             'approved_at' => ['required', 'date'],
             'submission_notes' => ['nullable', 'string', 'max:3000'],
         ], [
-            'approved_at.required' => 'Informe a data da aprovacao final para arquivar a prestacao.',
+            'approved_at.required' => 'Informe a data da aprovação final para arquivar a prestação.',
         ]);
 
         if (! $formSubmission->consume($request, "accountability-archive-{$process->id}")) {
@@ -323,7 +323,7 @@ class AccountabilityController extends Controller
 
         if (blank($process->submitted_at) || blank($process->protocol_number)) {
             throw ValidationException::withMessages([
-                'protocol_number' => 'Registre o protocolo de envio antes de arquivar a prestacao final.',
+                'protocol_number' => 'Registre o protocolo de envio antes de arquivar a prestação final.',
             ]);
         }
 
@@ -355,7 +355,7 @@ class AccountabilityController extends Controller
 
         $integrityAlertService->sync($municipality->fresh());
 
-        return back()->with('status', 'Prestacao final aprovada, arquivada e marcada como concluida.');
+        return back()->with('status', 'Prestação final aprovada, arquivada e marcada como concluída.');
     }
 
     public function update(

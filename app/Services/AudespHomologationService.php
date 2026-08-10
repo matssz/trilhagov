@@ -421,7 +421,7 @@ class AudespHomologationService
         $headers = fgetcsv($stream, 0, $delimiter);
         if (! is_array($headers)) {
             fclose($stream);
-            throw ValidationException::withMessages(['source_file' => 'Nao foi possivel identificar o cabecalho do CSV financeiro.']);
+            throw ValidationException::withMessages(['source_file' => 'Não foi possível identificar o cabeçalho do CSV financeiro.']);
         }
 
         $columnMap = [];
@@ -472,7 +472,7 @@ class AudespHomologationService
                 $snapshot[$field] += $amount;
             }
             try {
-                $snapshot['available_appropriation'] += $this->parseCsvAmount($row['available_appropriation'] ?? null, $rowNumber, 'Saldo disponivel');
+                $snapshot['available_appropriation'] += $this->parseCsvAmount($row['available_appropriation'] ?? null, $rowNumber, 'Saldo disponível');
             } catch (ValidationException $exception) {
                 $rowErrors = array_merge($rowErrors, $exception->errors()['source_file'] ?? []);
             }
@@ -514,11 +514,11 @@ class AudespHomologationService
         $canonical = $this->canonicalHeader($header);
         $aliases = [
             'application_code' => ['codigo_de_aplicacao', 'codigo_aplicacao', 'cod_aplicacao', 'aplicacao', 'codigo'],
-            'pre_commitment_amount' => ['pre_empenho', 'preempenho', 'reserva', 'reserva_orcamentaria', 'valor_reservado'],
+            'pre_commitment_amount' => ['pre_empenho', 'preempenho', 'reserva', 'reserva_orcamentaria', 'reserva_orcament_ria', 'valor_reservado'],
             'committed_amount' => ['empenhado', 'valor_empenhado', 'empenho', 'empenhado_liquido'],
             'liquidated_amount' => ['liquidado', 'valor_liquidado', 'liquidacao', 'liquidado_liquido'],
             'paid_amount' => ['pago', 'valor_pago', 'pagamento', 'pago_liquido'],
-            'available_appropriation' => ['saldo_disponivel', 'credito_disponivel', 'disponivel'],
+            'available_appropriation' => ['saldo_disponivel', 'saldo_dispon_vel', 'credito_disponivel', 'credito_dispon_vel', 'disponivel', 'dispon_vel'],
             'commitment_number' => ['numero_empenho', 'empenho_numero', 'ne'],
         ];
 
@@ -856,7 +856,7 @@ class AudespHomologationService
         $parsed = $this->parseAmount($value);
         if (! is_finite($parsed) || (abs($parsed) < 0.0001 && ! preg_match('/(^|[^0-9])0([,.]0+)?($|[^0-9])/', (string) $value))) {
             throw ValidationException::withMessages([
-                'source_file' => "Linha {$rowNumber}: {$label} nao foi reconhecido como valor financeiro.",
+                'source_file' => "Linha {$rowNumber}: {$label} não foi reconhecido como valor financeiro.",
             ]);
         }
 
@@ -865,9 +865,16 @@ class AudespHomologationService
 
     private function canonicalHeader(string $value): string
     {
-        $value = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value) ?: $value;
+        $value = strtr(mb_strtolower($value), [
+            'á' => 'a', 'à' => 'a', 'ã' => 'a', 'â' => 'a', 'ä' => 'a',
+            'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'õ' => 'o', 'ô' => 'o', 'ö' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+            'ç' => 'c', 'ñ' => 'n',
+        ]);
 
-        return trim((string) preg_replace('/[^a-z0-9]+/', '_', mb_strtolower($value)), '_');
+        return trim((string) preg_replace('/[^a-z0-9]+/', '_', $value), '_');
     }
 
     private function normalize(string $value): string

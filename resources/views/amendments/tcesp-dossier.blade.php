@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <title>Dossie TCESP - {{ $amendment->reference }}</title>
+    <title>Dossiê TCESP - {{ $amendment->reference }}</title>
     <style>
         @page { margin: 30px 34px; }
         body { color: #172133; font-family: DejaVu Sans, sans-serif; font-size: 9px; line-height: 1.42; }
@@ -40,7 +40,7 @@
 @endphp
     <header class="header">
         <div class="brand">Trilha<span>Gov</span></div>
-        <p class="muted">Dossie municipal de aderencia TCESP</p>
+        <p class="muted">Dossiê municipal de aderência TCESP</p>
         <h1>{{ $amendment->reference }}</h1>
         <p>{{ $amendment->municipality->name }} / {{ $amendment->municipality->state }} - exercicio {{ $amendment->fiscal_year }}</p>
         <p>Gerado em {{ $generatedAt->format('d/m/Y') }} as {{ $generatedAt->format('H:i') }} - {{ $frameworkVersion }}</p>
@@ -71,16 +71,16 @@
         <table>
             <tr><th>Objeto</th><td colspan="3">{{ $amendment->object }}</td></tr>
             <tr><th>Autor</th><td>{{ $amendment->author_name }}</td><th>Modalidade</th><td>{{ $amendment->transferTypeLabel() }}</td></tr>
-            <tr><th>Responsavel</th><td>{{ $amendment->responsibleUser?->name ?? 'Nao definido' }}</td><th>Orgao executor</th><td>{{ $amendment->responsible_department ?: 'Nao informado' }}</td></tr>
+            <tr><th>Responsável</th><td>{{ $amendment->responsibleUser?->name ?? 'Não definido' }}</td><th>Órgão executor</th><td>{{ $amendment->responsible_department ?: 'Não informado' }}</td></tr>
             <tr><th>Valor previsto</th><td>{{ $money($amendment->expected_amount) }}</td><th>Valor recebido</th><td>{{ $money($amendment->received_amount) }}</td></tr>
         </table>
     </section>
 
     <section class="section">
-        <h2>Execucao e rastreabilidade</h2>
+        <h2>Execução e rastreabilidade</h2>
         <table class="summary">
             <tr>
-                <td><span class="muted">Execucao fisica</span><strong>{{ $amendment->physicalExecutionPercentage() }}%</strong></td>
+                <td><span class="muted">Execução física</span><strong>{{ $amendment->physicalExecutionPercentage() }}%</strong></td>
                 <td><span class="muted">Empenhado</span><strong>{{ $money($amendment->financialCommitments->sum('committed_amount')) }}</strong></td>
                 <td><span class="muted">Pago</span><strong>{{ $money($paid) }}</strong></td>
                 <td><span class="muted">Audesp</span><strong>{{ $amendment->audespRegistration ? 'Preparado' : 'Pendente' }}</strong></td>
@@ -105,14 +105,14 @@
     <section class="section page-break">
         <h2>Matriz TCESP</h2>
         <table>
-            <thead><tr><th>Regra</th><th>Categoria</th><th>Situacao</th><th>Evidencia</th><th>Fonte</th></tr></thead>
+            <thead><tr><th>Regra</th><th>Categoria</th><th>Situação</th><th>Evidência</th><th>Fonte</th></tr></thead>
             <tbody>
                 @foreach ($matrix as $item)
                     <tr>
                         <td><strong>{{ $item['code'] }}</strong><br>{{ $item['title'] }}@if($item['critical'])<br><span class="badge critical">Essencial</span>@endif</td>
                         <td>{{ $categories[$item['category']]['label'] ?? $item['category'] }}</td>
                         <td>{{ $statuses[$item['status']] ?? $item['status'] }}</td>
-                        <td>{{ $item['review']?->evidence_notes ?: ($item['review']?->document?->original_name ?: 'Nao registrada') }}</td>
+                        <td>{{ $item['review']?->evidence_notes ?: ($item['review']?->document?->original_name ?: 'Não registrada') }}</td>
                         <td>{{ $item['source'] }}</td>
                     </tr>
                 @endforeach
@@ -135,15 +135,15 @@
     </section>
 
     <section class="section">
-        <h2>Controle interno e prestacao de contas</h2>
+        <h2>Controle interno e prestação de contas</h2>
         <table>
             <tr><th>Revisoes de controle</th><td>{{ $amendment->internalControlReviews->count() }}</td><th>Providencias de controle</th><td>{{ $amendment->internalControlReviews->flatMap->actions->count() }}</td></tr>
-            <tr><th>Prestacao de contas</th><td>{{ $amendment->accountabilityProcess?->statusLabel() ?? 'Nao iniciada' }}</td><th>Requisitos</th><td>{{ $amendment->accountabilityProcess?->requirements->count() ?? 0 }}</td></tr>
+            <tr><th>Prestação de contas</th><td>{{ $amendment->accountabilityProcess?->statusLabel() ?? 'Não iniciada' }}</td><th>Requisitos</th><td>{{ $amendment->accountabilityProcess?->requirements->count() ?? 0 }}</td></tr>
         </table>
     </section>
 
     <p class="footer-note">
-        Fonte de referencia: {{ $sourceLabel }}. Este dossie consolida registros operacionais do municipio e nao substitui parecer juridico, validacao contabil nem manifestacao formal do TCESP.
+        Fonte de referência: {{ $sourceLabel }}. Este dossiê consolida registros operacionais do município e não substitui parecer jurídico, validação contábil nem manifestação formal do TCESP.
     </p>
 </body>
 </html>

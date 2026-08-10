@@ -85,28 +85,28 @@ class AccountabilityService
         $openDiligences = $process?->diligences->where('status', 'open')->count() ?? 0;
         $score = (int) ($readiness['score'] ?? 0);
         $closingTone = $ready ? 'success' : ($hasProcess && $score >= 60 ? 'warning' : 'neutral');
-        $closingLabel = $ready ? 'Pronta para protocolo' : ($hasProcess ? 'Fechamento em andamento' : 'Prestacao nao iniciada');
+        $closingLabel = $ready ? 'Pronta para protocolo' : ($hasProcess ? 'Fechamento em andamento' : 'Prestação não iniciada');
         $physicalComplete = $physicalPercentage >= 100;
         $hasEvidence = $evidenceCount > 0;
         $protocolLabel = $process?->protocol_number ?: 'Aguardando protocolo';
-        $submittedLabel = $process?->submitted_at?->format('d/m/Y') ?? 'Nao enviado';
-        $approvedLabel = $process?->approved_at?->format('d/m/Y') ?? 'Nao aprovado';
-        $statusLabel = $process?->statusLabel() ?? 'Nao iniciada';
-        $responsibleLabel = $process?->responsibleUser?->name ?? $amendment->responsibleUser?->name ?? 'Nao definido';
-        $deadlineLabel = $process?->due_at?->format('d/m/Y') ?? $amendment->accountability_deadline?->format('d/m/Y') ?? 'Nao definido';
+        $submittedLabel = $process?->submitted_at?->format('d/m/Y') ?? 'Não enviado';
+        $approvedLabel = $process?->approved_at?->format('d/m/Y') ?? 'Não aprovado';
+        $statusLabel = $process?->statusLabel() ?? 'Não iniciada';
+        $responsibleLabel = $process?->responsibleUser?->name ?? $amendment->responsibleUser?->name ?? 'Não definido';
+        $deadlineLabel = $process?->due_at?->format('d/m/Y') ?? $amendment->accountability_deadline?->format('d/m/Y') ?? 'Não definido';
         $receiptSeal = $process?->approved_at
-            ? 'Prestacao aprovada e arquivavel'
+            ? 'Prestação aprovada e arquivável'
             : ($process?->submitted_at
-                ? 'Prestacao protocolada'
-                : ($ready ? 'Pronta para apresentar' : 'Em preparacao'));
+                ? 'Prestação protocolada'
+                : ($ready ? 'Pronta para apresentar' : 'Em preparação'));
         $timelineProtocolDetail = $process?->protocol_number
             ? 'Protocolo '.$process->protocol_number.' em '.$submittedLabel
-            : 'Informe protocolo e data de envio quando a prestacao for apresentada.';
+            : 'Informe protocolo e data de envio quando a prestação for apresentada.';
 
         $next = [
             'icon' => 'clipboard-list',
-            'title' => 'Iniciar prestacao simplificada',
-            'description' => 'Abra o processo para o sistema montar o checklist e ler execucao, pagamentos e evidencias ja registrados.',
+            'title' => 'Iniciar prestação simplificada',
+            'description' => 'Abra o processo para o sistema montar o checklist e ler execução, pagamentos e evidências já registrados.',
             'href' => '#iniciar-prestacao',
             'label' => 'Iniciar processo',
         ];
@@ -115,7 +115,7 @@ class AccountabilityService
             $next = [
                 'icon' => 'wand-sparkles',
                 'title' => 'Pre-conferir checklist',
-                'description' => 'Use os dados da execucao para resolver automaticamente itens que ja possuem lastro no sistema.',
+                'description' => 'Use os dados da execução para resolver automaticamente itens que já possuem lastro no sistema.',
                 'href' => '#assistente-prestacao',
                 'label' => 'Pre-conferir agora',
             ];
@@ -123,23 +123,23 @@ class AccountabilityService
             $next = [
                 'icon' => 'scale',
                 'title' => 'Conciliar saldo',
-                'description' => 'Ajuste pagamentos ou devolucao para fechar recebido, pago e saldo devolvido.',
+                'description' => 'Ajuste pagamentos ou devolução para fechar recebido, pago e saldo devolvido.',
                 'href' => '#reconciliation',
-                'label' => 'Ver conciliacao',
+                'label' => 'Ver conciliação',
             ];
         } elseif ($hasProcess && ! $ready) {
             $next = [
                 'icon' => 'list-checks',
-                'title' => 'Resolver pendencias finais',
-                'description' => 'Finalize execucao fisica, evidencias ou diligencias antes do protocolo.',
+                'title' => 'Resolver pendências finais',
+                'description' => 'Finalize execução física, evidências ou diligências antes do protocolo.',
                 'href' => '#requirements',
-                'label' => 'Ver pendencias',
+                'label' => 'Ver pendências',
             ];
         } elseif ($hasProcess) {
             $next = [
                 'icon' => 'send',
-                'title' => 'Enviar prestacao de contas',
-                'description' => 'A base esta pronta para informar protocolo, data de envio e gerar o dossie.',
+                'title' => 'Enviar prestação de contas',
+                'description' => 'A base está pronta para informar protocolo, data de envio e gerar o dossiê.',
                 'href' => '#process',
                 'label' => 'Informar protocolo',
             ];
@@ -151,10 +151,10 @@ class AccountabilityService
                 [
                     'icon' => 'wand-sparkles',
                     'label' => 'Preparar processo',
-                    'metric' => $hasProcess ? 'Aberto' : 'Nao iniciado',
+                    'metric' => $hasProcess ? 'Aberto' : 'Não iniciado',
                     'description' => $hasProcess
-                        ? 'Checklist e responsavel ja existem para esta emenda.'
-                        : 'Cria a prestacao e preenche o que o sistema ja consegue validar.',
+                        ? 'Checklist e responsável já existem para esta emenda.'
+                        : 'Cria a prestação e preenche o que o sistema já consegue validar.',
                     'href' => $hasProcess ? '#process' : '#iniciar-prestacao',
                     'cta' => $hasProcess ? 'Ver processo' : 'Preparar agora',
                     'tone' => $hasProcess ? 'success' : 'warning',
@@ -164,8 +164,8 @@ class AccountabilityService
                     'label' => 'Conferir checklist',
                     'metric' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : '0/0',
                     'description' => $checklistReady
-                        ? 'Itens obrigatorios resolvidos ou marcados como nao aplicaveis.'
-                        : 'Use a pre-conferencia para aproveitar dados de execucao e documentos.',
+                        ? 'Itens obrigatórios resolvidos ou marcados como não aplicáveis.'
+                        : 'Use a pré-conferência para aproveitar dados de execução e documentos.',
                     'href' => $process && ! $checklistReady ? '#assistente-prestacao' : '#requirements',
                     'cta' => $checklistReady ? 'Ver checklist' : 'Pre-conferir',
                     'tone' => $checklistReady ? 'success' : 'warning',
@@ -175,27 +175,27 @@ class AccountabilityService
                     'label' => 'Conciliar saldo',
                     'metric' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.'),
                     'description' => $financialReady
-                        ? 'Recebido, pago e devolvido estao fechados.'
-                        : 'Ajuste pagamento ou devolucao antes de registrar envio.',
+                        ? 'Recebido, pago e devolvido estão fechados.'
+                        : 'Ajuste pagamento ou devolução antes de registrar envio.',
                     'href' => '#reconciliation',
-                    'cta' => 'Abrir conciliacao',
+                    'cta' => 'Abrir conciliação',
                     'tone' => $financialReady ? 'success' : 'danger',
                 ],
                 [
                     'icon' => 'send',
-                    'label' => 'Enviar prestacao',
+                    'label' => 'Enviar prestação',
                     'metric' => $ready ? 'Liberada' : $score.'%',
                     'description' => $ready
-                        ? 'Informe protocolo e mantenha o dossie pronto para auditoria.'
-                        : 'Finalize pendencias antes de protocolar.',
+                        ? 'Informe protocolo e mantenha o dossiê pronto para auditoria.'
+                        : 'Finalize pendências antes de protocolar.',
                     'href' => $ready ? '#envio-prestacao' : '#requirements',
-                    'cta' => $ready ? 'Informar protocolo' : 'Ver pendencias',
+                    'cta' => $ready ? 'Informar protocolo' : 'Ver pendências',
                     'tone' => $ready ? 'success' : 'warning',
                 ],
                 [
                     'icon' => 'package-check',
-                    'label' => 'Dossie',
-                    'metric' => $hasProcess ? 'Disponivel' : 'Aguardando',
+                    'label' => 'Dossiê',
+                    'metric' => $hasProcess ? 'Disponível' : 'Aguardando',
                     'description' => 'Baixe PDF executivo e pacote de anexos quando o processo existir.',
                     'href' => $hasProcess ? '#dossie-prestacao' : '#iniciar-prestacao',
                     'cta' => $hasProcess ? 'Baixar arquivos' : 'Abrir processo',
@@ -206,36 +206,36 @@ class AccountabilityService
                 'score' => $score,
                 'label' => $closingLabel,
                 'tone' => $closingTone,
-                'description' => 'Fechamento, checklist e dossie em uma trilha.',
+                'description' => 'Fechamento, checklist e dossiê em uma trilha.',
                 'facts' => [
-                    ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Nao iniciado'],
+                    ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Não iniciado'],
                     ['label' => 'Saldo', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
-                    ['label' => 'Diligencias', 'value' => $openDiligences.' aberta(s)'],
+                    ['label' => 'Diligências', 'value' => $openDiligences.' aberta(s)'],
                 ],
             ],
             'flow' => [
-                ['label' => 'Abrir processo', 'description' => 'Cria checklist e responsavel.', 'done' => $hasProcess, 'href' => $hasProcess ? '#process' : '#iniciar-prestacao'],
-                ['label' => 'Pre-conferir', 'description' => 'Resolve itens com dados ja registrados.', 'done' => $checklistReady, 'href' => '#assistente-prestacao'],
+                ['label' => 'Abrir processo', 'description' => 'Cria checklist e responsável.', 'done' => $hasProcess, 'href' => $hasProcess ? '#process' : '#iniciar-prestacao'],
+                ['label' => 'Pré-conferir', 'description' => 'Resolve itens com dados já registrados.', 'done' => $checklistReady, 'href' => '#assistente-prestacao'],
                 ['label' => 'Conciliar saldo', 'description' => 'Fecha recebido, pago e devolvido.', 'done' => $financialReady, 'href' => '#reconciliation'],
-                ['label' => 'Resolver pendencias', 'description' => 'Checklist, evidencias e diligencias.', 'done' => $ready, 'href' => '#requirements'],
-                ['label' => 'Gerar dossie', 'description' => 'Baixa PDF e pacote de anexos.', 'done' => $ready, 'href' => '#dossie-prestacao'],
+                ['label' => 'Resolver pendências', 'description' => 'Checklist, evidências e diligências.', 'done' => $ready, 'href' => '#requirements'],
+                ['label' => 'Gerar dossiê', 'description' => 'Baixa PDF e pacote de anexos.', 'done' => $ready, 'href' => '#dossie-prestacao'],
             ],
             'actions' => [
                 [
                     'key' => 'quick-check',
                     'icon' => 'wand-sparkles',
                     'label' => 'Pre-conferir agora',
-                    'description' => 'Marca automaticamente checklist, saldo e evidencias que ja possuem base no sistema.',
+                    'description' => 'Marca automaticamente checklist, saldo e evidências que já possuem base no sistema.',
                     'href' => '#assistente-prestacao',
                     'enabled' => $hasProcess && ! $checklistReady,
                 ],
                 [
                     'key' => 'execution',
                     'icon' => 'route',
-                    'label' => $physicalComplete && $hasEvidence ? 'Revisar execucao' : 'Completar execucao',
+                    'label' => $physicalComplete && $hasEvidence ? 'Revisar execução' : 'Completar execução',
                     'description' => $physicalComplete && $hasEvidence
-                        ? 'Confira etapas, pagamentos e documentos usados na prestacao.'
-                        : 'Conclua etapas fisicas, pagamentos e evidencias antes de enviar.',
+                        ? 'Confira etapas, pagamentos e documentos usados na prestação.'
+                        : 'Conclua etapas físicas, pagamentos e evidências antes de enviar.',
                     'href' => route('emendas.execution', $amendment),
                     'enabled' => $hasProcess && (! $physicalComplete || ! $hasEvidence),
                 ],
@@ -243,15 +243,15 @@ class AccountabilityService
                     'key' => 'reconciliation',
                     'icon' => 'scale',
                     'label' => 'Conciliar saldo',
-                    'description' => 'Ajuste valor devolvido, referencia e observacoes quando houver diferenca financeira.',
+                    'description' => 'Ajuste valor devolvido, referência e observações quando houver diferença financeira.',
                     'href' => '#process',
                     'enabled' => $hasProcess && ! $financialReady,
                 ],
                 [
                     'key' => 'diligences',
                     'icon' => 'message-square-warning',
-                    'label' => 'Resolver diligencias',
-                    'description' => 'Responda pendencias abertas e registre protocolo de retorno quando existir.',
+                    'label' => 'Resolver diligências',
+                    'description' => 'Responda pendências abertas e registre protocolo de retorno quando existir.',
                     'href' => '#diligences',
                     'enabled' => $hasProcess && $openDiligences > 0,
                 ],
@@ -259,14 +259,14 @@ class AccountabilityService
                     'key' => 'submit',
                     'icon' => 'send',
                     'label' => 'Registrar envio',
-                    'description' => 'Informe data e protocolo quando a prestacao estiver pronta.',
+                    'description' => 'Informe data e protocolo quando a prestação estiver pronta.',
                     'href' => '#envio-prestacao',
                     'enabled' => $ready,
                 ],
                 [
                     'key' => 'dossier',
                     'icon' => 'package-check',
-                    'label' => 'Baixar dossie',
+                    'label' => 'Baixar dossiê',
                     'description' => 'Gere PDF executivo e pacote com anexos para auditoria ou arquivo municipal.',
                     'href' => '#dossie-prestacao',
                     'enabled' => $hasProcess,
@@ -274,28 +274,28 @@ class AccountabilityService
             ],
             'steps' => [
                 ['label' => 'Processo aberto', 'description' => 'Checklist municipal criado.', 'done' => $hasProcess],
-                ['label' => 'Execucao concluida', 'description' => 'Etapas fisicas em 100%.', 'done' => $physicalComplete],
+                ['label' => 'Execução concluída', 'description' => 'Etapas físicas em 100%.', 'done' => $physicalComplete],
                 ['label' => 'Financeiro conciliado', 'description' => 'Recebido, pago e devolvido fecham.', 'done' => $financialReady],
-                ['label' => 'Evidencias vinculadas', 'description' => 'Documentos ligados as entregas.', 'done' => $hasEvidence],
+                ['label' => 'Evidências vinculadas', 'description' => 'Documentos ligados às entregas.', 'done' => $hasEvidence],
                 ['label' => 'Pronta para envio', 'description' => 'Sem bloqueios para protocolo.', 'done' => $ready],
             ],
             'summary' => [
-                ['label' => 'Execucao fisica', 'value' => $physicalPercentage.'%'],
-                ['label' => 'Evidencias', 'value' => $evidenceCount.' documento(s)'],
-                ['label' => 'Saldo sem conciliacao', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
-                ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Nao iniciado'],
+                ['label' => 'Execução física', 'value' => $physicalPercentage.'%'],
+                ['label' => 'Evidências', 'value' => $evidenceCount.' documento(s)'],
+                ['label' => 'Saldo sem conciliação', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                ['label' => 'Checklist', 'value' => $process ? ($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0) : 'Não iniciado'],
             ],
             'finalPackage' => [
                 'ready' => $ready,
-                'title' => $ready ? 'Prestacao final pronta' : 'Prestacao final em preparacao',
+                'title' => $ready ? 'Prestação final pronta' : 'Prestação final em preparação',
                 'description' => $ready
-                    ? 'O processo ja possui base para protocolo, PDF executivo e pacote de documentos.'
+                    ? 'O processo já possui base para protocolo, PDF executivo e pacote de documentos.'
                     : 'O sistema mostra exatamente o que falta antes do envio final ao controle interno ou externo.',
                 'checks' => [
-                    ['label' => 'Processo aberto', 'done' => $hasProcess, 'detail' => $hasProcess ? 'Prestacao criada' : 'Inicie o processo'],
-                    ['label' => 'Checklist resolvido', 'done' => $checklistReady, 'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' itens') : 'Nao iniciado'],
-                    ['label' => 'Financeiro conciliado', 'done' => $financialReady, 'detail' => 'Diferenca R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
-                    ['label' => 'Evidencias anexadas', 'done' => $hasEvidence, 'detail' => $evidenceCount.' documento(s)'],
+                    ['label' => 'Processo aberto', 'done' => $hasProcess, 'detail' => $hasProcess ? 'Prestação criada' : 'Inicie o processo'],
+                    ['label' => 'Checklist resolvido', 'done' => $checklistReady, 'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' itens') : 'Não iniciado'],
+                    ['label' => 'Financeiro conciliado', 'done' => $financialReady, 'detail' => 'Diferença R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                    ['label' => 'Evidências anexadas', 'done' => $hasEvidence, 'detail' => $evidenceCount.' documento(s)'],
                     ['label' => 'Sem bloqueios', 'done' => $ready, 'detail' => $ready ? 'Pronto para protocolo' : (($readiness['blockers'] ?? collect())->first() ?? 'Aguardando preparo')],
                 ],
             ],
@@ -314,21 +314,21 @@ class AccountabilityService
                     'title' => 'Recurso recebido',
                     'detail' => $amendment->received_at
                         ? 'Recebido em '.$amendment->received_at->format('d/m/Y').' no valor de R$ '.number_format((float) $amendment->received_amount, 2, ',', '.')
-                        : 'Informe o recebimento para fechar a conciliacao.',
+                        : 'Informe o recebimento para fechar a conciliação.',
                     'done' => $amendment->received_at !== null,
                 ],
                 [
-                    'title' => 'Execucao comprovada',
-                    'detail' => $physicalPercentage.'% de execucao fisica e '.$evidenceCount.' evidencia(s) vinculada(s).',
+                    'title' => 'Execução comprovada',
+                    'detail' => $physicalPercentage.'% de execução física e '.$evidenceCount.' evidência(s) vinculada(s).',
                     'done' => $physicalComplete && $hasEvidence,
                 ],
                 [
                     'title' => 'Checklist final',
-                    'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' item(ns) obrigatorio(s) resolvido(s).') : 'Abra a prestacao para montar o checklist.',
+                    'detail' => $process ? (($readiness['required_resolved'] ?? 0).'/'.($readiness['required_total'] ?? 0).' item(ns) obrigatório(s) resolvido(s).') : 'Abra a prestação para montar o checklist.',
                     'done' => $checklistReady,
                 ],
                 [
-                    'title' => 'Protocolo da prestacao',
+                    'title' => 'Protocolo da prestação',
                     'detail' => $timelineProtocolDetail,
                     'done' => $process?->submitted_at !== null,
                 ],
@@ -336,7 +336,7 @@ class AccountabilityService
                     'title' => 'Arquivo para controle',
                     'detail' => $process?->approved_at
                         ? 'Aprovada em '.$approvedLabel.'.'
-                        : ($ready ? 'PDF executivo e pacote de auditoria prontos para apresentacao.' : 'Finalize os bloqueios para gerar uma entrega completa.'),
+                        : ($ready ? 'PDF executivo e pacote de auditoria prontos para apresentação.' : 'Finalize os bloqueios para gerar uma entrega completa.'),
                     'done' => $process?->approved_at !== null || $ready,
                 ],
             ],
@@ -367,9 +367,9 @@ class AccountabilityService
             $title = (string) Str::of($requirement->title)->ascii()->lower();
 
             if (str_contains($title, 'cumprimento do objeto') && $physicalComplete && $evidence) {
-                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Execucao fisica concluida e evidencia de entrega localizada automaticamente.');
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Execução física concluída e evidência de entrega localizada automaticamente.');
             } elseif (str_contains($title, 'comprovacao') && $evidence) {
-                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Evidencia de entrega vinculada automaticamente.');
+                $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $evidence->id, 'Evidência de entrega vinculada automaticamente.');
             } elseif (str_contains($title, 'comprovantes de despesas') && $financial['paid'] > 0) {
                 $data = $this->resolvedRequirement($user, AccountabilityRequirement::STATUS_COMPLETED, $anyDocument?->id, 'Pagamentos registrados no TrilhaGov foram localizados para esta emenda.');
             } elseif (str_contains($title, 'extrato') && abs($financial['unreconciled']) <= 0.01 && $amendment->received_amount !== null) {

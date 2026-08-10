@@ -39,7 +39,7 @@
             <div>
                 <p class="page-kicker mb-1">Assistente guiado</p>
                 <h2 class="h5 mb-1">Plano de Trabalho municipal</h2>
-                <p>O caminho abaixo transforma a proposta em plano executavel, com documentos, riscos e responsaveis antes da execucao.</p>
+                <p>O caminho abaixo transforma a proposta em plano executável, com documentos, riscos e responsáveis antes da execução.</p>
             </div>
             @if ($plan)
                 <span class="work-plan-status status-{{ $plan->status }}">{{ $plan->statusLabel() }}</span>
@@ -67,7 +67,7 @@
 
         <div class="work-plan-guide-grid">
             <div>
-                <h3>Documentos minimos</h3>
+                <h3>Documentos mínimos</h3>
                 <ul>
                     @foreach ($guide['documents'] as $document)
                         <li>{{ $document }}</li>
@@ -75,7 +75,7 @@
                 </ul>
             </div>
             <div>
-                <h3>Riscos antes da execucao</h3>
+                <h3>Riscos antes da execução</h3>
                 <ul>
                     @foreach ($guide['risks'] as $risk)
                         <li>{{ $risk }}</li>
@@ -83,7 +83,7 @@
                 </ul>
             </div>
             <div>
-                <h3>Responsaveis</h3>
+                <h3>Responsáveis</h3>
                 <dl>
                     @foreach ($guide['responsibles'] as $responsible)
                         <div><dt>{{ $responsible['label'] }}</dt><dd>{{ $responsible['value'] }}</dd></div>
@@ -139,7 +139,7 @@
                 <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
                 <div>
                     <strong>Plano simplificado a partir da emenda</strong>
-                    <p>Objeto, executor, valor, saude, justificativa e uma etapa inicial foram preenchidos automaticamente. Revise somente o que for necessario antes da analise.</p>
+                    <p>Objeto, executor, valor, saúde, justificativa e uma etapa inicial foram preenchidos automaticamente. Revise somente o que for necessário antes da análise.</p>
                 </div>
             </div>
             <dl>

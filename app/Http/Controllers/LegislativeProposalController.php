@@ -142,33 +142,33 @@ class LegislativeProposalController extends Controller
         $healthProgress = $healthRequired ? min(100, round($healthAllocated / (float) $healthRequired * 100)) : null;
 
         if ($profile === null) {
-            $nextTitle = 'Aguardando ativacao do exercicio';
-            $nextText = 'O gestor municipal precisa ativar a norma para liberar cota, reserva de saude e cadastro de propostas.';
+            $nextTitle = 'Aguardando ativação do exercício';
+            $nextText = 'O gestor municipal precisa ativar a norma para liberar cota, reserva de saúde e cadastro de propostas.';
             $badge = 'Bloqueado';
             $badgeTone = 'danger';
         } elseif ($countLimit !== null && $count >= (int) $countLimit) {
             $nextTitle = 'Limite de propostas atingido';
-            $nextText = 'Revise as propostas existentes ou aguarde orientacao da equipe municipal antes de cadastrar outra.';
+            $nextText = 'Revise as propostas existentes ou aguarde orientação da equipe municipal antes de cadastrar outra.';
             $badge = 'Cota encerrada';
             $badgeTone = 'warning';
         } elseif ($remaining !== null && (float) $remaining <= 0.005) {
             $nextTitle = 'Saldo individual esgotado';
-            $nextText = 'Todas as novas indicacoes precisam respeitar o teto da Lei Organica definido para o exercicio.';
+            $nextText = 'Todas as novas indicações precisam respeitar o teto da Lei Orgânica definido para o exercício.';
             $badge = 'Sem saldo';
             $badgeTone = 'warning';
         } elseif ($minimumAmount !== null && $remaining !== null && (float) $remaining + 0.005 < $minimumAmount) {
-            $nextTitle = 'Saldo abaixo do minimo';
-            $nextText = 'A norma municipal exige proposta minima de R$ '.number_format($minimumAmount, 2, ',', '.').', acima do saldo disponivel.';
-            $badge = 'Sem valor minimo';
+            $nextTitle = 'Saldo abaixo do mínimo';
+            $nextText = 'A norma municipal exige proposta mínima de R$ '.number_format($minimumAmount, 2, ',', '.').', acima do saldo disponível.';
+            $badge = 'Sem valor mínimo';
             $badgeTone = 'warning';
         } elseif ($healthGap !== null && (float) $healthGap > 0.005) {
-            $nextTitle = 'Priorize uma proposta de saude';
-            $nextText = 'Para protocolar sem bloqueio, direcione pelo menos R$ '.number_format((float) $healthGap, 2, ',', '.').' para saude.';
-            $badge = 'Saude pendente';
+            $nextTitle = 'Priorize uma proposta de saúde';
+            $nextText = 'Para protocolar sem bloqueio, direcione pelo menos R$ '.number_format((float) $healthGap, 2, ',', '.').' para saúde.';
+            $badge = 'Saúde pendente';
             $badgeTone = 'warning';
         } else {
             $nextTitle = 'Pronto para indicar';
-            $nextText = 'Informe objeto, beneficiario, valor estimado e envie para conferencia legislativa.';
+            $nextText = 'Informe objeto, beneficiário, valor estimado e envie para conferência legislativa.';
             $badge = 'Pode indicar';
             $badgeTone = 'success';
         }
@@ -191,16 +191,16 @@ class LegislativeProposalController extends Controller
                 ],
                 [
                     'icon' => 'heart-pulse',
-                    'label' => 'Saude obrigatoria',
+                    'label' => 'Saúde obrigatória',
                     'value' => $healthGap !== null && (float) $healthGap > 0.005
                         ? 'Faltam R$ '.number_format((float) $healthGap, 2, ',', '.')
                         : 'Em dia',
-                    'description' => 'O sistema calcula a reserva minima pela norma municipal ativa.',
+                    'description' => 'O sistema calcula a reserva mínima pela norma municipal ativa.',
                     'tone' => $healthGap !== null && (float) $healthGap > 0.005 ? 'warning' : 'success',
                 ],
                 [
                     'icon' => 'file-plus-2',
-                    'label' => 'Seu proximo passo',
+                    'label' => 'Seu próximo passo',
                     'value' => $nextTitle,
                     'description' => $nextText,
                     'tone' => $badgeTone,
@@ -208,24 +208,24 @@ class LegislativeProposalController extends Controller
             ],
             'plainChecklist' => [
                 [
-                    'label' => 'Saldo disponivel',
+                    'label' => 'Saldo disponível',
                     'done' => $remaining !== null && (float) $remaining > 0.005,
                     'detail' => $remaining === null ? 'Aguardando norma ativa' : 'R$ '.number_format((float) $remaining, 2, ',', '.'),
                 ],
                 [
                     'label' => 'Regra municipal ativa',
                     'done' => $profile !== null,
-                    'detail' => $profile ? 'Exercicio '.$profile->fiscal_year.' liberado' : 'Gestor precisa ativar',
+                    'detail' => $profile ? 'Exercício '.$profile->fiscal_year.' liberado' : 'Gestor precisa ativar',
                 ],
                 [
-                    'label' => 'Saude calculada',
+                    'label' => 'Saúde calculada',
                     'done' => $healthGap === null || (float) $healthGap <= 0.005,
-                    'detail' => $healthGap !== null && (float) $healthGap > 0.005 ? 'Priorize saude' : 'Sem bloqueio',
+                    'detail' => $healthGap !== null && (float) $healthGap > 0.005 ? 'Priorize saúde' : 'Sem bloqueio',
                 ],
                 [
                     'label' => 'Pode enviar',
                     'done' => $canCreate,
-                    'detail' => $canCreate ? 'Formulario liberado' : $badge,
+                    'detail' => $canCreate ? 'Formulário liberado' : $badge,
                 ],
             ],
             'statusCounts' => $statusCounts,
@@ -485,8 +485,8 @@ class LegislativeProposalController extends Controller
                 'url' => $action['url'],
                 'label' => match ($action['column']['key']) {
                     'receive' => 'Receber como processo municipal',
-                    'budget' => 'Confirmar reserva orcamentaria',
-                    'review' => 'Concluir conferencia ou protocolo',
+                    'budget' => 'Confirmar reserva orçamentária',
+                    'review' => 'Concluir conferência ou protocolo',
                     default => 'Abrir acompanhamento',
                 },
             ])->values(),
@@ -495,43 +495,43 @@ class LegislativeProposalController extends Controller
             'focus_class' => $total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : ''),
             'focus_icon' => $total === 0 ? 'circle-check' : ($focus['icon'] ?? 'alert-circle'),
             'focus_kicker' => $total === 0 ? 'Sem gargalo operacional' : 'Foco recomendado agora',
-            'focus_title' => $total === 0 ? 'Nenhuma proposta aguardando acao do Executivo' : ($focus['title'] ?? 'Revisar fila'),
-            'focus_text' => $total === 0 ? 'As propostas ativas estao sem pendencia imediata de decisao, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.'),
+            'focus_title' => $total === 0 ? 'Nenhuma proposta aguardando ação do Executivo' : ($focus['title'] ?? 'Revisar fila'),
+            'focus_text' => $total === 0 ? 'As propostas ativas estão sem pendência imediata de decisão, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.'),
             'command_cards' => [
                 [
                     'icon' => 'inbox',
                     'label' => 'Receber',
                     'value' => (int) collect($board)->firstWhere('key', 'receive')['count'],
                     'tone' => 'receive',
-                    'description' => 'Protocolos da Camara que ainda precisam virar processo municipal.',
+                    'description' => 'Protocolos da Câmara que ainda precisam virar processo municipal.',
                 ],
                 [
                     'icon' => 'wallet-cards',
                     'label' => 'Reservar',
                     'value' => (int) collect($board)->firstWhere('key', 'budget')['count'],
                     'tone' => 'budget',
-                    'description' => 'Propostas recebidas aguardando confirmacao orcamentaria.',
+                    'description' => 'Propostas recebidas aguardando confirmação orçamentária.',
                 ],
                 [
                     'icon' => 'heart-pulse',
-                    'label' => 'Saude',
+                    'label' => 'Saúde',
                     'value' => 'R$ '.number_format((float) $actionable->sum('health_amount'), 2, ',', '.'),
                     'tone' => 'health',
-                    'description' => 'Valor marcado como saude ainda sob decisao do Executivo.',
+                    'description' => 'Valor marcado como saúde ainda sob decisão do Executivo.',
                 ],
                 [
                     'icon' => 'gauge',
-                    'label' => 'Execucao',
+                    'label' => 'Execução',
                     'value' => (int) $execution['count'],
                     'tone' => 'execution',
-                    'description' => 'Emendas ja reservadas que devem seguir para plano e entrega.',
+                    'description' => 'Emendas já reservadas que devem seguir para plano e entrega.',
                 ],
             ],
             'flow_steps' => [
                 [
-                    'label' => 'Camara envia',
+                    'label' => 'Câmara envia',
                     'description' => 'Proposta aprovada chega protocolada.',
-                    'action' => 'Ir para conferencia',
+                    'action' => 'Ir para conferência',
                     'url' => $review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url'],
                     'count' => (int) $review['count'],
                 ],
@@ -543,15 +543,15 @@ class LegislativeProposalController extends Controller
                     'count' => (int) $receive['count'],
                 ],
                 [
-                    'label' => 'Reserva orcamentaria',
-                    'description' => 'Valor integral e dotacao ficam registrados.',
+                    'label' => 'Reserva orçamentária',
+                    'description' => 'Valor integral e dotação ficam registrados.',
                     'action' => 'Reservar agora',
                     'url' => $budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url'],
                     'count' => (int) $budget['count'],
                 ],
                 [
-                    'label' => 'Plano e execucao',
-                    'description' => 'Central cria pendencias para entregar e prestar contas.',
+                    'label' => 'Plano e execução',
+                    'description' => 'Central cria pendências para entregar e prestar contas.',
                     'action' => 'Acompanhar',
                     'url' => $executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url'],
                     'count' => (int) $executionColumn['count'],
@@ -891,7 +891,7 @@ class LegislativeProposalController extends Controller
         $stats = $workItems->synchronize($municipality->fresh());
         $notifications->submitter($proposal->fresh(), 'Proposta recebida pelo Executivo', "A proposta {$proposal->reference} foi vinculada ao processo {$validated['executive_process_number']}.");
 
-        return back()->with('status', 'Recebimento confirmado. A emenda foi aberta e a Central recebeu '.$stats['created'].' pendencia(s) automatica(s).');
+        return back()->with('status', 'Recebimento confirmado. A emenda foi aberta e a Central recebeu '.$stats['created'].' pendência(s) automática(s).');
     }
 
     public function reserve(
@@ -948,7 +948,7 @@ class LegislativeProposalController extends Controller
 
         return redirect()
             ->route('emendas.work-plan', $proposal->amendment)
-            ->with('status', 'Reserva registrada. Revise o Plano de Trabalho guiado e envie para analise tecnica. A Central recebeu '.$stats['created'].' pendencia(s) automatica(s).');
+            ->with('status', 'Reserva registrada. Revise o Plano de Trabalho guiado e envie para análise técnica. A Central recebeu '.$stats['created'].' pendência(s) automática(s).');
     }
 
     /** @return array<string, mixed> */
@@ -956,12 +956,12 @@ class LegislativeProposalController extends Controller
     {
         $sequence = preg_replace('/^LEG-\d{4}-/i', '', $proposal->reference) ?: str_pad((string) $proposal->id, 3, '0', STR_PAD_LEFT);
         $processNumber = 'PREF-'.$proposal->fiscal_year.'-'.$sequence;
-        $department = $proposal->responsible_department ?: ($proposal->health_related ? 'Secretaria Municipal de Saude' : 'Unidade executora a confirmar');
-        $classification = $proposal->health_related ? 'Saude / ASPS' : ($proposal->expense_destination === 'investment' ? 'Investimento municipal' : 'Custeio municipal');
-        $notes = 'Recebimento automatico da proposta '.$proposal->reference
-            .' protocolada pela Camara'.($proposal->protocol_number ? ' sob '.$proposal->protocol_number : '')
+        $department = $proposal->responsible_department ?: ($proposal->health_related ? 'Secretaria Municipal de Saúde' : 'Unidade executora a confirmar');
+        $classification = $proposal->health_related ? 'Saúde / ASPS' : ($proposal->expense_destination === 'investment' ? 'Investimento municipal' : 'Custeio municipal');
+        $notes = 'Recebimento automático da proposta '.$proposal->reference
+            .' protocolada pela Câmara'.($proposal->protocol_number ? ' sob '.$proposal->protocol_number : '')
             .'. Secretaria sugerida: '.$department
-            .'. Classificacao inicial: '.$classification
+            .'. Classificação inicial: '.$classification
             .'. Valor a reanalisar e reservar: R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.').'.';
 
         return [
@@ -972,7 +972,7 @@ class LegislativeProposalController extends Controller
             'items' => [
                 ['label' => 'Processo sugerido', 'value' => $processNumber],
                 ['label' => 'Secretaria sugerida', 'value' => $department],
-                ['label' => 'Classificacao', 'value' => $classification],
+                ['label' => 'Classificação', 'value' => $classification],
                 ['label' => 'Valor recebido', 'value' => 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.')],
             ],
         ];
@@ -985,10 +985,10 @@ class LegislativeProposalController extends Controller
         $reservationNumber = 'RES-'.$proposal->fiscal_year.'-'.$sequence;
         $amount = (float) $proposal->estimated_amount;
         $process = $proposal->executive_process_number ?: 'processo executivo pendente';
-        $notes = 'Reserva orcamentaria automatica da proposta '.$proposal->reference
+        $notes = 'Reserva orçamentária automática da proposta '.$proposal->reference
             .' vinculada ao '.$process
             .'. Valor integral reservado: R$ '.number_format($amount, 2, ',', '.')
-            .'. A etapa seguinte deve solicitar e revisar o Plano de Trabalho antes da execucao.';
+            .'. A etapa seguinte deve solicitar e revisar o Plano de Trabalho antes da execução.';
 
         return [
             'reservation_number' => $reservationNumber,

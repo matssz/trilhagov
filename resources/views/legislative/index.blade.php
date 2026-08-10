@@ -27,37 +27,37 @@
             <section class="legislative-councilor-home">
                 <div class="councilor-home-main">
                     <span class="page-kicker">Minha cota</span>
-                    <h2>{{ $quota['remaining'] === null ? 'Cota em configuracao' : 'R$ '.number_format($quota['remaining'], 2, ',', '.').' disponiveis' }}</h2>
+                    <h2>{{ $quota['remaining'] === null ? 'Cota em configuração' : 'R$ '.number_format($quota['remaining'], 2, ',', '.').' disponíveis' }}</h2>
                     <strong class="councilor-home-next">{{ $councilorGuide['nextTitle'] ?? 'Pronto para indicar' }}</strong>
-                    <p>{{ $councilorGuide['nextText'] ?? 'O sistema calcula automaticamente saldo, limite e reserva de saude.' }}</p>
+                    <p>{{ $councilorGuide['nextText'] ?? 'O sistema calcula automaticamente saldo, limite e reserva de saúde.' }}</p>
                     <span class="councilor-home-badge is-{{ $councilorGuide['badgeTone'] ?? 'success' }}">{{ $councilorGuide['badge'] ?? 'Pode indicar' }}</span>
                 </div>
                 <div class="councilor-home-actions">
                     @if ($councilorGuide['canCreate'] ?? false)
                         <a class="btn btn-primary" href="{{ route('legislative.create', ['year' => $year]) }}"><i data-lucide="plus" aria-hidden="true"></i>Nova proposta</a>
                     @else
-                        <button class="btn btn-outline-secondary" type="button" disabled><i data-lucide="lock-keyhole" aria-hidden="true"></i>Aguardando liberacao</button>
+                        <button class="btn btn-outline-secondary" type="button" disabled><i data-lucide="lock-keyhole" aria-hidden="true"></i>Aguardando liberação</button>
                     @endif
                     <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
                 </div>
-                <div class="councilor-operating-strip" aria-label="Acoes principais do vereador">
+                <div class="councilor-operating-strip" aria-label="Ações principais do vereador">
                     <article>
                         <span>1</span>
-                        <div><strong>Indicar pedido</strong><small>Escolha objeto, valor e destino. O sistema confere cota e saude.</small></div>
+                        <div><strong>Indicar pedido</strong><small>Escolha objeto, valor e destino. O sistema confere cota e saúde.</small></div>
                         @if ($councilorGuide['canCreate'] ?? false)
-                            <a href="{{ route('legislative.create', ['year' => $year]) }}">Comecar</a>
+                            <a href="{{ route('legislative.create', ['year' => $year]) }}">Começar</a>
                         @else
                             <em>Bloqueado</em>
                         @endif
                     </article>
                     <article>
                         <span>2</span>
-                        <div><strong>Acompanhar resposta</strong><small>Veja se esta com voce, Camara, Executivo ou em execucao.</small></div>
+                        <div><strong>Acompanhar resposta</strong><small>Veja se está com você, Câmara, Executivo ou em execução.</small></div>
                         <a href="#minhas-propostas">Ver etapas</a>
                     </article>
                     <article>
                         <span>3</span>
-                        <div><strong>Entender saldo</strong><small>Valor indicado fica comprometido, mas so executa depois da reserva.</small></div>
+                        <div><strong>Entender saldo</strong><small>Valor indicado fica comprometido, mas só executa depois da reserva.</small></div>
                         <a href="#explicacao-cota">Ver cota</a>
                     </article>
                 </div>
@@ -68,12 +68,12 @@
                         <div class="councilor-progress-track"><i style="width: {{ $councilorGuide['quotaProgress'] ?? 0 }}%"></i></div>
                     </div>
                     <div>
-                        <span>Reserva minima de saude</span>
+                        <span>Reserva mínima de saúde</span>
                         <strong>{{ $councilorGuide['healthProgress'] === null ? 'A configurar' : $councilorGuide['healthProgress'].'%' }}</strong>
                         <div class="councilor-progress-track is-health"><i style="width: {{ $councilorGuide['healthProgress'] ?? 0 }}%"></i></div>
                     </div>
                     <div>
-                        <span>Em elaboracao</span>
+                        <span>Em elaboração</span>
                         <strong>{{ $councilorGuide['statusCounts'][App\Models\LegislativeProposal::STATUS_DRAFT] ?? 0 }}</strong>
                     </div>
                     <div>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="councilor-simple-checklist" aria-label="Visao simples do vereador">
                     <div>
-                        <span class="page-kicker">Visao simples do vereador</span>
+                        <span class="page-kicker">Visão simples do vereador</span>
                         <strong>Antes de cadastrar, confira estes pontos</strong>
                     </div>
                     <div class="councilor-simple-checklist-items">
@@ -112,18 +112,18 @@
                     <article class="{{ ($councilorGroups['summary']['action']['count'] ?? 0) > 0 ? 'needs-action' : 'is-clear' }}">
                         <span><i data-lucide="pencil-line" aria-hidden="true"></i></span>
                         <div>
-                            <small>Depende de voce</small>
+                            <small>Depende de você</small>
                             <strong>{{ $councilorGroups['summary']['action']['count'] ?? 0 }} proposta(s)</strong>
-                            <p>Rascunhos ou devolucoes que precisam de ajuste antes de seguir.</p>
+                            <p>Rascunhos ou devoluções que precisam de ajuste antes de seguir.</p>
                         </div>
                         <a href="{{ $councilorGroups['summary']['action']['url'] ?? route('legislative.index', ['year' => $year]) }}">Abrir</a>
                     </article>
                     <article>
                         <span><i data-lucide="landmark" aria-hidden="true"></i></span>
                         <div>
-                            <small>Com a Camara</small>
+                            <small>Com a Câmara</small>
                             <strong>{{ $councilorGroups['summary']['chamber']['count'] ?? 0 }} proposta(s)</strong>
-                            <p>Itens em conferencia legislativa ou prontos para protocolo.</p>
+                            <p>Itens em conferência legislativa ou prontos para protocolo.</p>
                         </div>
                         <a href="{{ $councilorGroups['summary']['chamber']['url'] ?? route('legislative.index', ['year' => $year]) }}">Ver</a>
                     </article>
@@ -132,14 +132,14 @@
                         <div>
                             <small>Com o Executivo</small>
                             <strong>{{ $councilorGroups['summary']['executive']['count'] ?? 0 }} proposta(s)</strong>
-                            <p>Protocoladas, recebidas ou com reserva orcamentaria aberta.</p>
+                            <p>Protocoladas, recebidas ou com reserva orçamentária aberta.</p>
                         </div>
                         <a href="{{ $councilorGroups['summary']['executive']['url'] ?? route('legislative.index', ['year' => $year]) }}">Acompanhar</a>
                     </article>
                     @if($councilorGroups['next_url'] ?? null)
                         <a class="councilor-next-action" href="{{ $councilorGroups['next_url'] }}">
                             <i data-lucide="arrow-right" aria-hidden="true"></i>
-                            <span><small>Proxima acao sugerida</small><strong>{{ $councilorGroups['next_label'] }}</strong></span>
+                            <span><small>Próxima ação sugerida</small><strong>{{ $councilorGroups['next_label'] }}</strong></span>
                         </a>
                     @endif
                 </div>
@@ -155,15 +155,15 @@
                     <article class="{{ ($quota['health_gap'] ?? 0) > 0 ? 'needs-health' : 'is-ok' }}">
                         <span><i data-lucide="heart-pulse" aria-hidden="true"></i></span>
                         <div>
-                            <small>Reserva de saude</small>
+                            <small>Reserva de saúde</small>
                             <strong>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Atendida' }}</strong>
-                            <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Priorize uma proposta marcada para saude.' : 'Voce ja preservou a proporcao minima.' }}</p>
+                            <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Priorize uma proposta marcada para saúde.' : 'Você já preservou a proporção mínima.' }}</p>
                         </div>
                     </article>
                     <article>
                         <span><i data-lucide="route" aria-hidden="true"></i></span>
                         <div>
-                            <small>Proximo movimento</small>
+                            <small>Próximo movimento</small>
                             <strong>{{ $councilorGroups['next_label'] ?? 'Ver propostas' }}</strong>
                             <p>{{ $councilorGuide['nextText'] ?? 'Acompanhe a etapa de cada proposta.' }}</p>
                         </div>
@@ -173,20 +173,20 @@
                     <div>
                         <span><i data-lucide="info" aria-hidden="true"></i></span>
                         <div>
-                            <strong>O valor nao some da cota</strong>
-                            <p>Quando voce salva uma proposta, o valor fica comprometido nela. Ele ainda nao foi pago nem transferido: so vira execucao depois da conferencia da Camara, recebimento do Executivo e reserva orcamentaria.</p>
+                            <strong>O valor não some da cota</strong>
+                            <p>Quando você salva uma proposta, o valor fica comprometido nela. Ele ainda não foi pago nem transferido: só vira execução depois da conferência da Câmara, recebimento do Executivo e reserva orçamentária.</p>
                         </div>
                     </div>
                     <ol>
                         <li><span>1</span><strong>Indicado</strong><small>Abate do saldo para evitar ultrapassar a cota.</small></li>
-                        <li><span>2</span><strong>Conferido</strong><small>Camara valida valor, objeto e saude.</small></li>
-                        <li><span>3</span><strong>Reservado</strong><small>Executivo confirma dotacao para executar.</small></li>
+                        <li><span>2</span><strong>Conferido</strong><small>Câmara valida valor, objeto e saúde.</small></li>
+                        <li><span>3</span><strong>Reservado</strong><small>Executivo confirma dotação para executar.</small></li>
                         <li><span>4</span><strong>Executado</strong><small>Prefeitura empenha, paga e entrega.</small></li>
                     </ol>
                 </div>
                 <div class="councilor-home-steps">
                     <span><i data-lucide="edit-3" aria-hidden="true"></i>Vereador indica</span>
-                    <span><i data-lucide="badge-check" aria-hidden="true"></i>Camara confere</span>
+                    <span><i data-lucide="badge-check" aria-hidden="true"></i>Câmara confere</span>
                     <span><i data-lucide="send" aria-hidden="true"></i>Executivo recebe</span>
                     <span><i data-lucide="building-2" aria-hidden="true"></i>Prefeitura executa</span>
                 </div>
@@ -194,25 +194,25 @@
                     <article>
                         <span><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></span>
                         <div>
-                            <small>O que voce faz</small>
+                            <small>O que você faz</small>
                             <strong>Escolhe destino, valor e motivo</strong>
-                            <p>O formulario pede o minimo. Campos tecnicos podem ser completados pela equipe municipal depois.</p>
+                            <p>O formulário pede o mínimo. Campos técnicos podem ser completados pela equipe municipal depois.</p>
                         </div>
                     </article>
                     <article>
                         <span><i data-lucide="calculator" aria-hidden="true"></i></span>
                         <div>
                             <small>O que o sistema faz</small>
-                            <strong>Confere saldo e saude</strong>
-                            <p>A cota vem da RCL e da Lei Organica ativa. Saude e sinalizada automaticamente quando houver indicios.</p>
+                            <strong>Confere saldo e saúde</strong>
+                            <p>A cota vem da RCL e da Lei Orgânica ativa. Saúde é sinalizada automaticamente quando houver indícios.</p>
                         </div>
                     </article>
                     <article>
                         <span><i data-lucide="eye" aria-hidden="true"></i></span>
                         <div>
                             <small>Depois do envio</small>
-                            <strong>Voce acompanha tudo aqui</strong>
-                            <p>Cada proposta mostra se esta com voce, com a Camara, com o Executivo ou em execucao.</p>
+                            <strong>Você acompanha tudo aqui</strong>
+                            <p>Cada proposta mostra se está com você, com a Câmara, com o Executivo ou em execução.</p>
                         </div>
                     </article>
                 </div>
@@ -311,9 +311,9 @@
                     </div>
                 </div>
                 <div class="executive-desk-metrics">
-                    <div><span>Acoes pendentes</span><strong>{{ $executiveDesk['total'] ?? 0 }}</strong></div>
-                    <div><span>Valor sob decisao</span><strong>R$ {{ number_format($executiveDesk['amount'] ?? 0, 2, ',', '.') }}</strong></div>
-                    <div><span>Em execucao aberta</span><strong>{{ $executiveDesk['done'] ?? 0 }}</strong></div>
+                    <div><span>Ações pendentes</span><strong>{{ $executiveDesk['total'] ?? 0 }}</strong></div>
+                    <div><span>Valor sob decisão</span><strong>R$ {{ number_format($executiveDesk['amount'] ?? 0, 2, ',', '.') }}</strong></div>
+                    <div><span>Em execução aberta</span><strong>{{ $executiveDesk['done'] ?? 0 }}</strong></div>
                     <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
                 </div>
             </div>
@@ -322,7 +322,7 @@
                     <div>
                         <p class="panel-kicker">Comando municipal</p>
                         <h3>O que o gestor precisa decidir agora</h3>
-                        <p>Receba propostas da Camara, confirme reserva e libere plano, execucao e prestacao de contas sem sair desta mesa.</p>
+                        <p>Receba propostas da Câmara, confirme reserva e libere plano, execução e prestação de contas sem sair desta mesa.</p>
                     </div>
                     @if ($executiveDesk['focus_url'] ?? null)
                         <a class="btn btn-outline-primary" href="{{ $executiveDesk['focus_url'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Executar foco</a>
@@ -359,8 +359,8 @@
                     <header>
                         <span><i data-lucide="list-checks" aria-hidden="true"></i></span>
                         <div>
-                            <strong>3 decisoes mais importantes</strong>
-                            <small>Atalhos para o gestor resolver o que destrava Camara, reserva e execucao.</small>
+                            <strong>3 decisões mais importantes</strong>
+                            <small>Atalhos para o gestor resolver o que destrava Câmara, reserva e execução.</small>
                         </div>
                     </header>
                     <div>
@@ -395,7 +395,7 @@
                                     <div>
                                         <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
                                         <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
-                                        <em>{{ $action['proposal']->author_name }} · processo e pendencias serao sugeridos automaticamente</em>
+                                        <em>{{ $action['proposal']->author_name }} · processo e pendências serão sugeridos automaticamente</em>
                                     </div>
                                     <button type="submit">Confirmar</button>
                                 </form>
@@ -407,7 +407,7 @@
                                     <div>
                                         <small>{{ $action['column']['action'] }}{{ $action['late'] ? ' · fora do prazo' : '' }}</small>
                                         <strong>{{ $action['proposal']->reference }} · {{ $action['proposal']->object }}</strong>
-                                        <em>{{ $action['proposal']->author_name }} · reserva integral e Plano de Trabalho serao acionados automaticamente</em>
+                                        <em>{{ $action['proposal']->author_name }} · reserva integral e Plano de Trabalho serão acionados automaticamente</em>
                                     </div>
                                     <button type="submit">Reservar</button>
                                 </form>
@@ -492,7 +492,7 @@
         @if($executiveBoard)
             <label><span>Vereador</span><select class="form-select" name="author"><option value="">Todos</option>@foreach($filterOptions['authors'] as $option)<option value="{{ $option }}" @selected($selectedAuthor === $option)>{{ $option }}</option>@endforeach</select></label>
             <label><span>Secretaria</span><select class="form-select" name="department"><option value="">Todas</option>@foreach($filterOptions['departments'] as $option)<option value="{{ $option }}" @selected($selectedDepartment === $option)>{{ $option }}</option>@endforeach</select></label>
-            <label><span>Saude</span><select class="form-select" name="health"><option value="">Todas</option><option value="yes" @selected($selectedHealth === 'yes')>Somente saude</option><option value="no" @selected($selectedHealth === 'no')>Nao saude</option></select></label>
+            <label><span>Saúde</span><select class="form-select" name="health"><option value="">Todas</option><option value="yes" @selected($selectedHealth === 'yes')>Somente saúde</option><option value="no" @selected($selectedHealth === 'no')>Não saúde</option></select></label>
         @endif
         <label class="search"><span>Busca</span><input class="form-control" name="search" value="{{ $search }}" placeholder="Referência, autor, objeto ou beneficiário"></label>
         <button class="btn btn-outline-primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i>Filtrar</button>

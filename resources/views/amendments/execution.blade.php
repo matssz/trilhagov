@@ -40,12 +40,12 @@
 
     <x-validation-summary />
 
-    <section class="execution-guide mb-4" aria-label="Execucao simplificada">
+    <section class="execution-guide mb-4" aria-label="Execução simplificada">
         <div class="execution-guide-header">
             <div>
-                <p class="page-kicker mb-1">Execucao simplificada</p>
-                <h2 class="h5 mb-1">Painel unico do Executivo</h2>
-                <p>Controle o que precisa acontecer agora: abrir etapas, registrar empenho, comprovar entrega e preparar a prestacao de contas.</p>
+                <p class="page-kicker mb-1">Execução simplificada</p>
+                <h2 class="h5 mb-1">Painel único do Executivo</h2>
+                <p>Controle o que precisa acontecer agora: abrir etapas, registrar empenho, comprovar entrega e preparar a prestação de contas.</p>
             </div>
             @if ($amendment->municipalWorkPlan)
                 <a class="btn btn-outline-primary" href="{{ route('emendas.work-plan', $amendment) }}"><i data-lucide="clipboard-list" aria-hidden="true"></i>Ver plano</a>
@@ -69,26 +69,26 @@
             @endif
         </div>
 
-        <div class="execution-readiness is-{{ $executionGuide['readiness']['tone'] }}" aria-label="Prontidao da execucao">
+        <div class="execution-readiness is-{{ $executionGuide['readiness']['tone'] }}" aria-label="Prontidão da execução">
             <div class="execution-readiness-score">
                 <strong>{{ $executionGuide['readiness']['percentage'] }}%</strong>
                 <span>{{ $executionGuide['readiness']['label'] }}</span>
             </div>
             <div class="execution-readiness-copy">
-                <strong>Entrega, dinheiro e evidencia em uma trilha</strong>
-                <p>O Executivo acompanha o que ja foi aberto, empenhado, pago e comprovado antes de mandar para prestacao de contas.</p>
+                <strong>Entrega, dinheiro e evidência em uma trilha</strong>
+                <p>O Executivo acompanha o que já foi aberto, empenhado, pago e comprovado antes de mandar para prestação de contas.</p>
             </div>
             <div class="execution-readiness-facts">
-                <div><small>Fisico</small><strong>{{ $executionGuide['readiness']['physical'] }}%</strong></div>
+                <div><small>Físico</small><strong>{{ $executionGuide['readiness']['physical'] }}%</strong></div>
                 <div><small>Financeiro</small><strong>{{ $executionGuide['readiness']['financial'] }}%</strong></div>
-                <div><small>Evidencias</small><strong>{{ $executionGuide['readiness']['evidence_count'] }}</strong></div>
+                <div><small>Evidências</small><strong>{{ $executionGuide['readiness']['evidence_count'] }}</strong></div>
             </div>
         </div>
 
-        <div class="execution-command-board" aria-label="Mesa simples da execucao">
+        <div class="execution-command-board" aria-label="Mesa simples da execução">
             <div class="execution-command-heading">
                 <div>
-                    <p class="page-kicker mb-1">Mesa simples da execucao</p>
+                    <p class="page-kicker mb-1">Mesa simples da execução</p>
                     <strong>O que o gestor precisa fazer nesta emenda</strong>
                 </div>
                 <small>Atalhos diretos para executar, pagar, comprovar e prestar contas.</small>
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <div class="execution-flow-lane" aria-label="Fluxo simplificado da execucao">
+        <div class="execution-flow-lane" aria-label="Fluxo simplificado da execução">
             @foreach ($executionGuide['flow'] as $step)
                 <a class="{{ $step['done'] ? 'is-done' : '' }}" href="{{ $step['href'] }}">
                     <span><i data-lucide="{{ $step['done'] ? 'circle-check' : $step['icon'] }}" aria-hidden="true"></i></span>
@@ -127,7 +127,7 @@
 
         <div class="execution-guide-grid">
             <div>
-                <h3>Resumo automatico</h3>
+                <h3>Resumo automático</h3>
                 <dl>
                     @foreach ($executionGuide['summary'] as $item)
                         <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
@@ -147,13 +147,13 @@
                 <div class="execution-guide-actions">
                     <a href="#stages"><i data-lucide="clipboard-check" aria-hidden="true"></i>Etapas</a>
                     <a href="#commitments"><i data-lucide="briefcase-business" aria-hidden="true"></i>Empenhos</a>
-                    <a href="#evidence"><i data-lucide="file-check-2" aria-hidden="true"></i>Evidencias</a>
-                    <a href="{{ route('emendas.accountability', $amendment) }}"><i data-lucide="archive" aria-hidden="true"></i>Prestacao</a>
+                    <a href="#evidence"><i data-lucide="file-check-2" aria-hidden="true"></i>Evidências</a>
+                    <a href="{{ route('emendas.accountability', $amendment) }}"><i data-lucide="archive" aria-hidden="true"></i>Prestação</a>
                 </div>
             </div>
         </div>
 
-        <div class="execution-release-panel {{ $executionGuide['release']['ready'] ? 'is-ready' : 'has-blockers' }}" id="liberacao-prestacao" aria-label="Liberacao para prestacao de contas">
+        <div class="execution-release-panel {{ $executionGuide['release']['ready'] ? 'is-ready' : 'has-blockers' }}" id="liberacao-prestacao" aria-label="Liberação para prestação de contas">
             <div class="execution-release-heading">
                 <span><i data-lucide="{{ $executionGuide['release']['ready'] ? 'badge-check' : 'shield-alert' }}" aria-hidden="true"></i></span>
                 <div>

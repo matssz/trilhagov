@@ -30,11 +30,11 @@ class AccountabilityDossierController extends Controller
         $pdf = $this->makePdf($amendment, $accountabilityService);
         $temporaryPath = tempnam(sys_get_temp_dir(), 'trilhagov-dossier-');
 
-        abort_if($temporaryPath === false, 500, 'Nao foi possivel preparar o pacote do dossie.');
+        abort_if($temporaryPath === false, 500, 'Não foi possível preparar o pacote do dossiê.');
 
         $zip = new ZipArchive;
         $opened = $zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote do dossie.');
+        abort_unless($opened === true, 500, 'Não foi possível criar o pacote do dossiê.');
 
         $readiness = $accountabilityService->readiness($amendment, $amendment->accountabilityProcess);
         $guide = $accountabilityService->guide($amendment, $amendment->accountabilityProcess, $readiness);
@@ -46,7 +46,7 @@ class AccountabilityDossierController extends Controller
 
         foreach ($amendment->documents as $document) {
             if (! Storage::disk('local')->exists($document->storage_path)) {
-                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao encontrado no armazenamento');
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo não encontrado no armazenamento');
 
                 continue;
             }
@@ -66,7 +66,7 @@ class AccountabilityDossierController extends Controller
             $contents = Storage::disk('local')->get($document->storage_path);
 
             if ($contents === null || $contents === false) {
-                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao pode ser lido');
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo não pode ser lido');
 
                 continue;
             }
@@ -129,15 +129,15 @@ class AccountabilityDossierController extends Controller
     private function manifest(ParliamentaryAmendment $amendment, array $includedDocuments, array $skippedDocuments): string
     {
         $lines = [
-            'TrilhaGov - Pacote de prestacao de contas',
+            'TrilhaGov - Pacote de prestação de contas',
             'Emenda: '.$amendment->reference,
-            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Município: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
             'Gerado em: '.now()->format('d/m/Y H:i:s'),
             'Documentos catalogados: '.$amendment->documents->count(),
-            'Documentos incluidos no pacote: '.count($includedDocuments),
-            'Documentos nao incluidos: '.count($skippedDocuments),
+            'Documentos incluídos no pacote: '.count($includedDocuments),
+            'Documentos não incluídos: '.count($skippedDocuments),
             '',
-            'Arquivos incluidos:',
+            'Arquivos incluídos:',
             ...($includedDocuments === [] ? ['- nenhum anexo incluido'] : array_map(fn (string $line) => '- '.$line, $includedDocuments)),
         ];
 
@@ -145,7 +145,7 @@ class AccountabilityDossierController extends Controller
             $lines = [
                 ...$lines,
                 '',
-                'Atencao: documentos catalogados que nao entraram no pacote:',
+                'Atenção: documentos catalogados que não entraram no pacote:',
                 ...array_map(fn (string $line) => '- '.$line, $skippedDocuments),
             ];
         }
@@ -170,17 +170,17 @@ class AccountabilityDossierController extends Controller
         $receipt = $guide['finalReceipt'];
         $timeline = $guide['finalTimeline'];
         $lines = [
-            'TrilhaGov - Recibo da prestacao de contas',
+            'TrilhaGov - Recibo da prestação de contas',
             'Emenda: '.$amendment->reference,
             'Objeto: '.$amendment->object,
-            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Município: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
             'Selo: '.$receipt['seal'],
-            'Situacao: '.$receipt['status'],
+            'Situação: '.$receipt['status'],
             'Protocolo: '.$receipt['protocol'],
             'Envio: '.$receipt['submitted_at'],
             'Prazo: '.$receipt['deadline'],
-            'Responsavel: '.$receipt['responsible'],
-            'Prontidao: '.$receipt['readiness'],
+            'Responsável: '.$receipt['responsible'],
+            'Prontidão: '.$receipt['readiness'],
             '',
             'Linha do tempo final:',
         ];

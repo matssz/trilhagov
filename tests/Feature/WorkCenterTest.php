@@ -282,7 +282,7 @@ class WorkCenterTest extends TestCase
             ->assertSee('Minhas ações')
             ->assertSee('Comando do gestor')
             ->assertSee('O que decidir primeiro hoje')
-            ->assertSee('Fechar execucao e contas')
+            ->assertSee('Fechar execução e contas')
             ->assertSee('queue=execution', false)
             ->assertSee('Concluir plano da emenda')
             ->assertDontSee('Anexar parecer jurídico');

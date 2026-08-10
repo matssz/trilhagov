@@ -41,14 +41,14 @@
 
     <x-validation-summary />
 
-    <section class="accountability-guide mb-4" id="assistente-prestacao" aria-label="Prestacao de contas simplificada">
+    <section class="accountability-guide mb-4" id="assistente-prestacao" aria-label="Prestação de contas simplificada">
         <div class="accountability-guide-header">
             <div>
-                <p class="page-kicker mb-1">Prestacao simplificada</p>
+                <p class="page-kicker mb-1">Prestação simplificada</p>
                 <h2 class="h5 mb-1">Fechamento municipal guiado</h2>
-                <p>O sistema confere execucao, pagamentos, saldo, evidencias e checklist para preparar o dossie de envio.</p>
+                <p>O sistema confere execução, pagamentos, saldo, evidências e checklist para preparar o dossiê de envio.</p>
             </div>
-            <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="route" aria-hidden="true"></i>Ver execucao</a>
+            <a class="btn btn-outline-primary" href="{{ route('emendas.execution', $amendment) }}"><i data-lucide="route" aria-hidden="true"></i>Ver execução</a>
         </div>
 
         <div class="accountability-guide-next">
@@ -86,10 +86,10 @@
             </div>
         </div>
 
-        <div class="accountability-command-board" aria-label="Mesa simples da prestacao">
+        <div class="accountability-command-board" aria-label="Mesa simples da prestação">
             <div class="accountability-command-heading">
                 <div>
-                    <p class="page-kicker mb-1">Mesa simples da prestacao</p>
+                    <p class="page-kicker mb-1">Mesa simples da prestação</p>
                     <strong>Prepare, confira, concilie e envie sem perder contexto</strong>
                 </div>
                 <small>Os atalhos abaixo seguem a ordem operacional do fechamento municipal.</small>
@@ -108,10 +108,10 @@
         </div>
 
         @if ($process)
-            <div class="accountability-action-strip" aria-label="Acoes recomendadas para finalizar a prestacao">
+            <div class="accountability-action-strip" aria-label="Ações recomendadas para finalizar a prestação">
                 <div class="accountability-action-strip-heading">
-                    <p class="page-kicker mb-1">Acoes para finalizar</p>
-                    <strong>Resolva o proximo bloqueio sem sair do fluxo</strong>
+                    <p class="page-kicker mb-1">Ações para finalizar</p>
+                    <strong>Resolva o próximo bloqueio sem sair do fluxo</strong>
                 </div>
                 <div class="accountability-action-list">
                     @foreach ($accountabilityGuide['actions'] as $action)
@@ -137,7 +137,7 @@
             </div>
         @endif
 
-        <div class="accountability-flow-lane" aria-label="Fluxo de fechamento da prestacao de contas">
+        <div class="accountability-flow-lane" aria-label="Fluxo de fechamento da prestação de contas">
             @foreach ($accountabilityGuide['flow'] as $flowStep)
                 <a class="{{ $flowStep['done'] ? 'is-done' : '' }}" href="{{ $flowStep['href'] }}">
                     <span><i data-lucide="{{ $flowStep['done'] ? 'check' : 'arrow-right' }}" aria-hidden="true"></i></span>
@@ -169,7 +169,7 @@
             <div class="accountability-start-icon"><i data-lucide="clipboard-list" aria-hidden="true"></i></div>
             <div>
                 <h2 class="h5">Iniciar prestação de contas</h2>
-                <p class="text-secondary mb-3">Use o assistente para abrir o processo, montar o checklist e conferir automaticamente execucao, financeiro e evidencias.</p>
+                <p class="text-secondary mb-3">Use o assistente para abrir o processo, montar o checklist e conferir automaticamente execução, financeiro e evidências.</p>
                 <dl class="data-list mb-0">
                     <dt>Prazo cadastrado</dt><dd>{{ $amendment->accountability_deadline?->format('d/m/Y') ?? 'Não definido' }}</dd>
                     <dt>Responsável inicial</dt><dd>{{ $amendment->responsibleUser?->name ?? 'Não definido' }}</dd>
@@ -187,7 +187,7 @@
                     <form method="POST" action="{{ route('emendas.accountability.store', $amendment) }}">
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $processCreateToken }}">
-                        <button class="btn btn-outline-primary" type="submit"><i data-lucide="plus" aria-hidden="true"></i>So iniciar checklist</button>
+                        <button class="btn btn-outline-primary" type="submit"><i data-lucide="plus" aria-hidden="true"></i>Só iniciar checklist</button>
                     </form>
                 </div>
             @endif
@@ -239,8 +239,8 @@
                 <span><i data-lucide="{{ $readiness['ready'] ? 'send' : 'lock-keyhole' }}" aria-hidden="true"></i></span>
                 <div>
                     <p class="page-kicker mb-1">Envio ao controle</p>
-                    <h2 class="h5 mb-1">{{ $readiness['ready'] ? 'Prestacao pronta para protocolo' : 'Envio bloqueado por pendencias' }}</h2>
-                    <p>{{ $readiness['ready'] ? 'Informe o protocolo recebido e o TrilhaGov marca a prestacao como enviada, mantendo o dossie disponivel para auditoria.' : 'Finalize checklist, conciliacao, evidencias e diligencias antes de registrar o protocolo.' }}</p>
+                    <h2 class="h5 mb-1">{{ $readiness['ready'] ? 'Prestação pronta para protocolo' : 'Envio bloqueado por pendências' }}</h2>
+                    <p>{{ $readiness['ready'] ? 'Informe o protocolo recebido e o TrilhaGov marca a prestação como enviada, mantendo o dossiê disponível para auditoria.' : 'Finalize checklist, conciliação, evidências e diligências antes de registrar o protocolo.' }}</p>
                 </div>
             </div>
             @if ($canEdit && $readiness['ready'])
@@ -258,7 +258,7 @@
                         @error('protocol_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="span-2">
-                        <label class="form-label" for="quick_submission_notes">Observacao do envio</label>
+                        <label class="form-label" for="quick_submission_notes">Observação do envio</label>
                         <input class="form-control" id="quick_submission_notes" name="submission_notes" value="{{ old('submission_notes', $process->submission_notes) }}" maxlength="3000">
                     </div>
                     <button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Registrar envio</button>
@@ -266,7 +266,7 @@
             @elseif (! $canEdit)
                 <span class="btn btn-outline-secondary disabled" aria-disabled="true">Somente consulta</span>
             @else
-                <a class="btn btn-outline-primary" href="#requirements"><i data-lucide="list-checks" aria-hidden="true"></i>Ver pendencias</a>
+                <a class="btn btn-outline-primary" href="#requirements"><i data-lucide="list-checks" aria-hidden="true"></i>Ver pendências</a>
             @endif
         </section>
 
@@ -434,7 +434,7 @@
             </div>
             <div class="accountability-final-actions">
                 @if ($accountabilityGuide['finalPackage']['ready'])
-                    <a class="btn btn-primary" href="#envio-prestacao"><i data-lucide="send" aria-hidden="true"></i>Protocolar prestacao</a>
+                    <a class="btn btn-primary" href="#envio-prestacao"><i data-lucide="send" aria-hidden="true"></i>Protocolar prestação</a>
                     <a class="btn btn-outline-primary" href="#dossie-prestacao"><i data-lucide="package-check" aria-hidden="true"></i>Baixar pacote final</a>
                 @else
                     <a class="btn btn-outline-primary" href="{{ $accountabilityGuide['next']['href'] }}"><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i>{{ $accountabilityGuide['next']['label'] }}</a>
@@ -445,21 +445,21 @@
         <section class="accountability-final-showcase mb-4" id="apresentacao-final">
             <div class="accountability-final-showcase-header">
                 <div>
-                    <p class="page-kicker mb-1">Prestacao final para apresentacao</p>
+                    <p class="page-kicker mb-1">Prestação final para apresentação</p>
                     <h2 class="h5 mb-1">Recibo, linha do tempo e pacote de auditoria</h2>
-                    <p>Use esta area para conferir o que sera apresentado ao controle interno, Camara ou auditoria externa.</p>
+                    <p>Use esta área para conferir o que será apresentado ao controle interno, Câmara ou auditoria externa.</p>
                 </div>
                 <span class="accountability-final-seal">{{ $accountabilityGuide['finalReceipt']['seal'] }}</span>
             </div>
-            <div class="accountability-receipt-grid" aria-label="Recibo de protocolo da prestacao">
+            <div class="accountability-receipt-grid" aria-label="Recibo de protocolo da prestação">
                 <article><small>Protocolo</small><strong>{{ $accountabilityGuide['finalReceipt']['protocol'] }}</strong></article>
-                <article><small>Situacao</small><strong>{{ $accountabilityGuide['finalReceipt']['status'] }}</strong></article>
+                <article><small>Situação</small><strong>{{ $accountabilityGuide['finalReceipt']['status'] }}</strong></article>
                 <article><small>Envio</small><strong>{{ $accountabilityGuide['finalReceipt']['submitted_at'] }}</strong></article>
-                <article><small>Responsavel</small><strong>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</strong></article>
+                <article><small>Responsável</small><strong>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</strong></article>
                 <article><small>Prazo</small><strong>{{ $accountabilityGuide['finalReceipt']['deadline'] }}</strong></article>
-                <article><small>Prontidao</small><strong>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</strong></article>
+                <article><small>Prontidão</small><strong>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</strong></article>
             </div>
-            <div class="accountability-final-timeline" aria-label="Linha do tempo final da prestacao">
+            <div class="accountability-final-timeline" aria-label="Linha do tempo final da prestação">
                 @foreach ($accountabilityGuide['finalTimeline'] as $timelineItem)
                     <article class="{{ $timelineItem['done'] ? 'is-done' : 'is-pending' }}">
                         <span><i data-lucide="{{ $timelineItem['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i></span>
@@ -484,22 +484,22 @@
         <section class="accountability-archive-panel mb-4 {{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'is-archived' : '' }}" id="arquivamento-final">
             <span><i data-lucide="{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'archive-check' : 'archive' }}" aria-hidden="true"></i></span>
             <div>
-                <p class="page-kicker mb-1">Conclusao operacional</p>
-                <h2 class="h5 mb-1">{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Prestacao arquivada e concluida' : 'Aprovar e arquivar prestacao final' }}</h2>
-                <p>{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Esta emenda ja esta com status definitivo, data de conclusao e pacote preservado para consulta.' : 'Depois do protocolo e da aprovacao final, marque o processo como concluido para fechar a emenda e preservar o dossie.' }}</p>
+                <p class="page-kicker mb-1">Conclusão operacional</p>
+                <h2 class="h5 mb-1">{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Prestação arquivada e concluída' : 'Aprovar e arquivar prestação final' }}</h2>
+                <p>{{ $process->status === App\Models\AccountabilityProcess::STATUS_APPROVED ? 'Esta emenda já está com status definitivo, data de conclusão e pacote preservado para consulta.' : 'Depois do protocolo e da aprovação final, marque o processo como concluído para fechar a emenda e preservar o dossiê.' }}</p>
             </div>
             @if ($process->status === App\Models\AccountabilityProcess::STATUS_APPROVED)
-                <strong>{{ $process->approved_at?->format('d/m/Y') ?? 'Concluida' }}</strong>
+                <strong>{{ $process->approved_at?->format('d/m/Y') ?? 'Concluída' }}</strong>
             @elseif ($canEdit && $readiness['ready'] && $process->submitted_at && $process->protocol_number)
                 <form method="POST" action="{{ route('emendas.accountability.archive', $amendment) }}" data-prevent-double-submit>
                     @csrf
                     <input name="_submission_token" type="hidden" value="{{ $processArchiveToken }}">
-                    <label class="form-label" for="archive_approved_at">Data da aprovacao final</label>
+                    <label class="form-label" for="archive_approved_at">Data da aprovação final</label>
                     <input class="form-control @error('approved_at') is-invalid @enderror" id="archive_approved_at" name="approved_at" type="date" value="{{ old('approved_at', today()->toDateString()) }}" required>
                     @error('approved_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    <label class="form-label" for="archive_notes">Observacao final</label>
+                    <label class="form-label" for="archive_notes">Observação final</label>
                     <input class="form-control" id="archive_notes" name="submission_notes" value="{{ old('submission_notes') }}" maxlength="3000" placeholder="Ex: aprovada pelo controle interno">
-                    <button class="btn btn-primary" type="submit"><i data-lucide="archive-check" aria-hidden="true"></i>Arquivar prestacao</button>
+                    <button class="btn btn-primary" type="submit"><i data-lucide="archive-check" aria-hidden="true"></i>Arquivar prestação</button>
                 </form>
             @else
                 <a class="btn btn-outline-primary" href="{{ $readiness['ready'] ? '#envio-prestacao' : $accountabilityGuide['next']['href'] }}">

@@ -30,16 +30,16 @@ class MunicipalWorkPlanService
                 'object_description' => $object,
                 'public_need' => $notes !== ''
                     ? $notes
-                    : 'Necessidade publica vinculada a emenda '.$amendment->reference.' indicada para atendimento municipal.',
+                    : 'Necessidade pública vinculada à emenda '.$amendment->reference.' indicada para atendimento municipal.',
                 'physical_target' => 'Executar o objeto indicado: '.$object,
                 'finalistic_target' => $health
-                    ? 'Ampliar ou qualificar o atendimento publico de saude vinculado ao objeto indicado.'
-                    : 'Entregar beneficio direto a populacao municipal conforme o objeto aprovado.',
-                'budget_program' => $health ? 'Programa municipal de saude' : 'Programa municipal a confirmar',
-                'budget_action' => $health ? 'Acao de atencao e servicos publicos de saude' : 'Acao orcamentaria a confirmar',
-                'application_plan' => 'Aplicacao integral dos recursos no objeto aprovado pela Camara e recebido pelo Executivo.',
-                'cost_memory' => 'Valor base recebido da emenda: R$ '.number_format($amount, 2, ',', '.').'. Detalhar composicao final antes da analise tecnica.',
-                'maintenance_plan' => 'A unidade executora municipal ficara responsavel pela operacao, guarda, manutencao e continuidade da entrega.',
+                    ? 'Ampliar ou qualificar o atendimento público de saúde vinculado ao objeto indicado.'
+                    : 'Entregar benefício direto à população municipal conforme o objeto aprovado.',
+                'budget_program' => $health ? 'Programa municipal de saúde' : 'Programa municipal a confirmar',
+                'budget_action' => $health ? 'Ação de atenção e serviços públicos de saúde' : 'Ação orçamentária a confirmar',
+                'application_plan' => 'Aplicação integral dos recursos no objeto aprovado pela Câmara e recebido pelo Executivo.',
+                'cost_memory' => 'Valor base recebido da emenda: R$ '.number_format($amount, 2, ',', '.').'. Detalhar composição final antes da análise técnica.',
+                'maintenance_plan' => 'A unidade executora municipal ficará responsável pela operação, guarda, manutenção e continuidade da entrega.',
                 'health_related' => $health,
                 'health_reserve_verified' => $health,
                 'includes_engineering' => false,
@@ -50,7 +50,7 @@ class MunicipalWorkPlanService
                 'planned_end_at' => $end->toDateString(),
             ],
             'stage' => [
-                'title' => 'Execucao integral da emenda',
+                'title' => 'Execução integral da emenda',
                 'physical_delivery' => $object,
                 'planned_amount' => $amount,
                 'planned_start_at' => $start->toDateString(),
@@ -60,7 +60,7 @@ class MunicipalWorkPlanService
             'items' => [
                 ['label' => 'Executor sugerido', 'value' => $department],
                 ['label' => 'Valor planejado', 'value' => 'R$ '.number_format($amount, 2, ',', '.')],
-                ['label' => 'Saude', 'value' => $health ? 'Reserva ja marcada' : 'Nao classificada como saude'],
+                ['label' => 'Saúde', 'value' => $health ? 'Reserva já marcada' : 'Não classificada como saúde'],
                 ['label' => 'Cronograma', 'value' => $start->format('d/m/Y').' a '.$end->format('d/m/Y')],
             ],
         ];
@@ -88,13 +88,13 @@ class MunicipalWorkPlanService
                 'next' => [
                     'icon' => 'clipboard-list',
                     'title' => 'Iniciar Plano de Trabalho guiado',
-                    'description' => 'O sistema monta beneficiario, objeto, valor, saude e cronograma inicial a partir da proposta.',
+                    'description' => 'O sistema monta beneficiário, objeto, valor, saúde e cronograma inicial a partir da proposta.',
                     'href' => '#iniciar-plano',
                     'label' => 'Iniciar plano guiado',
                 ],
                 'steps' => $this->guideSteps(false, false, false, false, false),
                 'documents' => $this->requiredDocuments($amendment, null),
-                'risks' => ['O Executivo ainda nao iniciou o Plano de Trabalho desta emenda.'],
+                'risks' => ['O Executivo ainda não iniciou o Plano de Trabalho desta emenda.'],
                 'responsibles' => $this->responsibles($amendment, 'Gestor municipal'),
             ];
         }
@@ -116,34 +116,34 @@ class MunicipalWorkPlanService
         $next = [
             'icon' => 'list-checks',
             'title' => 'Completar dados pendentes',
-            'description' => 'Revise os campos destacados, confirme documentos minimos e salve o plano antes do envio.',
+            'description' => 'Revise os campos destacados, confirme documentos mínimos e salve o plano antes do envio.',
             'href' => '#dados-plano',
-            'label' => 'Revisar pendencias',
+            'label' => 'Revisar pendências',
         ];
 
         if ($ready && $plan->isEditable()) {
             $next = [
                 'icon' => 'send',
-                'title' => 'Enviar para analise tecnica',
-                'description' => 'O plano esta pronto para parecer de admissibilidade e sera bloqueado durante a avaliacao.',
+                'title' => 'Enviar para análise técnica',
+                'description' => 'O plano está pronto para parecer de admissibilidade e será bloqueado durante a avaliação.',
                 'href' => '#enviar-analise',
-                'label' => 'Enviar para analise',
+                'label' => 'Enviar para análise',
             ];
         } elseif ($plan->status === MunicipalWorkPlan::STATUS_UNDER_REVIEW) {
             $next = [
                 'icon' => 'badge-check',
                 'title' => 'Emitir parecer de admissibilidade',
-                'description' => 'O plano esta sob responsabilidade do gestor para aprovar, devolver ou rejeitar formalmente.',
+                'description' => 'O plano está sob responsabilidade do gestor para aprovar, devolver ou rejeitar formalmente.',
                 'href' => '#parecer',
                 'label' => 'Ver parecer',
             ];
         } elseif ($plan->status === MunicipalWorkPlan::STATUS_APPROVED) {
             $next = [
                 'icon' => 'route',
-                'title' => 'Avancar para execucao',
-                'description' => 'Com o plano aprovado, o proximo controle e acompanhar entregas, pagamentos e documentos.',
+                'title' => 'Avançar para execução',
+                'description' => 'Com o plano aprovado, o próximo controle é acompanhar entregas, pagamentos e documentos.',
                 'href' => route('emendas.execution', $amendment),
-                'label' => 'Abrir execucao',
+                'label' => 'Abrir execução',
             ];
         }
 
@@ -225,10 +225,10 @@ class MunicipalWorkPlanService
     private function guideSteps(bool $started, bool $core, bool $schedule, bool $technical, bool $submitted): array
     {
         return [
-            ['label' => 'Plano iniciado', 'description' => 'Dados basicos criados pelo Executivo.', 'done' => $started],
-            ['label' => 'Objeto e metas', 'description' => 'Beneficiario, necessidade e resultado esperado.', 'done' => $core],
+            ['label' => 'Plano iniciado', 'description' => 'Dados básicos criados pelo Executivo.', 'done' => $started],
+            ['label' => 'Objeto e metas', 'description' => 'Beneficiário, necessidade e resultado esperado.', 'done' => $core],
             ['label' => 'Cronograma e valor', 'description' => 'Etapas batem com o valor reservado.', 'done' => $schedule],
-            ['label' => 'Conferencia tecnica', 'description' => 'Saude, PCA, engenharia e licencas tratados.', 'done' => $technical],
+            ['label' => 'Conferência técnica', 'description' => 'Saúde, PCA, engenharia e licenças tratados.', 'done' => $technical],
             ['label' => 'Envio formal', 'description' => 'Plano enviado para parecer municipal.', 'done' => $submitted],
         ];
     }
@@ -238,17 +238,17 @@ class MunicipalWorkPlanService
     {
         $documents = [
             'Plano de Trabalho revisado pelo Executivo',
-            'Memoria de calculo ou pesquisa de precos',
-            'Cronograma fisico-financeiro',
-            'Identificacao do beneficiario ou orgao executor',
+            'Memória de cálculo ou pesquisa de preços',
+            'Cronograma físico-financeiro',
+            'Identificação do beneficiário ou órgão executor',
         ];
 
         if (($plan?->health_related ?? false) || $amendment->indicated_for_health) {
-            $documents[] = 'Comprovacao da reserva e enquadramento em saude';
+            $documents[] = 'Comprovação da reserva e enquadramento em saúde';
         }
 
         if ($plan?->includes_engineering) {
-            $documents[] = 'Projeto, orcamento, ART/RRT e licencas aplicaveis';
+            $documents[] = 'Projeto, orçamento, ART/RRT e licenças aplicáveis';
         }
 
         return $documents;
@@ -260,22 +260,22 @@ class MunicipalWorkPlanService
         $risks = [];
 
         if (($readiness['difference'] ?? 0) != 0) {
-            $risks[] = 'O total das etapas ainda nao fecha com o valor da emenda.';
+            $risks[] = 'O total das etapas ainda não fecha com o valor da emenda.';
         }
         if ($plan->pca_status === 'update_requested') {
-            $risks[] = 'O objeto precisa ser encaminhado para atualizacao do PCA pelo Executivo.';
+            $risks[] = 'O objeto precisa ser encaminhado para atualização do PCA pelo Executivo.';
         }
         if ($plan->health_related && ! $plan->health_reserve_verified) {
-            $risks[] = 'A emenda marcada como saude ainda nao teve reserva confirmada.';
+            $risks[] = 'A emenda marcada como saúde ainda não teve reserva confirmada.';
         }
         if ($plan->includes_engineering && $plan->engineering_project_status === 'pending') {
-            $risks[] = 'Ha obra ou engenharia com projeto pendente antes da execucao.';
+            $risks[] = 'Há obra ou engenharia com projeto pendente antes da execução.';
         }
         if (Str::length(trim((string) $amendment->object)) < 35) {
-            $risks[] = 'O objeto original e curto; detalhe bem a entrega para evitar devolucao.';
+            $risks[] = 'O objeto original é curto; detalhe bem a entrega para evitar devolução.';
         }
 
-        return $risks ?: ['Sem risco critico identificado pelo preenchimento atual.'];
+        return $risks ?: ['Sem risco crítico identificado pelo preenchimento atual.'];
     }
 
     /** @return array<int, array{label: string, value: string}> */
@@ -283,8 +283,8 @@ class MunicipalWorkPlanService
     {
         return [
             ['label' => 'Unidade executora', 'value' => $amendment->responsible_department ?: 'A confirmar pelo gestor'],
-            ['label' => 'Responsavel operacional', 'value' => $amendment->responsibleUser?->name ?: 'Nao definido'],
-            ['label' => 'Proxima acao', 'value' => $nextOwner],
+            ['label' => 'Responsável operacional', 'value' => $amendment->responsibleUser?->name ?: 'Não definido'],
+            ['label' => 'Próxima ação', 'value' => $nextOwner],
         ];
     }
 

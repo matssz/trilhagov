@@ -102,7 +102,7 @@
                         @endforeach
                     </div>
                     <div class="rules-module-actions">
-                        <p>Audesp/TCESP segue automatico para municipios paulistas. A reserva de saude continua calculada no fluxo, mesmo com a tela tecnica desligada.</p>
+                        <p>Audesp/TCESP segue automático para municípios paulistas. A reserva de saúde continua calculada no fluxo, mesmo com a tela técnica desligada.</p>
                         <button class="btn btn-primary" type="submit"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>Salvar modulos</button>
                     </div>
                 </form>

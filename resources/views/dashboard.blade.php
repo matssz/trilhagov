@@ -161,8 +161,8 @@
         <div class="executive-cycle-heading">
             <div>
                 <p class="panel-kicker">Ciclo executivo municipal</p>
-                <h2>Da indicacao a prestacao de contas</h2>
-                <p>Visao rapida para gestor, Executivo e prefeito acompanharem o que precisa andar agora.</p>
+                <h2>Da indicação à prestação de contas</h2>
+                <p>Visão rápida para gestor, Executivo e prefeito acompanharem o que precisa andar agora.</p>
             </div>
             <a class="btn btn-outline-primary" href="{{ $executiveCycle['focus']['route'] }}">
                 <i data-lucide="{{ $executiveCycle['focus']['icon'] }}" aria-hidden="true"></i>{{ $executiveCycle['focus']['action'] }}
@@ -199,9 +199,9 @@
 
         <div class="executive-cycle-next">
             <div>
-                <p class="panel-kicker">Proximas acoes</p>
-                <h3>Acoes que encurtam o caminho do recurso</h3>
-                <p>{{ $executiveCycle['reserved_count'] }} proposta(s) ja possuem reserva orcamentaria registrada.</p>
+                <p class="panel-kicker">Próximas ações</p>
+                <h3>Ações que encurtam o caminho do recurso</h3>
+                <p>{{ $executiveCycle['reserved_count'] }} proposta(s) já possuem reserva orçamentária registrada.</p>
             </div>
             <div class="executive-cycle-next-list">
                 @forelse ($executiveCycle['next_items'] as $item)
@@ -212,7 +212,7 @@
                         <em>R$ {{ number_format($item['value'], 2, ',', '.') }}</em>
                     </a>
                 @empty
-                    <div class="empty-state compact"><i data-lucide="circle-check-big" aria-hidden="true"></i><h3>Nenhuma acao executiva pendente</h3><p>Quando houver proposta recebida, execucao ou prestacao aberta, ela aparecera aqui.</p></div>
+                    <div class="empty-state compact"><i data-lucide="circle-check-big" aria-hidden="true"></i><h3>Nenhuma ação executiva pendente</h3><p>Quando houver proposta recebida, execução ou prestação aberta, ela aparecerá aqui.</p></div>
                 @endforelse
             </div>
         </div>

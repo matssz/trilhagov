@@ -47,24 +47,24 @@
         @endforeach
     </ol>
 
-    <section class="homologation-decision mb-4" aria-label="Decisao operacional do lote">
+    <section class="homologation-decision mb-4" aria-label="Decisão operacional do lote">
         <div>
-            <small>Decisao da competencia</small>
-            <strong>{{ $batch->status === \App\Models\AudespHomologationBatch::STATUS_READY ? 'Pode registrar transmissao externa' : ($rejected ? 'Corrigir e reenviar com contador' : 'Ainda requer conferencia') }}</strong>
+            <small>Decisão da competência</small>
+            <strong>{{ $batch->status === \App\Models\AudespHomologationBatch::STATUS_READY ? 'Pode registrar transmissão externa' : ($rejected ? 'Corrigir e reenviar com contador' : 'Ainda requer conferência') }}</strong>
             <p>
                 @if ($batch->status === \App\Models\AudespHomologationBatch::STATUS_READY)
                     Todos os itens do XML coincidem com o TrilhaGov. Transmita no Coletor Audesp e anexe o protocolo.
                 @elseif ($rejected)
                     A tentativa rejeitada fica preservada. Corrija a origem do erro e crie novo lote vinculado.
                 @else
-                    Resolva divergencias ou vinculos ausentes antes de qualquer remessa oficial.
+                    Resolva divergências ou vínculos ausentes antes de qualquer remessa oficial.
                 @endif
             </p>
         </div>
         <div>
             <span><b>{{ $batch->matched_count }}</b><small>coincidente(s)</small></span>
             <span class="{{ $batch->divergent_count ? 'has-risk' : '' }}"><b>{{ $batch->divergent_count }}</b><small>divergente(s)</small></span>
-            <span class="{{ $batch->unmatched_count ? 'has-risk' : '' }}"><b>{{ $batch->unmatched_count }}</b><small>sem vinculo</small></span>
+            <span class="{{ $batch->unmatched_count ? 'has-risk' : '' }}"><b>{{ $batch->unmatched_count }}</b><small>sem vínculo</small></span>
         </div>
     </section>
 

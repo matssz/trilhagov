@@ -40,7 +40,7 @@ class SpreadsheetImportTest extends TestCase
         $simplified->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8')
             ->assertDownload('modelo-municipal-simplificado.csv');
-        $this->assertStringContainsString('Secretaria responsavel', (string) $simplified->getContent());
+        $this->assertStringContainsString('Secretaria responsável', (string) $simplified->getContent());
         $this->assertStringNotContainsString('Codigo Transferegov', (string) $simplified->getContent());
     }
 

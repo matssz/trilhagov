@@ -21,22 +21,22 @@
         <p>Registros existentes são sinalizados e nunca sobrescritos.</p>
     </section>
 
-    <section class="import-model-grid" aria-label="Modelos de importacao">
+    <section class="import-model-grid" aria-label="Modelos de importação">
         <article>
             <span><i data-lucide="zap" aria-hidden="true"></i></span>
             <div>
-                <small>Comece rapido</small>
+                <small>Comece rápido</small>
                 <strong>Modelo municipal simplificado</strong>
-                <p>Use quando a Camara ou o gestor so tem autor, objeto, secretaria, valor e data. O TrilhaGov completa esfera municipal, execucao direta, prazos e indicio de saude.</p>
+                <p>Use quando a Câmara ou o gestor só tem autor, objeto, secretaria, valor e data. O TrilhaGov completa esfera municipal, execução direta, prazos e indício de saúde.</p>
             </div>
             <a href="{{ route('spreadsheet-imports.template.simplified') }}">Baixar</a>
         </article>
         <article>
             <span><i data-lucide="settings-2" aria-hidden="true"></i></span>
             <div>
-                <small>Migracao tecnica</small>
+                <small>Migração técnica</small>
                 <strong>Modelo completo</strong>
-                <p>Use quando o municipio ja possui processo, rastreabilidade, codigos contabeis, prazos e situacao de execucao para cada emenda.</p>
+                <p>Use quando o município já possui processo, rastreabilidade, códigos contábeis, prazos e situação de execução para cada emenda.</p>
             </div>
             <a href="{{ route('spreadsheet-imports.template') }}">Baixar</a>
         </article>

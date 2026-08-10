@@ -20,16 +20,16 @@ class SecurityPrivacyTest extends TestCase
             ->get(route('security-privacy.index'))
             ->assertOk()
             ->assertSee('LGPD e defesa')
-            ->assertSee('IDs no inspecionar nao concedem permissao')
+            ->assertSee('IDs no inspecionar não concedem permissão')
             ->assertSee('Banco protegido pelo backend')
-            ->assertSee('Inventario LGPD')
-            ->assertSee('Dados tratados pelo municipio')
+            ->assertSee('Inventário LGPD')
+            ->assertSee('Dados tratados pelo município')
             ->assertSee('Bases de tratamento')
             ->assertSee('Matriz de risco')
-            ->assertSee('Retencao e descarte')
+            ->assertSee('Retenção e descarte')
             ->assertSee('Resposta a incidente')
             ->assertSee('Roteiro para vazamento')
-            ->assertSee('Protecao extra para a sua conta de gestor')
+            ->assertSee('Proteção extra para a sua conta de gestor')
             ->assertSee('Ativar MFA');
     }
 

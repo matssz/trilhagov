@@ -75,9 +75,9 @@
                 <span>pronto</span>
             </div>
             <div>
-                <p class="page-kicker mb-1">Dossie anual consolidado</p>
+                <p class="page-kicker mb-1">Dossiê anual consolidado</p>
                 <h2>{{ $snapshot['readiness']['label'] ?? 'Revisao pendente' }}</h2>
-                <p>Conferencia de normas, relatorios mensais, Audesp/Siafic, transparencia, prestacao de contas e documentos oficiais antes do encaminhamento institucional.</p>
+                <p>Conferência de normas, relatórios mensais, Audesp/Siafic, transparência, prestação de contas e documentos oficiais antes do encaminhamento institucional.</p>
             </div>
             <div class="annual-readiness-validations">
                 @foreach (($snapshot['readiness']['external_validation'] ?? []) as $owner => $instruction)
@@ -122,7 +122,7 @@
                             <small>{{ $check['detail'] }}</small>
                             <em>{{ $check['action'] }}</em>
                         </div>
-                        <a class="icon-button" href="{{ $check['href'] }}" title="Abrir acao" aria-label="Abrir {{ $check['label'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i></a>
+                        <a class="icon-button" href="{{ $check['href'] }}" title="Abrir ação" aria-label="Abrir {{ $check['label'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i></a>
                     </article>
                 @endforeach
             </div>

@@ -103,7 +103,7 @@ class MunicipalInstitutionController extends Controller
         $municipality = $currentMunicipality->get($request);
         $institution = $municipality->institutions()->findOrFail($institution);
         if (! $formSubmission->has($request, "municipal-institution-update-{$institution->id}")) {
-            return back()->with('warning', 'Esta alteracao ja foi processada.');
+            return back()->with('warning', 'Esta alteração já foi processada.');
         }
         $validated = $this->validateInstitution($request, $municipality->id, $institution->id);
         $formSubmission->consume($request, "municipal-institution-update-{$institution->id}");

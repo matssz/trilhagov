@@ -8,7 +8,7 @@
             <div>
                 <span class="section-kicker">Defesa municipal</span>
                 <h1>LGPD e defesa contra acesso indevido</h1>
-                <p class="text-muted mb-0">Diagnostico pratico para proteger dados, reduzir exposicao e evitar que IDs visiveis virem acesso real.</p>
+                <p class="text-muted mb-0">Diagnóstico prático para proteger dados, reduzir exposição e evitar que IDs visíveis virem acesso real.</p>
             </div>
         </div>
 
@@ -18,10 +18,10 @@
                     <i data-lucide="database-lock" aria-hidden="true"></i>
                     Supabase/Postgres via backend
                 </span>
-                <h2>IDs no inspecionar nao concedem permissao</h2>
+                <h2>IDs no inspecionar não concedem permissão</h2>
                 <p>
-                    O usuario pode ver referencias, links e IDs renderizados na pagina, mas cada acao sensivel continua passando por login,
-                    municipio ativo, papel permitido e validacao no servidor Laravel.
+                    O usuário pode ver referências, links e IDs renderizados na página, mas cada ação sensível continua passando por login,
+                    município ativo, papel permitido e validação no servidor Laravel.
                 </p>
             </div>
             <div class="privacy-score">
@@ -33,12 +33,12 @@
         <article class="privacy-mfa-card mt-3">
             <div>
                 <span class="privacy-pill"><i data-lucide="shield-check" aria-hidden="true"></i>Segundo fator</span>
-                <h2>Protecao extra para a sua conta de gestor</h2>
+                <h2>Proteção extra para a sua conta de gestor</h2>
                 <p>
                     @if (! $mfaDeliveryReady)
-                        Configure um envio de e-mail real antes de ativar MFA em producao. Assim o gestor nao fica sem receber o codigo de acesso.
+                        Configure um envio de e-mail real antes de ativar MFA em produção. Assim o gestor não fica sem receber o código de acesso.
                     @else
-                        {{ $currentUserMfaEnabled ? 'Seu login ja exige uma verificacao adicional depois da senha.' : 'Ative a verificacao em duas etapas para reduzir risco caso a senha seja exposta.' }}
+                        {{ $currentUserMfaEnabled ? 'Seu login já exige uma verificação adicional depois da senha.' : 'Ative a verificação em duas etapas para reduzir risco caso a senha seja exposta.' }}
                     @endif
                 </p>
             </div>
@@ -73,8 +73,8 @@
             <div class="col-12 col-xl-8">
                 <article class="privacy-panel">
                     <div class="privacy-panel-heading">
-                        <span>Inventario LGPD</span>
-                        <strong>Dados tratados pelo municipio</strong>
+                        <span>Inventário LGPD</span>
+                        <strong>Dados tratados pelo município</strong>
                     </div>
                     <div class="privacy-inventory">
                         @foreach ($dataInventory as $item)
@@ -112,24 +112,24 @@
             <div class="col-12 col-lg-7">
                 <article class="privacy-panel">
                     <div class="privacy-panel-heading">
-                        <span>Mapa de exposicao</span>
+                        <span>Mapa de exposição</span>
                         <strong>{{ $municipality->name }} / {{ $municipality->state }}</strong>
                     </div>
                     <div class="privacy-map">
                         <div>
-                            <span>Publico</span>
-                            <strong>{{ $municipality->transparency_enabled ? 'Transparencia ativa' : 'Transparencia desligada' }}</strong>
-                            <small>Slug publico controlado pelo gestor.</small>
+                            <span>Público</span>
+                            <strong>{{ $municipality->transparency_enabled ? 'Transparência ativa' : 'Transparência desligada' }}</strong>
+                            <small>Slug público controlado pelo gestor.</small>
                         </div>
                         <div>
                             <span>Autenticado</span>
-                            <strong>Sessao municipal</strong>
+                            <strong>Sessão municipal</strong>
                             <small>Sem cache de telas internas no navegador.</small>
                         </div>
                         <div>
                             <span>Operacional</span>
-                            <strong>Papel e permissao</strong>
-                            <small>Gestor, editor, vereador, revisao ou consulta.</small>
+                            <strong>Papel e permissão</strong>
+                            <small>Gestor, editor, vereador, revisão ou consulta.</small>
                         </div>
                     </div>
                 </article>
@@ -138,7 +138,7 @@
                 <article class="privacy-panel">
                     <div class="privacy-panel-heading">
                         <span>Acessos</span>
-                        <strong>Usuarios e convites</strong>
+                    <strong>Usuários e convites</strong>
                     </div>
                     <div class="privacy-stats">
                         @foreach (App\Models\User::municipalityRoles() as $role => $label)
@@ -181,8 +181,8 @@
             <div class="col-12 col-xl-5">
                 <article class="privacy-panel">
                     <div class="privacy-panel-heading">
-                        <span>Retencao e descarte</span>
-                        <strong>Regras praticas</strong>
+                        <span>Retenção e descarte</span>
+                        <strong>Regras práticas</strong>
                     </div>
                     <div class="privacy-retention">
                         @foreach ($retentionPlan as $rule)
@@ -199,7 +199,7 @@
         <article class="privacy-panel mt-3">
             <div class="privacy-panel-heading">
                 <span>Resposta a incidente</span>
-                <strong>Roteiro para vazamento, acesso indevido ou erro de permissao</strong>
+                <strong>Roteiro para vazamento, acesso indevido ou erro de permissão</strong>
             </div>
             <div class="privacy-playbook">
                 @foreach ($incidentPlaybook as $step)
@@ -217,8 +217,8 @@
             <div>
                 <h2>Regra de defesa do TrilhaGov</h2>
                 <p>
-                    ID exibido na interface e segredo sao coisas diferentes. O sistema pode mostrar um identificador operacional, mas nao pode confiar nele.
-                    A defesa correta e sempre validar no backend se o registro pertence ao municipio ativo e se o usuario tem papel para aquela acao.
+                    ID exibido na interface e segredo são coisas diferentes. O sistema pode mostrar um identificador operacional, mas não pode confiar nele.
+                    A defesa correta é sempre validar no backend se o registro pertence ao município ativo e se o usuário tem papel para aquela ação.
                 </p>
             </div>
         </article>

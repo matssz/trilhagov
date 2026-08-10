@@ -367,7 +367,7 @@ class MunicipalRegulatoryProfileController extends Controller
 
             return [
                 'blockers' => ['Revise os dados desta configuracao antes de ativa-la.'],
-                'warnings' => ['Alguns dados antigos nao puderam ser avaliados automaticamente.'],
+                'warnings' => ['Alguns dados antigos não puderam ser avaliados automaticamente.'],
                 'checks' => [],
                 'score' => 0,
                 'ceiling' => null,

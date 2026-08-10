@@ -40,11 +40,11 @@ class TcespDossierController extends Controller
         $pdf = $this->makePdf($amendment, $framework);
         $temporaryPath = tempnam(sys_get_temp_dir(), 'trilhagov-tcesp-');
 
-        abort_if($temporaryPath === false, 500, 'Nao foi possivel preparar o pacote TCESP.');
+        abort_if($temporaryPath === false, 500, 'Não foi possível preparar o pacote TCESP.');
 
         $zip = new ZipArchive;
         $opened = $zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        abort_unless($opened === true, 500, 'Nao foi possivel criar o pacote TCESP.');
+        abort_unless($opened === true, 500, 'Não foi possível criar o pacote TCESP.');
 
         $zip->addFromString('dossie/'.$this->baseFilename($amendment).'.pdf', $pdf->output());
         $includedDocuments = [];
@@ -52,7 +52,7 @@ class TcespDossierController extends Controller
 
         foreach ($amendment->documents as $document) {
             if (! Storage::disk('local')->exists($document->storage_path)) {
-                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao encontrado no armazenamento');
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo não encontrado no armazenamento');
 
                 continue;
             }
@@ -72,7 +72,7 @@ class TcespDossierController extends Controller
             $contents = Storage::disk('local')->get($document->storage_path);
 
             if ($contents === null || $contents === false) {
-                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo nao pode ser lido');
+                $skippedDocuments[] = $this->manifestDocumentLine($document, 'arquivo não pode ser lido');
 
                 continue;
             }
@@ -149,22 +149,22 @@ class TcespDossierController extends Controller
         $lines = [
             'TrilhaGov - Pacote TCESP',
             'Emenda: '.$amendment->reference,
-            'Municipio: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
+            'Município: '.$amendment->municipality->name.'/'.$amendment->municipality->state,
             'Gerado em: '.now()->format('d/m/Y H:i:s'),
             'Matriz: '.TcespComplianceFramework::VERSION,
             'Documentos catalogados: '.$amendment->documents->count(),
-            'Documentos incluidos no pacote: '.count($includedDocuments),
-            'Documentos nao incluidos: '.count($skippedDocuments),
+            'Documentos incluídos no pacote: '.count($includedDocuments),
+            'Documentos não incluídos: '.count($skippedDocuments),
             '',
-            'Arquivos incluidos:',
-            ...($includedDocuments === [] ? ['- nenhum anexo incluido'] : array_map(fn (string $line) => '- '.$line, $includedDocuments)),
+            'Arquivos incluídos:',
+            ...($includedDocuments === [] ? ['- nenhum anexo incluído'] : array_map(fn (string $line) => '- '.$line, $includedDocuments)),
         ];
 
         if ($skippedDocuments !== []) {
             $lines = [
                 ...$lines,
                 '',
-                'Atencao: documentos catalogados que nao entraram no pacote:',
+                'Atenção: documentos catalogados que não entraram no pacote:',
                 ...array_map(fn (string $line) => '- '.$line, $skippedDocuments),
             ];
         }

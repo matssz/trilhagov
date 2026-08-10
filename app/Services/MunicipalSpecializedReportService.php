@@ -301,7 +301,7 @@ class MunicipalSpecializedReportService
                 'key' => 'transparency',
                 'label' => 'Transparencia publica',
                 'status' => $municipality->transparency_enabled ? 'ok' : 'attention',
-                'detail' => $municipality->transparency_enabled ? 'Portal publico habilitado.' : 'Portal publico ainda nao habilitado.',
+                'detail' => $municipality->transparency_enabled ? 'Portal público habilitado.' : 'Portal público ainda não habilitado.',
                 'action' => 'Conferir configuracao de transparencia.',
                 'href' => route('emendas.index'),
             ],
@@ -317,7 +317,7 @@ class MunicipalSpecializedReportService
                 'key' => 'accountability',
                 'label' => 'Prestacoes de contas',
                 'status' => $coverage['accountability_with_pending_issues'] > 0 || ($coverage['accountability_processes'] < $rows->count() && $rows->isNotEmpty()) ? 'attention' : 'ok',
-                'detail' => $coverage['accountability_processes'].' processo(s), '.$coverage['accountability_approved'].' aprovado(s), '.$coverage['accountability_with_pending_issues'].' com pendencia.',
+                'detail' => $coverage['accountability_processes'].' processo(s), '.$coverage['accountability_approved'].' aprovado(s), '.$coverage['accountability_with_pending_issues'].' com pendência.',
                 'action' => 'Finalizar prestacoes pendentes.',
                 'href' => route('work-center.index', ['queue' => 'execution']),
             ],
@@ -325,7 +325,7 @@ class MunicipalSpecializedReportService
                 'key' => 'control',
                 'label' => 'Controle interno e TCESP',
                 'status' => collect($base['control_matrix'])->contains(fn (array $item) => $item['status'] !== 'controlled') ? 'attention' : 'ok',
-                'detail' => collect($base['control_matrix'])->where('status', 'controlled')->count().' de '.count($base['control_matrix']).' controle(s) sem pendencia.',
+                'detail' => collect($base['control_matrix'])->where('status', 'controlled')->count().' de '.count($base['control_matrix']).' controle(s) sem pendência.',
                 'action' => 'Resolver matriz de aderencia TCESP.',
                 'href' => route('municipal-tcesp-adherence.index'),
             ],
@@ -343,13 +343,13 @@ class MunicipalSpecializedReportService
         return [
             'score' => $score,
             'status' => $score >= 85 ? 'ready' : ($score >= 60 ? 'attention' : 'critical'),
-            'label' => $score >= 85 ? 'Pronto para revisao final' : ($score >= 60 ? 'Requer validacao antes do envio' : 'Nao encaminhar sem saneamento'),
+            'label' => $score >= 85 ? 'Pronto para revisão final' : ($score >= 60 ? 'Requer validação antes do envio' : 'Não encaminhar sem saneamento'),
             'checks' => $checks->values()->all(),
             'external_validation' => [
                 'Contabilidade/Siafic' => 'Conferir balancete, XML mensal, codigo de aplicacao e retorno do fornecedor.',
                 'Controle Interno' => 'Revisar matriz TCESP, documentos essenciais, transparencia e achados.',
-                'Camara Municipal' => 'Confirmar protocolos, impedimentos, remanejamentos e ciencia dos autores.',
-                'Audesp/TCESP' => 'Guardar recibos, rejeicoes, reenvios e justificativas no dossie municipal.',
+                'Câmara Municipal' => 'Confirmar protocolos, impedimentos, remanejamentos e ciência dos autores.',
+                'Audesp/TCESP' => 'Guardar recibos, rejeições, reenvios e justificativas no dossiê municipal.',
             ],
         ];
     }

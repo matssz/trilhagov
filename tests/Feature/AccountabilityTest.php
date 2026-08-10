@@ -65,30 +65,30 @@ class AccountabilityTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Prestacao simplificada')
+            ->assertSee('Prestação simplificada')
             ->assertSee('Pre-conferir checklist')
             ->assertSee('Fechamento municipal guiado')
-            ->assertSee('Fechamento, checklist e dossie em uma trilha')
-            ->assertSee('Mesa simples da prestacao')
+            ->assertSee('Fechamento, checklist e dossiê em uma trilha')
+            ->assertSee('Mesa simples da prestação')
             ->assertSee('Prepare, confira, concilie e envie sem perder contexto')
             ->assertSee('Preparar processo')
             ->assertSee('Conferir checklist')
             ->assertSee('Conciliar saldo')
-            ->assertSee('Enviar prestacao')
+            ->assertSee('Enviar prestação')
             ->assertSee('Abrir processo')
             ->assertSee('Pre-conferir')
             ->assertSee('Conciliar saldo')
-            ->assertSee('Resolver pendencias')
-            ->assertSee('Gerar dossie')
-            ->assertSee('Acoes para finalizar')
+            ->assertSee('Resolver pendências')
+            ->assertSee('Gerar dossiê')
+            ->assertSee('Ações para finalizar')
             ->assertSee('Pre-conferir agora')
-            ->assertSee('Prestacao final em preparacao')
+            ->assertSee('Prestação final em preparação')
             ->assertSee('Fechamento final')
             ->assertSee('Checklist resolvido')
-            ->assertSee('Prestacao final para apresentacao')
+            ->assertSee('Prestação final para apresentação')
             ->assertSee('Recibo, linha do tempo e pacote de auditoria')
-            ->assertSee('Recibo de protocolo da prestacao')
-            ->assertSee('Linha do tempo final da prestacao')
+            ->assertSee('Recibo de protocolo da prestação')
+            ->assertSee('Linha do tempo final da prestação')
             ->assertSee(route('emendas.accountability.quick-check', $amendment), false);
 
         $token = $this->sessionFor($municipality, "accountability-quick-check-{$process->id}");
@@ -106,16 +106,16 @@ class AccountabilityTest extends TestCase
 
         $this->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Enviar prestacao de contas')
+            ->assertSee('Enviar prestação de contas')
             ->assertSee('Informar protocolo')
             ->assertSee('Pronta para protocolo')
             ->assertSee('Registrar envio')
-            ->assertSee('Baixar dossie')
-            ->assertSee('Prestacao final pronta')
+            ->assertSee('Baixar dossiê')
+            ->assertSee('Prestação final pronta')
             ->assertSee('Pronta para apresentar')
             ->assertSee('PDF executivo')
             ->assertSee('Pacote de auditoria')
-            ->assertSee('Protocolar prestacao')
+            ->assertSee('Protocolar prestação')
             ->assertSee('Baixar pacote final')
             ->assertSee('#dossie-prestacao', false);
     }
@@ -135,7 +135,7 @@ class AccountabilityTest extends TestCase
             ->get(route('emendas.accountability', $amendment))
             ->assertOk()
             ->assertSee('Preparar automaticamente')
-            ->assertSee('So iniciar checklist');
+            ->assertSee('Só iniciar checklist');
 
         $token = $this->sessionFor($municipality, "accountability-prepare-{$amendment->id}");
         $this->post(route('emendas.accountability.prepare', $amendment), [
@@ -153,9 +153,9 @@ class AccountabilityTest extends TestCase
 
         $this->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Enviar prestacao de contas')
+            ->assertSee('Enviar prestação de contas')
             ->assertSee('Pronta para protocolo')
-            ->assertSee('Prestacao final pronta');
+            ->assertSee('Prestação final pronta');
     }
 
     public function test_viewer_can_consult_but_cannot_change_accountability(): void
@@ -284,7 +284,7 @@ class AccountabilityTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Prestacao pronta para protocolo')
+            ->assertSee('Prestação pronta para protocolo')
             ->assertSee('Registrar envio');
 
         $token = $this->sessionFor($municipality, "accountability-submit-{$process->id}");
@@ -324,8 +324,8 @@ class AccountabilityTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Aprovar e arquivar prestacao final')
-            ->assertSee('Arquivar prestacao');
+            ->assertSee('Aprovar e arquivar prestação final')
+            ->assertSee('Arquivar prestação');
 
         $this->post(route('emendas.accountability.archive', $amendment), [
             '_submission_token' => $this->sessionFor($municipality, "accountability-archive-{$process->id}"),
@@ -340,8 +340,8 @@ class AccountabilityTest extends TestCase
 
         $this->get(route('emendas.accountability', $amendment))
             ->assertOk()
-            ->assertSee('Prestacao arquivada e concluida')
-            ->assertSee('Prestacao aprovada e arquivavel');
+            ->assertSee('Prestação arquivada e concluída')
+            ->assertSee('Prestação aprovada e arquivável');
     }
 
     public function test_diligence_deadline_alert_reaches_assigned_person_and_response_is_audited(): void
@@ -405,7 +405,7 @@ class AccountabilityTest extends TestCase
         $this->assertTrue($zip->open($path) === true);
         $this->assertNotFalse($zip->locateName('MANIFESTO.txt'));
         $this->assertNotFalse($zip->locateName('RECIBO-PRESTACAO.txt'));
-        $this->assertStringContainsString('TrilhaGov - Recibo da prestacao de contas', (string) $zip->getFromName('RECIBO-PRESTACAO.txt'));
+        $this->assertStringContainsString('TrilhaGov - Recibo da prestação de contas', (string) $zip->getFromName('RECIBO-PRESTACAO.txt'));
         $this->assertStringContainsString('Linha do tempo final', (string) $zip->getFromName('RECIBO-PRESTACAO.txt'));
         $this->assertTrue(collect(range(0, $zip->numFiles - 1))->contains(
             fn (int $index) => str_contains((string) $zip->getNameIndex($index), $document->original_name),

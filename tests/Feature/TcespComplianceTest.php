@@ -63,16 +63,16 @@ class TcespComplianceTest extends TestCase
             ->get(route('emendas.compliance', $amendment))
             ->assertOk()
             ->assertSee('Saneamento guiado')
-            ->assertSee('Prontidao do pacote TCESP')
-            ->assertSee('Revisao recomendada')
+            ->assertSee('Prontidão do pacote TCESP')
+            ->assertSee('Revisão recomendada')
             ->assertSee('Essenciais abertos')
             ->assertSee('Resolver agora')
             ->assertSee('PDF executivo')
-            ->assertSee('Dossie para leitura')
+            ->assertSee('Dossiê para leitura')
             ->assertSee('Pacote com anexos')
             ->assertSee('ZIP com manifesto')
-            ->assertSee('Evidencias que costumam resolver este item')
-            ->assertSee('Lei Organica atualizada')
+            ->assertSee('Evidências que costumam resolver este item')
+            ->assertSee('Lei Orgânica atualizada')
             ->assertSee('essencial(is) em aberto');
     }
 
@@ -84,7 +84,7 @@ class TcespComplianceTest extends TestCase
             'framework_version' => TcespComplianceFramework::VERSION,
             'rule_code' => 'NORM-01',
             'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
-            'evidence_notes' => 'Lei Organica conferida no processo fisico.',
+            'evidence_notes' => 'Lei Orgânica conferida no processo físico.',
             'reviewed_by' => $user->id,
             'reviewed_at' => now(),
         ]);
@@ -93,9 +93,9 @@ class TcespComplianceTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.compliance', $amendment))
             ->assertOk()
-            ->assertSee('Revisao recomendada')
+            ->assertSee('Revisão recomendada')
             ->assertSee('registre ou vincule um documento de suporte.')
-            ->assertSee('So com justificativa');
+            ->assertSee('Só com justificativa');
     }
 
     public function test_package_readiness_warns_when_cataloged_file_is_missing_from_storage(): void
@@ -104,7 +104,7 @@ class TcespComplianceTest extends TestCase
         [$user, $municipality, $amendment] = $this->context();
         $documentType = $municipality->documentTypes()->create([
             'created_by' => $user->id,
-            'name' => 'Parecer tecnico',
+            'name' => 'Parecer técnico',
             'is_active' => true,
         ]);
         $amendment->documents()->create([
@@ -125,7 +125,7 @@ class TcespComplianceTest extends TestCase
             ->assertOk()
             ->assertSee('documento(s) catalogado(s) sem arquivo no armazenamento')
             ->assertSee('parecer-ausente.pdf')
-            ->assertSee('reenvie o arquivo ausente ou registre uma nova versao do documento.');
+            ->assertSee('reenvie o arquivo ausente ou registre uma nova versão do documento.');
     }
 
     public function test_package_readiness_is_clear_when_all_essential_items_are_documented_or_not_applicable(): void
@@ -169,8 +169,8 @@ class TcespComplianceTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.compliance', $amendment))
             ->assertOk()
-            ->assertSee('Pronto para conferencia')
-            ->assertSee('Pacote sem pendencia essencial aparente')
+            ->assertSee('Pronto para conferência')
+            ->assertSee('Pacote sem pendência essencial aparente')
             ->assertSee('Baixe o pacote TCESP');
     }
 
@@ -182,7 +182,7 @@ class TcespComplianceTest extends TestCase
             'framework_version' => TcespComplianceFramework::VERSION,
             'rule_code' => 'NORM-01',
             'status' => AmendmentComplianceReview::STATUS_COMPLIANT,
-            'evidence_notes' => 'Lei Organica e LDO conferidas.',
+            'evidence_notes' => 'Lei Orgânica e LDO conferidas.',
             'reviewed_by' => $user->id,
             'reviewed_at' => now(),
         ]);
@@ -202,7 +202,7 @@ class TcespComplianceTest extends TestCase
         [$user, $municipality, $amendment] = $this->context();
         $documentType = $municipality->documentTypes()->create([
             'created_by' => $user->id,
-            'name' => 'Parecer tecnico',
+            'name' => 'Parecer técnico',
             'is_active' => true,
         ]);
         Storage::disk('local')->put('documents/tcesp/parecer.pdf', 'conteudo do parecer');
@@ -231,9 +231,9 @@ class TcespComplianceTest extends TestCase
         $manifest = $zip->getFromName('MANIFESTO.txt');
         $this->assertIsString($manifest);
         $this->assertStringContainsString('Documentos catalogados: 1', $manifest);
-        $this->assertStringContainsString('Documentos incluidos no pacote: 1', $manifest);
-        $this->assertStringContainsString('Documentos nao incluidos: 0', $manifest);
-        $this->assertStringContainsString('parecer.pdf | tipo: Parecer tecnico | v1 | documentos/parecer-tecnico/', $manifest);
+        $this->assertStringContainsString('Documentos incluídos no pacote: 1', $manifest);
+        $this->assertStringContainsString('Documentos não incluídos: 0', $manifest);
+        $this->assertStringContainsString('parecer.pdf | tipo: Parecer técnico | v1 | documentos/parecer-tecnico/', $manifest);
         $zip->close();
     }
 
@@ -243,7 +243,7 @@ class TcespComplianceTest extends TestCase
         [$user, $municipality, $amendment] = $this->context();
         $documentType = $municipality->documentTypes()->create([
             'created_by' => $user->id,
-            'name' => 'Parecer tecnico',
+            'name' => 'Parecer técnico',
             'is_active' => true,
         ]);
         Storage::disk('local')->put('documents/tcesp/presente.pdf', 'conteudo presente');
@@ -274,10 +274,10 @@ class TcespComplianceTest extends TestCase
         $manifest = $zip->getFromName('MANIFESTO.txt');
         $this->assertIsString($manifest);
         $this->assertStringContainsString('Documentos catalogados: 2', $manifest);
-        $this->assertStringContainsString('Documentos incluidos no pacote: 1', $manifest);
-        $this->assertStringContainsString('Documentos nao incluidos: 1', $manifest);
-        $this->assertStringContainsString('Atencao: documentos catalogados que nao entraram no pacote:', $manifest);
-        $this->assertStringContainsString('ausente.pdf | tipo: Parecer tecnico | v2 | arquivo nao encontrado no armazenamento', $manifest);
+        $this->assertStringContainsString('Documentos incluídos no pacote: 1', $manifest);
+        $this->assertStringContainsString('Documentos não incluídos: 1', $manifest);
+        $this->assertStringContainsString('Atenção: documentos catalogados que não entraram no pacote:', $manifest);
+        $this->assertStringContainsString('ausente.pdf | tipo: Parecer técnico | v2 | arquivo não encontrado no armazenamento', $manifest);
         $zip->close();
     }
 

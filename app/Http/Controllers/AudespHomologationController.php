@@ -118,7 +118,7 @@ class AudespHomologationController extends Controller
                 (int) $validated['reference_month'],
             );
         $directory = "audesp-homologations/{$municipality->id}/sources";
-        $storagePath = Storage::putFileAs($directory, $file, Str::uuid().'.'.$extension);
+        $storagePath = Storage::disk('local')->putFileAs($directory, $file, Str::uuid().'.'.$extension);
         if (! $storagePath) {
             throw ValidationException::withMessages(['source_file' => 'Não foi possível armazenar o XML com segurança. Tente novamente.']);
         }
@@ -171,7 +171,7 @@ class AudespHomologationController extends Controller
                 return $batch;
             });
         } catch (Throwable $exception) {
-            Storage::delete($storagePath);
+            Storage::disk('local')->delete($storagePath);
             if ($exception instanceof QueryException && in_array((string) $exception->getCode(), ['23000', '23505'], true)) {
                 throw ValidationException::withMessages(['source_file' => 'Este arquivo já foi registrado para o município.']);
             }
@@ -238,10 +238,10 @@ class AudespHomologationController extends Controller
             return back()->with('warning', 'Esta conferência já foi executada.');
         }
         abort_unless($batch->isEditable(), 409);
-        abort_unless(Storage::exists($batch->source_storage_path), 404);
+        abort_unless(Storage::disk('local')->exists($batch->source_storage_path), 404);
 
         $inspection = $homologation->inspect(
-            (string) Storage::get($batch->source_storage_path),
+            (string) Storage::disk('local')->get($batch->source_storage_path),
             $municipality,
             $batch->fiscal_year,
             $batch->reference_month,
@@ -425,9 +425,9 @@ class AudespHomologationController extends Controller
         $municipality = $currentMunicipality->get($request);
         $this->ensureAudespScope($municipality);
         $batch = $this->batch($municipality->id, $batch);
-        abort_unless(Storage::exists($batch->source_storage_path), 404);
+        abort_unless(Storage::disk('local')->exists($batch->source_storage_path), 404);
 
-        return Storage::download($batch->source_storage_path, $batch->source_original_name, [
+        return Storage::disk('local')->download($batch->source_storage_path, $batch->source_original_name, [
             'Content-Type' => $batch->source_mime_type,
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -439,9 +439,9 @@ class AudespHomologationController extends Controller
         $this->ensureAudespScope($municipality);
         $batch = $this->batch($municipality->id, $batch);
         $event = $batch->events()->findOrFail($event);
-        abort_unless($event->evidence_storage_path && Storage::exists($event->evidence_storage_path), 404);
+        abort_unless($event->evidence_storage_path && Storage::disk('local')->exists($event->evidence_storage_path), 404);
 
-        return Storage::download($event->evidence_storage_path, $event->evidence_original_name, [
+        return Storage::disk('local')->download($event->evidence_storage_path, $event->evidence_original_name, [
             'Content-Type' => $event->evidence_mime_type,
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -457,11 +457,11 @@ class AudespHomologationController extends Controller
             fwrite($output, "\xEF\xBB\xBF");
             fputcsv($output, [
                 'Codigo de Aplicacao',
-                'Reserva orcamentaria',
+                'Reserva orçamentária',
                 'Empenhado',
                 'Liquidado',
                 'Pago',
-                'Saldo disponivel',
+                'Saldo disponível',
                 'Numero empenho',
             ], ';');
             fputcsv($output, [
@@ -557,7 +557,7 @@ class AudespHomologationController extends Controller
                 'label' => 'Cadastro Audesp das emendas',
                 'status' => $registrations > 0 ? 'ok' : 'pending',
                 'detail' => $registrations.' cadastro(s) preparado(s) no TrilhaGov.',
-                'action' => 'Prepare pelo menos uma emenda municipal com codigo de aplicacao antes do XML real.',
+                'action' => 'Prepare pelo menos uma emenda municipal com código de aplicação antes do XML real.',
             ],
             [
                 'label' => 'Movimento mensal real do Siafic',
@@ -566,18 +566,18 @@ class AudespHomologationController extends Controller
                 'action' => 'Importe o Detalhe do Movimento Mensal exportado pelo fornecedor do Siafic.',
             ],
             [
-                'label' => 'Rejeicoes tratadas',
+                'label' => 'Rejeições tratadas',
                 'status' => $rejectedBatches === 0 ? 'ok' : 'attention',
                 'detail' => $rejectedBatches.' lote(s) rejeitado(s) ainda preservado(s) para saneamento.',
                 'action' => 'Vincule reenvio ao lote rejeitado e guarde o retorno do Audesp.',
             ],
             [
-                'label' => 'Evidencia mais recente',
+                'label' => 'Evidência mais recente',
                 'status' => $latestRealBatch ? 'ok' : 'pending',
                 'detail' => $latestRealBatch
                     ? $latestRealBatch->documentTypeLabel().' em '.$latestRealBatch->created_at->format('d/m/Y H:i')
                     : 'Nenhum XML real foi registrado ainda.',
-                'action' => 'Registre arquivo, protocolo, recibo ou rejeicao antes de validar o procedimento.',
+                'action' => 'Registre arquivo, protocolo, recibo ou rejeição antes de validar o procedimento.',
             ],
         ]);
         $score = (int) round(($checks->where('status', 'ok')->count() / max(1, $checks->count())) * 100);
@@ -587,8 +587,8 @@ class AudespHomologationController extends Controller
             'score' => $score,
             'status' => $score >= 75 && $rejectedBatches === 0 ? 'ready' : ($score >= 50 ? 'attention' : 'pending'),
             'label' => $score >= 75 && $rejectedBatches === 0
-                ? 'Pronto para validacao assistida'
-                : ($score >= 50 ? 'Validacao em andamento' : 'Ainda falta arquivo real'),
+                ? 'Pronto para validação assistida'
+                : ($score >= 50 ? 'Validação em andamento' : 'Ainda falta arquivo real'),
             'checks' => $checks->values()->all(),
         ];
     }
@@ -614,7 +614,7 @@ class AudespHomologationController extends Controller
         }
 
         $extension = $file->extension() ?: strtolower($file->getClientOriginalExtension());
-        $path = Storage::putFileAs("audesp-homologations/{$municipalityId}/{$batchId}/evidence", $file, Str::uuid().'.'.$extension);
+        $path = Storage::disk('local')->putFileAs("audesp-homologations/{$municipalityId}/{$batchId}/evidence", $file, Str::uuid().'.'.$extension);
         if (! $path) {
             throw ValidationException::withMessages(['evidence' => 'Não foi possível armazenar a evidência. Tente novamente.']);
         }
@@ -632,7 +632,7 @@ class AudespHomologationController extends Controller
     private function deleteEvidence(array $evidence): void
     {
         if (isset($evidence['evidence_storage_path'])) {
-            Storage::delete($evidence['evidence_storage_path']);
+            Storage::disk('local')->delete($evidence['evidence_storage_path']);
         }
     }
 

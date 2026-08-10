@@ -110,13 +110,13 @@
         };
         $trackingSteps = [
             ['title' => 'Proposta salva', 'owner' => 'Vereador', 'description' => 'Pedido criado ou ajustado antes do envio.', 'date' => $proposal->created_at, 'href' => '#editor-proposta'],
-            ['title' => 'Conferencia da Camara', 'owner' => 'Camara', 'description' => 'Analise minima de objeto, valor, saude e beneficiario.', 'date' => $proposal->submitted_at, 'href' => '#conferencia-legislativa'],
-            ['title' => 'Protocolo ao Executivo', 'owner' => 'Camara', 'description' => 'Encaminhamento formal para a Prefeitura.', 'date' => $proposal->reviewed_at, 'href' => '#protocolo-executivo'],
+            ['title' => 'Conferência da Câmara', 'owner' => 'Câmara', 'description' => 'Análise mínima de objeto, valor, saúde e beneficiário.', 'date' => $proposal->submitted_at, 'href' => '#conferencia-legislativa'],
+            ['title' => 'Protocolo ao Executivo', 'owner' => 'Câmara', 'description' => 'Encaminhamento formal para a Prefeitura.', 'date' => $proposal->reviewed_at, 'href' => '#protocolo-executivo'],
             ['title' => 'Recebimento municipal', 'owner' => 'Executivo', 'description' => 'Abertura do processo administrativo.', 'date' => $proposal->sent_at, 'href' => '#recebimento-executivo'],
-            ['title' => 'Reserva orcamentaria', 'owner' => 'Executivo', 'description' => 'Confirmacao de dotacao para executar.', 'date' => $proposal->received_at, 'href' => '#reserva-orcamentaria'],
-            ['title' => 'Plano de trabalho', 'owner' => 'Executivo', 'description' => 'Planejamento tecnico e cronograma.', 'date' => $amendment?->municipalWorkPlan?->created_at, 'href' => '#acompanhamento-executivo'],
-            ['title' => 'Execucao', 'owner' => 'Prefeitura', 'description' => 'Entrega fisica e liquidacao acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
-            ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestacao de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
+            ['title' => 'Reserva orçamentária', 'owner' => 'Executivo', 'description' => 'Confirmação de dotação para executar.', 'date' => $proposal->received_at, 'href' => '#reserva-orcamentaria'],
+            ['title' => 'Plano de trabalho', 'owner' => 'Executivo', 'description' => 'Planejamento técnico e cronograma.', 'date' => $amendment?->municipalWorkPlan?->created_at, 'href' => '#acompanhamento-executivo'],
+            ['title' => 'Execução', 'owner' => 'Prefeitura', 'description' => 'Entrega física e liquidação acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
+            ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestação de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
         ];
         $stepSlaDays = [0 => 2, 1 => 3, 2 => 2, 3 => 2, 4 => 5, 5 => 5, 6 => 7, 7 => 7];
         $currentTrackingStep = $trackingSteps[$currentProcessIndex] ?? $trackingSteps[0];
@@ -166,7 +166,7 @@
             <span><i data-lucide="{{ $currentStepDelayed ? 'timer-reset' : 'map-pin-check' }}" aria-hidden="true"></i></span>
             <div>
                 <small>Leitura simples para o vereador</small>
-                <strong>Agora esta com: {{ $currentTrackingStep['owner'] }}</strong>
+                <strong>Agora está com: {{ $currentTrackingStep['owner'] }}</strong>
                 <p>{{ $currentTrackingStep['title'] }}. {{ $currentTrackingStep['description'] }} @if($currentStepDelayed) Esta etapa passou do prazo operacional recomendado. @endif</p>
             </div>
             <a class="btn btn-outline-primary" href="{{ $currentTrackingStep['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Ir para etapa</a>
@@ -175,8 +175,8 @@
             <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
             <div>
                 <small>Entenda o valor desta proposta</small>
-                <strong>R$ {{ number_format((float) $proposal->estimated_amount, 2, ',', '.') }} estao comprometidos nesta indicacao</strong>
-                <p>Esse valor saiu do saldo disponivel para impedir que sua carteira ultrapasse a cota. Ele ainda nao foi pago, transferido ou executado. A Prefeitura so usa esse recurso depois da analise, protocolo, recebimento e reserva orcamentaria.</p>
+                <strong>R$ {{ number_format((float) $proposal->estimated_amount, 2, ',', '.') }} estão comprometidos nesta indicação</strong>
+                <p>Esse valor saiu do saldo disponível para impedir que sua carteira ultrapasse a cota. Ele ainda não foi pago, transferido ou executado. A Prefeitura só usa esse recurso depois da análise, protocolo, recebimento e reserva orçamentária.</p>
             </div>
             <a class="btn btn-outline-primary" href="#acompanhamento-executivo"><i data-lucide="route" aria-hidden="true"></i>Ver caminho</a>
         </section>
@@ -187,8 +187,8 @@
             <span><i data-lucide="timer-reset" aria-hidden="true"></i></span>
             <div>
                 <small>Alerta interno de prazo</small>
-                <strong>{{ $currentTrackingStep['title'] }} parada ha {{ $currentStepAgeDays }} dia(s)</strong>
-                <p>Responsavel atual: {{ $currentTrackingStep['owner'] }}. O prazo operacional recomendado para esta etapa e de {{ $currentStepSlaDays }} dia(s).</p>
+                <strong>{{ $currentTrackingStep['title'] }} parada há {{ $currentStepAgeDays }} dia(s)</strong>
+                <p>Responsável atual: {{ $currentTrackingStep['owner'] }}. O prazo operacional recomendado para esta etapa é de {{ $currentStepSlaDays }} dia(s).</p>
             </div>
             <a class="btn btn-outline-primary" href="{{ $currentTrackingStep['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Ir para etapa</a>
         </section>
@@ -198,8 +198,8 @@
         <header>
             <div>
                 <span class="page-kicker">Esteira da proposta</span>
-                <h2>Onde esta e quem precisa agir</h2>
-                <p>O vereador acompanha em uma unica tela o caminho entre Camara, Executivo, reserva, execucao e pagamento.</p>
+                <h2>Onde está e quem precisa agir</h2>
+                <p>O vereador acompanha em uma única tela o caminho entre Câmara, Executivo, reserva, execução e pagamento.</p>
             </div>
             <a class="btn btn-outline-primary" href="{{ $nextAction['href'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $nextAction['label'] }}</a>
         </header>
@@ -211,8 +211,8 @@
                         : ($index < $currentProcessIndex ? 'complete' : ($index === $currentProcessIndex ? 'current' : 'pending'));
                     $date = $step['date'] ? \Illuminate\Support\Carbon::parse($step['date']) : null;
                     $stateLabel = match ($state) {
-                        'complete' => 'concluido',
-                        'current' => 'acao atual',
+                        'complete' => 'concluído',
+                        'current' => 'ação atual',
                         'blocked' => 'interrompido',
                         default => 'pendente',
                     };
@@ -223,7 +223,7 @@
                         <small>{{ $step['owner'] }} · {{ $stateLabel }}</small>
                         <strong>{{ $step['title'] }}</strong>
                         <p>{{ $step['description'] }}</p>
-                        <em>{{ $date ? $date->format('d/m/Y H:i') : ($state === 'current' ? 'Parado ha '.$proposal->updated_at->diffForHumans(null, true) : 'Aguardando etapa anterior') }}</em>
+                        <em>{{ $date ? $date->format('d/m/Y H:i') : ($state === 'current' ? 'Parado há '.$proposal->updated_at->diffForHumans(null, true) : 'Aguardando etapa anterior') }}</em>
                     </div>
                 </a>
             @endforeach
@@ -373,8 +373,8 @@
                         <div>
                             <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
                             <div>
-                                <strong>Recebimento automatico preparado</strong>
-                                <p>O TrilhaGov sugere processo, secretaria, classificacao e observacao inicial. Confirme para abrir a emenda executiva e gerar pendencias na Central de Trabalho.</p>
+                                <strong>Recebimento automático preparado</strong>
+                                <p>O TrilhaGov sugere processo, secretaria, classificação e observação inicial. Confirme para abrir a emenda executiva e gerar pendências na Central de Trabalho.</p>
                             </div>
                         </div>
                         <dl>

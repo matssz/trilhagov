@@ -72,11 +72,11 @@ class AmendmentExecutionTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.execution', $amendment))
             ->assertOk()
-            ->assertSee('Execucao simplificada')
+            ->assertSee('Execução simplificada')
             ->assertSee('Gerar etapas do plano')
             ->assertSee('Plano aprovado localizado')
-            ->assertSee('Entrega, dinheiro e evidencia em uma trilha')
-            ->assertSee('Mesa simples da execucao')
+            ->assertSee('Entrega, dinheiro e evidência em uma trilha')
+            ->assertSee('Mesa simples da execução')
             ->assertSee('O que o gestor precisa fazer nesta emenda')
             ->assertSee('Executar objeto')
             ->assertSee('Empenhar e pagar')
@@ -87,7 +87,7 @@ class AmendmentExecutionTest extends TestCase
             ->assertSee('Liquidar e pagar')
             ->assertSee('Comprovar entrega')
             ->assertSee('Prestar contas')
-            ->assertSee('Execucao a estruturar');
+            ->assertSee('Execução a estruturar');
 
         $token = $this->sessionFor($municipality, "execution-start-{$amendment->id}");
         $payload = ['_submission_token' => $token];
@@ -259,7 +259,7 @@ class AmendmentExecutionTest extends TestCase
             ->assertOk()
             ->assertSee('Termo de recebimento')
             ->assertSee('entrega.pdf')
-            ->assertSee('Evidencias');
+            ->assertSee('Evidências');
     }
 
     public function test_execution_release_panel_guides_before_accountability(): void
@@ -275,11 +275,11 @@ class AmendmentExecutionTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.execution', $amendment))
             ->assertOk()
-            ->assertSee('Ainda nao liberada para prestacao')
-            ->assertSee('Resolver proxima pendencia')
-            ->assertSee('Entrega concluida')
+            ->assertSee('Ainda não liberada para prestação')
+            ->assertSee('Resolver próxima pendência')
+            ->assertSee('Entrega concluída')
             ->assertSee('Financeiro conciliado')
-            ->assertSee('Evidencia anexada');
+            ->assertSee('Evidência anexada');
     }
 
     public function test_completed_execution_is_released_to_accountability(): void
@@ -345,10 +345,10 @@ class AmendmentExecutionTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.execution', $amendment))
             ->assertOk()
-            ->assertSee('Liberada para prestacao de contas')
-            ->assertSee('A emenda tem entrega fisica')
-            ->assertSee('Abrir prestacao')
-            ->assertSee('Pronta para prestacao');
+            ->assertSee('Liberada para prestação de contas')
+            ->assertSee('A emenda tem entrega física')
+            ->assertSee('Abrir prestação')
+            ->assertSee('Pronta para prestação');
     }
 
     public function test_execution_records_are_scoped_to_active_municipality_and_roles(): void

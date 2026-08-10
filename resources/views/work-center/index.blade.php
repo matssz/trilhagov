@@ -49,12 +49,12 @@
         <article><span class="metric-owner"><i data-lucide="user-round-check" aria-hidden="true"></i></span><div><small>Sem responsável</small><strong>{{ $metrics['unassigned'] }}</strong></div></article>
     </section>
 
-    <section class="work-decision-panel" aria-label="Decisoes prioritarias do gestor">
+    <section class="work-decision-panel" aria-label="Decisões prioritárias do gestor">
         <div class="work-decision-heading">
             <div>
                 <p class="panel-kicker">Comando do gestor</p>
                 <h2>O que decidir primeiro hoje</h2>
-                <span>Atalhos para as filas que seguram Camara, Executivo, saude, TCESP, execucao e prestacao de contas.</span>
+                <span>Atalhos para as filas que seguram Câmara, Executivo, saúde, TCESP, execução e prestação de contas.</span>
             </div>
             <a class="btn btn-outline-primary" href="{{ route('work-center.index', ['status' => 'active']) }}"><i data-lucide="list-checks" aria-hidden="true"></i>Ver fila completa</a>
         </div>

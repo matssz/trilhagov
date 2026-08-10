@@ -43,13 +43,13 @@
         <article class="is-success"><span><i data-lucide="badge-check" aria-hidden="true"></i></span><div><small>Armazenados</small><strong>{{ (int) ($counts[\App\Models\AudespHomologationBatch::STATUS_STORED] ?? 0) }}</strong></div></article>
     </div>
 
-    <section class="homologation-real-file mb-4" aria-label="Homologacao com arquivo real do Siafic">
+    <section class="homologation-real-file mb-4" aria-label="Homologação com arquivo real do Siafic">
         <header>
             <span><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
             <div>
                 <p class="page-kicker mb-1">Etapa TCESP 4</p>
-                <h2>Homologacao com arquivo real do Siafic</h2>
-                <p>Use este roteiro com contador e fornecedor antes de considerar a competencia pronta para remessa oficial.</p>
+                <h2>Homologação com arquivo real do Siafic</h2>
+                <p>Use este roteiro com contador e fornecedor antes de considerar a competência pronta para remessa oficial.</p>
             </div>
             <div class="homologation-real-actions">
                 <a class="btn btn-outline-secondary" href="{{ route('audesp-homologations.financial-template') }}"><i data-lucide="file-down" aria-hidden="true"></i>Modelo CSV financeiro</a>
@@ -58,19 +58,19 @@
         </header>
         <div>
             <article><strong>1</strong><span>Exportar arquivo real</span><small>XML Audesp oficial ou CSV financeiro operacional produzido pelo Siafic.</small></article>
-            <article><strong>2</strong><span>Conferir codigos</span><small>Codigo de aplicacao, fonte, conta, pre-empenho, empenho, liquidacao e pagamento.</small></article>
-            <article><strong>3</strong><span>Importar sem alterar</span><small>O TrilhaGov compara e preserva o hash; nenhuma informacao contabil e sobrescrita.</small></article>
-            <article><strong>4</strong><span>Registrar Coletor</span><small>A transmissao continua no ambiente oficial do Audesp, com protocolo e evidencia.</small></article>
-            <article><strong>5</strong><span>Guardar retorno</span><small>Recibo, rejeicao, reenvio e validacao ficam no dossie municipal.</small></article>
+            <article><strong>2</strong><span>Conferir códigos</span><small>Código de aplicação, fonte, conta, pré-empenho, empenho, liquidação e pagamento.</small></article>
+            <article><strong>3</strong><span>Importar sem alterar</span><small>O TrilhaGov compara e preserva o hash; nenhuma informação contábil é sobrescrita.</small></article>
+            <article><strong>4</strong><span>Registrar Coletor</span><small>A transmissão continua no ambiente oficial do Audesp, com protocolo e evidência.</small></article>
+            <article><strong>5</strong><span>Guardar retorno</span><small>Recibo, rejeição, reenvio e validação ficam no dossiê municipal.</small></article>
         </div>
     </section>
 
-    <section class="homologation-real-validation is-{{ $realValidationPlan['status'] }} mb-4" aria-label="Plano de validacao real">
+    <section class="homologation-real-validation is-{{ $realValidationPlan['status'] }} mb-4" aria-label="Plano de validação real">
         <header>
             <div>
-                <p class="page-kicker mb-1">Validacao real {{ $realValidationPlan['year'] }}</p>
+                <p class="page-kicker mb-1">Validação real {{ $realValidationPlan['year'] }}</p>
                 <h2>{{ $realValidationPlan['label'] }}</h2>
-                <p>Use este painel para chamar contador, fornecedor do Siafic e controle interno sem depender de memoria ou planilha paralela.</p>
+                <p>Use este painel para chamar contador, fornecedor do Siafic e controle interno sem depender de memória ou planilha paralela.</p>
             </div>
             <strong>{{ $realValidationPlan['score'] }}%</strong>
         </header>

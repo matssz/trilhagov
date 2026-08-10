@@ -162,13 +162,13 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Nova proposta')
             ->assertSee('Pronto para indicar')
             ->assertSee('Uso da cota')
-            ->assertSee('Reserva minima de saude')
+            ->assertSee('Reserva mínima de saúde')
             ->assertSee('Resumo automatico para o vereador')
             ->assertSee('Quanto ainda posso indicar')
-            ->assertSee('Reserva de saude')
-            ->assertSee('Proximo movimento')
-            ->assertSee('O valor nao some da cota')
-            ->assertSee('so vira execucao depois da conferencia da Camara')
+            ->assertSee('Reserva de saúde')
+            ->assertSee('Próximo movimento')
+            ->assertSee('O valor não some da cota')
+            ->assertSee('só vira execução depois da conferência da Câmara')
             ->assertSee('Indicado')
             ->assertSee('Reservado')
             ->assertSee('Vereador indica')
@@ -218,16 +218,16 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Sem saldo')
             ->assertSee('Saldo individual esgotado')
-            ->assertSee('Aguardando liberacao')
-            ->assertSee('Acoes principais do vereador')
+            ->assertSee('Aguardando liberação')
+            ->assertSee('Ações principais do vereador')
             ->assertSee('Indicar pedido')
             ->assertSee('Acompanhar resposta')
             ->assertSee('Entender saldo')
             ->assertSee('Valor indicado fica comprometido')
-            ->assertSee('O que voce faz')
+            ->assertSee('O que você faz')
             ->assertSee('Escolhe destino, valor e motivo')
             ->assertSee('O que o sistema faz')
-            ->assertSee('Voce acompanha tudo aqui');
+            ->assertSee('Você acompanha tudo aqui');
     }
 
     public function test_create_screen_projects_available_quota_and_recommends_health_automatically(): void
@@ -259,20 +259,20 @@ class LegislativeProposalTest extends TestCase
         $this->actingAs($councilor)->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('legislative.create', ['year' => 2027]))
             ->assertOk()
-            ->assertSee('Saldo que sobrara na cota')
-            ->assertSee('Assistente automatico de preenchimento')
-            ->assertSee('Informe so o essencial')
-            ->assertSee('Cota, quantidade e saude')
-            ->assertSee('Camara e Executivo')
-            ->assertSee('Modelos rapidos para vereador')
-            ->assertSee('Equipamento de saude')
+            ->assertSee('Saldo que sobrará na cota')
+            ->assertSee('Assistente automático de preenchimento')
+            ->assertSee('Informe só o essencial')
+            ->assertSee('Cota, quantidade e saúde')
+            ->assertSee('Câmara e Executivo')
+            ->assertSee('Modelos rápidos para vereador')
+            ->assertSee('Equipamento de saúde')
             ->assertSee('Escola municipal')
             ->assertSee('Obra no bairro')
             ->assertSee('data-template="health-equipment"', false)
             ->assertSee('Conferência automática antes da Câmara')
             ->assertSee('Cota e saldo')
             ->assertSee('Reserva mínima')
-            ->assertSee('O TrilhaGov usa RCL, cadeiras da Camara e percentual de saude da norma ativa.')
+            ->assertSee('O TrilhaGov usa RCL, cadeiras da Câmara e percentual de saúde da norma ativa.')
             ->assertSee('Salvar proposta')
             ->assertSee('data-legislative-readiness', false)
             ->assertSee('data-auto-health-source', false)
@@ -384,7 +384,7 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Recebimento pela Prefeitura')
             ->assertSee('Receber agora')
-            ->assertSee('Recebimento automatico preparado')
+            ->assertSee('Recebimento automático preparado')
             ->assertSee('Processo sugerido')
             ->assertSee('Secretaria sugerida')
             ->assertSee('Processo executivo');
@@ -492,14 +492,14 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Esteira da proposta')
             ->assertSee('Entenda o valor desta proposta')
             ->assertSee('Leitura simples para o vereador')
-            ->assertSee('Agora esta com:')
+            ->assertSee('Agora está com:')
             ->assertSee('Ir para etapa')
-            ->assertSee('estao comprometidos nesta indicacao')
-            ->assertSee('ainda nao foi pago, transferido ou executado')
-            ->assertSee('Onde esta e quem precisa agir')
-            ->assertSee('Conferencia da Camara')
+            ->assertSee('estão comprometidos nesta indicação')
+            ->assertSee('ainda não foi pago, transferido ou executado')
+            ->assertSee('Onde está e quem precisa agir')
+            ->assertSee('Conferência da Câmara')
             ->assertSee('Recebimento municipal')
-            ->assertSee('Reserva orcamentaria')
+            ->assertSee('Reserva orçamentária')
             ->assertDontSee('Abrir fluxo executivo');
     }
 
@@ -529,7 +529,7 @@ class LegislativeProposalTest extends TestCase
         $proposal->refresh();
         $this->assertSame(LegislativeProposal::STATUS_RECEIVED, $proposal->status);
         $this->assertSame($expectedProcess, $proposal->executive_process_number);
-        $this->assertStringContainsString('Recebimento automatico', $proposal->executive_notes);
+        $this->assertStringContainsString('Recebimento automático', $proposal->executive_notes);
         $this->assertNotNull($proposal->amendment);
         $this->assertSame($expectedProcess, $proposal->amendment->administrative_process);
         $this->assertDatabaseHas('municipal_work_items', [
@@ -545,7 +545,7 @@ class LegislativeProposalTest extends TestCase
         $this->assertSame(LegislativeProposal::STATUS_RESERVED, $proposal->status);
         $this->assertSame('RES-2027-'.Str::after($proposal->reference, 'LEG-2027-'), $proposal->budget_reservation_number);
         $this->assertEquals((float) $proposal->estimated_amount, (float) $proposal->budget_reserved_amount);
-        $this->assertStringContainsString('Reserva orcamentaria automatica', $proposal->executive_notes);
+        $this->assertStringContainsString('Reserva orçamentária automática', $proposal->executive_notes);
     }
 
     public function test_executive_sees_single_board_for_chamber_intake_and_councilor_keeps_simple_view(): void
@@ -586,13 +586,13 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Reservar orçamento')
             ->assertSee('Comando municipal')
             ->assertSee('O que o gestor precisa decidir agora')
-            ->assertSee('Receba propostas da Camara')
+            ->assertSee('Receba propostas da Câmara')
             ->assertSee('Executar foco')
-            ->assertSee('Camara envia')
+            ->assertSee('Câmara envia')
             ->assertSee('Executivo recebe')
-            ->assertSee('Reserva orcamentaria')
-            ->assertSee('Plano e execucao')
-            ->assertSee('Ir para conferencia')
+            ->assertSee('Reserva orçamentária')
+            ->assertSee('Plano e execução')
+            ->assertSee('Ir para conferência')
             ->assertSee('Receber agora')
             ->assertSee('Reservar agora')
             ->assertSee('Acompanhar')
@@ -623,7 +623,7 @@ class LegislativeProposalTest extends TestCase
         ]);
         $this->proposal($municipality, $profile, $councilor, [
             'status' => LegislativeProposal::STATUS_SUBMITTED,
-            'object' => 'Proposta aguardando conferencia da Camara Municipal.',
+            'object' => 'Proposta aguardando conferência da Câmara Municipal.',
         ]);
         $this->proposal($municipality, $profile, $councilor, [
             'status' => LegislativeProposal::STATUS_SENT,
@@ -638,20 +638,20 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Meu acompanhamento')
             ->assertSee('Precisa de voc')
-            ->assertSee('Depende de voce')
+            ->assertSee('Depende de você')
             ->assertSee('Saldo para novas propostas')
-            ->assertSee('Saude obrigatoria')
-            ->assertSee('Seu proximo passo')
+            ->assertSee('Saúde obrigatória')
+            ->assertSee('Seu próximo passo')
             ->assertSee('Valor ainda livre dentro da sua cota individual')
             ->assertSee('Visao simples do vereador')
             ->assertSee('Antes de cadastrar, confira estes pontos')
-            ->assertSee('Saldo disponivel')
+            ->assertSee('Saldo disponível')
             ->assertSee('Regra municipal ativa')
-            ->assertSee('Saude calculada')
+            ->assertSee('Saúde calculada')
             ->assertSee('Pode enviar')
-            ->assertSee('Com a Camara')
+            ->assertSee('Com a Câmara')
             ->assertSee('Com o Executivo')
-            ->assertSee('Proxima acao sugerida')
+            ->assertSee('Próxima ação sugerida')
             ->assertSee('Corrigir proposta')
             ->assertSee('#editor-proposta')
             ->assertSee('#acompanhamento-executivo')
@@ -687,25 +687,25 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
             ->assertSee('Foco recomendado agora')
-            ->assertSee('Acoes pendentes')
-            ->assertSee('Valor sob decisao')
-            ->assertSee('Em execucao aberta')
+            ->assertSee('Ações pendentes')
+            ->assertSee('Valor sob decisão')
+            ->assertSee('Em execução aberta')
             ->assertSee('Fora do prazo')
             ->assertSee('Comando municipal')
-            ->assertSee('Valor marcado como saude ainda sob decisao do Executivo')
+            ->assertSee('Valor marcado como saúde ainda sob decisão do Executivo')
             ->assertSee('Sistema sugere processo e secretaria')
-            ->assertSee('Central cria pendencias')
+            ->assertSee('Central cria pendências')
             ->assertSee('Fila rapida de atendimento')
             ->assertSee('Ordem sugerida pelo prazo')
-            ->assertSee('3 decisoes mais importantes')
-            ->assertSee('Atalhos para o gestor resolver o que destrava Camara, reserva e execucao')
+            ->assertSee('3 decisões mais importantes')
+            ->assertSee('Atalhos para o gestor resolver o que destrava Câmara, reserva e execução')
             ->assertSee('Receber como processo municipal')
-            ->assertSee('Confirmar reserva orcamentaria')
+            ->assertSee('Confirmar reserva orçamentária')
             ->assertSee('prioridade(s)')
             ->assertSee('fora do prazo')
-            ->assertSee('processo e pendencias serao sugeridos automaticamente')
+            ->assertSee('processo e pendências serão sugeridos automaticamente')
             ->assertSee('Confirmar')
-            ->assertSee('reserva integral e Plano de Trabalho serao acionados automaticamente')
+            ->assertSee('reserva integral e Plano de Trabalho serão acionados automaticamente')
             ->assertSee('Reservar')
             ->assertSee('Atenção imediata')
             ->assertSee('Abrir prioridade')
@@ -764,7 +764,7 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Vereador')
             ->assertSee('Secretaria')
-            ->assertSee('Somente saude')
+            ->assertSee('Somente saúde')
             ->assertSee('Limpar')
             ->assertSee('Aquisicao de equipamentos para UBS municipal')
             ->assertDontSee('Pavimentacao de via municipal');
@@ -791,8 +791,8 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.show', $proposal))
             ->assertOk()
             ->assertSee('Alerta interno de prazo')
-            ->assertSee('Recebimento municipal parada ha 4 dia(s)')
-            ->assertSee('Responsavel atual: Executivo')
+            ->assertSee('Recebimento municipal parada há 4 dia(s)')
+            ->assertSee('Responsável atual: Executivo')
             ->assertSee('Ir para etapa')
             ->assertSee('#recebimento-executivo');
     }

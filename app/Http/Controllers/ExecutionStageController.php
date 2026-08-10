@@ -22,7 +22,7 @@ class ExecutionStageController extends Controller
         $request->validate(['_submission_token' => ['required', 'string']]);
 
         if (! $formSubmission->consume($request, "execution-start-{$amendment->id}")) {
-            return back()->with('warning', 'A execucao desta emenda ja foi iniciada ou o pedido ja foi processado.');
+            return back()->with('warning', 'A execução desta emenda já foi iniciada ou o pedido já foi processado.');
         }
 
         $created = DB::transaction(function () use ($request, $amendment, $auditTrail, $simplifiedExecutionService): int {
@@ -41,7 +41,7 @@ class ExecutionStageController extends Controller
         $integrityAlertService->sync($municipality->fresh());
 
         if ($created === 0) {
-            return back()->with('warning', 'A execucao desta emenda ja possui etapas cadastradas.');
+            return back()->with('warning', 'A execução desta emenda já possui etapas cadastradas.');
         }
 
         return redirect()

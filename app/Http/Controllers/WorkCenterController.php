@@ -130,10 +130,10 @@ class WorkCenterController extends Controller
     {
         return collect([
             ['queue' => 'overdue', 'label' => 'Resolver atrasos', 'description' => 'Prazos vencidos que podem gerar apontamento.', 'icon' => 'triangle-alert', 'tone' => 'danger'],
-            ['queue' => 'unassigned', 'label' => 'Definir responsaveis', 'description' => 'Itens sem dono tendem a parar o fluxo.', 'icon' => 'user-round-plus', 'tone' => 'warning'],
-            ['queue' => 'chamber', 'label' => 'Tratar Camara', 'description' => 'Protocolos, comunicacoes e retornos legislativos.', 'icon' => 'landmark', 'tone' => 'primary'],
-            ['queue' => 'execution', 'label' => 'Fechar execucao e contas', 'description' => 'Empenhos, pagamentos e prestacoes pendentes.', 'icon' => 'chart-no-axes-combined', 'tone' => 'success'],
-            ['queue' => 'health_control', 'label' => 'Conferir saude e TCESP', 'description' => 'Reserva, ASPS, controle interno e matriz TCESP.', 'icon' => 'shield-check', 'tone' => 'primary'],
+            ['queue' => 'unassigned', 'label' => 'Definir responsáveis', 'description' => 'Itens sem dono tendem a parar o fluxo.', 'icon' => 'user-round-plus', 'tone' => 'warning'],
+            ['queue' => 'chamber', 'label' => 'Tratar Câmara', 'description' => 'Protocolos, comunicações e retornos legislativos.', 'icon' => 'landmark', 'tone' => 'primary'],
+            ['queue' => 'execution', 'label' => 'Fechar execução e contas', 'description' => 'Empenhos, pagamentos e prestações pendentes.', 'icon' => 'chart-no-axes-combined', 'tone' => 'success'],
+            ['queue' => 'health_control', 'label' => 'Conferir saúde e TCESP', 'description' => 'Reserva, ASPS, controle interno e matriz TCESP.', 'icon' => 'shield-check', 'tone' => 'primary'],
         ])->map(function (array $definition) use ($baseQuery, $userId): array {
             $query = clone $baseQuery;
             $this->applyQueueFilter($query, $definition['queue'], $userId);

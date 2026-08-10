@@ -95,11 +95,11 @@ class MunicipalSpecializedReportTest extends TestCase
         ]);
         $report = MunicipalSpecializedReport::firstOrFail();
         $this->assertArrayHasKey('readiness', $report->snapshot);
-        $this->assertSame('Nao encaminhar sem saneamento', $report->snapshot['readiness']['label']);
+        $this->assertSame('Não encaminhar sem saneamento', $report->snapshot['readiness']['label']);
         $this->assertSame(7, count($report->snapshot['readiness']['checks']));
         $this->get(route('specialized-reports.show', $report))
             ->assertOk()
-            ->assertSee('Dossie anual consolidado')
+            ->assertSee('Dossiê anual consolidado')
             ->assertSee('Checklist de encaminhamento')
             ->assertSee('Audesp/Siafic validado')
             ->assertSee('Contabilidade/Siafic');

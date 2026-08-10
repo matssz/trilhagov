@@ -33,30 +33,30 @@ class AmendmentSpreadsheetImportService
         'object' => 'Objeto',
         'expense_destination' => 'Destinacao (custeio ou investimento)',
         'responsible_department' => 'Secretaria responsavel',
-        'beneficiary_location' => 'Municipio ou localidade beneficiada',
+        'beneficiary_location' => 'Município ou localidade beneficiada',
         'transferegov_code' => 'Codigo Transferegov',
         'legal_instrument' => 'Instrumento juridico',
         'administrative_process' => 'Processo administrativo',
         'bank_tracking_type' => 'Rastreabilidade bancaria',
         'bank_account_number' => 'Numero da conta bancaria',
         'funding_source_code' => 'Fonte de Recursos',
-        'application_code_fixed' => 'Codigo de Aplicacao Fixo',
-        'application_code_variable' => 'Codigo de Aplicacao Variavel',
+        'application_code_fixed' => 'Código de Aplicação Fixo',
+        'application_code_variable' => 'Código de Aplicação Variável',
         'expected_amount' => 'Valor previsto',
         'received_amount' => 'Valor recebido',
-        'status' => 'Situacao',
+        'status' => 'Situação',
         'cancellation_reason' => 'Motivo do cancelamento',
         'cancelled_at' => 'Data do cancelamento',
-        'indicated_at' => 'Data da indicacao',
+        'indicated_at' => 'Data da indicação',
         'received_at' => 'Data do recebimento',
-        'communication_deadline' => 'Prazo de comunicacao',
-        'communication_completed_at' => 'Comunicacao concluida em',
-        'execution_deadline' => 'Prazo de execucao',
-        'application_deadline' => 'Prazo de aplicacao dos recursos',
-        'execution_completed_at' => 'Execucao concluida em',
-        'accountability_deadline' => 'Prazo de prestacao de contas',
-        'accountability_completed_at' => 'Prestacao de contas concluida em',
-        'notes' => 'Observacoes',
+        'communication_deadline' => 'Prazo de comunicação',
+        'communication_completed_at' => 'Comunicação concluída em',
+        'execution_deadline' => 'Prazo de execução',
+        'application_deadline' => 'Prazo de aplicação dos recursos',
+        'execution_completed_at' => 'Execução concluída em',
+        'accountability_deadline' => 'Prazo de prestação de contas',
+        'accountability_completed_at' => 'Prestação de contas concluída em',
+        'notes' => 'Observações',
     ];
 
     /** @var array<int, string> */
@@ -295,12 +295,12 @@ class AmendmentSpreadsheetImportService
         fwrite($stream, "\xEF\xBB\xBF");
         fputcsv($stream, array_values(self::TEMPLATE_HEADERS), ';');
         fputcsv($stream, [
-            'EM-2026-001', '2026', 'Municipal', 'Individual', 'Execucao direta pelo municipio',
-            'Vereadora Maria Silva', 'PSD', 'Reforma da unidade basica de saude', 'Investimento',
-            'Secretaria Municipal de Saude', 'Municipio de Exemplo', '', '', 'PROC-001/2026',
-            'Execucao direta com codigos', '', '08', '100.0000', '001', 'R$ 500.000,00', '',
+            'EM-2026-001', '2026', 'Municipal', 'Individual', 'Execução direta pelo município',
+            'Vereadora Maria Silva', 'PSD', 'Reforma da unidade básica de saúde', 'Investimento',
+            'Secretaria Municipal de Saúde', 'Município de Exemplo', '', '', 'PROC-001/2026',
+            'Execução direta com códigos', '', '08', '100.0000', '001', 'R$ 500.000,00', '',
             'Identificada', '', '', '15/03/2026', '', '30/04/2026', '', '31/12/2026', '31/12/2026', '',
-            '31/03/2027', '', 'Exemplo: substitua esta linha pelos dados do municipio.',
+            '31/03/2027', '', 'Exemplo: substitua esta linha pelos dados do município.',
         ], ';');
         rewind($stream);
         $contents = stream_get_contents($stream);
@@ -314,28 +314,28 @@ class AmendmentSpreadsheetImportService
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, "\xEF\xBB\xBF");
         fputcsv($stream, [
-            'Identificacao da emenda',
-            'Exercicio',
+            'Identificação da emenda',
+            'Exercício',
             'Autor',
             'Partido',
             'Objeto',
-            'Secretaria responsavel',
-            'Municipio ou localidade beneficiada',
+            'Secretaria responsável',
+            'Município ou localidade beneficiada',
             'Valor previsto',
-            'Data da indicacao',
-            'Observacoes',
+            'Data da indicação',
+            'Observações',
         ], ';');
         fputcsv($stream, [
             'CAM-2026-001',
             '2026',
             'Vereadora Ana Lima',
             'PSD',
-            'Aquisicao de equipamentos para UBS Central',
-            'Secretaria Municipal de Saude',
-            'Municipio de Exemplo',
+            'Aquisição de equipamentos para UBS Central',
+            'Secretaria Municipal de Saúde',
+            'Município de Exemplo',
             'R$ 80.000,00',
             '15/03/2026',
-            'Linha simplificada: o TrilhaGov completa esfera municipal, execucao direta, prazos e sinalizacao de saude.',
+            'Linha simplificada: o TrilhaGov completa esfera municipal, execução direta, prazos e sinalização de saúde.',
         ], ';');
         rewind($stream);
         $contents = stream_get_contents($stream);
@@ -507,7 +507,7 @@ class AmendmentSpreadsheetImportService
 
             $normalized['government_sphere'] = 'Municipal';
             $normalized['authorship_type'] = 'Individual';
-            $normalized['transfer_type'] = 'Execucao direta pelo municipio';
+            $normalized['transfer_type'] = 'Execução direta pelo município';
             $normalized['status'] = 'Identificada';
             $normalized['expense_destination'] = $isHealth ? 'Custeio' : 'Investimento';
             $normalized['beneficiary_location'] = $normalized['beneficiary_location']

@@ -128,8 +128,8 @@ class AudespHomologationTest extends TestCase
         $this->assertNull($item->differences);
         $this->get(route('audesp-homologations.show', $batch))
             ->assertOk()
-            ->assertSee('Decisao da competencia')
-            ->assertSee('Pode registrar transmissao externa')
+            ->assertSee('Decisão da competência')
+            ->assertSee('Pode registrar transmissão externa')
             ->assertSee('Movimento contábil mensal')
             ->assertSee('Execução financeira da emenda');
     }
@@ -330,11 +330,11 @@ class AudespHomologationTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('audesp-homologations.index'))
             ->assertOk()
-            ->assertSee('Validacao real 2026')
+            ->assertSee('Validação real 2026')
             ->assertSee('Ainda falta arquivo real')
             ->assertSee('Cadastro Audesp das emendas')
             ->assertSee('Movimento mensal real do Siafic')
-            ->assertSee('Homologacao com arquivo real do Siafic')
+            ->assertSee('Homologação com arquivo real do Siafic')
             ->assertSee('Modelo CSV financeiro')
             ->assertSee('Exportar arquivo real')
             ->assertSee('Importar sem alterar')
@@ -504,11 +504,11 @@ class AudespHomologationTest extends TestCase
         $stream = fopen('php://temp', 'r+');
         fputcsv($stream, [
             'Codigo de Aplicacao',
-            'Reserva orcamentaria',
+            'Reserva orçamentária',
             'Empenhado',
             'Liquidado',
             'Pago',
-            'Saldo disponivel',
+            'Saldo disponível',
             'Numero empenho',
         ], ';');
         fputcsv($stream, [

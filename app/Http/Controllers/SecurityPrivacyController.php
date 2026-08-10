@@ -38,45 +38,45 @@ class SecurityPrivacyController extends Controller
             [
                 'status' => 'ok',
                 'title' => 'Banco protegido pelo backend',
-                'description' => 'A conexao com Supabase/Postgres fica no Laravel. O navegador nao recebe senha de banco nem chave administrativa.',
+                'description' => 'A conexão com Supabase/Postgres fica no Laravel. O navegador não recebe senha de banco nem chave administrativa.',
             ],
             [
                 'status' => 'ok',
-                'title' => 'Dados escopados por municipio',
-                'description' => 'Rotas autenticadas exigem municipio ativo e papel permitido antes de abrir informacoes operacionais.',
+                'title' => 'Dados escopados por município',
+                'description' => 'Rotas autenticadas exigem município ativo e papel permitido antes de abrir informações operacionais.',
             ],
             [
                 'status' => 'ok',
-                'title' => 'Convites nao usam token salvo em texto puro',
-                'description' => 'O convite publico valida o token pelo hash SHA-256 e bloqueia tentativas repetidas.',
+                'title' => 'Convites não usam token salvo em texto puro',
+                'description' => 'O convite público valida o token pelo hash SHA-256 e bloqueia tentativas repetidas.',
             ],
             [
                 'status' => $municipality->transparency_enabled ? 'attention' : 'ok',
-                'title' => 'Portal publico de transparencia',
+                'title' => 'Portal público de transparência',
                 'description' => $municipality->transparency_enabled
-                    ? 'O portal publico esta ativo. Revise se somente dados publicaveis aparecem para consulta externa.'
-                    : 'O portal publico esta desligado. Dados externos nao ficam expostos por transparencia.',
+                    ? 'O portal público está ativo. Revise se somente dados publicáveis aparecem para consulta externa.'
+                    : 'O portal público está desligado. Dados externos não ficam expostos por transparência.',
             ],
             [
                 'status' => config('app.debug') ? 'critical' : 'ok',
-                'title' => 'Modo debug em producao',
+                'title' => 'Modo debug em produção',
                 'description' => config('app.debug')
-                    ? 'APP_DEBUG esta ativo. Em producao, desligue para nao revelar stack trace ou detalhes internos.'
-                    : 'APP_DEBUG esta desligado, evitando exposicao de erros tecnicos para usuarios.',
+                    ? 'APP_DEBUG está ativo. Em produção, desligue para não revelar stack trace ou detalhes internos.'
+                    : 'APP_DEBUG está desligado, evitando exposição de erros técnicos para usuários.',
             ],
             [
                 'status' => $activeProfile?->document_retention_years ? 'ok' : 'attention',
-                'title' => 'Retencao documental parametrizada',
+                'title' => 'Retenção documental parametrizada',
                 'description' => $activeProfile?->document_retention_years
-                    ? 'A norma vigente define retencao documental por '.$activeProfile->document_retention_years.' ano(s), servindo de base para descarte controlado.'
-                    : 'Ative uma norma municipal com prazo de retencao para orientar descarte e guarda minima.',
+                    ? 'A norma vigente define retenção documental por '.$activeProfile->document_retention_years.' ano(s), servindo de base para descarte controlado.'
+                    : 'Ative uma norma municipal com prazo de retenção para orientar descarte e guarda mínima.',
             ],
             [
                 'status' => $allSensitiveMfa && $mfaDeliveryReady ? 'ok' : 'attention',
                 'title' => 'MFA para gestores e auditoria',
                 'description' => $mfaDeliveryReady
-                    ? $mfaEnabledCount.' de '.$sensitiveUsers->count().' usuario(s) sensiveis com segundo fator ativo.'
-                    : 'Configure um mailer real antes de ativar MFA em producao.',
+                    ? $mfaEnabledCount.' de '.$sensitiveUsers->count().' usuário(s) sensíveis com segundo fator ativo.'
+                    : 'Configure um mailer real antes de ativar MFA em produção.',
             ],
         ];
 
@@ -108,7 +108,7 @@ class SecurityPrivacyController extends Controller
 
         if ((bool) $validated['enabled'] && ! $this->mfaDeliveryReady()) {
             return back()->withErrors([
-                'mfa' => 'Configure um envio de e-mail real antes de ativar MFA em producao.',
+                'mfa' => 'Configure um envio de e-mail real antes de ativar MFA em produção.',
             ]);
         }
 
@@ -119,8 +119,8 @@ class SecurityPrivacyController extends Controller
         ])->save();
 
         return back()->with('status', (bool) $validated['enabled']
-            ? 'Verificacao em duas etapas ativada para sua conta.'
-            : 'Verificacao em duas etapas desativada para sua conta.');
+            ? 'Verificação em duas etapas ativada para sua conta.'
+            : 'Verificação em duas etapas desativada para sua conta.');
     }
 
     private function mfaDeliveryReady(): bool
@@ -157,38 +157,38 @@ class SecurityPrivacyController extends Controller
         return [
             [
                 'area' => 'Acessos',
-                'data' => 'Usuarios, papeis, convites e identidade legislativa',
-                'count' => $userCount.' usuario(s) / '.$invitationCount.' convite(s)',
-                'purpose' => 'Autenticacao, autorizacao e segregacao de responsabilidades.',
-                'exposure' => 'Somente gestor ve a administracao de usuarios.',
+                'data' => 'Usuários, papéis, convites e identidade legislativa',
+                'count' => $userCount.' usuário(s) / '.$invitationCount.' convite(s)',
+                'purpose' => 'Autenticação, autorização e segregação de responsabilidades.',
+                'exposure' => 'Somente gestor vê a administração de usuários.',
             ],
             [
                 'area' => 'Emendas',
-                'data' => 'Autores, beneficiarios, objetos, valores e prazos',
+                'data' => 'Autores, beneficiários, objetos, valores e prazos',
                 'count' => $municipality->amendments()->count().' emenda(s)',
-                'purpose' => 'Gestao municipal, execucao, controle interno e prestacao de contas.',
-                'exposure' => 'Interno; transparencia publica somente quando habilitada.',
+                'purpose' => 'Gestão municipal, execução, controle interno e prestação de contas.',
+                'exposure' => 'Interno; transparência pública somente quando habilitada.',
             ],
             [
-                'area' => 'Camara',
+                'area' => 'Câmara',
                 'data' => 'Propostas legislativas e acompanhamento do vereador',
                 'count' => $municipality->legislativeProposals()->count().' proposta(s)',
-                'purpose' => 'Registrar indicacoes, cotas, saude e protocolo ao Executivo.',
-                'exposure' => 'Vereador ve propria carteira; Executivo ve fila municipal.',
+                'purpose' => 'Registrar indicações, cotas, saúde e protocolo ao Executivo.',
+                'exposure' => 'Vereador vê própria carteira; Executivo vê fila municipal.',
             ],
             [
                 'area' => 'Documentos',
-                'data' => 'Anexos, evidencias, pareceres, dossies e hashes',
+                'data' => 'Anexos, evidências, pareceres, dossiês e hashes',
                 'count' => $municipality->documents()->count().' documento(s)',
                 'purpose' => 'Prova de conformidade, auditoria e resposta ao controle externo.',
-                'exposure' => 'Privado no storage; download passa por municipio ativo.',
+                'exposure' => 'Privado no storage; download passa por município ativo.',
             ],
             [
                 'area' => 'Auditoria',
-                'data' => 'Acoes, IP, agente de usuario e trilhas de alteracao',
+                'data' => 'Ações, IP, agente de usuário e trilhas de alteração',
                 'count' => $auditLogCount.' evento(s)',
-                'purpose' => 'Rastreabilidade, responsabilizacao e investigacao de incidente.',
-                'exposure' => 'Consulta operacional restrita e imutavel.',
+                'purpose' => 'Rastreabilidade, responsabilização e investigação de incidente.',
+                'exposure' => 'Consulta operacional restrita e imutável.',
             ],
         ];
     }
@@ -197,9 +197,9 @@ class SecurityPrivacyController extends Controller
     private function legalBases(): array
     {
         return [
-            ['title' => 'Obrigacao legal e regulatoria', 'description' => 'Execucao de emendas, prestacao de contas, controle interno e atendimento aos orgaos de controle.'],
-            ['title' => 'Execucao de politicas publicas', 'description' => 'Acompanhamento de entregas municipais financiadas por emendas e indicacoes legislativas.'],
-            ['title' => 'Legitimo interesse administrativo', 'description' => 'Seguranca, auditoria, prevencao a fraude, suporte e continuidade do servico publico.'],
+            ['title' => 'Obrigação legal e regulatória', 'description' => 'Execução de emendas, prestação de contas, controle interno e atendimento aos órgãos de controle.'],
+            ['title' => 'Execução de políticas públicas', 'description' => 'Acompanhamento de entregas municipais financiadas por emendas e indicações legislativas.'],
+            ['title' => 'Legítimo interesse administrativo', 'description' => 'Segurança, auditoria, prevenção a fraude, suporte e continuidade do serviço público.'],
         ];
     }
 
@@ -216,20 +216,20 @@ class SecurityPrivacyController extends Controller
             [
                 'status' => $expiredInvitations > 0 ? 'attention' : 'ok',
                 'title' => 'Convites expirados',
-                'signal' => $expiredInvitations.' convite(s) expirado(s) no historico.',
-                'action' => 'Mantenha expirados como trilha, mas cancele os que nao deveriam mais existir.',
+                'signal' => $expiredInvitations.' convite(s) expirado(s) no histórico.',
+                'action' => 'Mantenha expirados como trilha, mas cancele os que não deveriam mais existir.',
             ],
             [
                 'status' => $transparencyStatus,
-                'title' => 'Transparencia publica',
-                'signal' => $municipality->transparency_enabled ? 'Portal publico habilitado.' : 'Portal publico desabilitado.',
-                'action' => 'Antes de publicar, confira se dados pessoais e documentos internos nao aparecem.',
+                'title' => 'Transparência pública',
+                'signal' => $municipality->transparency_enabled ? 'Portal público habilitado.' : 'Portal público desabilitado.',
+                'action' => 'Antes de publicar, confira se dados pessoais e documentos internos não aparecem.',
             ],
             [
                 'status' => $auditLogCount > 0 ? 'ok' : 'attention',
                 'title' => 'Trilha de auditoria',
                 'signal' => $auditLogCount.' evento(s) registrado(s).',
-                'action' => 'Toda acao sensivel deve manter ator, data, IP e alteracao realizada.',
+                'action' => 'Toda ação sensível deve manter ator, data, IP e alteração realizada.',
             ],
         ];
     }
@@ -242,9 +242,9 @@ class SecurityPrivacyController extends Controller
 
         return [
             ['item' => 'Documentos de emendas', 'rule' => 'Guardar por '.$retention.' ou prazo superior exigido pelo controle externo.'],
-            ['item' => 'Convites e usuarios', 'rule' => 'Manter historico minimo para auditoria; remover acesso quando nao houver vinculo.'],
-            ['item' => 'Logs de auditoria', 'rule' => 'Preservar trilha imutavel para investigacao e responsabilizacao.'],
-            ['item' => 'Dossies e relatorios', 'rule' => 'Preservar versoes emitidas com hash e manifesto dos anexos incluidos.'],
+            ['item' => 'Convites e usuários', 'rule' => 'Manter histórico mínimo para auditoria; remover acesso quando não houver vínculo.'],
+            ['item' => 'Logs de auditoria', 'rule' => 'Preservar trilha imutável para investigação e responsabilização.'],
+            ['item' => 'Dossiês e relatórios', 'rule' => 'Preservar versões emitidas com hash e manifesto dos anexos incluídos.'],
         ];
     }
 
@@ -252,11 +252,11 @@ class SecurityPrivacyController extends Controller
     private function incidentPlaybook(): array
     {
         return [
-            ['step' => '1', 'title' => 'Conter', 'description' => 'Revogar acesso suspeito, trocar segredos e pausar publicacao externa se necessario.'],
-            ['step' => '2', 'title' => 'Preservar prova', 'description' => 'Exportar logs, usuario, IP, rota afetada, horario e registros consultados.'],
-            ['step' => '3', 'title' => 'Classificar', 'description' => 'Identificar dado pessoal, volume, titulares afetados e risco ao municipio.'],
-            ['step' => '4', 'title' => 'Comunicar', 'description' => 'Acionar responsavel municipal, juridico/controladoria e avaliar comunicacao a ANPD/titulares.'],
-            ['step' => '5', 'title' => 'Corrigir', 'description' => 'Fechar brecha, registrar decisao, revisar permissao e atualizar rotina operacional.'],
+            ['step' => '1', 'title' => 'Conter', 'description' => 'Revogar acesso suspeito, trocar segredos e pausar publicação externa se necessário.'],
+            ['step' => '2', 'title' => 'Preservar prova', 'description' => 'Exportar logs, usuário, IP, rota afetada, horário e registros consultados.'],
+            ['step' => '3', 'title' => 'Classificar', 'description' => 'Identificar dado pessoal, volume, titulares afetados e risco ao município.'],
+            ['step' => '4', 'title' => 'Comunicar', 'description' => 'Acionar responsável municipal, jurídico/controladoria e avaliar comunicação a ANPD/titulares.'],
+            ['step' => '5', 'title' => 'Corrigir', 'description' => 'Fechar brecha, registrar decisão, revisar permissão e atualizar rotina operacional.'],
         ];
     }
 }

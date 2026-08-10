@@ -520,11 +520,34 @@ h6 {
 }
 
 .btn svg {
+    display: block;
     width: 17px;
     height: 17px;
     flex: 0 0 17px;
     margin: 0;
     vertical-align: middle;
+}
+
+:where(a, button, summary, .badge, .page-kicker, .panel-kicker, .form-text, .form-hint) > svg,
+:where(a, button, summary, .badge, .page-kicker, .panel-kicker, .form-text, .form-hint) > i[data-lucide] {
+    display: inline-block;
+    flex-shrink: 0;
+    vertical-align: -0.16em;
+}
+
+:where(a, button, summary) > i[data-lucide]:first-child,
+:where(a, button, summary) > svg:first-child {
+    margin-right: .35rem;
+}
+
+.btn > i[data-lucide]:first-child,
+.btn > svg:first-child {
+    margin-right: 0;
+}
+
+img,
+svg {
+    max-width: 100%;
 }
 
 .btn-primary {

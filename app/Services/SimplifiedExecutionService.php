@@ -32,10 +32,10 @@ class SimplifiedExecutionService
 
         $next = [
             'icon' => 'route',
-            'title' => 'Iniciar execucao simplificada',
+            'title' => 'Iniciar execução simplificada',
             'description' => $hasApprovedPlan
                 ? 'Copie automaticamente as etapas aprovadas no Plano de Trabalho para acompanhar a entrega real.'
-                : 'Cadastre uma primeira etapa executavel para iniciar o acompanhamento fisico e financeiro.',
+                : 'Cadastre uma primeira etapa executável para iniciar o acompanhamento físico e financeiro.',
             'href' => '#iniciar-execucao',
             'label' => $hasApprovedPlan ? 'Gerar etapas do plano' : 'Criar primeira etapa',
         ];
@@ -44,33 +44,33 @@ class SimplifiedExecutionService
             $next = [
                 'icon' => 'briefcase-business',
                 'title' => 'Registrar empenho',
-                'description' => 'Vincule o primeiro empenho a uma etapa para conectar orcamento, fornecedor e entrega fisica.',
+                'description' => 'Vincule o primeiro empenho a uma etapa para conectar orçamento, fornecedor e entrega física.',
                 'href' => '#commitments',
                 'label' => 'Registrar empenho',
             ];
         } elseif ($hasCommitments && $paidAmount <= 0) {
             $next = [
                 'icon' => 'receipt-text',
-                'title' => 'Registrar liquidacao e pagamento',
-                'description' => 'Depois do empenho, mantenha liquidacoes e pagamentos alinhados ao valor recebido.',
+                'title' => 'Registrar liquidação e pagamento',
+                'description' => 'Depois do empenho, mantenha liquidações e pagamentos alinhados ao valor recebido.',
                 'href' => $amendment->supportsTcespCompliance() ? route('emendas.audesp', $amendment).'#cadeia-contabil' : '#commitments',
                 'label' => $amendment->supportsTcespCompliance() ? 'Abrir Audesp' : 'Registrar pagamento',
             ];
         } elseif ($paidAmount > 0 && ! $hasEvidence) {
             $next = [
                 'icon' => 'file-check-2',
-                'title' => 'Anexar evidencia de entrega',
-                'description' => 'Comprove medicao, recebimento, fotos ou relatorio antes de fechar a execucao.',
+                'title' => 'Anexar evidência de entrega',
+                'description' => 'Comprove medição, recebimento, fotos ou relatório antes de fechar a execução.',
                 'href' => '#evidence',
-                'label' => 'Anexar evidencia',
+                'label' => 'Anexar evidência',
             ];
         } elseif ($readyForAccountability) {
             $next = [
                 'icon' => 'archive',
-                'title' => 'Preparar prestacao de contas',
-                'description' => 'Execucao fisica, pagamentos e evidencias estao prontos para o fechamento formal.',
+                'title' => 'Preparar prestação de contas',
+                'description' => 'Execução física, pagamentos e evidências estão prontos para o fechamento formal.',
                 'href' => route('emendas.accountability', $amendment),
-                'label' => 'Abrir prestacao',
+                'label' => 'Abrir prestação',
             ];
         }
 
@@ -82,8 +82,8 @@ class SimplifiedExecutionService
                     'label' => 'Executar objeto',
                     'metric' => $stages->count().' etapa(s)',
                     'description' => $hasStages
-                        ? 'Acompanhe progresso, responsavel e prazo de cada entrega.'
-                        : 'Abra uma etapa fisica para transformar a emenda em entrega acompanhavel.',
+                        ? 'Acompanhe progresso, responsável e prazo de cada entrega.'
+                        : 'Abra uma etapa física para transformar a emenda em entrega acompanhável.',
                     'href' => '#stages',
                     'cta' => $hasStages ? 'Ver etapas' : 'Abrir etapa',
                     'tone' => $hasStages ? 'success' : 'warning',
@@ -93,8 +93,8 @@ class SimplifiedExecutionService
                     'label' => 'Empenhar e pagar',
                     'metric' => 'R$ '.number_format($paidAmount, 2, ',', '.'),
                     'description' => $hasCommitments
-                        ? 'Registre liquidacao e pagamento sem perder o vinculo com a entrega.'
-                        : 'Cadastre o empenho para ligar orcamento, fornecedor e processo.',
+                        ? 'Registre liquidação e pagamento sem perder o vínculo com a entrega.'
+                        : 'Cadastre o empenho para ligar orçamento, fornecedor e processo.',
                     'href' => '#commitments',
                     'cta' => $hasCommitments ? 'Ver financeiro' : 'Registrar empenho',
                     'tone' => $paidAmount > 0 ? 'success' : ($hasCommitments ? 'primary' : 'warning'),
@@ -102,12 +102,12 @@ class SimplifiedExecutionService
                 [
                     'icon' => 'file-check-2',
                     'label' => 'Comprovar entrega',
-                    'metric' => $documents->count().' evidencia(s)',
+                    'metric' => $documents->count().' evidência(s)',
                     'description' => $hasEvidence
-                        ? 'Documentos ja vinculados as etapas para sustentar a prestacao.'
-                        : 'Anexe termo, medicao, foto ou relatorio antes do fechamento.',
+                        ? 'Documentos já vinculados às etapas para sustentar a prestação.'
+                        : 'Anexe termo, medição, foto ou relatório antes do fechamento.',
                     'href' => '#evidence',
-                    'cta' => $hasEvidence ? 'Ver evidencias' : 'Anexar evidencia',
+                    'cta' => $hasEvidence ? 'Ver evidências' : 'Anexar evidência',
                     'tone' => $hasEvidence ? 'success' : 'warning',
                 ],
                 [
@@ -115,32 +115,32 @@ class SimplifiedExecutionService
                     'label' => 'Prestar contas',
                     'metric' => $readyForAccountability ? 'Liberada' : 'Bloqueada',
                     'description' => $readyForAccountability
-                        ? 'Base minima pronta para abrir o processo de prestacao.'
+                        ? 'Base mínima pronta para abrir o processo de prestação.'
                         : 'O TrilhaGov mostra abaixo o que ainda impede o envio.',
                     'href' => $readyForAccountability ? route('emendas.accountability', $amendment) : '#liberacao-prestacao',
-                    'cta' => $readyForAccountability ? 'Abrir prestacao' : 'Ver bloqueios',
+                    'cta' => $readyForAccountability ? 'Abrir prestação' : 'Ver bloqueios',
                     'tone' => $readyForAccountability ? 'success' : 'danger',
                 ],
             ],
             'steps' => [
                 ['label' => 'Etapas abertas', 'description' => 'Cronograma real criado para a entrega.', 'done' => $hasStages],
-                ['label' => 'Empenho vinculado', 'description' => 'Fornecedor e processo conectados a execucao.', 'done' => $hasCommitments],
-                ['label' => 'Pagamento controlado', 'description' => 'Pagamentos lancados sem ultrapassar o recebido.', 'done' => $receivedAmount > 0 && $paidAmount > 0 && $paidAmount <= $receivedAmount],
-                ['label' => 'Evidencias anexadas', 'description' => 'Documentos de entrega ligados as etapas.', 'done' => $hasEvidence],
-                ['label' => 'Pronta para contas', 'description' => 'Base minima preparada para prestacao.', 'done' => $readyForAccountability],
+                ['label' => 'Empenho vinculado', 'description' => 'Fornecedor e processo conectados à execução.', 'done' => $hasCommitments],
+                ['label' => 'Pagamento controlado', 'description' => 'Pagamentos lançados sem ultrapassar o recebido.', 'done' => $receivedAmount > 0 && $paidAmount > 0 && $paidAmount <= $receivedAmount],
+                ['label' => 'Evidências anexadas', 'description' => 'Documentos de entrega ligados às etapas.', 'done' => $hasEvidence],
+                ['label' => 'Pronta para contas', 'description' => 'Base mínima preparada para prestação.', 'done' => $readyForAccountability],
             ],
             'risks' => $this->risks($amendment, $receivedAmount, $committedAmount, $paidAmount, $physicalPercentage),
             'summary' => [
-                ['label' => 'Plano', 'value' => $hasApprovedPlan ? 'Plano aprovado localizado' : 'Plano aprovado nao localizado'],
+                ['label' => 'Plano', 'value' => $hasApprovedPlan ? 'Plano aprovado localizado' : 'Plano aprovado não localizado'],
                 ['label' => 'Etapas', 'value' => $stages->count().' etapa(s)'],
-                ['label' => 'Evidencias', 'value' => $documents->count().' evidencia(s)'],
+                ['label' => 'Evidências', 'value' => $documents->count().' evidência(s)'],
                 ['label' => 'Financeiro', 'value' => $financialPercentage.'% financeiro'],
             ],
             'readiness' => [
                 'percentage' => $readinessPercentage,
                 'done' => $doneCount,
                 'total' => 5,
-                'label' => $readyForAccountability ? 'Pronta para prestacao' : ($doneCount >= 3 ? 'Execucao em andamento' : 'Execucao a estruturar'),
+                'label' => $readyForAccountability ? 'Pronta para prestação' : ($doneCount >= 3 ? 'Execução em andamento' : 'Execução a estruturar'),
                 'tone' => $readyForAccountability ? 'success' : ($doneCount >= 3 ? 'warning' : 'neutral'),
                 'physical' => $physicalPercentage,
                 'financial' => $financialPercentage,
@@ -151,14 +151,14 @@ class SimplifiedExecutionService
             ],
             'release' => [
                 'ready' => $readyForAccountability,
-                'label' => $readyForAccountability ? 'Liberada para prestacao de contas' : 'Ainda nao liberada para prestacao',
+                'label' => $readyForAccountability ? 'Liberada para prestação de contas' : 'Ainda não liberada para prestação',
                 'description' => $readyForAccountability
-                    ? 'A emenda tem entrega fisica, financeiro conciliado e evidencia minima para abrir o fechamento formal.'
-                    : 'Resolva os pontos abaixo antes de iniciar ou enviar a prestacao de contas.',
+                    ? 'A emenda tem entrega física, financeiro conciliado e evidência mínima para abrir o fechamento formal.'
+                    : 'Resolva os pontos abaixo antes de iniciar ou enviar a prestação de contas.',
                 'checks' => $releaseChecks,
                 'blockers' => $releaseBlockers,
                 'next_href' => $readyForAccountability ? route('emendas.accountability', $amendment) : ($releaseChecks->firstWhere('done', false)['href'] ?? '#stages'),
-                'next_label' => $readyForAccountability ? 'Abrir prestacao' : 'Resolver proxima pendencia',
+                'next_label' => $readyForAccountability ? 'Abrir prestação' : 'Resolver próxima pendência',
             ],
             'flow' => [
                 ['label' => 'Abrir etapas', 'icon' => 'clipboard-list', 'done' => $hasStages, 'href' => '#stages'],
@@ -185,38 +185,38 @@ class SimplifiedExecutionService
     ): Collection {
         return collect([
             [
-                'label' => 'Etapa fisica aberta',
-                'description' => 'Inicie a execucao com ao menos uma etapa verificavel.',
+                'label' => 'Etapa física aberta',
+                'description' => 'Inicie a execução com ao menos uma etapa verificável.',
                 'done' => $hasStages,
                 'href' => '#stages',
             ],
             [
-                'label' => 'Entrega concluida',
+                'label' => 'Entrega concluída',
                 'description' => 'Atualize a etapa para 100% quando o objeto estiver entregue.',
                 'done' => $physicalPercentage >= 100,
                 'href' => '#stages',
             ],
             [
                 'label' => 'Recurso recebido informado',
-                'description' => 'Informe o valor recebido na emenda para permitir conciliacao.',
+                'description' => 'Informe o valor recebido na emenda para permitir conciliação.',
                 'done' => $receivedAmount > 0,
                 'href' => route('emendas.edit', $amendment),
             ],
             [
                 'label' => 'Empenho registrado',
-                'description' => 'Registre ao menos um empenho vinculado a execucao.',
+                'description' => 'Registre ao menos um empenho vinculado à execução.',
                 'done' => $committedAmount > 0,
                 'href' => '#commitments',
             ],
             [
                 'label' => 'Financeiro conciliado',
-                'description' => 'Pagamentos devem corresponder ao valor recebido antes da prestacao.',
+                'description' => 'Pagamentos devem corresponder ao valor recebido antes da prestação.',
                 'done' => $hasFinancialClosure,
                 'href' => '#commitments',
             ],
             [
-                'label' => 'Evidencia anexada',
-                'description' => 'Anexe medicao, foto, termo de recebimento ou relatorio ligado a etapa.',
+                'label' => 'Evidência anexada',
+                'description' => 'Anexe medição, foto, termo de recebimento ou relatório ligado à etapa.',
                 'done' => $hasEvidence,
                 'href' => '#evidence',
             ],
@@ -233,7 +233,7 @@ class SimplifiedExecutionService
         $sourceStages = $plan?->status === MunicipalWorkPlan::STATUS_APPROVED && $plan->stages->isNotEmpty()
             ? $plan->stages
             : collect([(object) [
-                'title' => 'Execucao integral da emenda',
+                'title' => 'Execução integral da emenda',
                 'physical_delivery' => $amendment->object,
                 'planned_amount' => $amendment->received_amount ?? $amendment->expected_amount,
                 'planned_start_at' => $amendment->received_at ?? today(),
@@ -279,10 +279,10 @@ class SimplifiedExecutionService
         $risks = [];
 
         if ($amendment->executionStages->isEmpty()) {
-            $risks[] = 'Ainda nao ha etapa fisica para comprovar a entrega.';
+            $risks[] = 'Ainda não há etapa física para comprovar a entrega.';
         }
         if ($receivedAmount <= 0) {
-            $risks[] = 'Valor recebido nao informado; a conciliacao financeira fica incompleta.';
+            $risks[] = 'Valor recebido não informado; a conciliação financeira fica incompleta.';
         }
         if ($committedAmount > $receivedAmount && $receivedAmount > 0) {
             $risks[] = 'Empenhos ultrapassam o valor recebido.';
@@ -291,12 +291,12 @@ class SimplifiedExecutionService
             $risks[] = 'Pagamentos ultrapassam o valor recebido.';
         }
         if ($paidAmount > 0 && $amendment->documents->whereNotNull('execution_stage_id')->isEmpty()) {
-            $risks[] = 'Ha pagamento sem evidencia de entrega vinculada.';
+            $risks[] = 'Há pagamento sem evidência de entrega vinculada.';
         }
         if ($physicalPercentage >= 100 && $paidAmount <= 0) {
-            $risks[] = 'Execucao fisica concluida sem pagamento registrado.';
+            $risks[] = 'Execução física concluída sem pagamento registrado.';
         }
 
-        return $risks ?: ['Sem risco critico na execucao simplificada atual.'];
+        return $risks ?: ['Sem risco crítico na execução simplificada atual.'];
     }
 }

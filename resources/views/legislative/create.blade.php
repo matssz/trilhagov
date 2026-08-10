@@ -34,41 +34,41 @@
             </div>
             <span>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Saúde em dia' }}</span>
         </section>
-        <section class="legislative-minimum-flow" aria-label="Fluxo minimo para a indicacao do vereador">
+        <section class="legislative-minimum-flow" aria-label="Fluxo mínimo para a indicação do vereador">
             <article>
                 <span><i data-lucide="file-pen-line" aria-hidden="true"></i></span>
                 <div>
                     <small>1 · Pedido do vereador</small>
-                    <strong>Informe so o essencial</strong>
-                    <p>Objeto, beneficiario ou local, natureza da despesa e valor estimado.</p>
+                    <strong>Informe só o essencial</strong>
+                    <p>Objeto, beneficiário ou local, natureza da despesa e valor estimado.</p>
                 </div>
             </article>
             <article>
                 <span><i data-lucide="calculator" aria-hidden="true"></i></span>
                 <div>
-                    <small>2 · Conferencia automatica</small>
-                    <strong>Cota, quantidade e saude</strong>
-                    <p>O TrilhaGov usa RCL, cadeiras da Camara e percentual de saude da norma ativa.</p>
+                    <small>2 · Conferência automática</small>
+                    <strong>Cota, quantidade e saúde</strong>
+                    <p>O TrilhaGov usa RCL, cadeiras da Câmara e percentual de saúde da norma ativa.</p>
                 </div>
             </article>
             <article>
                 <span><i data-lucide="route" aria-hidden="true"></i></span>
                 <div>
-                    <small>3 · Proximo passo</small>
-                    <strong>Camara e Executivo</strong>
-                    <p>Depois de salva, a proposta segue para conferencia, protocolo e reserva municipal.</p>
+                    <small>3 · Próximo passo</small>
+                    <strong>Câmara e Executivo</strong>
+                    <p>Depois de salva, a proposta segue para conferência, protocolo e reserva municipal.</p>
                 </div>
             </article>
         </section>
         <section class="legislative-projection-panel" data-legislative-projection>
             <div>
-                <span>Saldo que sobrara na cota</span>
+                <span>Saldo que sobrará na cota</span>
                 <strong data-projection-remaining>{{ $automation['maximum_amount'] === null ? 'Saldo a configurar' : 'Informe o valor' }}</strong>
                 <small data-projection-message>
                     @if ($automation['recommended_health'])
                         Priorize saúde: faltam R$ {{ number_format((float) $automation['health_gap'], 2, ',', '.') }} para atender a reserva mínima.
                     @else
-                        O valor informado fica indicado nesta proposta. Ele so vira execucao depois da analise da Camara e da reserva pelo Executivo.
+                        O valor informado fica indicado nesta proposta. Ele só vira execução depois da análise da Câmara e da reserva pelo Executivo.
                     @endif
                 </small>
             </div>
@@ -85,8 +85,8 @@
             <div>
                 <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
                 <div>
-                    <strong>Assistente automatico de preenchimento</strong>
-                    <p data-readiness-message>Preencha objeto, valor e beneficiario. O TrilhaGov sugere saude, secretaria, localidade e fonte da estimativa quando identificar o padrao.</p>
+                    <strong>Assistente automático de preenchimento</strong>
+                    <p data-readiness-message>Preencha objeto, valor e beneficiário. O TrilhaGov sugere saúde, secretaria, localidade e fonte da estimativa quando identificar o padrão.</p>
                 </div>
             </div>
             <ul>
@@ -108,7 +108,7 @@
                 <article>
                     <small>Orçamento</small>
                     <strong>Cota e saldo</strong>
-                    <span>Mostra quanto da cota do vereador ficara comprometido por esta proposta.</span>
+                    <span>Mostra quanto da cota do vereador ficará comprometido por esta proposta.</span>
                 </article>
                 <article>
                     <small>Saúde</small>
@@ -126,22 +126,22 @@
             <header>
                 <span><i data-lucide="sparkles" aria-hidden="true"></i></span>
                 <div>
-                    <strong>Modelos rapidos para vereador</strong>
-                    <p>Escolha um caso comum. O TrilhaGov preenche secretaria, justificativa e campos tecnicos iniciais para voce ajustar.</p>
+                    <strong>Modelos rápidos para vereador</strong>
+                    <p>Escolha um caso comum. O TrilhaGov preenche secretaria, justificativa e campos técnicos iniciais para você ajustar.</p>
                 </div>
             </header>
             <div>
                 <button type="button" data-template="health-equipment">
                     <i data-lucide="heart-pulse" aria-hidden="true"></i>
-                    <span><strong>Equipamento de saude</strong><small>UBS, vacinacao, atendimento basico</small></span>
+                    <span><strong>Equipamento de saúde</strong><small>UBS, vacinação, atendimento básico</small></span>
                 </button>
                 <button type="button" data-template="school-equipment">
                     <i data-lucide="graduation-cap" aria-hidden="true"></i>
-                    <span><strong>Escola municipal</strong><small>mobiliario, tecnologia, melhoria escolar</small></span>
+                    <span><strong>Escola municipal</strong><small>mobiliário, tecnologia, melhoria escolar</small></span>
                 </button>
                 <button type="button" data-template="street-work">
                     <i data-lucide="construction" aria-hidden="true"></i>
-                    <span><strong>Obra no bairro</strong><small>pavimentacao, reforma, infraestrutura</small></span>
+                    <span><strong>Obra no bairro</strong><small>pavimentação, reforma, infraestrutura</small></span>
                 </button>
             </div>
         </section>

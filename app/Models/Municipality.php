@@ -78,7 +78,7 @@ class Municipality extends Model
             ],
             'state_amendments' => [
                 'label' => 'Emendas estaduais',
-                'description' => 'Libera o cadastro de emendas estaduais sem misturar com o fluxo municipal da Camara.',
+                'description' => 'Libera o cadastro de emendas estaduais sem misturar com o fluxo municipal da Câmara.',
                 'field' => 'state_amendments_enabled',
             ],
             'health_asps' => [
@@ -89,7 +89,7 @@ class Municipality extends Model
             ],
             'contracts' => [
                 'label' => 'Obras e contratos',
-                'description' => 'Libera planejamento, medicoes, aditivos e dossie de execucao contratual.',
+                'description' => 'Libera planejamento, medições, aditivos e dossiê de execução contratual.',
                 'field' => 'contracts_module_enabled',
             ],
             'audit' => [

@@ -26,7 +26,7 @@ class MunicipalWorkPlanTest extends TestCase
             ->assertOk()
             ->assertSee('Assistente guiado')
             ->assertSee('Iniciar Plano de Trabalho guiado')
-            ->assertSee('Documentos minimos')
+            ->assertSee('Documentos mínimos')
             ->assertSee('O TrilhaGov vai iniciar automaticamente')
             ->assertSee('Executor sugerido')
             ->assertSee('Valor planejado');
@@ -47,14 +47,14 @@ class MunicipalWorkPlanTest extends TestCase
         $this->assertSame('2026-07-01', $plan->planned_start_at->toDateString());
         $this->assertSame('2026-12-31', $plan->planned_end_at->toDateString());
         $this->assertCount(1, $plan->stages);
-        $this->assertSame('Execucao integral da emenda', $plan->stages->first()->title);
+        $this->assertSame('Execução integral da emenda', $plan->stages->first()->title);
         $this->assertSame('100000.00', $plan->stages->first()->planned_amount);
 
         $this->get(route('emendas.work-plan', $amendment))
             ->assertOk()
             ->assertSee('Plano de Trabalho municipal')
             ->assertSee('Cronograma e valor')
-            ->assertSee('Riscos antes da execucao')
+            ->assertSee('Riscos antes da execução')
             ->assertSee('Plano simplificado a partir da emenda')
             ->assertSee('Revisar cronograma');
     }

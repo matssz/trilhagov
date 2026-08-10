@@ -46,7 +46,7 @@
             <div>
                 <small>Plano de correcao</small>
                 <strong>Revise a planilha antes de reenviar</strong>
-                <p>Abra os motivos por linha, corrija campos obrigatorios, datas, valores e registros repetidos. O TrilhaGov nao sobrescreve emendas ja existentes.</p>
+                <p>Abra os motivos por linha, corrija campos obrigatórios, datas, valores e registros repetidos. O TrilhaGov não sobrescreve emendas já existentes.</p>
             </div>
             <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.index') }}"><i data-lucide="upload" aria-hidden="true"></i>Enviar corrigida</a>
         </section>
