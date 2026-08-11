@@ -13,7 +13,7 @@ class MunicipalOnboardingService
         private readonly MunicipalRegulatoryReadiness $readiness,
     ) {}
 
-    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, guide: array<string, mixed>, health: array<string, mixed>, council: array<string, mixed>} */
+    /** @return array{activeProfile: ?MunicipalRegulatoryProfile, draftProfile: ?MunicipalRegulatoryProfile, year: int, steps: array<int, array{key: string, title: string, description: string, complete: bool, route: string, action: string, icon: string}>, score: int, guide: array<string, mixed>, health: array<string, mixed>, council: array<string, mixed>, commercial: array<string, mixed>} */
     public function summary(Municipality $municipality): array
     {
         $activeProfile = $municipality->regulatoryProfiles()
@@ -196,6 +196,88 @@ class MunicipalOnboardingService
                 'health_label' => $activeProfile?->health_reserve_percentage
                     ? number_format((float) $activeProfile->health_reserve_percentage, 2, ',', '.').'%'
                     : 'A configurar',
+            ],
+            'commercial' => $this->commercialOnboarding($municipality, $activeProfile, $hasCouncil, $hasLegislativeFlow || $hasAmendment, $hasWorkCenter),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function commercialOnboarding(
+        Municipality $municipality,
+        ?MunicipalRegulatoryProfile $activeProfile,
+        bool $hasCouncil,
+        bool $hasFirstFlow,
+        bool $hasWorkCenter,
+    ): array {
+        $hasDemoBase = $municipality->hasCompleteProfile() && $activeProfile !== null && $hasCouncil && $hasFirstFlow;
+        $readyToPitch = $hasDemoBase && $hasWorkCenter;
+        $steps = [
+            [
+                'title' => 'Preparar ambiente de demonstração',
+                'description' => 'Município, exercício, cotas, Câmara e exemplos precisam estar prontos antes da reunião.',
+                'complete' => $hasDemoBase,
+                'route' => route('municipal-onboarding.index'),
+                'action' => 'Ver implantação',
+                'icon' => 'monitor-check',
+            ],
+            [
+                'title' => 'Validar a dor com o cliente',
+                'description' => 'Confirmar como Câmara, Executivo, contabilidade e controle interno tratam emendas hoje.',
+                'complete' => false,
+                'route' => route('work-center.index'),
+                'action' => 'Abrir roteiro',
+                'icon' => 'messages-square',
+            ],
+            [
+                'title' => 'Coletar materiais reais',
+                'description' => 'Lei Orgânica, RCL, número de cadeiras, modelos de ofício, planilhas e exemplo de execução.',
+                'complete' => false,
+                'route' => route('municipal-rules.index'),
+                'action' => 'Conferir normas',
+                'icon' => 'folder-check',
+            ],
+            [
+                'title' => 'Executar piloto controlado',
+                'description' => 'Rodar uma proposta da Câmara até reserva, execução e prestação final com acompanhamento semanal.',
+                'complete' => false,
+                'route' => route('legislative.index'),
+                'action' => 'Abrir fluxo',
+                'icon' => 'route',
+            ],
+            [
+                'title' => 'Medir resultado para venda',
+                'description' => 'Registrar tempo economizado, pendências evitadas, documentos completos e riscos encontrados.',
+                'complete' => $readyToPitch,
+                'route' => route('governance-reports.index'),
+                'action' => 'Ver relatórios',
+                'icon' => 'chart-no-axes-combined',
+            ],
+        ];
+
+        $complete = count(array_filter($steps, fn (array $step): bool => $step['complete']));
+
+        return [
+            'ready' => $readyToPitch,
+            'score' => (int) round($complete / count($steps) * 100),
+            'headline' => $readyToPitch
+                ? 'Ambiente pronto para apresentação comercial'
+                : 'Transforme a implantação em demonstração comercial',
+            'description' => $readyToPitch
+                ? 'O município já possui fluxo, Câmara e Central de Trabalho suficientes para uma reunião de validação.'
+                : 'Use esta trilha para sair de uma tela técnica e chegar em uma apresentação que o prefeito, vereador e controle interno entendem.',
+            'steps' => $steps,
+            'meeting_script' => [
+                'Comece pela dor: planilhas, mensagens soltas, prazos e falta de visão do saldo.',
+                'Mostre o vereador criando proposta com cota e saúde calculadas automaticamente.',
+                'Mostre o Executivo recebendo, reservando orçamento e acompanhando execução.',
+                'Feche na prestação de contas com dossiê, evidências, protocolo e trilha de auditoria.',
+            ],
+            'materials' => [
+                'Lei Orgânica ou ato local que institui as emendas.',
+                'RCL do exercício anterior e número oficial de cadeiras da Câmara.',
+                'Planilha ou lista real de indicações dos vereadores.',
+                'Modelo de ofício, protocolo, parecer ou relatório usado pelo município.',
+                'Arquivo de teste do Siafic/Audesp quando o município for paulista.',
             ],
         ];
     }

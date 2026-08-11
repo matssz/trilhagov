@@ -9,6 +9,7 @@
         $health = $summary['health'];
         $council = $summary['council'];
         $guide = $summary['guide'];
+        $commercial = $summary['commercial'];
     @endphp
 
     <header class="onboarding-heading">
@@ -76,6 +77,53 @@
                         <li>{{ $field }}</li>
                     @endforeach
                 </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-panel onboarding-commercial-panel">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Onboarding comercial</p>
+                <h2 class="h5 mb-0">{{ $commercial['headline'] }}</h2>
+                <p class="small text-secondary mb-0">{{ $commercial['description'] }}</p>
+            </div>
+            <div class="onboarding-commercial-score {{ $commercial['ready'] ? 'is-ready' : '' }}">
+                <strong>{{ $commercial['score'] }}%</strong>
+                <span>{{ $commercial['ready'] ? 'demo pronta' : 'preparando demo' }}</span>
+            </div>
+        </div>
+        <div class="onboarding-commercial-grid">
+            <div class="onboarding-commercial-steps">
+                @foreach ($commercial['steps'] as $index => $step)
+                    <article class="{{ $step['complete'] ? 'complete' : 'pending' }}">
+                        <span><i data-lucide="{{ $step['complete'] ? 'check' : $step['icon'] }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Passo {{ $index + 1 }}</small>
+                            <strong>{{ $step['title'] }}</strong>
+                            <p>{{ $step['description'] }}</p>
+                            <a href="{{ $step['route'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $step['action'] }}</a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="onboarding-commercial-side">
+                <div>
+                    <span class="panel-kicker">Roteiro da reunião</span>
+                    <ol>
+                        @foreach ($commercial['meeting_script'] as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ol>
+                </div>
+                <div>
+                    <span class="panel-kicker">Materiais para pedir ao município</span>
+                    <ul>
+                        @foreach ($commercial['materials'] as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         </div>
     </section>

@@ -39,6 +39,21 @@ class MunicipalOnboardingTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_manager_sees_commercial_onboarding(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee('Onboarding comercial')
+            ->assertSee('Transforme a implantação em demonstração comercial')
+            ->assertSee('Preparar ambiente de demonstração')
+            ->assertSee('Roteiro da reunião')
+            ->assertSee('Materiais para pedir ao município');
+    }
+
     public function test_manager_activates_organic_law_exercise_and_releases_legislative_portal(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
