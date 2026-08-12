@@ -52,6 +52,7 @@ class DashboardController extends Controller
             'analytics' => $analytics,
             'municipalHealth' => $this->municipalHealth($municipality, $isManager, $canEdit),
             'executiveCycle' => $this->executiveCycle($municipality, $amendments),
+            'mayorBriefing' => $this->mayorBriefing($municipality, $analytics, $amendments),
             'filters' => $filters,
             'years' => $options['years'],
             'departments' => $options['departments'],
@@ -65,6 +66,125 @@ class DashboardController extends Controller
                 ? $formSubmission->issue($request, "transparency-settings-{$municipality->id}")
                 : null,
         ]);
+    }
+
+    /** @param Collection<int, ParliamentaryAmendment> $amendments @return array<string, mixed> */
+    private function mayorBriefing($municipality, array $analytics, Collection $amendments): array
+    {
+        $summary = $analytics['summary'];
+        $openProposals = $municipality->legislativeProposals()
+            ->whereIn('status', [
+                LegislativeProposal::STATUS_SUBMITTED,
+                LegislativeProposal::STATUS_APPROVED,
+                LegislativeProposal::STATUS_SENT,
+                LegislativeProposal::STATUS_RECEIVED,
+            ])
+            ->count();
+        $reservedProposals = $municipality->legislativeProposals()
+            ->where('status', LegislativeProposal::STATUS_RESERVED)
+            ->sum('budget_reserved_amount');
+        $healthExpected = (float) $amendments
+            ->filter(fn (ParliamentaryAmendment $amendment) => $amendment->indicated_for_health === true || $amendment->municipalWorkPlan?->health_related === true)
+            ->sum('expected_amount');
+        $activeProfile = $municipality->regulatoryProfiles()
+            ->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)
+            ->latest('fiscal_year')
+            ->latest('version')
+            ->first();
+        $healthRequired = $activeProfile && (float) $summary['expected'] > 0
+            ? (float) $summary['expected'] * (float) $activeProfile->health_reserve_percentage / 100
+            : null;
+        $healthGap = $healthRequired === null ? null : max(0, $healthRequired - $healthExpected);
+        $overdueWork = $municipality->workItems()
+            ->whereIn('status', [MunicipalWorkItem::STATUS_PENDING, MunicipalWorkItem::STATUS_IN_PROGRESS])
+            ->whereDate('due_at', '<', today())
+            ->count();
+        $criticalAlerts = $municipality->integrityAlerts()
+            ->where('status', 'open')
+            ->whereIn('severity', ['high', 'critical'])
+            ->count();
+
+        $decision = match (true) {
+            $summary['overdue'] > 0 || $overdueWork > 0 => [
+                'tone' => 'danger',
+                'icon' => 'timer-reset',
+                'title' => 'Atacar prazos vencidos',
+                'description' => 'Há prazos ou tarefas vencidas que podem gerar cobrança do controle interno.',
+                'route' => route('work-center.index', ['queue' => 'overdue']),
+                'action' => 'Ver atrasos',
+            ],
+            $openProposals > 0 => [
+                'tone' => 'warning',
+                'icon' => 'landmark',
+                'title' => 'Destravar Câmara e Executivo',
+                'description' => 'Existem propostas aguardando conferência, protocolo, recebimento ou reserva.',
+                'route' => route('legislative.index'),
+                'action' => 'Abrir propostas',
+            ],
+            $summary['high_risk'] > 0 || $criticalAlerts > 0 => [
+                'tone' => 'warning',
+                'icon' => 'shield-alert',
+                'title' => 'Reduzir risco operacional',
+                'description' => 'Há itens com risco elevado que merecem decisão do gestor.',
+                'route' => route('alerts.index'),
+                'action' => 'Ver alertas',
+            ],
+            $summary['accountability_approved'] < $summary['count'] && $summary['count'] > 0 => [
+                'tone' => 'info',
+                'icon' => 'clipboard-check',
+                'title' => 'Fechar prestações pendentes',
+                'description' => 'O ciclo fica mais forte comercialmente quando termina em dossiê e protocolo.',
+                'route' => route('emendas.index', ['status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING]),
+                'action' => 'Ver prestações',
+            ],
+            default => [
+                'tone' => 'success',
+                'icon' => 'badge-check',
+                'title' => 'Operação sob controle',
+                'description' => 'Não há bloqueio crítico no recorte atual. Use os relatórios para apresentar resultado.',
+                'route' => route('governance-reports.index'),
+                'action' => 'Gerar relatório',
+            ],
+        };
+
+        return [
+            'decision' => $decision,
+            'cards' => [
+                [
+                    'label' => 'Reservado pela Câmara',
+                    'value' => 'R$ '.number_format((float) $reservedProposals, 2, ',', '.'),
+                    'caption' => $openProposals.' proposta(s) ainda em decisão',
+                    'icon' => 'wallet-cards',
+                    'tone' => $openProposals > 0 ? 'warning' : 'neutral',
+                ],
+                [
+                    'label' => 'Saldo recebido não pago',
+                    'value' => 'R$ '.number_format((float) $summary['available'], 2, ',', '.'),
+                    'caption' => $summary['payment_rate'].'% do recebido já pago',
+                    'icon' => 'circle-dollar-sign',
+                    'tone' => $summary['available'] > 0 ? 'info' : 'neutral',
+                ],
+                [
+                    'label' => 'Reserva de saúde',
+                    'value' => $healthGap === null ? 'A configurar' : ($healthGap > 0 ? 'Faltam R$ '.number_format($healthGap, 2, ',', '.') : 'Atendida'),
+                    'caption' => 'R$ '.number_format($healthExpected, 2, ',', '.').' marcado(s) para saúde',
+                    'icon' => 'heart-pulse',
+                    'tone' => $healthGap === null ? 'warning' : ($healthGap > 0 ? 'warning' : 'success'),
+                ],
+                [
+                    'label' => 'Risco e prazo',
+                    'value' => (string) ($summary['overdue'] + $summary['high_risk'] + $overdueWork + $criticalAlerts),
+                    'caption' => 'pontos para decisão imediata',
+                    'icon' => 'shield-alert',
+                    'tone' => ($summary['overdue'] + $summary['high_risk'] + $overdueWork + $criticalAlerts) > 0 ? 'danger' : 'success',
+                ],
+            ],
+            'actions' => [
+                ['label' => 'Resolver pendências', 'route' => route('work-center.index'), 'icon' => 'list-checks'],
+                ['label' => 'Abrir Portal Legislativo', 'route' => route('legislative.index'), 'icon' => 'landmark'],
+                ['label' => 'Relatório mensal', 'route' => route('governance-reports.index'), 'icon' => 'scroll-text'],
+            ],
+        ];
     }
 
     /** @param Collection<int, ParliamentaryAmendment> $amendments @return array<string, mixed> */

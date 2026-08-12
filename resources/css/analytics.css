@@ -64,6 +64,162 @@
     min-height: 40px;
 }
 
+.mayor-briefing {
+    display: grid;
+    grid-template-columns: minmax(360px, .95fr) minmax(0, 1.35fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #c7d8e8;
+    border-top: 4px solid var(--navy-800);
+    border-radius: 7px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .98), rgba(242, 247, 251, .94)),
+        radial-gradient(circle at top right, rgba(23, 77, 125, .08), transparent 30rem);
+    box-shadow: var(--shadow-soft);
+}
+
+.mayor-briefing.tone-danger {
+    border-top-color: var(--danger);
+}
+
+.mayor-briefing.tone-warning {
+    border-top-color: var(--warning);
+}
+
+.mayor-briefing.tone-success {
+    border-top-color: var(--success);
+}
+
+.mayor-briefing-main {
+    display: grid;
+    gap: .8rem;
+}
+
+.mayor-briefing-decision {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: .85rem;
+    align-items: start;
+}
+
+.mayor-briefing-decision > span,
+.mayor-briefing-cards article > span {
+    display: grid;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--navy-800);
+    color: #fff;
+}
+
+.mayor-briefing-decision > span {
+    width: 48px;
+    height: 48px;
+}
+
+.mayor-briefing-decision h2 {
+    margin: .15rem 0 .35rem;
+    color: var(--navy-950);
+    font-size: 1.28rem;
+    font-weight: 850;
+}
+
+.mayor-briefing-decision p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: .85rem;
+    line-height: 1.45;
+}
+
+.mayor-briefing-decision .btn {
+    grid-column: 2;
+    width: fit-content;
+}
+
+.mayor-briefing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+}
+
+.mayor-briefing-actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 34px;
+    padding: .45rem .7rem;
+    border: 1px solid #cbd9e6;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .82);
+    color: var(--navy-900);
+    font-size: .76rem;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.mayor-briefing-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.mayor-briefing-cards article {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: .7rem;
+    min-width: 0;
+    padding: .85rem;
+    border: 1px solid #d8e3ec;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .9);
+}
+
+.mayor-briefing-cards article.tone-danger {
+    border-color: #edc0c0;
+    background: linear-gradient(145deg, #ffffff, #fff2f2);
+}
+
+.mayor-briefing-cards article.tone-warning {
+    border-color: #ead19a;
+    background: linear-gradient(145deg, #ffffff, #fff8e8);
+}
+
+.mayor-briefing-cards article.tone-success {
+    border-color: #b8ddc8;
+    background: linear-gradient(145deg, #ffffff, #edf8f3);
+}
+
+.mayor-briefing-cards article > span {
+    width: 38px;
+    height: 38px;
+    background: #e8f0f8;
+    color: var(--navy-800);
+}
+
+.mayor-briefing-cards small {
+    color: var(--muted);
+    font-size: .66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.mayor-briefing-cards strong {
+    display: block;
+    overflow-wrap: anywhere;
+    margin: .25rem 0 .18rem;
+    color: var(--navy-950);
+    font-size: 1.02rem;
+    font-weight: 850;
+    line-height: 1.18;
+}
+
+.mayor-briefing-cards p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .72rem;
+    line-height: 1.35;
+}
+
 .analytics-metrics {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1016,6 +1172,7 @@
 
 @media (max-width: 1199.98px) {
     .analytics-metrics,
+    .mayor-briefing-cards,
     .public-metric-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1059,6 +1216,7 @@
 }
 
 @media (max-width: 991.98px) {
+    .mayor-briefing,
     .analytics-grid-primary,
     .analytics-grid-secondary,
     .analytics-grid-tertiary,
@@ -1103,10 +1261,34 @@
 
     .analytics-filters,
     .analytics-metrics,
+    .mayor-briefing-cards,
     .public-metric-grid,
     .public-open-data-strip,
     .analytics-pulse {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mayor-briefing {
+        padding: .85rem;
+    }
+
+    .mayor-briefing-decision {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .mayor-briefing-decision > span {
+        width: 40px;
+        height: 40px;
+    }
+
+    .mayor-briefing-decision .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .mayor-briefing-actions a {
+        flex: 1 1 180px;
+        justify-content: center;
     }
 
     .analytics-filter-actions,

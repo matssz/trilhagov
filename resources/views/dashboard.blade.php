@@ -76,6 +76,39 @@
         </div>
     </form>
 
+    <section class="mayor-briefing tone-{{ $mayorBriefing['decision']['tone'] }}" aria-label="Painel do prefeito e gestor">
+        <div class="mayor-briefing-main">
+            <div class="mayor-briefing-decision">
+                <span><i data-lucide="{{ $mayorBriefing['decision']['icon'] }}" aria-hidden="true"></i></span>
+                <div>
+                    <p class="panel-kicker">Painel do prefeito e gestor</p>
+                    <h2>{{ $mayorBriefing['decision']['title'] }}</h2>
+                    <p>{{ $mayorBriefing['decision']['description'] }}</p>
+                </div>
+                <a class="btn btn-primary" href="{{ $mayorBriefing['decision']['route'] }}">
+                    <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $mayorBriefing['decision']['action'] }}
+                </a>
+            </div>
+            <div class="mayor-briefing-actions" aria-label="Atalhos do gestor">
+                @foreach ($mayorBriefing['actions'] as $action)
+                    <a href="{{ $action['route'] }}"><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i>{{ $action['label'] }}</a>
+                @endforeach
+            </div>
+        </div>
+        <div class="mayor-briefing-cards">
+            @foreach ($mayorBriefing['cards'] as $card)
+                <article class="tone-{{ $card['tone'] }}">
+                    <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $card['label'] }}</small>
+                        <strong>{{ $card['value'] }}</strong>
+                        <p>{{ $card['caption'] }}</p>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
+
     <section class="municipal-health health-{{ $municipalHealth['tone'] }}" aria-label="Saúde operacional do município">
         <div class="municipal-health-summary">
             <span><i data-lucide="{{ $municipalHealth['tone'] === 'ready' ? 'shield-check' : 'shield-alert' }}" aria-hidden="true"></i></span>

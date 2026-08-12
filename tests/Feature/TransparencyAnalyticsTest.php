@@ -90,6 +90,29 @@ class TransparencyAnalyticsTest extends TestCase
             ->assertSee('Revisar emendas');
     }
 
+    public function test_dashboard_shows_mayor_briefing(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->proposal($municipality, $manager, [
+            'reference' => 'LEG-PREF-001',
+            'status' => LegislativeProposal::STATUS_SENT,
+            'estimated_amount' => 50000,
+            'object' => 'Equipamentos para atendimento municipal.',
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Painel do prefeito e gestor')
+            ->assertSee('Destravar Câmara e Executivo')
+            ->assertSee('Reservado pela Câmara')
+            ->assertSee('Saldo recebido não pago')
+            ->assertSee('Reserva de saúde')
+            ->assertSee('Risco e prazo')
+            ->assertSee('Relatório mensal');
+    }
+
     public function test_only_manager_can_publish_and_repeated_request_is_ignored(): void
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
