@@ -35,9 +35,13 @@
     --neutral-900: #111d31;
     --navy-950: #071f3d;
     --navy-900: #0a2f5a;
+    --navy-850: #0f3766;
     --navy-800: #123f70;
+    --navy-700: #1e5a8d;
+    --navy-300: #9db8d3;
     --navy-50: #f1f7fc;
     --navy-100: #e8eff7;
+    --gold-700: #8b6408;
     --gold-600: #b98910;
     --gold-500: #d2a62b;
     --gold-100: #fff6d9;
@@ -69,6 +73,10 @@
     --elevation-1: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
     --elevation-2: 0 6px 18px rgba(15, 43, 73, .085), 0 2px 6px rgba(15, 23, 42, .045);
     --elevation-3: 0 18px 42px rgba(15, 23, 42, .16), inset 0 1px 0 rgba(255, 255, 255, .72);
+    --border: var(--line);
+    --text-secondary: var(--muted);
+    --shadow-sm: var(--elevation-1);
+    --shadow-lg: var(--elevation-3);
     --shadow-soft: var(--elevation-1), inset 0 1px 0 rgba(255, 255, 255, .85);
     --focus-ring: 0 0 0 3px rgba(18, 63, 112, .13);
     --interaction-speed: 160ms;
