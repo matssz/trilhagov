@@ -7,7 +7,7 @@
         <i data-lucide="arrow-left" aria-hidden="true"></i>Voltar para emendas
     </a>
 
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-3">
+    <div class="accountability-hero d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-3">
         <div>
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <p class="page-kicker mb-0">Prestação de contas</p>
