@@ -212,6 +212,59 @@ class LegislativeProposalService
         return $errors;
     }
 
+    /** @return array<string, mixed> */
+    public function submissionReadiness(LegislativeProposal $proposal, User $user): array
+    {
+        $errors = $this->submissionErrors($proposal, $user);
+        $proposal->loadMissing('regulatoryProfile');
+        $profile = $proposal->regulatoryProfile;
+
+        $items = [
+            [
+                'label' => 'Identidade parlamentar',
+                'ok' => ! array_key_exists('author', $errors),
+                'detail' => array_key_exists('author', $errors) ? $errors['author'] : $proposal->author_name.' / '.$proposal->author_party,
+            ],
+            [
+                'label' => 'Norma municipal ativa',
+                'ok' => ! array_key_exists('profile', $errors),
+                'detail' => array_key_exists('profile', $errors) ? $errors['profile'] : 'Exercicio '.$proposal->fiscal_year.' liberado para a Camara.',
+            ],
+            [
+                'label' => 'Valor dentro da cota',
+                'ok' => ! array_key_exists('estimated_amount', $errors) && ! array_key_exists('count', $errors),
+                'detail' => $errors['estimated_amount'] ?? $errors['count'] ?? 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.').' pode seguir para conferencia.',
+            ],
+            [
+                'label' => 'Beneficiario e destino',
+                'ok' => filled($proposal->beneficiary_name) && filled($proposal->responsible_department),
+                'detail' => filled($proposal->beneficiary_name) && filled($proposal->responsible_department)
+                    ? $proposal->beneficiary_name.' - '.$proposal->responsible_department
+                    : 'Informe beneficiario/local e secretaria responsavel.',
+            ],
+            [
+                'label' => 'Saude acompanhada',
+                'ok' => $profile === null || ! $proposal->health_related || (float) $proposal->estimated_amount > 0,
+                'detail' => $proposal->health_related ? 'Marcada como acao de saude.' : 'Nao marcada como saude.',
+            ],
+            [
+                'label' => 'Conflito declarado quando necessario',
+                'ok' => ! array_key_exists('third_sector_conflict_declaration', $errors),
+                'detail' => $errors['third_sector_conflict_declaration'] ?? 'Sem bloqueio para envio.',
+            ],
+        ];
+
+        return [
+            'can_submit' => $errors === [],
+            'title' => $proposal->status === LegislativeProposal::STATUS_RETURNED ? 'Corrigir e reenviar proposta' : 'Enviar para conferencia da Camara',
+            'message' => $errors === []
+                ? 'A proposta esta pronta para seguir. Depois do envio, ela fica bloqueada ate a conferencia legislativa.'
+                : 'Resolva os pontos abaixo antes de enviar. O sistema nao deixa a proposta seguir com erro de cota, norma ou cadastro.',
+            'errors' => $errors,
+            'items' => $items,
+        ];
+    }
+
     /**
      * @param array<string, mixed> $data
      * @return array<string, string>

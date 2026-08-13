@@ -3529,6 +3529,164 @@
     font-size: .78rem;
 }
 
+.legislative-submit-assistant {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #bfd0e0;
+    border-left: 4px solid var(--navy-800);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 100%);
+    box-shadow: 0 14px 30px rgba(13, 47, 87, .08);
+}
+
+.legislative-submit-assistant header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.legislative-submit-assistant header > span {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.legislative-submit-assistant svg {
+    width: 18px;
+    height: 18px;
+}
+
+.legislative-submit-assistant small,
+.legislative-submit-assistant strong,
+.legislative-submit-assistant p {
+    display: block;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.legislative-submit-assistant header small {
+    color: #65768f;
+    font-size: .68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.legislative-submit-assistant header strong {
+    margin-top: 2px;
+    color: var(--navy-950);
+    font-size: .98rem;
+    font-weight: 950;
+}
+
+.legislative-submit-assistant header p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: .76rem;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.legislative-submit-assistant > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.legislative-submit-assistant article {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #d3e2ef;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .88);
+}
+
+.legislative-submit-assistant article.is-ok svg {
+    color: #147451;
+}
+
+.legislative-submit-assistant article.needs-action {
+    border-color: #f0c98a;
+    background: #fff9ed;
+}
+
+.legislative-submit-assistant article.needs-action svg {
+    color: #a66800;
+}
+
+.legislative-submit-assistant article strong {
+    color: var(--navy-950);
+    font-size: .76rem;
+    font-weight: 950;
+}
+
+.legislative-submit-assistant article small {
+    margin-top: 3px;
+    color: #607087;
+    font-size: .68rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.legislative-councilor-flow-note {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    border: 1px solid #c8d9e9;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+.legislative-councilor-flow-note > span {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #e6f2ff;
+    color: var(--navy-900);
+}
+
+.legislative-councilor-flow-note svg {
+    width: 18px;
+    height: 18px;
+}
+
+.legislative-councilor-flow-note strong,
+.legislative-councilor-flow-note p {
+    display: block;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.legislative-councilor-flow-note strong {
+    color: var(--navy-950);
+    font-size: .86rem;
+    font-weight: 950;
+}
+
+.legislative-councilor-flow-note p {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: .74rem;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
 .legislative-action-panel {
     display: block;
     background: #fff;
@@ -4496,6 +4654,22 @@
 
     .legislative-action-band button {
         width: 100%;
+    }
+
+    .legislative-submit-assistant header {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .legislative-submit-assistant header form {
+        grid-column: 1 / -1;
+    }
+
+    .legislative-submit-assistant header .btn {
+        width: 100%;
+    }
+
+    .legislative-submit-assistant > div {
+        grid-template-columns: 1fr;
     }
 
     .legislative-action-panel > form {

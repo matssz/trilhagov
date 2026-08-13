@@ -96,6 +96,13 @@
                 <li data-readiness-item="justification">Justificativa suficiente</li>
             </ul>
         </section>
+        <section class="legislative-councilor-flow-note">
+            <span><i data-lucide="route" aria-hidden="true"></i></span>
+            <div>
+                <strong>Como sua proposta vai andar</strong>
+                <p>Primeiro ela fica salva como rascunho. Na tela seguinte voce confere tudo e envia para a Camara. Depois disso, o Executivo avalia, reserva o orcamento e voce acompanha o andamento pelo portal.</p>
+            </div>
+        </section>
         <section class="legislative-auto-check-panel">
             <header>
                 <span><i data-lucide="shield-check" aria-hidden="true"></i></span>

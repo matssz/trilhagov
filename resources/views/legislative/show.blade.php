@@ -291,7 +291,37 @@
             </form>
         </details>
 
-        <section class="legislative-action-band" id="enviar-conferencia">
+        <section class="legislative-submit-assistant" id="enviar-conferencia">
+            <header>
+                <span><i data-lucide="{{ $submissionReadiness['can_submit'] ? 'send' : 'list-checks' }}" aria-hidden="true"></i></span>
+                <div>
+                    <small>Assistente de envio</small>
+                    <strong>{{ $submissionReadiness['title'] }}</strong>
+                    <p>{{ $submissionReadiness['message'] }}</p>
+                </div>
+                <form method="POST" action="{{ route('legislative.submit', $proposal) }}" data-prevent-double-submit>
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $submitToken }}">
+                    <button class="btn btn-primary" type="submit" @disabled(! $submissionReadiness['can_submit'])>
+                        <i data-lucide="{{ $proposal->status === App\Models\LegislativeProposal::STATUS_RETURNED ? 'refresh-cw' : 'send' }}" aria-hidden="true"></i>
+                        {{ $proposal->status === App\Models\LegislativeProposal::STATUS_RETURNED ? 'Reenviar para conferência' : 'Enviar para conferência' }}
+                    </button>
+                </form>
+            </header>
+            <div>
+                @foreach($submissionReadiness['items'] as $item)
+                    <article class="{{ $item['ok'] ? 'is-ok' : 'needs-action' }}">
+                        <i data-lucide="{{ $item['ok'] ? 'circle-check' : 'circle-alert' }}" aria-hidden="true"></i>
+                        <span>
+                            <strong>{{ $item['label'] }}</strong>
+                            <small>{{ $item['detail'] }}</small>
+                        </span>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+
+        <section class="legislative-action-band d-none" aria-hidden="true">
             <div><span><i data-lucide="send" aria-hidden="true"></i></span><div><strong>Encaminhar à conferência legislativa</strong><p>A indicação ficará bloqueada para edição até a conferência dos requisitos mínimos.</p></div></div>
             <form method="POST" action="{{ route('legislative.submit', $proposal) }}" data-prevent-double-submit>@csrf<input name="_submission_token" type="hidden" value="{{ $submitToken }}"><button class="btn btn-primary" type="submit"><i data-lucide="send" aria-hidden="true"></i>Enviar para conferência</button></form>
         </section>

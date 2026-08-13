@@ -666,6 +666,7 @@ class LegislativeProposalController extends Controller
             'quota' => $service->quota($municipality, $proposal->regulatoryProfile, $proposal->author_name, $proposal),
             'reviewChecklist' => $service->reviewChecklist(),
             'reviewBlockers' => $service->reviewBlockers($proposal),
+            'submissionReadiness' => $service->submissionReadiness($proposal, $request->user()),
             'canEdit' => $role === User::ROLE_COUNCILOR && $proposal->submitted_by === $request->user()->id && $proposal->isEditable(),
             'canReview' => in_array($role, [User::ROLE_MANAGER, User::ROLE_LEGISLATIVE_REVIEWER], true),
             'canReceive' => in_array($role, [User::ROLE_MANAGER, User::ROLE_EDITOR], true),

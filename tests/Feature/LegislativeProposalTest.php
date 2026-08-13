@@ -274,6 +274,8 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Reserva mínima')
             ->assertSee('O TrilhaGov usa RCL, cadeiras da Câmara e percentual de saúde da norma ativa.')
             ->assertSee('Salvar proposta')
+            ->assertSee('Como sua proposta vai andar')
+            ->assertSee('Primeiro ela fica salva como rascunho')
             ->assertSee('data-legislative-readiness', false)
             ->assertSee('data-auto-health-source', false)
             ->assertSee('data-auto-health-toggle', false)
@@ -307,6 +309,43 @@ class LegislativeProposalTest extends TestCase
         ])->assertSessionHasErrors('estimated_amount');
 
         $this->assertSame(LegislativeProposal::STATUS_DRAFT, $proposal->fresh()->status);
+    }
+
+    public function test_councilor_submission_assistant_guides_draft_and_returned_proposal(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $councilor = $this->attach($municipality, User::ROLE_COUNCILOR, [
+            'legislative_name' => 'Vereador Fluxo Claro',
+            'legislative_party' => 'PSD',
+        ]);
+        $draft = $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_DRAFT,
+            'object' => 'Aquisicao de equipamentos para atendimento municipal no bairro central.',
+        ]);
+        $returned = $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_RETURNED,
+            'object' => 'Reforma de espaco publico devolvida para ajuste de dados.',
+            'review_notes' => 'Ajustar beneficiario e fundamentar melhor a finalidade publica.',
+        ]);
+
+        $this->actingAs($councilor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $draft))
+            ->assertOk()
+            ->assertSee('Assistente de envio')
+            ->assertSee('Enviar para conferencia da Camara')
+            ->assertSee('Identidade parlamentar')
+            ->assertSee('Valor dentro da cota')
+            ->assertSee('Enviar para conferência');
+
+        $this->actingAs($councilor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.show', $returned))
+            ->assertOk()
+            ->assertSee('Corrigir e reenviar proposta')
+            ->assertSee('Reenviar para conferência')
+            ->assertSee('Assistente de envio');
     }
 
     public function test_health_gap_blocks_protocol_until_councilor_portfolio_meets_local_percentage(): void
