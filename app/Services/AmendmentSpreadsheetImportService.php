@@ -658,7 +658,7 @@ class AmendmentSpreadsheetImportService
         }
 
         if (! $municipality->allowsGovernmentSphere((string) $data['government_sphere'])) {
-            $errors[] = 'A esfera informada nÃ£o estÃ¡ habilitada nos parÃ¢metros deste municÃ­pio.';
+            $errors[] = 'A esfera informada não está habilitada nos parâmetros deste município.';
         }
 
         return array_values(array_unique($errors));

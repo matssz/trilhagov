@@ -123,7 +123,7 @@ class ParliamentaryAmendmentRequest extends FormRequest
             if (! $municipality->allowsGovernmentSphere((string) $this->input('government_sphere'))) {
                 $validator->errors()->add(
                     'government_sphere',
-                    'Esta esfera ainda nÃ£o estÃ¡ habilitada para este municÃ­pio. Ative o parÃ¢metro em Normas municipais.',
+                    'Esta esfera ainda não está habilitada para este município. Ative o parâmetro em Normas municipais.',
                 );
 
                 return;

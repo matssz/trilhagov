@@ -60,7 +60,7 @@
                 @endforeach
             </select>
             @if (count($governmentSpheres) === 1)
-                <div class="form-text">Emendas federais e estaduais aparecem somente quando o gestor habilita esses mÃ³dulos em Normas municipais.</div>
+                <div class="form-text">Emendas federais e estaduais aparecem somente quando o gestor habilita esses módulos em Normas municipais.</div>
             @endif
             @error('government_sphere')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>

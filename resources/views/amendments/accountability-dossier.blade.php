@@ -62,8 +62,8 @@
         <table class="receipt">
             <tr><th>Selo final</th><td colspan="3">{{ $accountabilityGuide['finalReceipt']['seal'] }}</td></tr>
             <tr><th>Protocolo</th><td>{{ $accountabilityGuide['finalReceipt']['protocol'] }}</td><th>Envio</th><td>{{ $accountabilityGuide['finalReceipt']['submitted_at'] }}</td></tr>
-            <tr><th>SituaÃ§Ã£o</th><td>{{ $accountabilityGuide['finalReceipt']['status'] }}</td><th>ProntidÃ£o</th><td>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</td></tr>
-            <tr><th>ResponsÃ¡vel</th><td>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</td><th>Prazo</th><td>{{ $accountabilityGuide['finalReceipt']['deadline'] }}</td></tr>
+            <tr><th>Situação</th><td>{{ $accountabilityGuide['finalReceipt']['status'] }}</td><th>Prontidão</th><td>{{ $accountabilityGuide['finalReceipt']['readiness'] }}</td></tr>
+            <tr><th>Responsável</th><td>{{ $accountabilityGuide['finalReceipt']['responsible'] }}</td><th>Prazo</th><td>{{ $accountabilityGuide['finalReceipt']['deadline'] }}</td></tr>
         </table>
     </section>
 
