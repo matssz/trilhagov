@@ -5389,3 +5389,217 @@
         position: static;
     }
 }
+
+/* Legislative QA hardening: keep the redesigned portal stable on tablet and mobile. */
+@media (max-width: 1180px) {
+    .legislative-executive-desk,
+    .executive-next-decisions,
+    .legislative-detail-grid,
+    .councilor-money-guide {
+        grid-template-columns: 1fr;
+    }
+
+    .executive-command-cards,
+    .executive-flow-lane,
+    .executive-next-decisions > div,
+    .executive-triage-strip,
+    .legislative-board-grid,
+    .councilor-plain-cards,
+    .councilor-decision-strip,
+    .councilor-simple-guide,
+    .legislative-auto-check-panel > div,
+    .legislative-template-panel > div,
+    .legislative-minimum-flow,
+    .legislative-readiness-panel ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .legislative-row {
+        grid-template-columns: 96px minmax(220px, 1fr) 110px 130px 150px 18px;
+        gap: 12px;
+    }
+
+    .legislative-detail-summary,
+    .legislative-side-column {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    .legislative-heading,
+    .legislative-detail-heading {
+        display: flex;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .legislative-heading .btn,
+    .legislative-detail-heading .btn,
+    .legislative-process-map header .btn,
+    .executive-command-summary .btn,
+    .councilor-workspace-header .btn,
+    .councilor-mandate-header .btn {
+        width: 100%;
+    }
+
+    .legislative-process-map header,
+    .executive-command-summary,
+    .councilor-workspace-header,
+    .councilor-mandate-header {
+        display: grid;
+        align-items: stretch;
+    }
+
+    .legislative-detail-summary {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .legislative-councilor-home,
+    .councilor-operating-strip,
+    .councilor-mandate-grid,
+    .councilor-timeline,
+    .councilor-home-progress,
+    .councilor-action-summary,
+    .councilor-plain-cards,
+    .councilor-decision-strip,
+    .councilor-simple-checklist,
+    .councilor-simple-checklist-items,
+    .councilor-simple-guide,
+    .councilor-stage-grid,
+    .executive-command-cards,
+    .executive-flow-lane,
+    .executive-next-decisions > div,
+    .executive-action-queue > div,
+    .executive-triage-strip,
+    .legislative-board-grid,
+    .legislative-filters,
+    .legislative-simple-form,
+    .legislative-form-grid,
+    .legislative-fields,
+    .legislative-auto-check-panel > div,
+    .legislative-template-panel > div,
+    .legislative-minimum-flow,
+    .legislative-readiness-panel ul,
+    .legislative-smart-grid,
+    .legislative-process-steps,
+    .legislative-flow,
+    .legislative-side-column,
+    .legislative-data-grid,
+    .legislative-execution-metrics,
+    .legislative-review-checks,
+    .legislative-councilor-final-status > div {
+        grid-template-columns: 1fr;
+    }
+
+    .legislative-automation-panel,
+    .legislative-projection-panel,
+    .legislative-councilor-current-step,
+    .legislative-councilor-money-status,
+    .legislative-stale-alert,
+    .legislative-next-action,
+    .legislative-decision-panel-main,
+    .legislative-submit-assistant header {
+        grid-template-columns: 42px minmax(0, 1fr);
+    }
+
+    .legislative-automation-panel > span,
+    .legislative-projection-panel .btn,
+    .legislative-councilor-current-step .btn,
+    .legislative-councilor-money-status .btn,
+    .legislative-stale-alert .btn,
+    .legislative-next-action .btn,
+    .legislative-decision-panel-main .btn,
+    .legislative-submit-assistant header form,
+    .legislative-submit-assistant header .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        white-space: normal;
+    }
+
+    .legislative-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .legislative-row-code,
+    .legislative-row-main,
+    .legislative-row-health,
+    .legislative-row-amount,
+    .legislative-row .legislative-status {
+        grid-column: 1;
+        max-width: 100%;
+        text-align: left;
+        justify-self: start;
+    }
+
+    .legislative-row-main small,
+    .legislative-row-health,
+    .legislative-row-amount,
+    .legislative-status {
+        white-space: normal;
+    }
+
+    .legislative-row > svg {
+        display: none;
+    }
+
+    .legislative-form-section.span-2,
+    .legislative-fields .span-2,
+    .legislative-extra-fields.span-2,
+    .legislative-action-panel > form .span-2,
+    .legislative-side-column > section:last-child,
+    .legislative-auto-check-panel article:last-child,
+    .legislative-template-panel button:last-child {
+        grid-column: auto;
+    }
+
+    .legislative-form-actions,
+    .legislative-decision-actions {
+        flex-direction: column-reverse;
+    }
+
+    .legislative-form-actions .btn,
+    .legislative-decision-actions .btn,
+    .councilor-home-actions .btn,
+    .legislative-action-band button,
+    .legislative-action-panel .btn {
+        width: 100%;
+    }
+
+    .executive-action-card {
+        grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+    .executive-action-card button,
+    .executive-action-queue b,
+    .councilor-action-summary article > a {
+        grid-column: 2;
+        width: fit-content;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .legislative-heading h1,
+    .legislative-detail-heading h1,
+    .councilor-home-main h2 {
+        font-size: clamp(1.65rem, 11vw, 2.15rem);
+    }
+
+    .legislative-heading,
+    .legislative-detail-heading,
+    .legislative-councilor-home,
+    .councilor-workspace,
+    .councilor-mandate-panel,
+    .legislative-process-map,
+    .legislative-smart-summary {
+        border-radius: var(--radius-lg);
+    }
+
+    .legislative-quota-band,
+    .legislative-smart-grid,
+    .legislative-process-steps {
+        grid-template-columns: 1fr;
+    }
+}

@@ -65,12 +65,12 @@
                     <div class="councilor-mandate-header">
                         <div>
                             <span class="page-kicker">Resumo do mandato</span>
-                            <strong>Dinheiro, saude e andamento em uma tela</strong>
-                            <p>O TrilhaGov calcula a cota pela norma ativa. Voce acompanha o saldo sem precisar interpretar planilha.</p>
+                            <strong>Dinheiro, saúde e andamento em uma tela</strong>
+                            <p>O TrilhaGov calcula a cota pela norma ativa. Você acompanha o saldo sem precisar interpretar planilha.</p>
                         </div>
                         @if ($councilorGuide['canCreate'] ?? false)
                             <a class="btn btn-outline-primary" href="{{ route('legislative.create', ['year' => $year]) }}">
-                                <i data-lucide="sparkles" aria-hidden="true"></i>Nova indicacao guiada
+                                <i data-lucide="sparkles" aria-hidden="true"></i>Nova indicação guiada
                             </a>
                         @endif
                     </div>

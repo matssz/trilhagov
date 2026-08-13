@@ -100,7 +100,7 @@
             <span><i data-lucide="route" aria-hidden="true"></i></span>
             <div>
                 <strong>Como sua proposta vai andar</strong>
-                <p>Primeiro ela fica salva como rascunho. Na tela seguinte voce confere tudo e envia para a Camara. Depois disso, o Executivo avalia, reserva o orcamento e voce acompanha o andamento pelo portal.</p>
+                <p>Primeiro ela fica salva como rascunho. Na tela seguinte você confere tudo e envia para a Câmara. Depois disso, o Executivo avalia, reserva o orçamento e você acompanha o andamento pelo portal.</p>
             </div>
         </section>
         <section class="legislative-auto-check-panel">

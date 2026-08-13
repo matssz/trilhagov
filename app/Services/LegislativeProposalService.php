@@ -228,7 +228,7 @@ class LegislativeProposalService
             [
                 'label' => 'Norma municipal ativa',
                 'ok' => ! array_key_exists('profile', $errors),
-                'detail' => array_key_exists('profile', $errors) ? $errors['profile'] : 'Exercicio '.$proposal->fiscal_year.' liberado para a Camara.',
+                'detail' => array_key_exists('profile', $errors) ? $errors['profile'] : 'Exercício '.$proposal->fiscal_year.' liberado para a Câmara.',
             ],
             [
                 'label' => 'Valor dentro da cota',
@@ -236,19 +236,19 @@ class LegislativeProposalService
                 'detail' => $errors['estimated_amount'] ?? $errors['count'] ?? 'R$ '.number_format((float) $proposal->estimated_amount, 2, ',', '.').' pode seguir para conferencia.',
             ],
             [
-                'label' => 'Beneficiario e destino',
+                'label' => 'Beneficiário e destino',
                 'ok' => filled($proposal->beneficiary_name) && filled($proposal->responsible_department),
                 'detail' => filled($proposal->beneficiary_name) && filled($proposal->responsible_department)
                     ? $proposal->beneficiary_name.' - '.$proposal->responsible_department
                     : 'Informe beneficiario/local e secretaria responsavel.',
             ],
             [
-                'label' => 'Saude acompanhada',
+                'label' => 'Saúde acompanhada',
                 'ok' => $profile === null || ! $proposal->health_related || (float) $proposal->estimated_amount > 0,
-                'detail' => $proposal->health_related ? 'Marcada como acao de saude.' : 'Nao marcada como saude.',
+                'detail' => $proposal->health_related ? 'Marcada como ação de saúde.' : 'Não marcada como saúde.',
             ],
             [
-                'label' => 'Conflito declarado quando necessario',
+                'label' => 'Conflito declarado quando necessário',
                 'ok' => ! array_key_exists('third_sector_conflict_declaration', $errors),
                 'detail' => $errors['third_sector_conflict_declaration'] ?? 'Sem bloqueio para envio.',
             ],
@@ -256,10 +256,10 @@ class LegislativeProposalService
 
         return [
             'can_submit' => $errors === [],
-            'title' => $proposal->status === LegislativeProposal::STATUS_RETURNED ? 'Corrigir e reenviar proposta' : 'Enviar para conferencia da Camara',
+            'title' => $proposal->status === LegislativeProposal::STATUS_RETURNED ? 'Corrigir e reenviar proposta' : 'Enviar para conferência da Câmara',
             'message' => $errors === []
                 ? 'A proposta esta pronta para seguir. Depois do envio, ela fica bloqueada ate a conferencia legislativa.'
-                : 'Resolva os pontos abaixo antes de enviar. O sistema nao deixa a proposta seguir com erro de cota, norma ou cadastro.',
+                : 'Resolva os pontos abaixo antes de enviar. O sistema não deixa a proposta seguir com erro de cota, norma ou cadastro.',
             'errors' => $errors,
             'items' => $items,
         ];
@@ -279,11 +279,11 @@ class LegislativeProposalService
         $errors = [];
 
         if ($profile === null) {
-            return ['fiscal_year' => 'O MunicÃ­pio ainda nÃ£o ativou a configuraÃ§Ã£o normativa deste exercÃ­cio.'];
+            return ['fiscal_year' => 'O Município ainda não ativou a configuração normativa deste exercício.'];
         }
 
         if ($profile->regime_status !== MunicipalRegulatoryProfile::REGIME_INSTITUTED) {
-            $errors['fiscal_year'] = 'A Lei OrgÃ¢nica ainda nÃ£o estÃ¡ marcada como instituÃ­da para este exercÃ­cio.';
+            $errors['fiscal_year'] = 'A Lei Orgânica ainda não está marcada como instituída para este exercício.';
         }
 
         $amount = isset($data['estimated_amount']) ? (float) $data['estimated_amount'] : 0.0;
@@ -297,22 +297,22 @@ class LegislativeProposalService
         );
 
         if ($profile->minimum_amendment_amount !== null && $amount < (float) $profile->minimum_amendment_amount) {
-            $errors['estimated_amount'] = 'O valor mÃ­nimo para proposta neste exercÃ­cio Ã© R$ '
+            $errors['estimated_amount'] = 'O valor mínimo para proposta neste exercício é R$ '
                 .number_format((float) $profile->minimum_amendment_amount, 2, ',', '.').'.';
         }
 
         if ($quota['count_limit'] !== null && $quota['count'] > $quota['count_limit']) {
-            $errors['estimated_amount'] = "Este vereador jÃ¡ atingiu o limite de {$quota['count_limit']} proposta(s) para o exercÃ­cio.";
+            $errors['estimated_amount'] = "Este vereador já atingiu o limite de {$quota['count_limit']} proposta(s) para o exercício.";
         }
 
         if ($quota['author_ceiling'] !== null && $quota['used'] > $quota['author_ceiling'] + 0.005) {
             $availableBeforeThisProposal = max(0, (float) $quota['author_ceiling'] - ((float) $quota['used'] - $amount));
-            $errors['estimated_amount'] = 'Esta proposta ultrapassa o saldo disponÃ­vel do vereador. Saldo antes desta proposta: R$ '
+            $errors['estimated_amount'] = 'Esta proposta ultrapassa o saldo disponível do vereador. Saldo antes desta proposta: R$ '
                 .number_format($availableBeforeThisProposal, 2, ',', '.').'.';
         }
 
         if (($data['beneficiary_type'] ?? null) === 'third_sector' && ! (bool) ($data['third_sector_conflict_declaration'] ?? false)) {
-            $errors['third_sector_conflict_declaration'] = 'Para entidade do Terceiro Setor, confirme a declaraÃ§Ã£o preliminar de inexistÃªncia de conflito.';
+            $errors['third_sector_conflict_declaration'] = 'Para entidade do Terceiro Setor, confirme a declaração preliminar de inexistência de conflito.';
         }
 
         return $errors;

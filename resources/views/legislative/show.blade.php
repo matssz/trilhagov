@@ -125,9 +125,9 @@
         ];
         $councilorFinalCards = $amendment ? [
             [
-                'label' => 'Entrega fisica',
+                'label' => 'Entrega física',
                 'value' => $physicalProgress.'%',
-                'detail' => $physicalProgress >= 100 ? 'Objeto informado como concluido.' : 'Prefeitura ainda atualiza a execucao.',
+                'detail' => $physicalProgress >= 100 ? 'Objeto informado como concluído.' : 'Prefeitura ainda atualiza a execução.',
                 'done' => $physicalProgress >= 100,
             ],
             [
@@ -137,9 +137,9 @@
                 'done' => $paid > 0,
             ],
             [
-                'label' => 'Prestacao',
-                'value' => $accountabilityProcess?->statusLabel() ?? 'Nao iniciada',
-                'detail' => $accountabilityReady ? 'Documentacao final ja protocolada ou arquivada.' : 'Aguardando fechamento documental.',
+                'label' => 'Prestação',
+                'value' => $accountabilityProcess?->statusLabel() ?? 'Não iniciada',
+                'detail' => $accountabilityReady ? 'Documentação final já protocolada ou arquivada.' : 'Aguardando fechamento documental.',
                 'done' => $accountabilityReady,
             ],
         ] : [];
@@ -206,13 +206,13 @@
             <a class="btn btn-outline-primary" href="#acompanhamento-executivo"><i data-lucide="route" aria-hidden="true"></i>Ver caminho</a>
         </section>
         @if($amendment)
-            <section class="legislative-councilor-final-status" aria-label="Entrega e prestacao de contas para o vereador">
+            <section class="legislative-councilor-final-status" aria-label="Entrega e prestação de contas para o vereador">
                 <header>
                     <span><i data-lucide="flag" aria-hidden="true"></i></span>
                     <div>
-                        <small>Fechamento da sua indicacao</small>
-                        <strong>Execucao e prestacao em linguagem simples</strong>
-                        <p>Depois que a Prefeitura reserva o recurso, o TrilhaGov mostra entrega, pagamento e prestacao final sem exigir acesso aos modulos tecnicos.</p>
+                        <small>Fechamento da sua indicação</small>
+                        <strong>Execução e prestação em linguagem simples</strong>
+                        <p>Depois que a Prefeitura reserva o recurso, o TrilhaGov mostra entrega, pagamento e prestação final sem exigir acesso aos módulos técnicos.</p>
                     </div>
                 </header>
                 <div>
