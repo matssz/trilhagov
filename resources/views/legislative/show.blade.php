@@ -12,6 +12,11 @@
         $liquidated = (float) $liquidations->sum('amount');
         $paid = (float) $payments->sum('amount');
         $physicalProgress = $amendment?->physicalExecutionPercentage() ?? 0;
+        $accountabilityProcess = $amendment?->accountabilityProcess;
+        $accountabilityReady = $accountabilityProcess && in_array($accountabilityProcess->status, [
+            App\Models\AccountabilityProcess::STATUS_SUBMITTED,
+            App\Models\AccountabilityProcess::STATUS_APPROVED,
+        ], true);
         $executionStarted = $physicalProgress > 0
             || $commitments->isNotEmpty()
             || in_array($amendment?->status, ['executing', 'accountability_pending', 'completed'], true);
@@ -118,6 +123,26 @@
             ['title' => 'Execução', 'owner' => 'Prefeitura', 'description' => 'Entrega física e liquidação acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
             ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestação de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
         ];
+        $councilorFinalCards = $amendment ? [
+            [
+                'label' => 'Entrega fisica',
+                'value' => $physicalProgress.'%',
+                'detail' => $physicalProgress >= 100 ? 'Objeto informado como concluido.' : 'Prefeitura ainda atualiza a execucao.',
+                'done' => $physicalProgress >= 100,
+            ],
+            [
+                'label' => 'Valor pago',
+                'value' => 'R$ '.number_format($paid, 2, ',', '.'),
+                'detail' => $paid > 0 ? 'Pagamento registrado no Executivo.' : 'Sem pagamento registrado ainda.',
+                'done' => $paid > 0,
+            ],
+            [
+                'label' => 'Prestacao',
+                'value' => $accountabilityProcess?->statusLabel() ?? 'Nao iniciada',
+                'detail' => $accountabilityReady ? 'Documentacao final ja protocolada ou arquivada.' : 'Aguardando fechamento documental.',
+                'done' => $accountabilityReady,
+            ],
+        ] : [];
         $stepSlaDays = [0 => 2, 1 => 3, 2 => 2, 3 => 2, 4 => 5, 5 => 5, 6 => 7, 7 => 7];
         $currentTrackingStep = $trackingSteps[$currentProcessIndex] ?? $trackingSteps[0];
         $currentStepAgeDays = (int) floor($proposal->updated_at->diffInHours(now()) / 24);
@@ -180,6 +205,33 @@
             </div>
             <a class="btn btn-outline-primary" href="#acompanhamento-executivo"><i data-lucide="route" aria-hidden="true"></i>Ver caminho</a>
         </section>
+        @if($amendment)
+            <section class="legislative-councilor-final-status" aria-label="Entrega e prestacao de contas para o vereador">
+                <header>
+                    <span><i data-lucide="flag" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Fechamento da sua indicacao</small>
+                        <strong>Execucao e prestacao em linguagem simples</strong>
+                        <p>Depois que a Prefeitura reserva o recurso, o TrilhaGov mostra entrega, pagamento e prestacao final sem exigir acesso aos modulos tecnicos.</p>
+                    </div>
+                </header>
+                <div>
+                    @foreach($councilorFinalCards as $card)
+                        <article class="{{ $card['done'] ? 'is-done' : 'is-pending' }}">
+                            <i data-lucide="{{ $card['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i>
+                            <span>
+                                <small>{{ $card['label'] }}</small>
+                                <strong>{{ $card['value'] }}</strong>
+                                <em>{{ $card['detail'] }}</em>
+                            </span>
+                        </article>
+                    @endforeach
+                </div>
+                <a class="btn btn-outline-primary" href="#acompanhamento-executivo">
+                    <i data-lucide="arrow-down" aria-hidden="true"></i>Ver acompanhamento final
+                </a>
+            </section>
+        @endif
     @endif
 
     @if($currentStepDelayed)

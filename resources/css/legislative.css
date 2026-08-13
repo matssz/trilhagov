@@ -3105,6 +3105,123 @@
     white-space: nowrap;
 }
 
+.legislative-councilor-final-status {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #bfd2e4;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef7ff 100%);
+    box-shadow: 0 14px 30px rgba(13, 47, 87, .08);
+}
+
+.legislative-councilor-final-status header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
+
+.legislative-councilor-final-status header > span {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #e7f2ff;
+    color: var(--navy-900);
+}
+
+.legislative-councilor-final-status svg {
+    width: 18px;
+    height: 18px;
+}
+
+.legislative-councilor-final-status small,
+.legislative-councilor-final-status strong,
+.legislative-councilor-final-status p,
+.legislative-councilor-final-status em {
+    display: block;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.legislative-councilor-final-status header small {
+    color: #65768f;
+    font-size: .68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.legislative-councilor-final-status header strong {
+    margin-top: 2px;
+    color: var(--navy-950);
+    font-size: .96rem;
+    font-weight: 950;
+}
+
+.legislative-councilor-final-status header p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.legislative-councilor-final-status > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.legislative-councilor-final-status article {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    padding: 10px;
+    border: 1px solid #d3e2ef;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .9);
+}
+
+.legislative-councilor-final-status article.is-done svg {
+    color: #147451;
+}
+
+.legislative-councilor-final-status article.is-pending svg {
+    color: #6b7b8f;
+}
+
+.legislative-councilor-final-status article small {
+    color: #65768f;
+    font-size: .66rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.legislative-councilor-final-status article strong {
+    margin-top: 2px;
+    color: var(--navy-950);
+    font-size: .86rem;
+    font-weight: 950;
+}
+
+.legislative-councilor-final-status article em {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: .68rem;
+    font-style: normal;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.legislative-councilor-final-status .btn {
+    justify-self: start;
+}
+
 .legislative-process-map {
     margin-bottom: 20px;
     overflow: hidden;
@@ -4389,6 +4506,15 @@
         grid-column: 1 / -1;
         width: 100%;
         white-space: normal;
+    }
+
+    .legislative-councilor-final-status > div {
+        grid-template-columns: 1fr;
+    }
+
+    .legislative-councilor-final-status .btn {
+        justify-content: center;
+        width: 100%;
     }
 
     .legislative-stale-alert .btn {
