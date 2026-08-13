@@ -173,6 +173,185 @@
     white-space: nowrap;
 }
 
+.councilor-mandate-panel {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #c8d8e8;
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(239, 247, 255, .92)),
+        radial-gradient(circle at top right, rgba(23, 67, 116, .12), transparent 36%);
+    box-shadow: 0 16px 34px rgba(13, 47, 87, .08);
+}
+
+.councilor-mandate-header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.councilor-mandate-header strong,
+.councilor-mandate-header p {
+    display: block;
+    margin: 0;
+}
+
+.councilor-mandate-header strong {
+    color: var(--navy-950);
+    font-size: 1rem;
+    font-weight: 950;
+}
+
+.councilor-mandate-header p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.councilor-mandate-grid,
+.councilor-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.councilor-mandate-grid article,
+.councilor-timeline a {
+    min-width: 0;
+    border: 1px solid #d5e2ee;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .9);
+}
+
+.councilor-mandate-grid article {
+    padding: 12px;
+}
+
+.councilor-mandate-grid small,
+.councilor-mandate-grid strong,
+.councilor-mandate-grid span {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.councilor-mandate-grid small {
+    color: #62738b;
+    font-size: .68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.councilor-mandate-grid strong {
+    margin-top: 7px;
+    color: var(--navy-950);
+    font-size: 1.05rem;
+    font-weight: 950;
+}
+
+.councilor-mandate-grid span {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.councilor-timeline a {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    color: var(--navy-950);
+    text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.councilor-timeline a:hover {
+    border-color: #9db8d3;
+    box-shadow: 0 12px 26px rgba(13, 47, 87, .12);
+    transform: translateY(-1px);
+}
+
+.councilor-timeline a > span {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: #e9f3ff;
+    color: var(--navy-900);
+    font-size: .82rem;
+    font-weight: 950;
+}
+
+.councilor-timeline strong,
+.councilor-timeline small {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.councilor-timeline strong {
+    font-size: .78rem;
+    font-weight: 950;
+}
+
+.councilor-timeline small {
+    margin-top: 2px;
+    color: #65768f;
+    font-size: .66rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.councilor-alerts {
+    display: grid;
+    gap: 8px;
+}
+
+.councilor-alerts article {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border: 1px solid #f1cf8c;
+    border-radius: 8px;
+    background: #fff9ec;
+}
+
+.councilor-alerts svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: #a66800;
+}
+
+.councilor-alerts strong,
+.councilor-alerts p {
+    display: block;
+    margin: 0;
+}
+
+.councilor-alerts strong {
+    color: #7a4a00;
+    font-size: .78rem;
+    font-weight: 950;
+}
+
+.councilor-alerts p {
+    margin-top: 2px;
+    color: #765a27;
+    font-size: .72rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
 .councilor-home-progress {
     display: grid;
     grid-column: 1 / -1;
@@ -3927,6 +4106,11 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .councilor-mandate-grid,
+    .councilor-timeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .councilor-action-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -4105,6 +4289,21 @@
     }
 
     .councilor-stage-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .councilor-mandate-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .councilor-mandate-header .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .councilor-mandate-grid,
+    .councilor-timeline {
         grid-template-columns: 1fr;
     }
 

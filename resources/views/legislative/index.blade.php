@@ -61,6 +61,51 @@
                         <a href="#explicacao-cota">Ver cota</a>
                     </article>
                 </div>
+                <div class="councilor-mandate-panel" aria-label="Resumo do mandato">
+                    <div class="councilor-mandate-header">
+                        <div>
+                            <span class="page-kicker">Resumo do mandato</span>
+                            <strong>Dinheiro, saude e andamento em uma tela</strong>
+                            <p>O TrilhaGov calcula a cota pela norma ativa. Voce acompanha o saldo sem precisar interpretar planilha.</p>
+                        </div>
+                        @if ($councilorGuide['canCreate'] ?? false)
+                            <a class="btn btn-outline-primary" href="{{ route('legislative.create', ['year' => $year]) }}">
+                                <i data-lucide="sparkles" aria-hidden="true"></i>Nova indicacao guiada
+                            </a>
+                        @endif
+                    </div>
+                    <div class="councilor-mandate-grid">
+                        @foreach($councilorGuide['mandateCards'] ?? [] as $card)
+                            <article>
+                                <small>{{ $card['label'] }}</small>
+                                <strong>{{ $card['value'] }}</strong>
+                                <span>{{ $card['hint'] }}</span>
+                            </article>
+                        @endforeach
+                    </div>
+                    <div class="councilor-timeline" aria-label="Linha do tempo das propostas">
+                        @foreach($councilorGuide['timeline'] ?? [] as $step)
+                            <a class="is-{{ $step['tone'] }}" href="{{ $step['url'] }}">
+                                <span>{{ $step['count'] }}</span>
+                                <strong>{{ $step['label'] }}</strong>
+                                <small>abrir etapa</small>
+                            </a>
+                        @endforeach
+                    </div>
+                    @if(! empty($councilorGuide['alerts']))
+                        <div class="councilor-alerts">
+                            @foreach($councilorGuide['alerts'] as $alert)
+                                <article>
+                                    <i data-lucide="circle-alert" aria-hidden="true"></i>
+                                    <div>
+                                        <strong>{{ $alert['title'] }}</strong>
+                                        <p>{{ $alert['text'] }}</p>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
                 <div class="councilor-home-progress">
                     <div>
                         <span>Uso da cota</span>

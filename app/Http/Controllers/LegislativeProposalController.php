@@ -8,6 +8,7 @@ use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\AuditTrail;
+use App\Services\CouncilorPortalSummaryService;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
 use App\Services\LegislativeNotificationService;
@@ -26,6 +27,7 @@ class LegislativeProposalController extends Controller
         Request $request,
         CurrentMunicipality $currentMunicipality,
         LegislativeProposalService $service,
+        CouncilorPortalSummaryService $councilorPortal,
         FormSubmission $formSubmission,
     ): View {
         $municipality = $currentMunicipality->get($request);
@@ -61,7 +63,7 @@ class LegislativeProposalController extends Controller
             ? $service->quota($municipality, $profile, (string) ($membership->legislative_name ?: $request->user()->name))
             : null;
         $councilorGuide = $role === User::ROLE_COUNCILOR
-            ? $this->councilorGuide($municipality, $request->user()->id, $year, $profile, $quota)
+            ? $councilorPortal->build($municipality, $request->user()->id, $year, $profile, $quota)
             : null;
         $councilorGroups = $role === User::ROLE_COUNCILOR
             ? $this->councilorProposalGroups($municipality, $request->user()->id, $year, $councilorGuide)
