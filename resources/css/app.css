@@ -36,6 +36,7 @@
     --navy-950: #071f3d;
     --navy-900: #0a2f5a;
     --navy-800: #123f70;
+    --navy-50: #f1f7fc;
     --navy-100: #e8eff7;
     --gold-600: #b98910;
     --gold-500: #d2a62b;
@@ -7584,5 +7585,258 @@ button.accountability-action-card {
     .btn:hover,
     .btn:active {
         transform: none;
+    }
+}
+
+/* Critical screens polish: municipal command, onboarding, councilor portal and accountability. */
+.work-heading,
+.onboarding-heading,
+.legislative-councilor-home,
+.accountability-guide,
+.auth-panel,
+.municipality-option {
+    border-color: rgba(198, 211, 223, .78);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, .96) 0%, rgba(248, 251, 253, .94) 66%, rgba(242, 247, 250, .92) 100%);
+    box-shadow: var(--elevation-2);
+}
+
+.work-heading,
+.onboarding-heading {
+    border-radius: var(--radius-xl);
+}
+
+.work-heading {
+    padding: var(--space-6);
+}
+
+.work-heading h1,
+.onboarding-heading h1,
+.legislative-councilor-home h2 {
+    letter-spacing: 0;
+}
+
+.work-status-band {
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(7, 31, 61, .98), rgba(10, 47, 90, .96)),
+        radial-gradient(circle at top right, rgba(255, 255, 255, .14), transparent 32%);
+    box-shadow: var(--elevation-2);
+}
+
+.work-metrics article,
+.work-lanes,
+.work-lane-card,
+.work-item,
+.onboarding-guide-card,
+.councilor-mandate-grid article,
+.councilor-timeline a,
+.councilor-action-summary article,
+.accountability-guide-steps > div,
+.accountability-guide-summary > div,
+.accountability-command-card,
+.accountability-action-card,
+.accountability-final-checks article,
+.accountability-receipt-grid article {
+    border-color: rgba(198, 211, 223, .78);
+    border-radius: var(--radius-lg);
+    background: var(--surface-layer-1);
+    box-shadow: var(--elevation-1);
+}
+
+.work-metrics article,
+.work-lane-card,
+.onboarding-guide-card,
+.councilor-timeline a,
+.accountability-command-card,
+.accountability-action-card {
+    transition:
+        transform var(--interaction-speed) var(--interaction-ease),
+        border-color var(--interaction-speed) var(--interaction-ease),
+        box-shadow var(--interaction-speed) var(--interaction-ease);
+}
+
+.work-metrics article:hover,
+.work-lane-card:hover,
+.onboarding-guide-card:hover,
+.councilor-timeline a:hover,
+.accountability-command-card:hover,
+.accountability-action-card.is-active:hover {
+    border-color: rgba(18, 63, 112, .28);
+    box-shadow: var(--elevation-2);
+    transform: translateY(-1px);
+}
+
+.work-decision-panel,
+.accountability-command-board,
+.accountability-action-strip,
+.accountability-final-package,
+.accountability-final-showcase,
+.onboarding-status,
+.onboarding-commercial-panel,
+.councilor-mandate-panel,
+.councilor-simple-checklist {
+    border-color: rgba(198, 211, 223, .72);
+    border-radius: var(--radius-xl);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, .96) 0%, rgba(248, 251, 253, .95) 70%, rgba(241, 247, 251, .94) 100%);
+    box-shadow: var(--elevation-2);
+}
+
+.work-decision-heading,
+.accountability-command-heading,
+.accountability-action-strip-heading,
+.accountability-final-showcase-header,
+.onboarding-guide-panel .content-panel-header {
+    align-items: flex-start;
+}
+
+.work-decision-card,
+.accountability-command-card {
+    min-height: 132px;
+}
+
+.work-decision-card > span,
+.work-metrics article > span,
+.work-lane-card > span,
+.onboarding-status > span,
+.onboarding-guide-card > span,
+.accountability-guide-next > span,
+.accountability-command-card > span,
+.accountability-action-card > span,
+.councilor-action-summary article > span,
+.councilor-timeline a > span {
+    border: 1px solid rgba(174, 194, 214, .82);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+.work-decision-card small,
+.work-lane-card small,
+.accountability-command-card small,
+.accountability-action-card small,
+.onboarding-guide-card p,
+.councilor-action-summary small,
+.councilor-timeline small {
+    line-height: 1.35;
+}
+
+.work-decision-card strong,
+.work-lane-card strong,
+.accountability-command-card strong,
+.accountability-readiness-score strong,
+.accountability-receipt-grid strong,
+.onboarding-commercial-score strong,
+.onboarding-score span,
+.councilor-mandate-grid strong,
+.councilor-home-progress strong {
+    font-variant-numeric: tabular-nums;
+}
+
+.work-lane-grid,
+.accountability-command-grid,
+.accountability-action-list,
+.councilor-mandate-grid,
+.councilor-timeline {
+    gap: var(--space-3);
+}
+
+.onboarding-guide-panel,
+.accountability-guide {
+    overflow: hidden;
+}
+
+.onboarding-guide-grid,
+.accountability-guide-steps,
+.accountability-guide-summary,
+.accountability-readiness-facts,
+.councilor-operating-strip,
+.councilor-action-summary,
+.councilor-home-progress {
+    gap: 1px;
+    border-color: rgba(198, 211, 223, .78);
+    background: rgba(198, 211, 223, .78);
+}
+
+.accountability-readiness {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--elevation-2);
+}
+
+.accountability-readiness-score,
+.onboarding-score {
+    box-shadow: var(--elevation-2), inset 0 1px 0 rgba(255, 255, 255, .86);
+}
+
+.accountability-flow-lane a {
+    border-radius: var(--radius-lg);
+}
+
+.accountability-flow-lane span,
+.accountability-guide-steps span,
+.accountability-final-timeline article > span,
+.accountability-final-checks svg {
+    flex: 0 0 auto;
+}
+
+.auth-shell {
+    width: min(100%, 520px);
+}
+
+.auth-panel {
+    overflow: hidden;
+    padding: var(--space-6);
+    border: 1px solid rgba(198, 211, 223, .78);
+    border-radius: var(--radius-xl);
+}
+
+.municipality-option {
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+}
+
+.municipality-option:has(input:checked) {
+    border-color: rgba(18, 63, 112, .48);
+    box-shadow: var(--elevation-3);
+}
+
+.municipality-workspace {
+    border-radius: var(--radius-lg);
+}
+
+@media (max-width: 980px) {
+    .work-heading,
+    .work-decision-heading,
+    .onboarding-heading,
+    .legislative-councilor-home,
+    .accountability-command-heading,
+    .accountability-action-strip-heading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .work-heading .btn,
+    .work-heading form,
+    .work-decision-heading .btn,
+    .legislative-councilor-home .btn,
+    .accountability-command-heading .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 720px) {
+    .work-heading,
+    .onboarding-heading,
+    .legislative-councilor-home,
+    .accountability-guide,
+    .auth-panel,
+    .municipality-option {
+        border-radius: var(--radius-lg);
+    }
+
+    .work-heading,
+    .onboarding-heading,
+    .auth-panel {
+        padding: var(--space-5);
     }
 }
