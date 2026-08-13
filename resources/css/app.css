@@ -21,6 +21,18 @@
 @import './security-privacy.css';
 
 :root {
+    --font-display: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-tabular: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+    --neutral-25: #fcfdff;
+    --neutral-50: #f5f8fb;
+    --neutral-100: #edf3f8;
+    --neutral-200: #d8e3ed;
+    --neutral-300: #c6d3df;
+    --neutral-400: #93a3b5;
+    --neutral-500: #607086;
+    --neutral-700: #334158;
+    --neutral-800: #1f2b3d;
+    --neutral-900: #111d31;
     --navy-950: #071f3d;
     --navy-900: #0a2f5a;
     --navy-800: #123f70;
@@ -28,17 +40,38 @@
     --gold-600: #b98910;
     --gold-500: #d2a62b;
     --gold-100: #fff6d9;
-    --ink: #172133;
-    --muted: #647085;
-    --surface: #fdfefe;
+    --ink: var(--neutral-900);
+    --muted: var(--neutral-500);
+    --surface: var(--neutral-25);
     --surface-raised: #ffffff;
-    --canvas: #edf1f4;
-    --line: #d4dce4;
-    --line-soft: #e5eaef;
+    --surface-layer-1: rgba(255, 255, 255, .94);
+    --surface-layer-2: linear-gradient(145deg, #ffffff 0%, #f8fbfd 72%, #f4f7fa 100%);
+    --surface-floating: rgba(255, 255, 255, .78);
+    --canvas: var(--neutral-100);
+    --line: var(--neutral-200);
+    --line-soft: rgba(17, 29, 49, .08);
     --pearl-blue: #edf3f6;
     --pearl-gold: #faf5e7;
     --metal-gold: #d4ad3d;
-    --shadow-soft: 0 6px 18px rgba(16, 43, 73, .065), inset 0 1px 0 rgba(255, 255, 255, .85);
+    --space-1: .25rem;
+    --space-2: .5rem;
+    --space-3: .75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 18px;
+    --radius-full: 999px;
+    --elevation-0: none;
+    --elevation-1: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+    --elevation-2: 0 6px 18px rgba(15, 43, 73, .085), 0 2px 6px rgba(15, 23, 42, .045);
+    --elevation-3: 0 18px 42px rgba(15, 23, 42, .16), inset 0 1px 0 rgba(255, 255, 255, .72);
+    --shadow-soft: var(--elevation-1), inset 0 1px 0 rgba(255, 255, 255, .85);
+    --focus-ring: 0 0 0 3px rgba(18, 63, 112, .13);
+    --interaction-speed: 160ms;
+    --interaction-ease: cubic-bezier(.2, .8, .2, 1);
     --success: #157f57;
     --warning: #9b6900;
     --danger: #bd2c2c;
@@ -53,9 +86,9 @@
 body {
     min-height: 100vh;
     margin: 0;
-    background: linear-gradient(135deg, #f6f8f9 0%, var(--canvas) 48%, #f5f3ed 100%);
+    background: linear-gradient(135deg, var(--neutral-50) 0%, var(--canvas) 48%, #f7f9fb 100%);
     color: var(--ink);
-    font-family: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-display);
     font-size: 15px;
     font-optical-sizing: auto;
     font-synthesis: none;
@@ -7427,5 +7460,129 @@ button.accountability-action-card {
     .marketing-metric-row,
     .marketing-timeline {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Premium tokens layer: shared interaction rules for the whole interface. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 0;
+    box-shadow: var(--focus-ring);
+}
+
+.btn,
+.form-control,
+.form-select,
+.input-group-text,
+.topbar-search input {
+    border-radius: var(--radius-md);
+}
+
+.btn {
+    min-height: 38px;
+    transition:
+        transform var(--interaction-speed) var(--interaction-ease),
+        box-shadow var(--interaction-speed) var(--interaction-ease),
+        background-color var(--interaction-speed) var(--interaction-ease),
+        border-color var(--interaction-speed) var(--interaction-ease),
+        color var(--interaction-speed) var(--interaction-ease);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0) scale(.985);
+}
+
+.btn-primary {
+    box-shadow: var(--elevation-2), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    box-shadow: var(--elevation-3);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-danger {
+    background-color: rgba(255, 255, 255, .72);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-color: var(--neutral-300);
+    background-color: var(--surface-layer-1);
+    transition:
+        border-color var(--interaction-speed) var(--interaction-ease),
+        box-shadow var(--interaction-speed) var(--interaction-ease),
+        background-color var(--interaction-speed) var(--interaction-ease);
+}
+
+.form-control:focus,
+.form-select:focus,
+.topbar-search input:focus {
+    border-color: var(--navy-800);
+    background-color: var(--surface-raised);
+    box-shadow: var(--focus-ring);
+}
+
+/* Elevation level 1: repeated data surfaces that should stay quiet and stable. */
+.content-panel,
+.metric-card,
+.marketing-section,
+.marketing-check-list {
+    border-color: var(--line-soft);
+    box-shadow: var(--elevation-1);
+}
+
+/* Elevation level 2: primary panels and cards that need hierarchy without floating. */
+.pearl-panel,
+.validation-summary,
+.marketing-hero,
+.marketing-panel {
+    box-shadow: var(--elevation-2);
+}
+
+/* Elevation level 3: floating elements only, with restrained glass effect. */
+.dropdown-menu,
+.modal-content,
+.toast {
+    border-color: rgba(198, 211, 223, .72);
+    background: var(--surface-floating);
+    box-shadow: var(--elevation-3);
+    backdrop-filter: blur(16px) saturate(126%);
+}
+
+.metric-value,
+.metric-card strong,
+.table td,
+.commitment-values strong,
+.marketing-proof strong,
+[data-financial-value] {
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-value,
+.commitment-values strong,
+[data-financial-value] {
+    font-family: var(--font-tabular);
+    letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .form-control,
+    .form-select,
+    .input-group-text,
+    .topbar-search input {
+        transition: none;
+    }
+
+    .btn:hover,
+    .btn:active {
+        transform: none;
     }
 }
