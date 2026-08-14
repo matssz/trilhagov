@@ -26,7 +26,12 @@ class MunicipalOnboardingTest extends TestCase
             ->assertSee('Próxima ação recomendada')
             ->assertSee('Ativar normas do exercício')
             ->assertSee('Convidar Câmara')
-            ->assertSee('Ative primeiro o exercício');
+            ->assertSee('Ative primeiro o exercício')
+            ->assertSee('Município pronto para operar?')
+            ->assertSee('Começar pelo Excel do município')
+            ->assertSee('Cada usuário sabe o que fazer')
+            ->assertSee('Provas para auditoria e controle')
+            ->assertSee('Sistema simples por padrão');
     }
 
     public function test_only_manager_can_activate_exercise_from_onboarding(): void
@@ -52,6 +57,28 @@ class MunicipalOnboardingTest extends TestCase
             ->assertSee('Preparar ambiente de demonstração')
             ->assertSee('Roteiro da reunião')
             ->assertSee('Materiais para pedir ao município');
+    }
+
+    public function test_onboarding_guides_import_and_parameterized_modules(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $municipality->update(['spreadsheet_import_enabled' => false]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee('Habilitar importação')
+            ->assertSee('Oculto para simplificar')
+            ->assertSee('TCESP e Audesp')
+            ->assertSee('Ativo para SP');
+
+        $municipality->update(['spreadsheet_import_enabled' => true]);
+
+        $this->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee('Importar planilha')
+            ->assertSee('Visível no sistema');
     }
 
     public function test_manager_activates_organic_law_exercise_and_releases_legislative_portal(): void

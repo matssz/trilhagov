@@ -11685,3 +11685,391 @@ a:focus-visible {
         min-height: 0;
     }
 }
+
+/* Municipal onboarding command center: operational health, import, trails, defense and parameters. */
+.municipal-command-panel,
+.import-command-panel,
+.defense-command-panel,
+.profile-trails-panel,
+.municipal-parameters-panel {
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.municipal-command-score {
+    display: grid;
+    width: 112px;
+    min-width: 112px;
+    height: 76px;
+    place-items: center;
+    border: 1px solid rgba(184, 199, 214, .78);
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 18px rgba(15, 43, 73, .055);
+    text-align: center;
+}
+
+.municipal-command-score strong {
+    color: var(--navy-950);
+    font-size: 1.45rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.municipal-command-score span {
+    color: #64748b;
+    font-size: .68rem;
+    font-weight: 850;
+}
+
+.municipal-command-score.is-ready {
+    border-color: rgba(21, 127, 87, .28);
+    background: #f2fbf7;
+}
+
+.municipal-command-score.is-attention {
+    border-color: rgba(184, 128, 18, .28);
+    background: #fff8e8;
+}
+
+.municipal-command-score.is-blocked {
+    border-color: rgba(181, 54, 45, .28);
+    background: #fff1f1;
+}
+
+.municipal-health-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1px;
+    background: rgba(198, 211, 223, .78);
+}
+
+.municipal-health-grid article {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .75rem;
+    min-height: 154px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, .96);
+}
+
+.municipal-health-grid article > span,
+.profile-trail-grid header > span,
+.parameter-module-grid article > span {
+    display: inline-grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid rgba(184, 199, 214, .82);
+    border-radius: 12px;
+    background: #eef6fb;
+    color: var(--navy-850);
+}
+
+.municipal-health-grid article.is-ready > span {
+    border-color: rgba(21, 127, 87, .28);
+    background: #eaf8f1;
+    color: #157f57;
+}
+
+.municipal-health-grid article.is-attention > span {
+    border-color: rgba(184, 128, 18, .28);
+    background: #fff5dc;
+    color: #8b620d;
+}
+
+.municipal-health-grid article.is-blocked > span {
+    border-color: rgba(181, 54, 45, .28);
+    background: #fff0ee;
+    color: #9d2f2c;
+}
+
+.municipal-health-grid small,
+.defense-facts small,
+.parameter-rule-strip small {
+    color: #64748b;
+    font-size: .7rem;
+    font-weight: 850;
+}
+
+.municipal-health-grid strong,
+.defense-facts strong,
+.parameter-rule-strip strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: 1rem;
+    font-weight: 950;
+}
+
+.municipal-health-grid p,
+.profile-trail-grid p,
+.parameter-module-grid p,
+.defense-facts p,
+.import-step-list p {
+    margin: .18rem 0 0;
+    color: #586a7f;
+    font-size: .76rem;
+    font-weight: 720;
+    line-height: 1.35;
+}
+
+.municipal-health-grid a,
+.profile-trail-grid article > a {
+    grid-column: 2;
+    display: inline-flex;
+    width: fit-content;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: .38rem;
+    margin-top: .55rem;
+    padding: .45rem .7rem;
+    border: 1px solid rgba(19, 81, 180, .28);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--ds-action);
+    font-size: .74rem;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.municipal-ops-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.import-step-list {
+    display: grid;
+    gap: .65rem;
+    padding: 1rem;
+}
+
+.import-step-list article {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: .75rem;
+    align-items: start;
+}
+
+.import-step-list article > span {
+    display: inline-grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--navy-900);
+    color: #ffffff;
+    font-weight: 950;
+}
+
+.import-step-list strong,
+.profile-trail-grid strong,
+.parameter-module-grid strong {
+    color: var(--navy-950);
+    font-weight: 950;
+}
+
+.import-coverage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    padding: 0 1rem 1rem;
+}
+
+.import-coverage span {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .35rem .55rem;
+    border: 1px solid rgba(21, 127, 87, .18);
+    border-radius: 999px;
+    background: #f1fbf6;
+    color: #146b4a;
+    font-size: .72rem;
+    font-weight: 850;
+}
+
+.import-last-batch {
+    margin: 0;
+    padding: .8rem 1rem;
+    border-top: 1px solid rgba(198, 211, 223, .72);
+    color: #64748b;
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+.defense-score-row {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: .85rem;
+    align-items: center;
+    padding: 1rem;
+}
+
+.defense-score-row strong {
+    display: grid;
+    height: 72px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--navy-900);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 950;
+}
+
+.defense-score-row span {
+    color: #526278;
+    font-weight: 850;
+}
+
+.defense-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: rgba(198, 211, 223, .72);
+}
+
+.defense-facts article {
+    min-height: 112px;
+    padding: .9rem;
+    background: #ffffff;
+}
+
+.profile-trail-grid,
+.parameter-module-grid,
+.parameter-rule-strip {
+    display: grid;
+    gap: .85rem;
+    padding: 1rem;
+}
+
+.profile-trail-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.profile-trail-grid article,
+.parameter-module-grid article,
+.parameter-rule-strip article {
+    border: 1px solid rgba(184, 199, 214, .72);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .035), 0 8px 20px rgba(15, 43, 73, .04);
+}
+
+.profile-trail-grid article {
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    padding: 1rem;
+}
+
+.profile-trail-grid header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .75rem;
+}
+
+.profile-trail-grid article > div {
+    display: grid;
+    gap: .45rem;
+    margin-top: .85rem;
+}
+
+.profile-trail-grid span.done,
+.profile-trail-grid span.pending {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    color: #4b5f75;
+    font-size: .74rem;
+    font-weight: 850;
+}
+
+.profile-trail-grid span.done svg {
+    color: #157f57;
+}
+
+.profile-trail-grid span.pending svg {
+    color: #9b6b08;
+}
+
+.profile-trail-grid article > a {
+    margin-top: auto;
+}
+
+.parameter-rule-strip {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-bottom: 1px solid rgba(198, 211, 223, .72);
+}
+
+.parameter-rule-strip article {
+    padding: .85rem;
+}
+
+.parameter-module-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.parameter-module-grid article {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .75rem;
+    padding: .9rem;
+}
+
+.parameter-module-grid article.disabled {
+    background: #f8fafc;
+}
+
+.parameter-module-grid article.disabled > span {
+    color: #7b8a9b;
+}
+
+.parameter-module-grid small {
+    color: #64748b;
+    font-size: .7rem;
+    font-weight: 850;
+}
+
+@media (max-width: 1180px) {
+    .municipal-health-grid,
+    .profile-trail-grid,
+    .parameter-rule-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .parameter-module-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .municipal-ops-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .municipal-command-panel .content-panel-header,
+    .import-command-panel .content-panel-header,
+    .defense-command-panel .content-panel-header,
+    .profile-trails-panel .content-panel-header,
+    .municipal-parameters-panel .content-panel-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .municipal-health-grid,
+    .profile-trail-grid,
+    .parameter-rule-strip,
+    .parameter-module-grid,
+    .defense-facts {
+        grid-template-columns: 1fr;
+    }
+
+    .municipal-command-score {
+        width: 100%;
+        min-width: 0;
+    }
+}

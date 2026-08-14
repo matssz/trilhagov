@@ -11,6 +11,11 @@
         $guide = $summary['guide'];
         $commercial = $summary['commercial'];
         $pilot = $summary['pilot'];
+        $operationalHealth = $summary['operationalHealth'];
+        $initialImport = $summary['initialImport'];
+        $profileTrails = $summary['profileTrails'];
+        $defense = $summary['defense'];
+        $parameters = $summary['parameters'];
     @endphp
 
     <header class="onboarding-heading">
@@ -41,6 +46,159 @@
             </p>
         </div>
         <a class="btn btn-outline-primary" href="{{ route('municipal-rules.index') }}"><i data-lucide="landmark" aria-hidden="true"></i>Ver normas</a>
+    </section>
+
+    <section class="content-panel municipal-command-panel">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Saúde operacional</p>
+                <h2 class="h5 mb-0">Município pronto para operar?</h2>
+                <p class="small text-secondary mb-0">{{ $operationalHealth['summary'] }}</p>
+            </div>
+            <div class="municipal-command-score is-{{ $operationalHealth['tone'] }}">
+                <strong>{{ $operationalHealth['score'] }}%</strong>
+                <span>saúde do sistema</span>
+            </div>
+        </div>
+        <div class="municipal-health-grid">
+            @foreach ($operationalHealth['cards'] as $card)
+                <article class="is-{{ $card['tone'] }}">
+                    <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $card['label'] }}</small>
+                        <strong>{{ $card['value'] }}</strong>
+                        <p>{{ $card['hint'] }}</p>
+                    </div>
+                    <a href="{{ $card['route'] }}">{{ $card['action'] }}</a>
+                </article>
+            @endforeach
+        </div>
+    </section>
+
+    <div class="municipal-ops-grid">
+        <section class="content-panel import-command-panel">
+            <div class="content-panel-header">
+                <div>
+                    <p class="panel-kicker">Importação inicial</p>
+                    <h2 class="h5 mb-0">Começar pelo Excel do município</h2>
+                    <p class="small text-secondary mb-0">Use CSV para trazer base antiga sem digitar tudo manualmente.</p>
+                </div>
+                <a class="btn btn-sm {{ $initialImport['enabled'] ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ $initialImport['route'] }}">
+                    <i data-lucide="{{ $initialImport['enabled'] ? 'upload' : 'sliders-horizontal' }}" aria-hidden="true"></i>{{ $initialImport['action'] }}
+                </a>
+            </div>
+            <div class="import-step-list">
+                @foreach ($initialImport['steps'] as $index => $step)
+                    <article>
+                        <span>{{ $index + 1 }}</span>
+                        <div>
+                            <strong>{{ $step['title'] }}</strong>
+                            <p>{{ $step['description'] }}</p>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="import-coverage">
+                @foreach ($initialImport['coverage'] as $item)
+                    <span><i data-lucide="check" aria-hidden="true"></i>{{ $item['label'] }}</span>
+                @endforeach
+            </div>
+            <p class="import-last-batch">
+                {{ $initialImport['last_batch'] ? 'Último lote: '.$initialImport['last_batch']->original_name.' · '.$initialImport['last_batch']->valid_rows.' linha(s) apta(s).' : 'Nenhum lote importado ainda.' }}
+            </p>
+        </section>
+
+        <section class="content-panel defense-command-panel">
+            <div class="content-panel-header">
+                <div>
+                    <p class="panel-kicker">Defesa administrativa</p>
+                    <h2 class="h5 mb-0">Provas para auditoria e controle</h2>
+                    <p class="small text-secondary mb-0">Trilha de auditoria, documentos, protocolos e relatórios ficam concentrados para justificar decisões.</p>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" href="{{ $defense['route'] }}"><i data-lucide="shield-check" aria-hidden="true"></i>{{ $defense['action'] }}</a>
+            </div>
+            <div class="defense-score-row">
+                <strong>{{ $defense['score'] }}%</strong>
+                <span>{{ $defense['latest_audit'] ? 'Último registro: '.$defense['latest_audit']->actionLabel() : 'Ainda sem histórico suficiente.' }}</span>
+            </div>
+            <div class="defense-facts">
+                @foreach ($defense['items'] as $item)
+                    <article>
+                        <small>{{ $item['label'] }}</small>
+                        <strong>{{ $item['value'] }}</strong>
+                        <p>{{ $item['hint'] }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    </div>
+
+    <section class="content-panel profile-trails-panel">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Trilha por perfil</p>
+                <h2 class="h5 mb-0">Cada usuário sabe o que fazer</h2>
+                <p class="small text-secondary mb-0">Gestor, vereador, Executivo e Controle Interno enxergam próximos passos sem precisar entender todos os módulos.</p>
+            </div>
+        </div>
+        <div class="profile-trail-grid">
+            @foreach ($profileTrails as $trail)
+                <article>
+                    <header>
+                        <span><i data-lucide="{{ $trail['icon'] }}" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>{{ $trail['role'] }}</strong>
+                            <p>{{ $trail['description'] }}</p>
+                        </div>
+                    </header>
+                    <div>
+                        @foreach ($trail['items'] as $item)
+                            <span class="{{ $item['done'] ? 'done' : 'pending' }}">
+                                <i data-lucide="{{ $item['done'] ? 'circle-check' : 'circle-dot' }}" aria-hidden="true"></i>{{ $item['label'] }}
+                            </span>
+                        @endforeach
+                    </div>
+                    <a href="{{ $trail['route'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $trail['action'] }}</a>
+                </article>
+            @endforeach
+        </div>
+    </section>
+
+    <section class="content-panel municipal-parameters-panel">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Parametrização municipal</p>
+                <h2 class="h5 mb-0">Sistema simples por padrão, módulos por necessidade</h2>
+                <p class="small text-secondary mb-0">Federal, estadual, relatórios avançados e importação só aparecem quando fizer sentido para o município.</p>
+            </div>
+            <a class="btn btn-sm btn-outline-primary" href="{{ $parameters['route'] }}"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>Configurar parâmetros</a>
+        </div>
+        <div class="parameter-rule-strip">
+            @foreach ($parameters['rules'] as $rule)
+                <article>
+                    <small>{{ $rule['label'] }}</small>
+                    <strong>{{ $rule['value'] }}</strong>
+                </article>
+            @endforeach
+        </div>
+        <div class="parameter-module-grid">
+            @foreach ($parameters['modules'] as $module)
+                <article class="{{ $module['enabled'] ? 'enabled' : 'disabled' }}">
+                    <span><i data-lucide="{{ $module['enabled'] ? 'toggle-right' : 'toggle-left' }}" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>{{ $module['label'] }}</strong>
+                        <p>{{ $module['description'] }}</p>
+                        <small>
+                            @if ($module['automatic'])
+                                {{ $module['enabled'] ? 'Ativo automaticamente' : 'Automático quando aplicável' }}
+                            @else
+                                {{ $module['enabled'] ? 'Visível no sistema' : 'Oculto para simplificar' }}
+                            @endif
+                        </small>
+                    </div>
+                </article>
+            @endforeach
+        </div>
     </section>
 
     <section class="content-panel pilot-readiness-panel">
