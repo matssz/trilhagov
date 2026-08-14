@@ -30,7 +30,9 @@ class SecurityPrivacyTest extends TestCase
             ->assertSee('Resposta a incidente')
             ->assertSee('Roteiro para vazamento')
             ->assertSee('Proteção extra para a sua conta de gestor')
-            ->assertSee('Ativar MFA');
+            ->assertSee('Ativar MFA')
+            ->assertDontSee('/configuracoes/monitoramento', false)
+            ->assertDontSee('<span>Monitoramento</span>', false);
     }
 
     public function test_manager_can_toggle_own_mfa_from_security_panel(): void
