@@ -214,9 +214,9 @@
                         <button class="icon-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Abrir menu" title="Abrir menu">
                             <i data-lucide="menu" aria-hidden="true"></i>
                         </button>
-                        <form class="topbar-search" method="GET" action="{{ route($legislativeWorkspace ? 'legislative.index' : 'emendas.index') }}" role="search">
+                        <form class="topbar-search" method="GET" action="{{ route('search.index') }}" role="search">
                             <i data-lucide="search" aria-hidden="true"></i>
-                            <input name="search" type="search" value="{{ request('search') }}" placeholder="{{ $legislativeWorkspace ? 'Pesquisar propostas, objetos ou beneficiários' : 'Pesquisar emendas, autores ou objetos' }}" aria-label="Pesquisar">
+                            <input name="search" type="search" value="{{ request('search') }}" placeholder="Pesquisar emendas, propostas, documentos ou protocolos" aria-label="Pesquisar">
                         </form>
                         <a class="notification-button" href="{{ route('notifications.index') }}" title="Notificações" aria-label="Notificações{{ $unreadNotificationCount > 0 ? ': '.$unreadNotificationCount.' não lidas' : '' }}">
                             <i data-lucide="bell" aria-hidden="true"></i>

@@ -21,6 +21,7 @@ use App\Http\Controllers\ExternalIntegrationController;
 use App\Http\Controllers\FinancialCommitmentController;
 use App\Http\Controllers\FinancialLiquidationController;
 use App\Http\Controllers\FinancialPaymentController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\HealthAspsController;
 use App\Http\Controllers\InfrastructureMonitorController;
 use App\Http\Controllers\InvitationAcceptanceController;
@@ -154,6 +155,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
         Route::get('/conformidade-municipal-tcesp', MunicipalTcespAdherenceController::class)->name('municipal-tcesp-adherence.index');
     });
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');
+    Route::get('/buscar', GlobalSearchController::class)->name('search.index');
     Route::patch('/notificacoes/preferencias', [NotificationCenterController::class, 'updatePreferences'])->name('notifications.preferences.update')->block(10, 10);
     Route::patch('/notificacoes/{notification}/ler', [NotificationCenterController::class, 'markAsRead'])->name('notifications.read')->block(10, 10);
     Route::post('/notificacoes/ler-todas', [NotificationCenterController::class, 'markAllAsRead'])->name('notifications.read-all')->block(10, 10);
