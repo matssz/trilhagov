@@ -734,6 +734,20 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
         }
     };
 
+    const setTemplateValue = (field, value) => {
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+            field.value = value;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    };
+
+    const setTemplateSelectValue = (field, value) => {
+        if (field instanceof HTMLSelectElement) {
+            field.value = value;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
     const templates = {
         'health-equipment': {
             object: 'Aquisicao de equipamentos para melhorar o atendimento da unidade municipal de saude.',
@@ -771,18 +785,18 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
     };
 
     const applyTemplate = (template) => {
-        setIfBlank(objectInput, template.object);
-        setIfBlank(beneficiaryInput, template.beneficiary);
-        setIfBlank(departmentInput, template.department);
-        setIfBlank(justificationInput, template.justification);
-        setIfBlank(publicNeedInput, template.publicNeed);
-        setIfBlank(targetPopulationInput, template.targetPopulation);
-        setIfBlank(estimatedQuantityInput, template.quantity);
-        setIfBlank(estimateSourceInput, 'Estimativa declarada pelo vereador');
-        setSelectIfBlank(expenseDestinationInput, template.expenseDestination);
+        setTemplateValue(objectInput, template.object);
+        setTemplateValue(beneficiaryInput, template.beneficiary);
+        setTemplateValue(departmentInput, template.department);
+        setTemplateValue(justificationInput, template.justification);
+        setTemplateValue(publicNeedInput, template.publicNeed);
+        setTemplateValue(targetPopulationInput, template.targetPopulation);
+        setTemplateValue(estimatedQuantityInput, template.quantity);
+        setTemplateValue(estimateSourceInput, 'Estimativa declarada pelo vereador');
+        setTemplateSelectValue(expenseDestinationInput, template.expenseDestination);
 
         if (healthInput instanceof HTMLInputElement) {
-            healthInput.checked = Boolean(template.health || healthInput.checked);
+            healthInput.checked = Boolean(template.health);
             healthInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
@@ -915,6 +929,10 @@ if (legislativeAutomation instanceof HTMLElement && legislativeProjection instan
             const template = templates[button.dataset.template];
             if (template) {
                 applyTemplate(template);
+                templatePanel.querySelectorAll('[data-template]').forEach((item) => {
+                    item.classList.toggle('is-selected', item === button);
+                    item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+                });
             }
         });
     });

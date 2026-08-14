@@ -5603,3 +5603,16 @@
         grid-template-columns: 1fr;
     }
 }
+
+.legislative-template-panel button.is-selected {
+    border-color: rgba(18, 63, 112, .5);
+    background:
+        linear-gradient(145deg, rgba(238, 247, 255, .98), rgba(255, 255, 255, .96));
+    box-shadow:
+        0 14px 30px rgba(7, 31, 61, .12),
+        inset 0 0 0 1px rgba(18, 63, 112, .08);
+}
+
+.legislative-template-panel button.is-selected > svg {
+    color: var(--navy-950);
+}
