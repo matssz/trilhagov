@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Municipality;
 use App\Models\MunicipalityInvitation;
 use App\Models\MunicipalRegulatoryProfile;
+use App\Models\LegislativeProposal;
+use App\Models\ParliamentaryAmendment;
+use App\Models\SupportOccurrence;
 use App\Models\User;
 
 class MunicipalOnboardingService
@@ -51,6 +54,7 @@ class MunicipalOnboardingService
             ->when($activeProfile, fn ($query) => $query->where('fiscal_year', $activeProfile->fiscal_year))
             ->exists();
         $hasWorkCenter = $municipality->workItems()->exists();
+        $pilot = $this->pilotReadiness($municipality, $activeProfile, $hasCouncil, $hasWorkCenter);
         $readiness = $activeProfile
             ? $this->readiness->evaluate($activeProfile)
             : ($draftProfile ? $this->readiness->evaluate($draftProfile) : null);
@@ -184,6 +188,7 @@ class MunicipalOnboardingService
                 'blockers' => $readiness['blockers'] ?? ['Nenhuma norma ativa ou em preparação foi encontrada.'],
                 'warnings' => $readiness['warnings'] ?? [],
             ],
+            'pilot' => $pilot,
             'council' => [
                 'released' => $activeProfile !== null,
                 'ready' => $activeProfile !== null && $councilors->isNotEmpty(),
@@ -198,6 +203,225 @@ class MunicipalOnboardingService
                     : 'A configurar',
             ],
             'commercial' => $this->commercialOnboarding($municipality, $activeProfile, $hasCouncil, $hasLegislativeFlow || $hasAmendment, $hasWorkCenter),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function pilotReadiness(
+        Municipality $municipality,
+        ?MunicipalRegulatoryProfile $activeProfile,
+        bool $hasCouncil,
+        bool $hasWorkCenter,
+    ): array {
+        $year = $activeProfile?->fiscal_year ?? now()->year + 1;
+        $proposalQuery = $municipality->legislativeProposals()->where('fiscal_year', $year);
+        $amendmentQuery = $municipality->amendments()->where('fiscal_year', $year);
+        $proposal = (clone $proposalQuery)->latest()->first();
+        $amendment = (clone $amendmentQuery)->with(['executionStages', 'accountabilityProcess', 'documents'])->latest()->first();
+        $hasProposal = $proposal !== null;
+        $hasLegislativeReview = (clone $proposalQuery)
+            ->whereIn('status', [
+                LegislativeProposal::STATUS_APPROVED,
+                LegislativeProposal::STATUS_REJECTED,
+                LegislativeProposal::STATUS_SENT,
+                LegislativeProposal::STATUS_RECEIVED,
+                LegislativeProposal::STATUS_RESERVED,
+            ])
+            ->exists();
+        $hasProtocol = (clone $proposalQuery)
+            ->whereIn('status', [
+                LegislativeProposal::STATUS_SENT,
+                LegislativeProposal::STATUS_RECEIVED,
+                LegislativeProposal::STATUS_RESERVED,
+            ])
+            ->exists();
+        $hasExecutiveReceive = (clone $proposalQuery)
+            ->whereIn('status', [
+                LegislativeProposal::STATUS_RECEIVED,
+                LegislativeProposal::STATUS_RESERVED,
+            ])
+            ->exists();
+        $hasBudgetReserve = (clone $proposalQuery)
+            ->where('status', LegislativeProposal::STATUS_RESERVED)
+            ->exists();
+        $hasExecution = (clone $amendmentQuery)
+            ->where(function ($query) {
+                $query->whereIn('status', [
+                    ParliamentaryAmendment::STATUS_EXECUTING,
+                    ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
+                    ParliamentaryAmendment::STATUS_COMPLETED,
+                ])->orWhereHas('executionStages');
+            })
+            ->exists();
+        $hasAccountability = (clone $amendmentQuery)->whereHas('accountabilityProcess')->exists();
+        $hasDossierEvidence = (clone $amendmentQuery)->whereHas('documents')->exists()
+            || (clone $amendmentQuery)->whereHas('accountabilityProcess', fn ($query) => $query->whereNotNull('protocol_number'))->exists();
+        $hasOccurrencesChecked = SupportOccurrence::query()
+            ->where(function ($query) use ($municipality) {
+                $query->where('municipality_id', $municipality->id)->orWhereNull('municipality_id');
+            })
+            ->exists();
+
+        $checks = [
+            [
+                'key' => 'municipality',
+                'title' => 'Município configurado',
+                'description' => $municipality->hasCompleteProfile()
+                    ? 'Dados institucionais mínimos prontos para demonstração.'
+                    : 'Complete CNPJ, UF e código IBGE antes da apresentação.',
+                'complete' => $municipality->hasCompleteProfile(),
+                'status' => $municipality->hasCompleteProfile() ? 'ready' : 'blocked',
+                'route' => route('municipalities.select'),
+                'action' => 'Ver município',
+                'icon' => 'building-2',
+            ],
+            [
+                'key' => 'rules',
+                'title' => 'Norma ativa',
+                'description' => $activeProfile
+                    ? "Exercício {$activeProfile->fiscal_year} ativo com cota e reserva de saúde."
+                    : 'Ative o exercício para liberar Câmara, cotas e bloqueios automáticos.',
+                'complete' => $activeProfile !== null,
+                'status' => $activeProfile ? 'ready' : 'blocked',
+                'route' => route('municipal-onboarding.index'),
+                'action' => 'Ativar exercício',
+                'icon' => 'landmark',
+            ],
+            [
+                'key' => 'council',
+                'title' => 'Câmara liberada',
+                'description' => $hasCouncil
+                    ? 'Há vereador ou revisor legislativo vinculado ao município.'
+                    : 'Convide ao menos um vereador para validar o fluxo real da Câmara.',
+                'complete' => $hasCouncil,
+                'status' => $hasCouncil ? 'ready' : ($activeProfile ? 'attention' : 'blocked'),
+                'route' => route('users.index'),
+                'action' => 'Convidar Câmara',
+                'icon' => 'users',
+            ],
+            [
+                'key' => 'proposal',
+                'title' => 'Proposta legislativa criada',
+                'description' => $hasProposal
+                    ? 'Existe proposta para demonstrar a visão do vereador.'
+                    : 'Crie uma proposta teste pelo Portal Legislativo.',
+                'complete' => $hasProposal,
+                'status' => $hasProposal ? 'ready' : ($hasCouncil ? 'attention' : 'blocked'),
+                'route' => route('legislative.index'),
+                'action' => 'Abrir Portal',
+                'icon' => 'send',
+            ],
+            [
+                'key' => 'review',
+                'title' => 'Conferência da Câmara',
+                'description' => $hasLegislativeReview
+                    ? 'A proposta já passou por decisão legislativa.'
+                    : 'Aprove, devolva ou rejeite uma proposta para validar a etapa da Câmara.',
+                'complete' => $hasLegislativeReview,
+                'status' => $hasLegislativeReview ? 'ready' : ($hasProposal ? 'attention' : 'blocked'),
+                'route' => route('legislative.index'),
+                'action' => 'Conferir proposta',
+                'icon' => 'badge-check',
+            ],
+            [
+                'key' => 'protocol',
+                'title' => 'Protocolo ao Executivo',
+                'description' => $hasProtocol
+                    ? 'A Câmara já encaminhou proposta ao Executivo.'
+                    : 'Protocole uma proposta aprovada para mostrar a transição Câmara-Executivo.',
+                'complete' => $hasProtocol,
+                'status' => $hasProtocol ? 'ready' : ($hasLegislativeReview ? 'attention' : 'blocked'),
+                'route' => route('legislative.index'),
+                'action' => 'Protocolar',
+                'icon' => 'file-check-2',
+            ],
+            [
+                'key' => 'receive',
+                'title' => 'Executivo recebeu',
+                'description' => $hasExecutiveReceive
+                    ? 'O Executivo recebeu formalmente a proposta.'
+                    : 'Receba a proposta no painel executivo para validar a fila municipal.',
+                'complete' => $hasExecutiveReceive,
+                'status' => $hasExecutiveReceive ? 'ready' : ($hasProtocol ? 'attention' : 'blocked'),
+                'route' => route('legislative.index'),
+                'action' => 'Receber proposta',
+                'icon' => 'inbox',
+            ],
+            [
+                'key' => 'reserve',
+                'title' => 'Reserva orçamentária',
+                'description' => $hasBudgetReserve
+                    ? 'Reserva registrada para demonstrar disponibilidade orçamentária.'
+                    : 'Registre reserva para provar o controle de saldo e saúde.',
+                'complete' => $hasBudgetReserve,
+                'status' => $hasBudgetReserve ? 'ready' : ($hasExecutiveReceive ? 'attention' : 'blocked'),
+                'route' => route('legislative.index'),
+                'action' => 'Reservar',
+                'icon' => 'wallet-cards',
+            ],
+            [
+                'key' => 'execution',
+                'title' => 'Execução iniciada',
+                'description' => $hasExecution
+                    ? 'Há emenda em execução ou etapa cadastrada.'
+                    : 'Inicie a execução simplificada de uma emenda reservada.',
+                'complete' => $hasExecution,
+                'status' => $hasExecution ? 'ready' : ($hasBudgetReserve || $amendment ? 'attention' : 'blocked'),
+                'route' => $amendment ? route('emendas.execution', $amendment) : route('emendas.index'),
+                'action' => 'Abrir execução',
+                'icon' => 'gauge',
+            ],
+            [
+                'key' => 'accountability',
+                'title' => 'Prestação preparada',
+                'description' => $hasAccountability
+                    ? 'Existe prestação de contas vinculada a uma emenda.'
+                    : 'Prepare a prestação final para validar documentos, prazos e recibo.',
+                'complete' => $hasAccountability,
+                'status' => $hasAccountability ? 'ready' : ($hasExecution ? 'attention' : 'blocked'),
+                'route' => $amendment ? route('emendas.accountability', $amendment) : route('emendas.index'),
+                'action' => 'Abrir prestação',
+                'icon' => 'archive',
+            ],
+            [
+                'key' => 'dossier',
+                'title' => 'Dossiê ou evidência gerada',
+                'description' => $hasDossierEvidence
+                    ? 'Há documento, protocolo ou evidência para demonstrar rastreabilidade.'
+                    : 'Anexe evidência ou gere protocolo para fechar a apresentação.',
+                'complete' => $hasDossierEvidence,
+                'status' => $hasDossierEvidence ? 'ready' : ($hasAccountability ? 'attention' : 'blocked'),
+                'route' => $amendment ? route('emendas.accountability', $amendment) : route('emendas.index'),
+                'action' => 'Ver dossiê',
+                'icon' => 'folder-check',
+            ],
+            [
+                'key' => 'operations',
+                'title' => 'Monitoramento e ocorrências',
+                'description' => $hasOccurrencesChecked
+                    ? 'A Central de Ocorrências já possui leitura para suporte.'
+                    : 'Abra a Central de Ocorrências para validar suporte e pós-deploy.',
+                'complete' => $hasOccurrencesChecked,
+                'status' => $hasOccurrencesChecked ? 'ready' : 'attention',
+                'route' => route('occurrences.index'),
+                'action' => 'Ver ocorrências',
+                'icon' => 'bug',
+            ],
+        ];
+
+        $complete = count(array_filter($checks, fn (array $check): bool => $check['complete']));
+        $next = collect($checks)->first(fn (array $check): bool => ! $check['complete']) ?? end($checks);
+
+        return [
+            'year' => $year,
+            'ready' => $complete === count($checks),
+            'score' => (int) round($complete / count($checks) * 100),
+            'complete' => $complete,
+            'total' => count($checks),
+            'next' => $next,
+            'checks' => $checks,
+            'has_work_center' => $hasWorkCenter,
+            'demo_amendment' => $amendment,
         ];
     }
 

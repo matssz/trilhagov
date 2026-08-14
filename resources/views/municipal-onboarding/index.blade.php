@@ -10,6 +10,7 @@
         $council = $summary['council'];
         $guide = $summary['guide'];
         $commercial = $summary['commercial'];
+        $pilot = $summary['pilot'];
     @endphp
 
     <header class="onboarding-heading">
@@ -40,6 +41,44 @@
             </p>
         </div>
         <a class="btn btn-outline-primary" href="{{ route('municipal-rules.index') }}"><i data-lucide="landmark" aria-hidden="true"></i>Ver normas</a>
+    </section>
+
+    <section class="content-panel pilot-readiness-panel">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Piloto municipal</p>
+                <h2 class="h5 mb-0">{{ $pilot['ready'] ? 'Ambiente pronto para demonstração completa' : 'Checklist para validar o sistema inteiro' }}</h2>
+                <p class="small text-secondary mb-0">Use esta trilha para apresentar Câmara, Executivo, execução, prestação e suporte sem se perder entre módulos.</p>
+            </div>
+            <div class="pilot-readiness-score {{ $pilot['ready'] ? 'is-ready' : '' }}">
+                <strong>{{ $pilot['score'] }}%</strong>
+                <span>{{ $pilot['complete'] }}/{{ $pilot['total'] }} etapas</span>
+            </div>
+        </div>
+        <div class="pilot-next-action">
+            <span><i data-lucide="{{ $pilot['next']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <small>Próximo passo do piloto</small>
+                <strong>{{ $pilot['next']['title'] }}</strong>
+                <p>{{ $pilot['next']['description'] }}</p>
+            </div>
+            <a class="btn btn-primary" href="{{ $pilot['next']['route'] }}">
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+                {{ $pilot['next']['action'] }}
+            </a>
+        </div>
+        <div class="pilot-check-grid">
+            @foreach ($pilot['checks'] as $check)
+                <article class="pilot-check pilot-{{ $check['status'] }}">
+                    <span><i data-lucide="{{ $check['complete'] ? 'check' : $check['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>{{ $check['title'] }}</strong>
+                        <p>{{ $check['description'] }}</p>
+                        <a href="{{ $check['route'] }}">{{ $check['action'] }}</a>
+                    </div>
+                </article>
+            @endforeach
+        </div>
     </section>
 
     <section class="content-panel onboarding-guide-panel">
