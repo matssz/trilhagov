@@ -10,16 +10,16 @@ class MarketingPageTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('O caminho mais claro entre Câmara, Prefeitura, execução e prestação de contas.')
-            ->assertSee('Acessar demonstração')
-            ->assertSee('Feito para municípios que não têm estrutura própria de tecnologia.');
+            ->assertSee('Controle simples para Câmara, Prefeitura e prestação de contas.')
+            ->assertSee('Entrar na demonstração')
+            ->assertSee('Construído para cidades que precisam operar bem sem montar uma equipe de software.');
     }
 
     public function test_commercial_page_has_direct_public_url(): void
     {
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('Acessar demonstração')
-            ->assertSee('Demonstração pronta');
+            ->assertSee('Acessar demo')
+            ->assertSee('Apresente o fluxo completo em poucos minutos.');
     }
 }
