@@ -150,6 +150,10 @@
                                 <i data-lucide="shield-check" aria-hidden="true"></i>
                                 <span>LGPD e defesa</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">
+                                <i data-lucide="bug" aria-hidden="true"></i>
+                                <span>Ocorrências</span>
+                            </a>
                             <a class="sidebar-link {{ request()->routeIs('infrastructure-monitor.*') ? 'active' : '' }}" href="{{ route('infrastructure-monitor.index') }}">
                                 <i data-lucide="activity" aria-hidden="true"></i>
                                 <span>Monitoramento</span>

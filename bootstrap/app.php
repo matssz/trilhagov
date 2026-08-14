@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureMunicipalityModuleEnabled;
 use App\Http\Middleware\EnsureMunicipalityRole;
 use App\Http\Middleware\PreventAuthenticatedResponseCaching;
 use App\Http\Middleware\SecurityHeaders;
+use App\Services\OccurrenceCenterService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,5 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->report(function (\Throwable $exception) {
+            app(OccurrenceCenterService::class)->recordException($exception, request());
+        });
     })->create();

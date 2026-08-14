@@ -45,6 +45,7 @@ use App\Http\Controllers\MunicipalWorkPlanPdfController;
 use App\Http\Controllers\MunicipalWorkPlanStageController;
 use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\OfficialDocumentVerificationController;
+use App\Http\Controllers\OccurrenceCenterController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
@@ -210,6 +211,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
 
     Route::middleware('municipality.role:manager')->group(function () {
         Route::get('/implantacao', [MunicipalOnboardingController::class, 'index'])->name('municipal-onboarding.index');
+        Route::get('/suporte/ocorrencias', [OccurrenceCenterController::class, 'index'])->name('occurrences.index');
+        Route::patch('/suporte/ocorrencias/{occurrence}', [OccurrenceCenterController::class, 'update'])->name('occurrences.update')->block(10, 10);
         Route::get('/configuracoes/lgpd-seguranca', SecurityPrivacyController::class)->name('security-privacy.index');
         Route::get('/configuracoes/monitoramento', InfrastructureMonitorController::class)->name('infrastructure-monitor.index');
         Route::patch('/configuracoes/lgpd-seguranca/mfa', [SecurityPrivacyController::class, 'updateMfa'])->name('security-privacy.mfa.update')->block(10, 10);

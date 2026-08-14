@@ -8370,6 +8370,190 @@ button.accountability-action-card {
     overflow-wrap: anywhere;
 }
 
+.occurrence-page {
+    --occurrence-error: #b42318;
+    --occurrence-attention: #a66b00;
+    --occurrence-ok: #157f57;
+}
+
+.occurrence-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 1fr)) auto;
+    gap: .85rem;
+    align-items: end;
+    width: 100%;
+}
+
+.occurrence-filters label,
+.occurrence-action label {
+    display: grid;
+    gap: .35rem;
+}
+
+.occurrence-filters span,
+.occurrence-action span {
+    color: var(--text-muted);
+    font-size: .75rem;
+    font-weight: 850;
+}
+
+.occurrence-list {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.occurrence-card {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) minmax(240px, .32fr);
+    gap: 1rem;
+    border: 1px solid rgba(198, 211, 223, .86);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(145deg, #fff, #f8fbfe);
+    padding: 1rem;
+    box-shadow: var(--elevation-1);
+}
+
+.occurrence-card.occurrence-critical {
+    border-color: rgba(180, 35, 24, .3);
+    background: linear-gradient(145deg, #fff, #fff4f2);
+}
+
+.occurrence-card.occurrence-attention {
+    border-color: rgba(166, 107, 0, .28);
+    background: linear-gradient(145deg, #fff, #fff9ec);
+}
+
+.occurrence-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-lg);
+    background: #eef7ff;
+    color: var(--navy-800);
+}
+
+.occurrence-critical .occurrence-icon {
+    background: #fff0ef;
+    color: var(--occurrence-error);
+}
+
+.occurrence-attention .occurrence-icon {
+    background: #fff2d7;
+    color: var(--occurrence-attention);
+}
+
+.occurrence-topline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: .55rem;
+}
+
+.occurrence-topline span {
+    border-radius: var(--radius-full);
+    background: rgba(18, 63, 112, .08);
+    color: var(--navy-800);
+    padding: .18rem .55rem;
+    font-size: .72rem;
+    font-weight: 900;
+}
+
+.occurrence-main h2 {
+    margin: 0 0 .45rem;
+    color: var(--navy-950);
+    font-size: 1.05rem;
+    font-weight: 950;
+}
+
+.occurrence-main p {
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.occurrence-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .65rem;
+    margin: .85rem 0 0;
+}
+
+.occurrence-facts div,
+.occurrence-note {
+    border: 1px solid rgba(198, 211, 223, .72);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, .75);
+    padding: .65rem;
+}
+
+.occurrence-facts dt {
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.occurrence-facts dd {
+    margin: 0;
+    color: var(--navy-950);
+    font-size: .82rem;
+    font-weight: 850;
+    overflow-wrap: anywhere;
+}
+
+.occurrence-note {
+    margin-top: .85rem;
+}
+
+.occurrence-note strong {
+    color: var(--navy-950);
+    font-size: .85rem;
+}
+
+.occurrence-note p {
+    margin: .25rem 0 0;
+}
+
+.occurrence-action {
+    display: grid;
+    align-content: start;
+    gap: .65rem;
+}
+
+.occurrence-audit-list {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem;
+}
+
+.occurrence-audit-list article {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) minmax(120px, auto);
+    gap: .85rem;
+    align-items: center;
+    border: 1px solid rgba(198, 211, 223, .78);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    padding: .85rem;
+}
+
+.occurrence-audit-list i {
+    color: var(--navy-800);
+}
+
+.occurrence-audit-list strong {
+    color: var(--navy-950);
+    font-weight: 900;
+}
+
+.occurrence-audit-list p,
+.occurrence-audit-list span {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: .82rem;
+}
+
 @media (max-width: 1180px) {
     .accountability-readiness,
     .accountability-submit-panel,
@@ -8427,5 +8611,12 @@ button.accountability-action-card {
     .infra-score {
         width: 120px;
         min-width: 120px;
+    }
+
+    .occurrence-filters,
+    .occurrence-card,
+    .occurrence-facts,
+    .occurrence-audit-list article {
+        grid-template-columns: 1fr;
     }
 }
