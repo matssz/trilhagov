@@ -9,8 +9,8 @@ use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
 use App\Models\LegislativeProposal;
 use App\Models\MunicipalInstitution;
-use App\Models\MunicipalRegulatoryProfile;
 use App\Models\Municipality;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 
 class GuapiaraDemoSeeder extends Seeder
 {
-    private const PASSWORD = 'Demo@Guapiara2026!';
+    private const PASSWORD = 'TrilhaGov@2027';
 
     public function run(): void
     {
@@ -55,6 +55,7 @@ class GuapiaraDemoSeeder extends Seeder
             $this->attach($municipality, $auditor, User::ROLE_AUDITOR);
 
             $councilors = collect([
+                ['Bruno Almeida', 'PSD', 'bruno.guapiara@trilhagov.demo'],
                 ['Darcizo Jacinto de Lara', 'PP', 'darcizo.guapiara@trilhagov.demo'],
                 ['Flavio Augusto Ferreira Menk', 'PODE', 'flavio.menk.guapiara@trilhagov.demo'],
                 ['Flavio Rodrigues Alves', 'UNIÃO', 'flavio.alves.guapiara@trilhagov.demo'],
@@ -171,7 +172,8 @@ class GuapiaraDemoSeeder extends Seeder
                     ['Executivo', 'executivo.guapiara@trilhagov.demo', self::PASSWORD],
                     ['Câmara', 'camara.guapiara@trilhagov.demo', self::PASSWORD],
                     ['Controle interno', 'controle.guapiara@trilhagov.demo', self::PASSWORD],
-                    ['Vereador', 'darcizo.guapiara@trilhagov.demo', self::PASSWORD],
+                    ['Vereador Bruno', 'bruno.guapiara@trilhagov.demo', self::PASSWORD],
+                    ['Vereador realista', 'darcizo.guapiara@trilhagov.demo', self::PASSWORD],
                 ],
             );
         });
@@ -355,38 +357,38 @@ class GuapiaraDemoSeeder extends Seeder
     ): ParliamentaryAmendment {
         $amendment = ParliamentaryAmendment::firstOrNew(['municipality_id' => $municipality->id, 'reference' => 'EM-GUA-2027-003']);
         $amendment->forceFill([
-                'created_by' => $manager->id,
-                'municipal_regulatory_profile_id' => $profile->id,
-                'fiscal_year' => 2027,
-                'government_sphere' => 'municipal',
-                'authorship_type' => 'individual',
-                'transfer_type' => 'direct_execution',
-                'author_name' => $proposal->author_name,
-                'author_party' => $proposal->author_party,
-                'object' => $proposal->object,
-                'indicated_for_health' => true,
-                'expense_destination' => 'investment',
-                'responsible_department' => $proposal->responsible_department,
-                'beneficiary_location' => 'UBS Centro - Guapiara/SP',
-                'responsible_user_id' => $executive->id,
-                'legal_instrument' => 'Lei Orgânica Municipal e LOA 2027',
-                'administrative_process' => 'PM-GUA-2027-003',
-                'bank_tracking_type' => 'municipal_direct_codes',
-                'funding_source_code' => '08',
-                'application_code_fixed' => '301',
-                'application_code_variable' => '0003',
-                'expected_amount' => 95000,
-                'received_amount' => 95000,
-                'status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
-                'indicated_at' => '2027-01-20',
-                'received_at' => '2027-02-10',
-                'communication_deadline' => '2027-02-20',
-                'communication_completed_at' => '2027-02-13',
-                'execution_deadline' => '2027-06-30',
-                'application_deadline' => '2027-07-31',
-                'execution_completed_at' => '2027-05-28',
-                'accountability_deadline' => '2027-08-30',
-                'notes' => 'Emenda demonstrativa com execução simplificada e prestação em preparação.',
+            'created_by' => $manager->id,
+            'municipal_regulatory_profile_id' => $profile->id,
+            'fiscal_year' => 2027,
+            'government_sphere' => 'municipal',
+            'authorship_type' => 'individual',
+            'transfer_type' => 'direct_execution',
+            'author_name' => $proposal->author_name,
+            'author_party' => $proposal->author_party,
+            'object' => $proposal->object,
+            'indicated_for_health' => true,
+            'expense_destination' => 'investment',
+            'responsible_department' => $proposal->responsible_department,
+            'beneficiary_location' => 'UBS Centro - Guapiara/SP',
+            'responsible_user_id' => $executive->id,
+            'legal_instrument' => 'Lei Orgânica Municipal e LOA 2027',
+            'administrative_process' => 'PM-GUA-2027-003',
+            'bank_tracking_type' => 'municipal_direct_codes',
+            'funding_source_code' => '08',
+            'application_code_fixed' => '301',
+            'application_code_variable' => '0003',
+            'expected_amount' => 95000,
+            'received_amount' => 95000,
+            'status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
+            'indicated_at' => '2027-01-20',
+            'received_at' => '2027-02-10',
+            'communication_deadline' => '2027-02-20',
+            'communication_completed_at' => '2027-02-13',
+            'execution_deadline' => '2027-06-30',
+            'application_deadline' => '2027-07-31',
+            'execution_completed_at' => '2027-05-28',
+            'accountability_deadline' => '2027-08-30',
+            'notes' => 'Emenda demonstrativa com execução simplificada e prestação em preparação.',
         ])->save();
 
         return $amendment;
@@ -411,16 +413,16 @@ class GuapiaraDemoSeeder extends Seeder
 
         $commitment = FinancialCommitment::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'commitment_number' => 'EMP-GUA-2027-003']);
         $commitment->forceFill([
-                'municipality_id' => $municipality->id,
-                'execution_stage_id' => $stage->id,
-                'created_by' => $manager->id,
-                'supplier_name' => 'Fornecedor Demonstrativo de Equipamentos Médicos',
-                'supplier_document' => '00.000.000/0001-00',
-                'procurement_process' => 'DISP-GUA-2027-003',
-                'object_description' => $amendment->object,
-                'committed_amount' => 95000,
-                'committed_at' => '2027-03-15',
-                'status' => FinancialCommitment::STATUS_ACTIVE,
+            'municipality_id' => $municipality->id,
+            'execution_stage_id' => $stage->id,
+            'created_by' => $manager->id,
+            'supplier_name' => 'Fornecedor Demonstrativo de Equipamentos Médicos',
+            'supplier_document' => '00.000.000/0001-00',
+            'procurement_process' => 'DISP-GUA-2027-003',
+            'object_description' => $amendment->object,
+            'committed_amount' => 95000,
+            'committed_at' => '2027-03-15',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
         ])->save();
 
         DB::table('financial_liquidations')->updateOrInsert(
@@ -478,17 +480,17 @@ class GuapiaraDemoSeeder extends Seeder
         ] as [$category, $title, $description, $order]) {
             $requirement = AccountabilityRequirement::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => $title]);
             $requirement->forceFill([
-                    'municipality_id' => $municipality->id,
-                    'accountability_process_id' => $process->id,
-                    'completed_by' => $manager->id,
-                    'created_by' => $manager->id,
-                    'category' => $category,
-                    'description' => $description,
-                    'is_required' => true,
-                    'status' => AccountabilityRequirement::STATUS_COMPLETED,
-                    'notes' => 'Item demonstrativo concluído.',
-                    'completed_at' => now()->subDays(2),
-                    'sort_order' => $order,
+                'municipality_id' => $municipality->id,
+                'accountability_process_id' => $process->id,
+                'completed_by' => $manager->id,
+                'created_by' => $manager->id,
+                'category' => $category,
+                'description' => $description,
+                'is_required' => true,
+                'status' => AccountabilityRequirement::STATUS_COMPLETED,
+                'notes' => 'Item demonstrativo concluído.',
+                'completed_at' => now()->subDays(2),
+                'sort_order' => $order,
             ])->save();
         }
 
