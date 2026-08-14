@@ -13,6 +13,66 @@
 
     <x-validation-summary />
 
+    <section class="content-panel user-usage-panel mb-4" aria-label="Uso do sistema por perfil">
+        <div class="content-panel-header">
+            <div>
+                <p class="panel-kicker">Adoção municipal</p>
+                <h2 class="h5 mb-1">Uso do sistema por perfil</h2>
+                <p class="small text-secondary mb-0">Visão rápida para o gestor saber se Executivo, Câmara e consulta estão operando de verdade.</p>
+            </div>
+        </div>
+        <div class="user-usage-summary">
+            <article>
+                <span><i data-lucide="users" aria-hidden="true"></i></span>
+                <div><small>Usuários</small><strong>{{ $usageSummary['users'] }}</strong></div>
+            </article>
+            <article>
+                <span><i data-lucide="activity" aria-hidden="true"></i></span>
+                <div><small>Ativos em 7 dias</small><strong>{{ $usageSummary['active_users'] }}</strong></div>
+            </article>
+            <article class="{{ $usageSummary['inactive_users'] > 0 ? 'needs-action' : '' }}">
+                <span><i data-lucide="moon" aria-hidden="true"></i></span>
+                <div><small>Sem uso registrado</small><strong>{{ $usageSummary['inactive_users'] }}</strong></div>
+            </article>
+            <article class="{{ $usageSummary['pending_invitations'] > 0 ? 'needs-action' : '' }}">
+                <span><i data-lucide="mail-check" aria-hidden="true"></i></span>
+                <div><small>Convites pendentes</small><strong>{{ $usageSummary['pending_invitations'] }}</strong></div>
+            </article>
+        </div>
+        <div class="user-role-usage-grid">
+            @forelse ($roleUsage as $usage)
+                <article>
+                    <header>
+                        <span><i data-lucide="{{ $usage['role'] === App\Models\User::ROLE_COUNCILOR ? 'landmark' : ($usage['role'] === App\Models\User::ROLE_AUDITOR ? 'shield-check' : 'badge-check') }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Perfil</small>
+                            <strong>{{ $usage['label'] }}</strong>
+                        </div>
+                    </header>
+                    <dl>
+                        <div><dt>Pessoas</dt><dd>{{ $usage['users'] }}</dd></div>
+                        <div><dt>Ativos</dt><dd>{{ $usage['active_users'] }}</dd></div>
+                        <div><dt>Propostas</dt><dd>{{ $usage['proposal_count'] }}</dd></div>
+                    </dl>
+                    <p>
+                        @if ($usage['last_action'])
+                            Última ação: {{ $usage['last_action']->actionLabel() }} há {{ $usage['last_action']->created_at->diffForHumans(null, true) }}.
+                        @elseif ($usage['inactive_users'] > 0)
+                            Ainda não há uso registrado para este perfil.
+                        @else
+                            Perfil disponível para operação.
+                        @endif
+                    </p>
+                    @if ($usage['proposal_amount'] > 0)
+                        <em>R$ {{ number_format($usage['proposal_amount'], 2, ',', '.') }} em propostas vinculadas</em>
+                    @endif
+                </article>
+            @empty
+                <div class="empty-state">Nenhum perfil operacional vinculado ao município.</div>
+            @endforelse
+        </div>
+    </section>
+
     @if (session('invitation_link'))
         <div class="alert alert-success app-alert align-items-start mb-4" role="status">
             <i data-lucide="circle-check" aria-hidden="true"></i>

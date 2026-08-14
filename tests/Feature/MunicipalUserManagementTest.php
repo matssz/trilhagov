@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AuditLog;
+use App\Models\LegislativeProposal;
 use App\Models\Municipality;
 use App\Models\MunicipalityInvitation;
 use App\Models\MunicipalRegulatoryProfile;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Notifications\MunicipalityInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -32,6 +34,60 @@ class MunicipalUserManagementTest extends TestCase
             ->withSession(['active_municipality_id' => $editorMunicipality->id])
             ->get(route('users.index'))
             ->assertForbidden();
+    }
+
+    public function test_user_management_shows_usage_by_profile(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $councilor = User::factory()->create();
+        $municipality->users()->attach($councilor, [
+            'role' => User::ROLE_COUNCILOR,
+            'legislative_name' => 'Bruno Almeida',
+            'legislative_party' => 'PSD',
+            'legislative_term_start' => '2025-01-01',
+            'legislative_term_end' => '2028-12-31',
+        ]);
+
+        $proposal = $municipality->legislativeProposals()->create([
+            'submitted_by' => $councilor->id,
+            'reference' => 'LEG-2027-001',
+            'fiscal_year' => 2027,
+            'author_name' => 'Bruno Almeida',
+            'author_party' => 'PSD',
+            'object' => 'Aquisicao de mobiliario clinico',
+            'justification' => 'Atender a unidade municipal de saude.',
+            'priority' => 'normal',
+            'beneficiary_type' => 'municipal_body',
+            'beneficiary_name' => 'UBS Central',
+            'beneficiary_location' => $municipality->name,
+            'expense_destination' => 'investment',
+            'transfer_type' => 'direct_execution',
+            'health_related' => true,
+            'responsible_department' => 'Secretaria Municipal de Saude',
+            'public_need' => 'Melhorar o atendimento local.',
+            'estimated_amount' => 25000,
+            'estimate_source' => 'Pesquisa simplificada',
+            'status' => LegislativeProposal::STATUS_DRAFT,
+        ]);
+
+        DB::table('audit_logs')->insert([
+            'municipality_id' => $municipality->id,
+            'user_id' => $councilor->id,
+            'actor_name' => $councilor->name,
+            'action' => 'created',
+            'auditable_type' => LegislativeProposal::class,
+            'auditable_id' => $proposal->id,
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('Uso do sistema por perfil')
+            ->assertSee('Ativos em 7 dias')
+            ->assertSee('Vereador')
+            ->assertSee('R$ 25.000,00');
     }
 
     public function test_manager_can_create_secure_invitation_and_repeated_submission_is_ignored(): void

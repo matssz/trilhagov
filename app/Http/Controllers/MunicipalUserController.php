@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Models\LegislativeProposal;
 use App\Models\MunicipalityInvitation;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\User;
@@ -33,11 +35,60 @@ class MunicipalUserController extends Controller
             ->whereNull('revoked_at')
             ->latest()
             ->get();
+        $memberIds = $members->pluck('id');
+        $recentAuditLogs = AuditLog::query()
+            ->where('municipality_id', $municipality->id)
+            ->whereIn('user_id', $memberIds)
+            ->latest()
+            ->get();
+        $lastActionsByUser = $recentAuditLogs->groupBy('user_id')->map->first();
+        $recentActionUserIds = $recentAuditLogs
+            ->where('created_at', '>=', now()->subDays(7))
+            ->pluck('user_id')
+            ->unique();
+        $proposalsBySubmitter = LegislativeProposal::query()
+            ->where('municipality_id', $municipality->id)
+            ->whereIn('submitted_by', $memberIds)
+            ->get(['submitted_by', 'status', 'estimated_amount'])
+            ->groupBy('submitted_by');
+        $roleUsage = collect(User::municipalityRoles())
+            ->map(function (string $label, string $role) use ($members, $lastActionsByUser, $proposalsBySubmitter, $recentActionUserIds): array {
+                $roleMembers = $members->filter(fn (User $member): bool => $member->pivot->role === $role);
+                $proposalCount = $roleMembers->sum(fn (User $member): int => $proposalsBySubmitter->get($member->id, collect())->count());
+                $proposalAmount = $roleMembers->sum(fn (User $member): float => (float) $proposalsBySubmitter->get($member->id, collect())->sum('estimated_amount'));
+                $lastAction = $roleMembers
+                    ->map(fn (User $member) => $lastActionsByUser->get($member->id))
+                    ->filter()
+                    ->sortByDesc('created_at')
+                    ->first();
+
+                return [
+                    'role' => $role,
+                    'label' => $label,
+                    'users' => $roleMembers->count(),
+                    'active_users' => $roleMembers->whereIn('id', $recentActionUserIds)->count(),
+                    'inactive_users' => $roleMembers->reject(fn (User $member): bool => $lastActionsByUser->has($member->id))->count(),
+                    'proposal_count' => $proposalCount,
+                    'proposal_amount' => $proposalAmount,
+                    'last_action' => $lastAction,
+                ];
+            })
+            ->filter(fn (array $item): bool => $item['users'] > 0)
+            ->values();
+        $usageSummary = [
+            'users' => $members->count(),
+            'active_users' => $recentActionUserIds->count(),
+            'inactive_users' => $members->reject(fn (User $member): bool => $lastActionsByUser->has($member->id))->count(),
+            'pending_invitations' => $invitations->count(),
+            'expired_invitations' => $invitations->filter(fn (MunicipalityInvitation $invitation): bool => $invitation->expires_at->isPast())->count(),
+        ];
 
         return view('users.index', [
             'municipality' => $municipality,
             'members' => $members,
             'invitations' => $invitations,
+            'roleUsage' => $roleUsage,
+            'usageSummary' => $usageSummary,
             'roles' => User::municipalityRoles(),
             'invitableRoles' => array_intersect_key(
                 User::municipalityRoles(),
