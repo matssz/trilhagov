@@ -117,6 +117,7 @@ class AccountabilityTest extends TestCase
             ->assertSee('Pacote de auditoria')
             ->assertSee('Protocolar prestação')
             ->assertSee('Baixar pacote final')
+            ->assertSee('PC-'.$amendment->reference.'-'.now()->format('Ymd'))
             ->assertSee('#dossie-prestacao', false);
     }
 

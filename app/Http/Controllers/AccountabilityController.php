@@ -62,6 +62,7 @@ class AccountabilityController extends Controller
             'requirementStatuses' => AccountabilityRequirement::statuses(),
             'readiness' => $readiness,
             'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness),
+            'protocolSuggestion' => 'PC-'.$amendment->reference.'-'.now()->format('Ymd'),
             'prepareToken' => $canEdit
                 ? $formSubmission->issue($request, "accountability-prepare-{$amendment->id}")
                 : null,

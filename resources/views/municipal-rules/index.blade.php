@@ -86,7 +86,7 @@
                                 <label class="rules-module-card">
                                     <input class="form-check-input" name="{{ $field }}" type="checkbox" value="1" @checked(old($field, $municipality->moduleEnabled($key)))>
                                     <span>
-                                        <strong>{{ $module['label'] }}</strong>
+                                        <strong>{{ $module['label'] }} @if(! empty($module['automatic']))<em>automático no fluxo</em>@else<em>parametrizado</em>@endif</strong>
                                         <small>{{ $module['description'] }}</small>
                                     </span>
                                 </label>
@@ -94,7 +94,7 @@
                                 <div class="rules-module-card is-automatic">
                                     <i data-lucide="{{ $municipality->moduleEnabled($key) ? 'badge-check' : 'circle-dashed' }}" aria-hidden="true"></i>
                                     <span>
-                                        <strong>{{ $module['label'] }}</strong>
+                                        <strong>{{ $module['label'] }} <em>{{ $municipality->moduleEnabled($key) ? 'ativo automaticamente' : 'indisponível' }}</em></strong>
                                         <small>{{ $municipality->moduleEnabled($key) ? $module['description'] : 'Indisponivel automaticamente para este municipio.' }}</small>
                                     </span>
                                 </div>

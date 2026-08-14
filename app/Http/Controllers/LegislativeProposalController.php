@@ -585,6 +585,13 @@ class LegislativeProposalController extends Controller
 
         return view('legislative.create', [
             ...$this->formOptions($municipality, $request, $service, $year),
+            'prefill' => [
+                'estimated_amount' => is_numeric($request->query('suggested_amount'))
+                    ? number_format((float) $request->query('suggested_amount'), 2, '.', '')
+                    : null,
+                'health_related' => $request->boolean('suggested_health'),
+                'responsible_department' => $request->boolean('suggested_health') ? 'Secretaria Municipal de Saúde' : null,
+            ],
             'submissionToken' => $formSubmission->issue($request, 'legislative-proposal-create'),
         ]);
     }

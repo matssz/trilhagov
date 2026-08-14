@@ -64,6 +64,7 @@ class CouncilorPortalSummaryService
             'simpleCards' => $this->simpleCards($remaining, $healthGap, $nextTitle, $nextText, $badgeTone),
             'plainChecklist' => $this->plainChecklist($profile, $remaining, $healthGap, $canCreate, $badge),
             'mandateCards' => $this->mandateCards($quota, $healthGap, $count, $countLimit),
+            'recommendedProposal' => $this->recommendedProposal($year, $remaining, $healthGap, $minimumAmount, $canCreate),
             'timeline' => $this->timeline($year, $statusCounts),
             'alerts' => $this->alerts($profile, $statusCounts, $remaining, $healthGap, $canCreate),
             'statusCounts' => $statusCounts,
@@ -131,6 +132,51 @@ class CouncilorPortalSummaryService
             'Informe objeto, beneficiário, valor estimado e envie para conferência legislativa.',
             'Pode indicar',
             'success',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function recommendedProposal(
+        int $year,
+        mixed $remaining,
+        mixed $healthGap,
+        ?float $minimumAmount,
+        bool $canCreate,
+    ): array {
+        if (! $canCreate || $remaining === null) {
+            return [
+                'enabled' => false,
+                'title' => 'Aguardando liberação para nova proposta',
+                'description' => 'Assim que a norma e o saldo estiverem liberados, o sistema sugere valor e marcação de saúde automaticamente.',
+                'amount' => null,
+                'health' => false,
+                'url' => route('legislative.index', ['year' => $year]),
+                'cta' => 'Acompanhar portal',
+            ];
+        }
+
+        $remainingAmount = max(0, (float) $remaining);
+        $healthAmount = max(0, (float) ($healthGap ?? 0));
+        $minimum = max(0.01, (float) ($minimumAmount ?? 0.01));
+        $healthSuggested = $healthAmount > 0.005;
+        $amount = $healthSuggested
+            ? min($remainingAmount, max($healthAmount, $minimum))
+            : $remainingAmount;
+
+        return [
+            'enabled' => $amount >= $minimum,
+            'title' => $healthSuggested ? 'Sugestão automática: saúde primeiro' : 'Sugestão automática: usar saldo disponível',
+            'description' => $healthSuggested
+                ? 'O vereador ainda precisa compor a reserva mínima de saúde. O cadastro já abre marcado para saúde com o valor sugerido.'
+                : 'A reserva de saúde está atendida. O cadastro pode abrir com o saldo disponível da cota individual.',
+            'amount' => $amount,
+            'health' => $healthSuggested,
+            'url' => route('legislative.create', [
+                'year' => $year,
+                'suggested_amount' => number_format($amount, 2, '.', ''),
+                'suggested_health' => $healthSuggested ? 1 : 0,
+            ]),
+            'cta' => $healthSuggested ? 'Criar proposta de saúde' : 'Criar com saldo',
         ];
     }
 

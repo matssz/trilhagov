@@ -83,6 +83,22 @@
                             </article>
                         @endforeach
                     </div>
+                    @if($councilorGuide['recommendedProposal'] ?? null)
+                        <div class="councilor-auto-recommendation {{ $councilorGuide['recommendedProposal']['health'] ? 'is-health' : '' }}">
+                            <span><i data-lucide="{{ $councilorGuide['recommendedProposal']['health'] ? 'heart-pulse' : 'wand-sparkles' }}" aria-hidden="true"></i></span>
+                            <div>
+                                <small>Atalho inteligente</small>
+                                <strong>{{ $councilorGuide['recommendedProposal']['title'] }}</strong>
+                                <p>{{ $councilorGuide['recommendedProposal']['description'] }}</p>
+                            </div>
+                            @if($councilorGuide['recommendedProposal']['amount'])
+                                <em>R$ {{ number_format($councilorGuide['recommendedProposal']['amount'], 2, ',', '.') }}</em>
+                            @endif
+                            <a class="btn {{ $councilorGuide['recommendedProposal']['enabled'] ? 'btn-primary' : 'btn-outline-secondary' }}" href="{{ $councilorGuide['recommendedProposal']['url'] }}">
+                                <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $councilorGuide['recommendedProposal']['cta'] }}
+                            </a>
+                        </div>
+                    @endif
                     <div class="councilor-timeline" aria-label="Linha do tempo das propostas">
                         @foreach($councilorGuide['timeline'] ?? [] as $step)
                             <a class="is-{{ $step['tone'] }}" href="{{ $step['url'] }}">

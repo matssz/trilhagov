@@ -292,6 +292,16 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('data-fill-health', false)
             ->assertSee('data-health-amount="25000"', false)
             ->assertSee('max="105000"', false);
+
+        $this->get(route('legislative.create', [
+            'year' => 2027,
+            'suggested_amount' => '25000.00',
+            'suggested_health' => 1,
+        ]))
+            ->assertOk()
+            ->assertSee('value="25000.00"', false)
+            ->assertSee('Secretaria Municipal de Saúde')
+            ->assertSee('name="health_related" type="checkbox" value="1" checked', false);
     }
 
     public function test_submission_blocks_amount_above_councilor_quota(): void
@@ -650,6 +660,10 @@ class LegislativeProposalTest extends TestCase
             ->get(route('legislative.index', ['year' => 2027]))
             ->assertOk()
             ->assertSee('Minha cota')
+            ->assertSee('Atalho inteligente')
+            ->assertSee('Sugestão automática: usar saldo disponível')
+            ->assertSee('Criar com saldo')
+            ->assertSee('suggested_amount=155000.00', false)
             ->assertDontSee('Mesa do Executivo');
     }
 
