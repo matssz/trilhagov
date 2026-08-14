@@ -8314,6 +8314,349 @@ button.accountability-action-card {
     border-left-width: 1px;
 }
 
+/* Accountability pilot polish: executive closing screen with clearer hierarchy and safer button alignment. */
+.accountability-hero {
+    align-items: stretch;
+    min-height: 0;
+}
+
+.accountability-hero h1 {
+    font-size: clamp(1.8rem, 3vw, 2.55rem);
+}
+
+.accountability-hero > div:first-child {
+    display: grid;
+    align-content: center;
+    min-width: 0;
+}
+
+.accountability-hero > div:last-child {
+    align-self: stretch;
+    align-content: center;
+    min-width: min(100%, 270px);
+}
+
+.accountability-hero > div:last-child .btn {
+    justify-content: center;
+    min-width: 148px;
+}
+
+.accountability-guide {
+    gap: 1.05rem;
+}
+
+.accountability-guide-header {
+    align-items: center;
+}
+
+.accountability-guide-header .btn,
+.accountability-guide-next .btn,
+.accountability-final-actions .btn,
+.accountability-final-showcase-actions .btn,
+.dossier-actions .btn,
+.accountability-archive-panel .btn,
+.accountability-archive-panel button {
+    justify-content: center;
+    min-height: 42px;
+}
+
+.accountability-guide-next {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: .9rem;
+    align-items: center;
+}
+
+.accountability-guide-next > span,
+.accountability-submit-copy > span,
+.accountability-start-icon,
+.dossier-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    place-items: center;
+}
+
+.accountability-readiness {
+    align-items: center;
+}
+
+.accountability-readiness-facts {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.accountability-readiness-facts > div,
+.accountability-guide-summary > div,
+.accountability-receipt-grid article {
+    min-height: 76px;
+    background: rgba(255, 255, 255, .96);
+}
+
+.accountability-command-heading,
+.accountability-action-strip-heading {
+    align-items: center;
+}
+
+.accountability-command-grid {
+    grid-template-columns: repeat(5, minmax(156px, 1fr));
+}
+
+.accountability-action-list {
+    grid-template-columns: repeat(6, minmax(128px, 1fr));
+}
+
+.accountability-command-card,
+.accountability-action-card {
+    min-height: 132px;
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.accountability-command-card {
+    grid-template-rows: auto auto auto 1fr auto;
+}
+
+.accountability-action-card {
+    align-content: start;
+}
+
+.accountability-command-card > span,
+.accountability-action-card > span,
+.accountability-flow-lane span,
+.accountability-guide-steps span {
+    width: 36px;
+    height: 36px;
+    place-items: center;
+}
+
+.accountability-command-card p,
+.accountability-action-card small,
+.accountability-flow-lane small,
+.accountability-guide-steps small {
+    line-height: 1.4;
+}
+
+.accountability-flow-lane {
+    grid-template-columns: repeat(5, minmax(136px, 1fr));
+}
+
+.accountability-flow-lane a,
+.accountability-guide-steps > div {
+    min-height: 112px;
+    box-shadow: none;
+}
+
+.accountability-guide-steps,
+.accountability-guide-summary {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.accountability-start {
+    align-items: center;
+}
+
+.accountability-start-actions .btn {
+    min-height: 42px;
+}
+
+.accountability-metrics {
+    gap: .9rem;
+}
+
+.accountability-metrics .metric-card {
+    border-color: rgba(188, 204, 220, .8);
+    box-shadow: 0 14px 30px rgba(7, 31, 61, .05);
+}
+
+.readiness-panel,
+#process,
+#requirements,
+#diligences {
+    overflow: hidden;
+}
+
+.readiness-list {
+    padding: 1rem;
+}
+
+.accountability-submit-panel {
+    align-items: center;
+    gap: 1rem;
+}
+
+.accountability-submit-copy {
+    align-items: center;
+}
+
+.accountability-submit-form,
+.accountability-process-form,
+.accountability-form-band {
+    border-radius: var(--radius-lg);
+}
+
+.accountability-requirement-list,
+.diligence-list {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem;
+}
+
+.accountability-requirement-row,
+.diligence-row {
+    border: 1px solid rgba(198, 211, 223, .78);
+    box-shadow: none;
+}
+
+.accountability-requirement-row {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(112px, auto) 40px;
+    align-items: start;
+}
+
+.requirement-state,
+.diligence-icon {
+    width: 36px;
+    height: 36px;
+    place-items: center;
+}
+
+.requirement-status,
+.diligence-status {
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.requirement-editor summary,
+.diligence-editor summary {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+}
+
+.dossier-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+.dossier-actions > div:first-child {
+    display: flex;
+    gap: .85rem;
+    min-width: 0;
+}
+
+.dossier-actions > div:last-child {
+    justify-content: flex-end;
+}
+
+.accountability-final-package,
+.accountability-final-showcase,
+.accountability-archive-panel {
+    overflow: hidden;
+}
+
+.accountability-final-package {
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.accountability-final-actions,
+.accountability-final-showcase-actions {
+    align-content: center;
+}
+
+.accountability-final-checks {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.accountability-final-checks article,
+.accountability-final-timeline article {
+    min-height: 104px;
+    background: rgba(255, 255, 255, .96);
+}
+
+.accountability-archive-panel {
+    align-items: center;
+}
+
+.accountability-archive-panel form {
+    display: grid;
+    gap: .65rem;
+    min-width: min(100%, 320px);
+}
+
+@media (max-width: 1180px) {
+    .accountability-command-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .accountability-action-list,
+    .accountability-flow-lane {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dossier-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .dossier-actions > div:last-child {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .accountability-hero > div:last-child,
+    .accountability-guide-next,
+    .accountability-start,
+    .accountability-submit-panel,
+    .dossier-actions,
+    .accountability-archive-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-guide-next > span,
+    .accountability-submit-copy > span,
+    .accountability-start-icon,
+    .dossier-icon,
+    .accountability-archive-panel > span {
+        width: 42px;
+        height: 42px;
+    }
+
+    .accountability-command-grid,
+    .accountability-action-list,
+    .accountability-flow-lane,
+    .accountability-guide-steps,
+    .accountability-guide-summary,
+    .accountability-readiness-facts,
+    .accountability-final-checks,
+    .accountability-receipt-grid,
+    .accountability-final-timeline {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-requirement-row,
+    .diligence-row {
+        grid-template-columns: 36px minmax(0, 1fr);
+    }
+
+    .requirement-status,
+    .requirement-editor,
+    .diligence-editor {
+        grid-column: 1 / -1;
+    }
+
+    .requirement-status {
+        justify-content: flex-start;
+        width: fit-content;
+    }
+}
+
 /* Cross-screen polish: tabs and panels keep the same pilot rhythm after the redesigns. */
 .amendment-tabs {
     border-radius: var(--radius-xl);
