@@ -1,64 +1,106 @@
 @extends('layouts.app')
 
-@section('title', 'TrilhaGov | Gestão municipal de emendas')
+@section('title', 'TrilhaGov | Plataforma municipal de emendas')
 
 @section('content')
-    <section class="marketing-hero">
-        <div class="marketing-hero-copy">
-            <span class="marketing-kicker">SaaS municipal para emendas impositivas</span>
-            <h1>Controle Câmara, Executivo, execução e prestação de contas em um só fluxo.</h1>
-            <p>O TrilhaGov foi desenhado para municípios que ainda controlam emendas por planilhas, mensagens e pastas soltas. A plataforma guia vereador, gestor, controle interno e contabilidade sem exigir que cada usuário entenda toda a norma.</p>
-            <div class="marketing-actions">
-                <a class="btn btn-primary" href="{{ route('login') }}"><i data-lucide="log-in" aria-hidden="true"></i>Acessar demonstração</a>
-                <a class="btn btn-outline-primary" href="#fluxo"><i data-lucide="route" aria-hidden="true"></i>Ver fluxo</a>
+    <section class="commercial-hero" aria-label="TrilhaGov para municipios">
+        <div class="commercial-hero-content">
+            <span class="commercial-kicker"><i data-lucide="landmark" aria-hidden="true"></i> Plataforma municipal de emendas impositivas</span>
+            <h1>O caminho mais claro entre Câmara, Prefeitura, execução e prestação de contas.</h1>
+            <p>O TrilhaGov automatiza cota do vereador, reserva de saúde, conferência legislativa, fila do Executivo, evidências e dossiê final para municípios que ainda dependem de planilhas, mensagens e pastas soltas.</p>
+            <div class="commercial-hero-actions">
+                <a class="btn btn-primary btn-lg" href="{{ route('login') }}"><i data-lucide="log-in" aria-hidden="true"></i>Acessar demonstração</a>
+                <a class="btn btn-outline-primary btn-lg" href="#produto"><i data-lucide="play" aria-hidden="true"></i>Ver como funciona</a>
+            </div>
+            <div class="commercial-trust-row" aria-label="Resultados esperados">
+                <span><strong>RCL + Lei Orgânica</strong> viram saldo por vereador</span>
+                <span><strong>Saúde</strong> calculada sem planilha paralela</span>
+                <span><strong>TCESP/Audesp</strong> preparado para municípios paulistas</span>
             </div>
         </div>
-        <div class="marketing-product-panel" aria-label="Resumo visual do TrilhaGov">
-            <div class="marketing-product-top">
-                <span><i data-lucide="landmark" aria-hidden="true"></i>Guapiara / SP</span>
-                <strong>Portal de Emendas</strong>
+        <div class="commercial-product-stage" aria-label="Demonstração visual do produto">
+            <div class="commercial-browser-bar">
+                <span></span><span></span><span></span>
+                <em>trilhagov.onrender.com</em>
             </div>
-            <div class="marketing-metric-row">
-                <article><small>Cotas</small><strong>11 vereadores</strong></article>
-                <article><small>Saúde</small><strong>50% reservado</strong></article>
-                <article><small>TCESP</small><strong>Audesp ativo</strong></article>
-            </div>
-            <div class="marketing-flow-card">
-                <span>1</span><div><strong>Câmara indica</strong><small>Vereador vê saldo, saúde e status.</small></div>
-            </div>
-            <div class="marketing-flow-card">
-                <span>2</span><div><strong>Executivo decide</strong><small>Recebe, reserva, executa e acompanha.</small></div>
-            </div>
-            <div class="marketing-flow-card">
-                <span>3</span><div><strong>Prestação fecha</strong><small>Dossiê, evidências, protocolo e histórico.</small></div>
+            <div class="commercial-product-shell">
+                <aside>
+                    <strong>Trilha<span>Gov</span></strong>
+                    <small>Portal de Emendas</small>
+                    <b class="is-active"><i data-lucide="layout-dashboard" aria-hidden="true"></i>Painel</b>
+                    <b><i data-lucide="landmark" aria-hidden="true"></i>Legislativo</b>
+                    <b><i data-lucide="wallet-cards" aria-hidden="true"></i>Execução</b>
+                    <b><i data-lucide="shield-check" aria-hidden="true"></i>Controle</b>
+                </aside>
+                <main>
+                    <header>
+                        <div>
+                            <small>Guapiara / SP</small>
+                            <strong>Comando Municipal</strong>
+                        </div>
+                        <span>Pronto para operar</span>
+                    </header>
+                    <div class="commercial-metrics">
+                        <article><small>Cota individual</small><strong>R$ 103,6 mil</strong></article>
+                        <article><small>Reserva saúde</small><strong>50%</strong></article>
+                        <article><small>Fila crítica</small><strong>3 ações</strong></article>
+                    </div>
+                    <div class="commercial-flow">
+                        <span class="is-done">Câmara indica</span>
+                        <span class="is-done">Executivo recebe</span>
+                        <span>Reserva orçamento</span>
+                        <span>Presta contas</span>
+                    </div>
+                    <div class="commercial-work-card">
+                        <i data-lucide="sparkles" aria-hidden="true"></i>
+                        <div>
+                            <small>Automação municipal</small>
+                            <strong>Proposta de saúde identificada</strong>
+                            <p>Saldo, secretaria, reserva mínima e próximo passo já sugeridos.</p>
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
     </section>
 
-    <section class="marketing-proof" aria-label="Principais dores resolvidas">
-        <article><i data-lucide="wallet-cards" aria-hidden="true"></i><strong>Cota automática</strong><span>RCL, percentual, cadeiras e reserva de saúde viram saldo por vereador.</span></article>
-        <article><i data-lucide="shield-check" aria-hidden="true"></i><strong>Controle TCESP</strong><span>Matriz, dossiê e manifesto reduzem risco de pacote incompleto.</span></article>
-        <article><i data-lucide="file-spreadsheet" aria-hidden="true"></i><strong>Importação assistida</strong><span>CSV para bases antigas e validação antes de gravar dados.</span></article>
-        <article><i data-lucide="bell-ring" aria-hidden="true"></i><strong>Alertas de prazo</strong><span>Pendências por perfil, vencimentos e diligências no sistema.</span></article>
+    <section class="commercial-proof-strip" aria-label="Dores resolvidas pelo TrilhaGov">
+        <article><i data-lucide="calculator" aria-hidden="true"></i><strong>Cota automática</strong><span>RCL, percentual e cadeiras calculados por exercício.</span></article>
+        <article><i data-lucide="heart-pulse" aria-hidden="true"></i><strong>Saúde sem retrabalho</strong><span>Reserva mínima sinalizada no pedido do vereador.</span></article>
+        <article><i data-lucide="route" aria-hidden="true"></i><strong>Fluxo único</strong><span>Câmara, Executivo, execução e prestação em uma esteira.</span></article>
+        <article><i data-lucide="file-check-2" aria-hidden="true"></i><strong>Dossiê final</strong><span>Documentos, evidências e protocolo prontos para controle.</span></article>
     </section>
 
-    <section class="marketing-section" id="fluxo">
-        <div class="marketing-section-heading">
-            <span class="marketing-kicker">Fluxo municipal</span>
-            <h2>Menos módulos soltos, mais esteira operacional.</h2>
-            <p>O sistema organiza a rotina real: o vereador só indica e acompanha; o Executivo recebe, reserva e executa; a prestação consolida documentos e protocolo.</p>
+    <section class="commercial-section commercial-problem" id="produto">
+        <div>
+            <span class="commercial-kicker"><i data-lucide="triangle-alert" aria-hidden="true"></i> Dor real do município</span>
+            <h2>O problema não é só cadastrar emenda. É saber o que pode, o que falta e quem precisa agir.</h2>
+            <p>Prefeituras pequenas não precisam de mais um cadastro genérico. Precisam de uma operação guiada: vereador indica com limite claro, Câmara confere requisitos mínimos, Executivo reserva orçamento e a equipe fecha execução e prestação sem perder evidência.</p>
         </div>
-        <div class="marketing-timeline">
+        <div class="commercial-decision-grid">
+            <article><span>01</span><strong>Vereador vê saldo antes de pedir</strong><p>O sistema mostra quanto ainda pode indicar e explica para onde o valor foi comprometido.</p></article>
+            <article><span>02</span><strong>Câmara protocola com segurança</strong><p>Checklist mínimo reduz indicação genérica, ausência de beneficiário e inconsistência de saúde.</p></article>
+            <article><span>03</span><strong>Executivo decide por fila</strong><p>Receber, reservar e acompanhar deixam de depender de mensagem perdida.</p></article>
+            <article><span>04</span><strong>Controle interno ganha rastreabilidade</strong><p>Histórico, documentos, alertas e dossiês ficam vinculados ao processo.</p></article>
+        </div>
+    </section>
+
+    <section class="commercial-section commercial-pipeline">
+        <div class="commercial-section-heading">
+            <span class="commercial-kicker"><i data-lucide="waypoints" aria-hidden="true"></i> Esteira operacional</span>
+            <h2>Da indicação à prestação final, sem módulos soltos competindo pela atenção.</h2>
+        </div>
+        <div class="commercial-pipeline-track">
             @foreach ([
-                ['Câmara indica', 'Vereador cadastra proposta com saldo e saúde calculados.'],
-                ['Conferência legislativa', 'Câmara verifica requisitos mínimos antes de protocolar.'],
-                ['Executivo recebe', 'Prefeitura abre processo, secretaria e responsáveis.'],
-                ['Reserva orçamentária', 'Valor fica formalmente reservado para execução.'],
+                ['Câmara indica', 'Vereador cadastra pedido com valor, destino e justificativa.'],
+                ['Conferência legislativa', 'Câmara valida objeto, teto, saúde e beneficiário.'],
+                ['Executivo recebe', 'Prefeitura abre processo, secretaria e responsável.'],
+                ['Reserva orçamentária', 'Valor fica reservado para execução municipal.'],
                 ['Execução simplificada', 'Etapas, empenho, liquidação, pagamento e evidências.'],
-                ['Prestação final', 'Checklist, dossiê, protocolo, aprovação e arquivo.'],
+                ['Prestação final', 'Checklist, dossiê, protocolo, decisão e arquivo.'],
             ] as $index => [$title, $description])
                 <article>
-                    <span>{{ $index + 1 }}</span>
+                    <span>{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                     <strong>{{ $title }}</strong>
                     <p>{{ $description }}</p>
                 </article>
@@ -66,18 +108,27 @@
         </div>
     </section>
 
-    <section class="marketing-section marketing-two-columns">
+    <section class="commercial-section commercial-market">
         <div>
-            <span class="marketing-kicker">Para vender como piloto</span>
-            <h2>O diferencial está na simplicidade para municípios pequenos.</h2>
-            <p>Estados e União têm estrutura técnica. O TrilhaGov nasce para prefeitura e Câmara que precisam cumprir norma, responder controle e evitar multa sem montar uma equipe de TI.</p>
+            <span class="commercial-kicker"><i data-lucide="rocket" aria-hidden="true"></i> Posicionamento comercial</span>
+            <h2>Feito para municípios que não têm estrutura própria de tecnologia.</h2>
+            <p>O TrilhaGov não tenta vender complexidade. Ele transforma norma municipal, TCESP, Audesp, controle interno e prestação de contas em uma rotina simples para gestor, vereador e equipe técnica.</p>
         </div>
-        <div class="marketing-check-list">
-            <span><i data-lucide="check" aria-hidden="true"></i>Portal Legislativo com saldo individual</span>
-            <span><i data-lucide="check" aria-hidden="true"></i>Norma municipal ativa por exercício</span>
-            <span><i data-lucide="check" aria-hidden="true"></i>Audesp e TCESP para municípios paulistas</span>
-            <span><i data-lucide="check" aria-hidden="true"></i>Prestação de contas com pacote final</span>
-            <span><i data-lucide="check" aria-hidden="true"></i>LGPD, MFA e defesa contra acesso indevido</span>
+        <div class="commercial-market-list">
+            <span><i data-lucide="check" aria-hidden="true"></i> Onboarding do município e ativação do exercício</span>
+            <span><i data-lucide="check" aria-hidden="true"></i> Portal Legislativo com linguagem simples para vereador</span>
+            <span><i data-lucide="check" aria-hidden="true"></i> Fila do Executivo para receber, reservar e executar</span>
+            <span><i data-lucide="check" aria-hidden="true"></i> Importação CSV para bases existentes</span>
+            <span><i data-lucide="check" aria-hidden="true"></i> LGPD, MFA, logs e central de ocorrências</span>
         </div>
+    </section>
+
+    <section class="commercial-cta" aria-label="Acessar demonstracao">
+        <div>
+            <span class="commercial-kicker"><i data-lucide="sparkles" aria-hidden="true"></i> Demonstração pronta</span>
+            <h2>Mostre o fluxo completo em poucos minutos.</h2>
+            <p>Use a base de Guapiara para apresentar o papel do vereador, da Câmara, do Executivo e da prestação de contas com dados realistas.</p>
+        </div>
+        <a class="btn btn-primary btn-lg" href="{{ route('login') }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Entrar no TrilhaGov</a>
     </section>
 @endsection
