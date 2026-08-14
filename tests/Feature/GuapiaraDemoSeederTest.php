@@ -38,12 +38,37 @@ class GuapiaraDemoSeederTest extends TestCase
             'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
         ]);
 
-        $this->assertGreaterThanOrEqual(3, LegislativeProposal::where('municipality_id', $municipality->id)->count());
+        $this->assertGreaterThanOrEqual(5, LegislativeProposal::where('municipality_id', $municipality->id)->count());
+        $this->assertDatabaseHas('legislative_proposals', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'LEG-GUA-2027-001',
+            'status' => LegislativeProposal::STATUS_SUBMITTED,
+        ]);
+        $this->assertDatabaseHas('legislative_proposals', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'LEG-GUA-2027-002',
+            'status' => LegislativeProposal::STATUS_APPROVED,
+        ]);
+        $this->assertDatabaseHas('legislative_proposals', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'LEG-GUA-2027-005',
+            'status' => LegislativeProposal::STATUS_RECEIVED,
+        ]);
         $this->assertDatabaseHas('parliamentary_amendments', [
             'municipality_id' => $municipality->id,
             'reference' => 'EM-GUA-2027-003',
             'status' => ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING,
         ]);
-        $this->assertSame(1, AccountabilityProcess::where('municipality_id', $municipality->id)->count());
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'EM-GUA-2027-005',
+            'status' => ParliamentaryAmendment::STATUS_EXECUTING,
+        ]);
+        $this->assertDatabaseHas('parliamentary_amendments', [
+            'municipality_id' => $municipality->id,
+            'reference' => 'EM-GUA-2027-004',
+            'status' => ParliamentaryAmendment::STATUS_COMPLETED,
+        ]);
+        $this->assertSame(2, AccountabilityProcess::where('municipality_id', $municipality->id)->count());
     }
 }

@@ -145,6 +145,32 @@ class GuapiaraDemoSeeder extends Seeder
                 false,
                 $legislative,
             );
+            $sentProposal = $this->proposal(
+                $municipality,
+                $profile,
+                $councilors[2],
+                'LEG-GUA-2027-004',
+                LegislativeProposal::STATUS_SENT,
+                'Reforma dos vestiarios do campo municipal do bairro Areia Branca',
+                'Secretaria Municipal de Obras e Servicos',
+                'Campo Municipal Areia Branca',
+                72000,
+                false,
+                $legislative,
+            );
+            $receivedProposal = $this->proposal(
+                $municipality,
+                $profile,
+                $councilors[3],
+                'LEG-GUA-2027-005',
+                LegislativeProposal::STATUS_RECEIVED,
+                'Aquisicao de tablets para apoio pedagogico na rede municipal',
+                'Secretaria Municipal de Educacao',
+                'Escolas municipais',
+                88000,
+                false,
+                $legislative,
+            );
 
             $reservedProposal = $this->proposal(
                 $municipality,
@@ -163,6 +189,52 @@ class GuapiaraDemoSeeder extends Seeder
             $amendment = $this->amendment($municipality, $profile, $manager, $executive, $reservedProposal);
             $reservedProposal->forceFill(['parliamentary_amendment_id' => $amendment->id])->save();
             $this->executionAndAccountability($municipality, $amendment, $manager, $executive);
+
+            $executingAmendment = $this->presentationAmendment(
+                $municipality,
+                $profile,
+                $manager,
+                $executive,
+                $receivedProposal,
+                'EM-GUA-2027-005',
+                ParliamentaryAmendment::STATUS_EXECUTING,
+                88000,
+                88000,
+                false,
+                'Execucao demonstrativa em andamento para material pedagogico municipal.',
+            );
+            $receivedProposal->forceFill([
+                'parliamentary_amendment_id' => $executingAmendment->id,
+                'executive_process_number' => 'PM-GUA-2027-005',
+                'budget_reservation_number' => 'RES-GUA-2027-005',
+                'budget_reserved_amount' => 88000,
+                'budget_reserved_at' => '2027-02-18',
+            ])->save();
+            $this->executionInProgress($municipality, $executingAmendment, $manager, $executive);
+
+            $completedAmendment = $this->presentationAmendment(
+                $municipality,
+                $profile,
+                $manager,
+                $executive,
+                $sentProposal,
+                'EM-GUA-2027-004',
+                ParliamentaryAmendment::STATUS_COMPLETED,
+                72000,
+                72000,
+                false,
+                'Emenda demonstrativa concluida para mostrar prestacao aprovada e pacote final.',
+            );
+            $sentProposal->forceFill([
+                'parliamentary_amendment_id' => $completedAmendment->id,
+                'status' => LegislativeProposal::STATUS_RESERVED,
+                'executive_process_number' => 'PM-GUA-2027-004',
+                'budget_reservation_number' => 'RES-GUA-2027-004',
+                'budget_reserved_amount' => 72000,
+                'budget_reserved_at' => '2027-02-16',
+                'received_at' => now()->subDays(6),
+            ])->save();
+            $this->completedExecutionAndAccountability($municipality, $completedAmendment, $manager, $executive);
 
             $this->command?->info('Base demonstrativa de Guapiara criada/atualizada.');
             $this->command?->table(
@@ -394,6 +466,206 @@ class GuapiaraDemoSeeder extends Seeder
         return $amendment;
     }
 
+    private function presentationAmendment(
+        Municipality $municipality,
+        MunicipalRegulatoryProfile $profile,
+        User $manager,
+        User $executive,
+        LegislativeProposal $proposal,
+        string $reference,
+        string $status,
+        float $expectedAmount,
+        ?float $receivedAmount,
+        bool $health,
+        string $notes,
+    ): ParliamentaryAmendment {
+        $amendment = ParliamentaryAmendment::firstOrNew(['municipality_id' => $municipality->id, 'reference' => $reference]);
+        $amendment->forceFill([
+            'created_by' => $manager->id,
+            'municipal_regulatory_profile_id' => $profile->id,
+            'fiscal_year' => 2027,
+            'government_sphere' => 'municipal',
+            'authorship_type' => 'individual',
+            'transfer_type' => 'direct_execution',
+            'author_name' => $proposal->author_name,
+            'author_party' => $proposal->author_party,
+            'object' => $proposal->object,
+            'indicated_for_health' => $health,
+            'expense_destination' => 'investment',
+            'responsible_department' => $proposal->responsible_department,
+            'beneficiary_location' => $proposal->beneficiary_name.' - Guapiara/SP',
+            'responsible_user_id' => $executive->id,
+            'legal_instrument' => 'Lei Organica Municipal e LOA 2027',
+            'administrative_process' => str_replace('EM-', 'PM-', $reference),
+            'bank_tracking_type' => 'municipal_direct_codes',
+            'funding_source_code' => '08',
+            'application_code_fixed' => $health ? '301' : '200',
+            'application_code_variable' => substr($reference, -3),
+            'expected_amount' => $expectedAmount,
+            'received_amount' => $receivedAmount,
+            'status' => $status,
+            'indicated_at' => '2027-01-22',
+            'received_at' => $receivedAmount !== null ? '2027-02-18' : null,
+            'communication_deadline' => '2027-02-28',
+            'communication_completed_at' => '2027-02-20',
+            'execution_deadline' => '2027-07-30',
+            'application_deadline' => '2027-08-31',
+            'execution_completed_at' => $status === ParliamentaryAmendment::STATUS_COMPLETED ? '2027-06-25' : null,
+            'accountability_deadline' => '2027-09-30',
+            'accountability_completed_at' => $status === ParliamentaryAmendment::STATUS_COMPLETED ? '2027-08-10' : null,
+            'notes' => $notes,
+        ])->save();
+
+        return $amendment;
+    }
+
+    private function executionInProgress(Municipality $municipality, ParliamentaryAmendment $amendment, User $manager, User $executive): void
+    {
+        $stage = ExecutionStage::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => 'Compra e distribuicao dos equipamentos']);
+        $stage->forceFill([
+            'municipality_id' => $municipality->id,
+            'responsible_user_id' => $executive->id,
+            'created_by' => $manager->id,
+            'description' => 'Processo de compra e entrega dos tablets para as escolas municipais.',
+            'status' => ExecutionStage::STATUS_IN_PROGRESS,
+            'progress_percentage' => 55,
+            'planned_amount' => 88000,
+            'planned_start_at' => '2027-03-05',
+            'planned_end_at' => '2027-07-20',
+            'completed_at' => null,
+            'sort_order' => 10,
+        ])->save();
+
+        $commitment = FinancialCommitment::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'commitment_number' => 'EMP-GUA-2027-005']);
+        $commitment->forceFill([
+            'municipality_id' => $municipality->id,
+            'execution_stage_id' => $stage->id,
+            'created_by' => $manager->id,
+            'supplier_name' => 'Fornecedor Demonstrativo de Tecnologia Educacional',
+            'supplier_document' => '00.000.000/0002-00',
+            'procurement_process' => 'DISP-GUA-2027-005',
+            'object_description' => $amendment->object,
+            'committed_amount' => 88000,
+            'committed_at' => '2027-03-20',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ])->save();
+    }
+
+    private function completedExecutionAndAccountability(Municipality $municipality, ParliamentaryAmendment $amendment, User $manager, User $executive): void
+    {
+        $stage = ExecutionStage::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => 'Reforma entregue e vistoriada']);
+        $stage->forceFill([
+            'municipality_id' => $municipality->id,
+            'responsible_user_id' => $executive->id,
+            'created_by' => $manager->id,
+            'description' => 'Reforma finalizada com vistoria, registro fotografico e termo de aceite.',
+            'status' => ExecutionStage::STATUS_COMPLETED,
+            'progress_percentage' => 100,
+            'planned_amount' => 72000,
+            'planned_start_at' => '2027-03-01',
+            'planned_end_at' => '2027-06-25',
+            'completed_at' => '2027-06-25',
+            'sort_order' => 10,
+        ])->save();
+
+        $commitment = FinancialCommitment::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'commitment_number' => 'EMP-GUA-2027-004']);
+        $commitment->forceFill([
+            'municipality_id' => $municipality->id,
+            'execution_stage_id' => $stage->id,
+            'created_by' => $manager->id,
+            'supplier_name' => 'Construtora Demonstrativa Municipal',
+            'supplier_document' => '00.000.000/0003-00',
+            'procurement_process' => 'PROC-GUA-2027-004',
+            'object_description' => $amendment->object,
+            'committed_amount' => 72000,
+            'committed_at' => '2027-03-18',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ])->save();
+
+        DB::table('financial_liquidations')->updateOrInsert(
+            ['parliamentary_amendment_id' => $amendment->id, 'liquidation_reference' => 'LIQ-GUA-2027-004'],
+            [
+                'municipality_id' => $municipality->id,
+                'financial_commitment_id' => $commitment->id,
+                'created_by' => $manager->id,
+                'amount' => 72000,
+                'liquidated_at' => '2027-06-25',
+                'supporting_document' => 'NF DEMO 004',
+                'acceptance_reference' => 'TR DEMO 004',
+                'notes' => 'Liquidacao demonstrativa de obra concluida.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        );
+
+        $liquidationId = DB::table('financial_liquidations')
+            ->where('parliamentary_amendment_id', $amendment->id)
+            ->where('liquidation_reference', 'LIQ-GUA-2027-004')
+            ->value('id');
+
+        DB::table('financial_payments')->updateOrInsert(
+            ['parliamentary_amendment_id' => $amendment->id, 'payment_reference' => 'PAG-GUA-2027-004'],
+            [
+                'municipality_id' => $municipality->id,
+                'financial_commitment_id' => $commitment->id,
+                'financial_liquidation_id' => $liquidationId,
+                'created_by' => $manager->id,
+                'amount' => 72000,
+                'paid_at' => '2027-07-05',
+                'notes' => 'Pagamento demonstrativo de emenda concluida.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        );
+
+        $process = AccountabilityProcess::firstOrNew(['parliamentary_amendment_id' => $amendment->id]);
+        $process->forceFill([
+            'municipality_id' => $municipality->id,
+            'responsible_user_id' => $executive->id,
+            'created_by' => $manager->id,
+            'status' => AccountabilityProcess::STATUS_APPROVED,
+            'due_at' => '2027-09-30',
+            'submitted_at' => '2027-08-01',
+            'protocol_number' => 'PC-GUA-2027-004',
+            'approved_at' => '2027-08-10',
+            'returned_amount' => 0,
+            'reconciliation_notes' => 'Recebido, executado e pago integralmente.',
+            'submission_notes' => 'Prestacao demonstrativa aprovada para exibicao do fechamento final.',
+        ])->save();
+
+        foreach ([
+            ['document', 'Relatorio final da reforma', 'Relatorio e termo de aceite conferidos.', 10],
+            ['financial', 'Financeiro fechado', 'Empenho, liquidacao e pagamento conciliados.', 20],
+            ['physical', 'Entrega vistoriada', 'Obra entregue com evidencia vinculada.', 30],
+            ['protocol', 'Prestacao protocolada', 'Protocolo final registrado.', 40],
+        ] as [$category, $title, $description, $order]) {
+            $requirement = AccountabilityRequirement::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => $title]);
+            $requirement->forceFill([
+                'municipality_id' => $municipality->id,
+                'accountability_process_id' => $process->id,
+                'completed_by' => $manager->id,
+                'created_by' => $manager->id,
+                'category' => $category,
+                'description' => $description,
+                'is_required' => true,
+                'status' => AccountabilityRequirement::STATUS_COMPLETED,
+                'notes' => 'Item da prestacao final demonstrativa concluido.',
+                'completed_at' => now()->subDays(5),
+                'sort_order' => $order,
+            ])->save();
+        }
+
+        $this->demoDocument(
+            $municipality,
+            $amendment,
+            $stage,
+            $manager,
+            'prestacao-contas-em-gua-2027-004.txt',
+            "Demonstracao TrilhaGov - Guapiara\nEmenda: {$amendment->reference}\nObjeto: {$amendment->object}\nValor: R$ 72.000,00\nStatus: prestacao aprovada.\n",
+            'Documento demonstrativo de prestacao aprovada.',
+        );
+    }
+
     private function executionAndAccountability(Municipality $municipality, ParliamentaryAmendment $amendment, User $manager, User $executive): void
     {
         $stage = ExecutionStage::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => 'Aquisição e instalação dos equipamentos']);
@@ -513,6 +785,45 @@ class GuapiaraDemoSeeder extends Seeder
                 'mime_type' => 'text/plain',
                 'size_bytes' => strlen($content),
                 'notes' => 'Documento demonstrativo para pacote final da prestação.',
+                'created_at' => now(),
+            ],
+        );
+    }
+
+    private function demoDocument(
+        Municipality $municipality,
+        ParliamentaryAmendment $amendment,
+        ExecutionStage $stage,
+        User $manager,
+        string $filename,
+        string $content,
+        string $notes,
+    ): void {
+        $type = $municipality->documentTypes()->firstOrCreate(
+            ['name' => 'Relatório de prestação de contas'],
+            [
+                'created_by' => $manager->id,
+                'description' => 'Relatório ou documento consolidado da prestação de contas.',
+                'is_required' => false,
+                'is_active' => true,
+                'sort_order' => 50,
+            ],
+        );
+        $path = 'demo/guapiara/'.$filename;
+        Storage::disk('local')->put($path, $content);
+
+        DB::table('amendment_documents')->updateOrInsert(
+            ['parliamentary_amendment_id' => $amendment->id, 'original_name' => $filename, 'version' => 1],
+            [
+                'municipality_id' => $municipality->id,
+                'document_type_id' => $type?->id,
+                'execution_stage_id' => $stage->id,
+                'uploaded_by' => $manager->id,
+                'uploader_name' => $manager->name,
+                'storage_path' => $path,
+                'mime_type' => 'text/plain',
+                'size_bytes' => strlen($content),
+                'notes' => $notes,
                 'created_at' => now(),
             ],
         );
