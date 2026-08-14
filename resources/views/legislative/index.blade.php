@@ -318,6 +318,8 @@
                                 <a class="councilor-stage-filter" href="{{ $group['filter_url'] }}">Ver mais {{ $group['hidden_count'] }}</a>
                             @elseif($group['count'] > 0)
                                 <a class="councilor-stage-filter" href="{{ $group['filter_url'] }}">Filtrar etapa</a>
+                            @else
+                                <a class="councilor-stage-action" href="{{ $group['filter_url'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Ver etapa</a>
                             @endif
                         </article>
                     @endforeach

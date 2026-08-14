@@ -11414,3 +11414,268 @@ a:focus-visible {
         border-radius: 12px;
     }
 }
+
+/* SaaS cockpit polish for the Legislative Portal and Executive Desk. */
+.legislative-heading {
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.legislative-heading h1 {
+    letter-spacing: 0;
+}
+
+.legislative-councilor-home,
+.councilor-workspace,
+.legislative-executive-board {
+    border: 1px solid rgba(184, 199, 214, .78);
+    background:
+        radial-gradient(circle at 0 0, rgba(19, 81, 180, .08), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+    box-shadow: 0 16px 40px rgba(15, 43, 73, .075);
+}
+
+.councilor-home-main {
+    max-width: 720px;
+}
+
+.councilor-home-main h2 {
+    line-height: 1.02;
+}
+
+.councilor-home-actions {
+    align-items: flex-start;
+}
+
+.councilor-operating-strip,
+.councilor-home-progress,
+.councilor-action-summary,
+.councilor-decision-strip,
+.councilor-simple-guide,
+.councilor-stage-grid {
+    gap: .85rem;
+}
+
+.councilor-operating-strip article,
+.councilor-home-progress > div,
+.councilor-action-summary article,
+.councilor-decision-strip article,
+.councilor-simple-guide article,
+.councilor-stage-card {
+    border-color: rgba(184, 199, 214, .72);
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .035), 0 10px 24px rgba(15, 43, 73, .045);
+}
+
+.councilor-stage-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 340px;
+}
+
+.councilor-stage-card header {
+    align-items: center;
+}
+
+.councilor-stage-card header > span,
+.councilor-action-summary article > span,
+.councilor-decision-strip article > span,
+.councilor-simple-guide article > span {
+    flex: 0 0 auto;
+}
+
+.councilor-stage-items {
+    flex: 1;
+}
+
+.councilor-stage-filter,
+.councilor-stage-action {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    margin-top: .85rem;
+    padding: .48rem .72rem;
+    border: 1px solid rgba(19, 81, 180, .28);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--ds-action);
+    font-size: .76rem;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.councilor-stage-filter:hover,
+.councilor-stage-action:hover {
+    border-color: rgba(19, 81, 180, .46);
+    background: var(--ds-primary-soft);
+    color: var(--ds-action-hover);
+}
+
+.executive-command-panel {
+    margin: 1.1rem;
+    border-color: rgba(184, 199, 214, .82);
+    background:
+        radial-gradient(circle at 100% 0, rgba(19, 81, 180, .08), transparent 32%),
+        linear-gradient(145deg, rgba(255, 255, 255, .99), rgba(247, 251, 254, .98));
+}
+
+.executive-command-summary {
+    padding: 1.25rem 1.3rem;
+}
+
+.executive-command-cards,
+.executive-flow-lane,
+.executive-next-decisions,
+.executive-triage-strip,
+.legislative-board-grid {
+    margin-inline: 1.1rem;
+}
+
+.executive-command-cards,
+.executive-flow-lane {
+    gap: .8rem;
+    padding: 1rem;
+    border-bottom: 0;
+    background: transparent;
+}
+
+.executive-command-cards article,
+.executive-flow-lane li {
+    border: 1px solid rgba(184, 199, 214, .72);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .035), 0 9px 20px rgba(15, 43, 73, .045);
+}
+
+.executive-command-cards article:last-child,
+.executive-flow-lane li:last-child {
+    border-right: 1px solid rgba(184, 199, 214, .72);
+}
+
+.executive-flow-lane li {
+    padding: 1rem;
+}
+
+.executive-flow-lane a {
+    width: fit-content;
+    margin-top: .75rem;
+    border-color: rgba(19, 81, 180, .28);
+    background: #ffffff;
+}
+
+.executive-next-decisions {
+    grid-template-columns: minmax(240px, .32fr) minmax(0, 1fr);
+    margin-bottom: 1.1rem;
+    border: 1px solid rgba(184, 199, 214, .72);
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.executive-next-decisions header {
+    background: #f7fafc;
+}
+
+.executive-next-decisions a,
+.executive-next-decisions p {
+    border-left: 1px solid rgba(184, 199, 214, .72);
+    background: #ffffff;
+}
+
+.executive-action-queue {
+    margin: 1.1rem;
+    border-radius: 16px;
+}
+
+.executive-action-card {
+    border-color: rgba(184, 199, 214, .72);
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.executive-action-card button,
+.executive-action-queue b {
+    border-radius: 8px;
+}
+
+.executive-triage-strip,
+.legislative-board-grid {
+    margin-bottom: 1.1rem;
+}
+
+.legislative-board-column {
+    border-color: rgba(184, 199, 214, .72);
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.legislative-board-items a {
+    border-radius: 10px;
+}
+
+.legislative-filters {
+    border: 1px solid rgba(184, 199, 214, .72);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 8px 20px rgba(15, 43, 73, .04);
+}
+
+.legislative-list {
+    overflow: hidden;
+}
+
+.legislative-row {
+    margin: .45rem .7rem;
+    border: 1px solid rgba(184, 199, 214, .58);
+    background: #ffffff;
+}
+
+.legislative-row:hover {
+    border-color: rgba(19, 81, 180, .32);
+    background: #f8fbff;
+}
+
+@media (max-width: 1180px) {
+    .executive-command-cards,
+    .executive-flow-lane,
+    .executive-next-decisions > div {
+        gap: .8rem;
+    }
+
+    .executive-command-cards article:nth-child(2n),
+    .executive-flow-lane li:nth-child(2n) {
+        border-right: 1px solid rgba(184, 199, 214, .72);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .legislative-heading {
+        align-items: stretch;
+    }
+
+    .executive-command-cards,
+    .executive-flow-lane,
+    .executive-next-decisions,
+    .executive-triage-strip,
+    .legislative-board-grid,
+    .executive-action-queue {
+        margin-inline: .75rem;
+    }
+
+    .executive-command-cards article,
+    .executive-flow-lane li {
+        border-bottom: 1px solid rgba(184, 199, 214, .72);
+    }
+
+    .executive-next-decisions a,
+    .executive-next-decisions p {
+        border-left: 0;
+    }
+
+    .councilor-stage-card {
+        min-height: 0;
+    }
+}
