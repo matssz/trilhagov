@@ -58,7 +58,7 @@
                 <p>{{ $accountabilityGuide['next']['description'] }}</p>
             </div>
             @if ($canEdit && (! $process || $accountabilityGuide['next']['href'] === '#assistente-prestacao'))
-                <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}">
+                <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}" data-prevent-double-submit>
                     @csrf
                     <input name="_submission_token" type="hidden" value="{{ $prepareToken }}">
                     <button class="btn btn-primary" type="submit">{{ $accountabilityGuide['next']['label'] }}</button>
@@ -179,12 +179,12 @@
             </div>
             @if ($canEdit)
                 <div class="accountability-start-actions">
-                    <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}">
+                    <form method="POST" action="{{ route('emendas.accountability.prepare', $amendment) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $prepareToken }}">
                         <button class="btn btn-primary" type="submit"><i data-lucide="wand-sparkles" aria-hidden="true"></i>Preparar automaticamente</button>
                     </form>
-                    <form method="POST" action="{{ route('emendas.accountability.store', $amendment) }}">
+                    <form method="POST" action="{{ route('emendas.accountability.store', $amendment) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $processCreateToken }}">
                         <button class="btn btn-outline-primary" type="submit"><i data-lucide="plus" aria-hidden="true"></i>Só iniciar checklist</button>
@@ -232,6 +232,26 @@
                     @foreach ($readiness['warnings'] as $warning)<div class="warning"><i data-lucide="triangle-alert" aria-hidden="true"></i><span>{{ $warning }}</span></div>@endforeach
                 </div>
             @endif
+            @if ($accountabilityGuide['blockerActions']->isNotEmpty())
+                <div class="accountability-correction-board" aria-label="Correções recomendadas para liberar a prestação">
+                    <div>
+                        <p class="page-kicker mb-1">Próximas correções</p>
+                        <strong>Resolva os bloqueios na ordem certa</strong>
+                    </div>
+                    <div class="accountability-correction-grid">
+                        @foreach ($accountabilityGuide['blockerActions'] as $action)
+                            <a class="accountability-correction-card tone-{{ $action['tone'] }}" href="{{ $action['href'] }}">
+                                <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                                <div>
+                                    <strong>{{ $action['title'] }}</strong>
+                                    <small>{{ $action['description'] }}</small>
+                                    <em><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $action['label'] }}</em>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </section>
 
         <section class="content-panel mb-4 accountability-submit-panel {{ $readiness['ready'] ? 'is-ready' : 'has-blockers' }}" id="envio-prestacao">
@@ -244,7 +264,7 @@
                 </div>
             </div>
             @if ($canEdit && $readiness['ready'])
-                <form class="accountability-submit-form" method="POST" action="{{ route('emendas.accountability.submit', $amendment) }}">
+                <form class="accountability-submit-form" method="POST" action="{{ route('emendas.accountability.submit', $amendment) }}" data-prevent-double-submit>
                     @csrf
                     <input name="_submission_token" type="hidden" value="{{ $processSubmitToken }}">
                     <div>
@@ -273,7 +293,7 @@
         <section class="content-panel mb-4" id="process">
             <div class="content-panel-header d-flex align-items-center gap-2"><i data-lucide="clipboard-list" aria-hidden="true"></i><h2 class="h5 mb-0">Processo e protocolo</h2></div>
             @if ($canEdit)
-                <form class="accountability-process-form" method="POST" action="{{ route('emendas.accountability.update', $amendment) }}" novalidate>
+                <form class="accountability-process-form" method="POST" action="{{ route('emendas.accountability.update', $amendment) }}" data-prevent-double-submit novalidate>
                     @csrf
                     @method('PATCH')
                     <input name="_submission_token" type="hidden" value="{{ $processUpdateToken }}">
@@ -333,7 +353,7 @@
 
             @if ($canEdit)
                 <div class="collapse" id="newRequirementForm">
-                    <form class="accountability-form-band requirement-create-grid" method="POST" action="{{ route('emendas.accountability.requirements.store', $amendment) }}">
+                    <form class="accountability-form-band requirement-create-grid" method="POST" action="{{ route('emendas.accountability.requirements.store', $amendment) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $requirementCreateToken }}">
                         <div class="span-2"><label class="form-label" for="requirement_title">Item <span class="required-mark">*</span></label><input class="form-control" id="requirement_title" name="title" maxlength="180" required></div>
@@ -360,7 +380,7 @@
                         @if ($canEdit)
                             <details class="requirement-editor">
                                 <summary title="Atualizar item" aria-label="Atualizar item"><i data-lucide="pencil" aria-hidden="true"></i></summary>
-                                <form method="POST" action="{{ route('emendas.accountability.requirements.update', [$amendment, $requirement]) }}">
+                                <form method="POST" action="{{ route('emendas.accountability.requirements.update', [$amendment, $requirement]) }}" data-prevent-double-submit>
                                     @csrf
                                     @method('PATCH')
                                     <input name="_submission_token" type="hidden" value="{{ $requirementUpdateTokens->get($requirement->id) }}">
@@ -383,7 +403,7 @@
             </div>
             @if ($canEdit)
                 <div class="collapse" id="newDiligenceForm">
-                    <form class="accountability-form-band diligence-create-grid" method="POST" action="{{ route('emendas.accountability.diligences.store', $amendment) }}">
+                    <form class="accountability-form-band diligence-create-grid" method="POST" action="{{ route('emendas.accountability.diligences.store', $amendment) }}" data-prevent-double-submit>
                         @csrf
                         <input name="_submission_token" type="hidden" value="{{ $diligenceCreateToken }}">
                         <div class="span-2"><label class="form-label" for="diligence_title">Título <span class="required-mark">*</span></label><input class="form-control" id="diligence_title" name="title" maxlength="180" required></div>
@@ -401,7 +421,7 @@
                         <span class="diligence-icon"><i data-lucide="message-square" aria-hidden="true"></i></span>
                         <div class="diligence-copy"><div class="d-flex flex-wrap align-items-center gap-2"><h3 class="h6 mb-0">{{ $diligence->title }}</h3><span class="diligence-status status-{{ $diligence->status }}">{{ $diligence->statusLabel() }}</span>@if ($diligence->isOverdue())<span class="badge text-bg-danger">Atrasada</span>@endif</div><p>{{ $diligence->description }}</p><small>{{ $diligence->assignedUser?->name ?? $process->responsibleUser?->name ?? 'Sem responsável' }} · prazo {{ $diligence->due_at->format('d/m/Y') }}</small>@if ($diligence->response_notes)<div class="diligence-response"><strong>Resposta:</strong> {{ $diligence->response_notes }} · protocolo {{ $diligence->response_protocol }}</div>@endif</div>
                         @if ($canEdit)
-                            <details class="diligence-editor"><summary title="Responder diligência" aria-label="Responder diligência"><i data-lucide="send" aria-hidden="true"></i></summary><form method="POST" action="{{ route('emendas.accountability.diligences.update', [$amendment, $diligence]) }}">@csrf @method('PATCH')<input name="_submission_token" type="hidden" value="{{ $diligenceUpdateTokens->get($diligence->id) }}"><div><label class="form-label" for="diligence_status_{{ $diligence->id }}">Situação</label><select class="form-select" id="diligence_status_{{ $diligence->id }}" name="status">@foreach (App\Models\AccountabilityDiligence::statuses() as $value => $label)<option value="{{ $value }}" @selected($diligence->status === $value)>{{ $label }}</option>@endforeach</select></div><div><label class="form-label" for="response_protocol_{{ $diligence->id }}">Protocolo</label><input class="form-control" id="response_protocol_{{ $diligence->id }}" name="response_protocol" value="{{ $diligence->response_protocol }}"></div><div class="span-2"><label class="form-label" for="response_notes_{{ $diligence->id }}">Resposta</label><textarea class="form-control" id="response_notes_{{ $diligence->id }}" name="response_notes" rows="2">{{ $diligence->response_notes }}</textarea></div><button class="btn btn-primary accountability-inline-submit" type="submit"><i data-lucide="send" aria-hidden="true"></i>Salvar resposta</button></form></details>
+                            <details class="diligence-editor"><summary title="Responder diligência" aria-label="Responder diligência"><i data-lucide="send" aria-hidden="true"></i></summary><form method="POST" action="{{ route('emendas.accountability.diligences.update', [$amendment, $diligence]) }}" data-prevent-double-submit>@csrf @method('PATCH')<input name="_submission_token" type="hidden" value="{{ $diligenceUpdateTokens->get($diligence->id) }}"><div><label class="form-label" for="diligence_status_{{ $diligence->id }}">Situação</label><select class="form-select" id="diligence_status_{{ $diligence->id }}" name="status">@foreach (App\Models\AccountabilityDiligence::statuses() as $value => $label)<option value="{{ $value }}" @selected($diligence->status === $value)>{{ $label }}</option>@endforeach</select></div><div><label class="form-label" for="response_protocol_{{ $diligence->id }}">Protocolo</label><input class="form-control" id="response_protocol_{{ $diligence->id }}" name="response_protocol" value="{{ $diligence->response_protocol }}"></div><div class="span-2"><label class="form-label" for="response_notes_{{ $diligence->id }}">Resposta</label><textarea class="form-control" id="response_notes_{{ $diligence->id }}" name="response_notes" rows="2">{{ $diligence->response_notes }}</textarea></div><button class="btn btn-primary accountability-inline-submit" type="submit"><i data-lucide="send" aria-hidden="true"></i>Salvar resposta</button></form></details>
                         @endif
                     </article>
                 @empty

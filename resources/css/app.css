@@ -6433,6 +6433,110 @@ button.accountability-action-card {
     flex: 0 0 17px;
 }
 
+.accountability-correction-board {
+    display: grid;
+    gap: .9rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(188, 204, 220, .74);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .95), rgba(244, 248, 252, .92));
+}
+
+.accountability-correction-board > div:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+}
+
+.accountability-correction-board > div:first-child strong {
+    color: var(--navy-950);
+    font-weight: 900;
+}
+
+.accountability-correction-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.accountability-correction-card {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: .75rem;
+    min-height: 126px;
+    padding: .95rem;
+    border: 1px solid rgba(188, 204, 220, .86);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, .96);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(7, 31, 61, .05);
+}
+
+.accountability-correction-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(13, 64, 111, .32);
+    color: inherit;
+    box-shadow: 0 18px 34px rgba(7, 31, 61, .09);
+}
+
+.accountability-correction-card > span {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(174, 194, 214, .82);
+    border-radius: var(--radius-lg);
+    background: #edf6fc;
+    color: var(--navy-800);
+}
+
+.accountability-correction-card.tone-danger > span {
+    background: #fff1f1;
+    color: var(--danger);
+}
+
+.accountability-correction-card.tone-warning > span {
+    background: #fff7df;
+    color: #9b6700;
+}
+
+.accountability-correction-card strong,
+.accountability-correction-card small,
+.accountability-correction-card em {
+    display: block;
+}
+
+.accountability-correction-card strong {
+    color: var(--navy-950);
+    font-size: .92rem;
+    font-weight: 900;
+}
+
+.accountability-correction-card small {
+    margin-top: .25rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.accountability-correction-card em {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .65rem;
+    color: var(--navy-800);
+    font-size: .78rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.accountability-correction-card em svg {
+    width: 14px;
+    height: 14px;
+}
+
 .accountability-process-form {
     padding: 1.15rem;
 }
@@ -8595,6 +8699,10 @@ button.accountability-action-card {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .accountability-correction-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .accountability-action-list,
     .accountability-flow-lane {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8634,6 +8742,7 @@ button.accountability-action-card {
     .accountability-guide-steps,
     .accountability-guide-summary,
     .accountability-readiness-facts,
+    .accountability-correction-grid,
     .accountability-final-checks,
     .accountability-receipt-grid,
     .accountability-final-timeline {

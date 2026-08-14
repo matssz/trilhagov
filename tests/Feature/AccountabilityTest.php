@@ -222,6 +222,17 @@ class AccountabilityTest extends TestCase
         $this->requirement($process, $manager);
         $token = $this->sessionFor($municipality, "accountability-update-{$process->id}");
 
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('emendas.accountability', $amendment))
+            ->assertOk()
+            ->assertSee('Próximas correções')
+            ->assertSee('Checklist pendente')
+            ->assertSee('Execução incompleta')
+            ->assertSee('Evidência não vinculada')
+            ->assertSee('Saldo sem conciliação')
+            ->assertSee(route('emendas.execution', $amendment), false);
+
         $this->actingAs($manager)->patch(route('emendas.accountability.update', $amendment), [
             ...$this->processPayload($token),
             'status' => AccountabilityProcess::STATUS_SUBMITTED,

@@ -103,6 +103,83 @@ class AccountabilityService
             ? 'Protocolo '.$process->protocol_number.' em '.$submittedLabel
             : 'Informe protocolo e data de envio quando a prestação for apresentada.';
 
+        $blockerActions = collect();
+
+        if (! $hasProcess) {
+            $blockerActions->push([
+                'icon' => 'clipboard-list',
+                'title' => 'Abrir a prestação',
+                'description' => 'Crie o processo para o sistema montar checklist, responsável e conferência automática.',
+                'href' => '#iniciar-prestacao',
+                'label' => 'Iniciar agora',
+                'tone' => 'warning',
+            ]);
+        } else {
+            if (! $checklistReady) {
+                $blockerActions->push([
+                    'icon' => 'wand-sparkles',
+                    'title' => 'Checklist pendente',
+                    'description' => 'Rode a pré-conferência para aproveitar documentos, pagamentos e execução já cadastrados.',
+                    'href' => '#assistente-prestacao',
+                    'label' => 'Pre-conferir',
+                    'tone' => 'warning',
+                ]);
+            }
+
+            if (! $physicalComplete) {
+                $blockerActions->push([
+                    'icon' => 'route',
+                    'title' => 'Execução incompleta',
+                    'description' => 'Conclua as etapas físicas antes de enviar a prestação final.',
+                    'href' => route('emendas.execution', $amendment),
+                    'label' => 'Abrir execução',
+                    'tone' => 'danger',
+                ]);
+            }
+
+            if (! $hasEvidence) {
+                $blockerActions->push([
+                    'icon' => 'paperclip',
+                    'title' => 'Evidência não vinculada',
+                    'description' => 'Anexe ou vincule documento de entrega em uma etapa de execução.',
+                    'href' => route('emendas.execution', $amendment).'#evidence',
+                    'label' => 'Anexar evidÃªncia',
+                    'tone' => 'warning',
+                ]);
+            }
+
+            if ($amendment->received_amount === null) {
+                $blockerActions->push([
+                    'icon' => 'banknote',
+                    'title' => 'Valor recebido ausente',
+                    'description' => 'Informe o recebimento do recurso para fechar a conciliação financeira.',
+                    'href' => route('emendas.edit', $amendment),
+                    'label' => 'Editar emenda',
+                    'tone' => 'danger',
+                ]);
+            } elseif (! $financialReady) {
+                $blockerActions->push([
+                    'icon' => 'scale',
+                    'title' => 'Saldo sem conciliação',
+                    'description' => 'Registre pagamento ou devolução para zerar a diferença financeira.',
+                    'href' => '#process',
+                    'label' => 'Conciliar saldo',
+                    'tone' => 'danger',
+                ]);
+            }
+
+            if ($openDiligences > 0) {
+                $blockerActions->push([
+                    'icon' => 'message-square-warning',
+                    'title' => 'Diligência aberta',
+                    'description' => 'Responda a solicitação, registre protocolo e deixe o processo apto para envio.',
+                    'href' => '#diligences',
+                    'label' => 'Responder',
+                    'tone' => 'warning',
+                ]);
+            }
+        }
+
         $next = [
             'icon' => 'clipboard-list',
             'title' => 'Iniciar prestação simplificada',
@@ -213,6 +290,7 @@ class AccountabilityService
                     ['label' => 'Diligências', 'value' => $openDiligences.' aberta(s)'],
                 ],
             ],
+            'blockerActions' => $blockerActions->take(4)->values(),
             'flow' => [
                 ['label' => 'Abrir processo', 'description' => 'Cria checklist e responsável.', 'done' => $hasProcess, 'href' => $hasProcess ? '#process' : '#iniciar-prestacao'],
                 ['label' => 'Pré-conferir', 'description' => 'Resolve itens com dados já registrados.', 'done' => $checklistReady, 'href' => '#assistente-prestacao'],
