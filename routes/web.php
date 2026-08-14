@@ -22,6 +22,7 @@ use App\Http\Controllers\FinancialCommitmentController;
 use App\Http\Controllers\FinancialLiquidationController;
 use App\Http\Controllers\FinancialPaymentController;
 use App\Http\Controllers\HealthAspsController;
+use App\Http\Controllers\InfrastructureMonitorController;
 use App\Http\Controllers\InvitationAcceptanceController;
 use App\Http\Controllers\LegislativeProposalController;
 use App\Http\Controllers\MunicipalAdmissibilityReviewController;
@@ -210,6 +211,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
     Route::middleware('municipality.role:manager')->group(function () {
         Route::get('/implantacao', [MunicipalOnboardingController::class, 'index'])->name('municipal-onboarding.index');
         Route::get('/configuracoes/lgpd-seguranca', SecurityPrivacyController::class)->name('security-privacy.index');
+        Route::get('/configuracoes/monitoramento', InfrastructureMonitorController::class)->name('infrastructure-monitor.index');
         Route::patch('/configuracoes/lgpd-seguranca/mfa', [SecurityPrivacyController::class, 'updateMfa'])->name('security-privacy.mfa.update')->block(10, 10);
         Route::post('/implantacao/ativar-exercicio', [MunicipalOnboardingController::class, 'activate'])->name('municipal-onboarding.activate')->block(10, 10);
         Route::post('/comunicacoes-oficiais/modelos/instalar', [MunicipalOfficialDocumentController::class, 'installDefaults'])->name('official-document-templates.install')->block(10, 10);

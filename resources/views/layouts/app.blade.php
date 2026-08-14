@@ -150,6 +150,10 @@
                                 <i data-lucide="shield-check" aria-hidden="true"></i>
                                 <span>LGPD e defesa</span>
                             </a>
+                            <a class="sidebar-link {{ request()->routeIs('infrastructure-monitor.*') ? 'active' : '' }}" href="{{ route('infrastructure-monitor.index') }}">
+                                <i data-lucide="activity" aria-hidden="true"></i>
+                                <span>Monitoramento</span>
+                            </a>
                             @if ($activeMunicipality?->moduleEnabled('document_checklist'))
                             <a class="sidebar-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}" href="{{ route('document-types.index') }}">
                                 <i data-lucide="list-checks" aria-hidden="true"></i>

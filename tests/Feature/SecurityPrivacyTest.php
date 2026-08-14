@@ -102,6 +102,32 @@ class SecurityPrivacyTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_manager_can_view_infrastructure_monitor(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('infrastructure-monitor.index'))
+            ->assertOk()
+            ->assertSee('Monitoramento do sistema')
+            ->assertSee('Banco de dados')
+            ->assertSee('Storage de documentos')
+            ->assertSee('Fila e jobs')
+            ->assertSee('Agendador')
+            ->assertSee('Logs da aplicação');
+    }
+
+    public function test_non_manager_cannot_view_infrastructure_monitor(): void
+    {
+        [$user, $municipality] = $this->userAndMunicipality(User::ROLE_EDITOR);
+
+        $this->actingAs($user)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('infrastructure-monitor.index'))
+            ->assertForbidden();
+    }
+
     public function test_web_responses_include_security_headers(): void
     {
         $this->get(route('login'))

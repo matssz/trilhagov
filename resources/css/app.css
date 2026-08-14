@@ -8174,6 +8174,202 @@ button.accountability-action-card {
     border-top-right-radius: inherit;
 }
 
+.infra-page {
+    --infra-ok: #157f57;
+    --infra-attention: #a66b00;
+    --infra-critical: #b42318;
+}
+
+.infra-hero,
+.infra-check {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    border: 1px solid rgba(198, 211, 223, .9);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(246, 250, 253, .96));
+    box-shadow: var(--elevation-1);
+}
+
+.infra-hero {
+    justify-content: space-between;
+    padding: 1.25rem;
+}
+
+.infra-hero h2 {
+    margin: .65rem 0 .3rem;
+    color: var(--navy-950);
+    font-size: clamp(1.35rem, 2vw, 2rem);
+    font-weight: 950;
+    letter-spacing: 0;
+}
+
+.infra-hero p,
+.infra-check p,
+.infra-check small {
+    color: var(--text-muted);
+}
+
+.infra-ok {
+    border-color: rgba(21, 127, 87, .26);
+    background: linear-gradient(145deg, #ffffff, #f0faf5);
+}
+
+.infra-attention {
+    border-color: rgba(166, 107, 0, .28);
+    background: linear-gradient(145deg, #ffffff, #fff8e8);
+}
+
+.infra-critical {
+    border-color: rgba(180, 35, 24, .28);
+    background: linear-gradient(145deg, #ffffff, #fff1f0);
+}
+
+.infra-score {
+    display: grid;
+    place-items: center;
+    min-width: 132px;
+    aspect-ratio: 1;
+    border: 10px solid rgba(18, 63, 112, .12);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), var(--elevation-1);
+    text-align: center;
+}
+
+.infra-score strong {
+    color: var(--navy-950);
+    font-size: 1.8rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.infra-score span {
+    max-width: 90px;
+    color: var(--text-muted);
+    font-size: .72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.infra-check {
+    min-height: 100%;
+    padding: 1rem;
+}
+
+.infra-check-icon {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
+    background: #eef7ff;
+    color: var(--navy-800);
+}
+
+.infra-check-ok .infra-check-icon {
+    background: #eaf8f1;
+    color: var(--infra-ok);
+}
+
+.infra-check-attention .infra-check-icon {
+    background: #fff2d7;
+    color: var(--infra-attention);
+}
+
+.infra-check-critical .infra-check-icon {
+    background: #fff0ef;
+    color: var(--infra-critical);
+}
+
+.infra-check-title {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .35rem;
+}
+
+.infra-check-title h2 {
+    margin: 0;
+    color: var(--navy-950);
+    font-size: 1rem;
+    font-weight: 950;
+}
+
+.infra-check-title span {
+    border-radius: var(--radius-full);
+    background: rgba(18, 63, 112, .08);
+    color: var(--navy-800);
+    padding: .2rem .55rem;
+    font-size: .72rem;
+    font-weight: 900;
+}
+
+.infra-check strong {
+    display: block;
+    color: var(--navy-950);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.infra-meta,
+.infra-definition-list {
+    display: grid;
+    gap: .55rem;
+    margin: .9rem 0 0;
+}
+
+.infra-meta div,
+.infra-definition-list div {
+    display: grid;
+    grid-template-columns: minmax(120px, .35fr) minmax(0, 1fr);
+    gap: .75rem;
+    border-top: 1px solid rgba(198, 211, 223, .72);
+    padding-top: .55rem;
+}
+
+.infra-meta dt,
+.infra-definition-list dt {
+    color: var(--text-muted);
+    font-size: .72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.infra-meta dd,
+.infra-definition-list dd {
+    margin: 0;
+    color: var(--navy-950);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.infra-error-list {
+    display: grid;
+    gap: .75rem;
+}
+
+.infra-error-list div {
+    border: 1px solid rgba(180, 35, 24, .16);
+    border-radius: var(--radius-lg);
+    background: #fff7f6;
+    padding: .85rem;
+}
+
+.infra-error-list span {
+    color: var(--infra-critical);
+    font-size: .72rem;
+    font-weight: 950;
+}
+
+.infra-error-list p {
+    margin: .25rem 0 0;
+    color: var(--navy-950);
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 1180px) {
     .accountability-readiness,
     .accountability-submit-panel,
@@ -8218,5 +8414,18 @@ button.accountability-action-card {
     .accountability-final-actions .btn,
     .accountability-final-showcase-actions .btn {
         width: 100%;
+    }
+
+    .infra-hero,
+    .infra-check-title,
+    .infra-meta div,
+    .infra-definition-list div {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+
+    .infra-score {
+        width: 120px;
+        min-width: 120px;
     }
 }
