@@ -76,3 +76,5 @@ services:
         value: TrilhaGov
       - key: SCHEDULER_TOKEN
         sync: false
+      - key: TRILHAGOV_SEED_DEMO
+        value: "true"

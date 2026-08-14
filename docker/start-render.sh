@@ -13,6 +13,11 @@ php artisan view:clear --no-interaction
 php artisan cache:clear --no-interaction
 php artisan route:clear --no-interaction
 php artisan config:clear --no-interaction
+
+if [ "${TRILHAGOV_SEED_DEMO:-false}" = "true" ]; then
+    php artisan trilhagov:demo-guapiara --force --no-interaction
+fi
+
 php artisan optimize
 
 exec apache2-foreground
