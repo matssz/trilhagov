@@ -325,6 +325,7 @@
             </section>
         @endif
 
+        @unless ($role === App\Models\User::ROLE_COUNCILOR)
         <section class="legislative-automation-panel">
             <i data-lucide="calculator" aria-hidden="true"></i>
             <div>
@@ -339,6 +340,7 @@
             <div><span>Saldo disponível</span><strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong><small>Antes de novos envios</small></div>
             <div class="health"><span>Reserva de saúde</span><strong>R$ {{ number_format($quota['health_allocated'], 2, ',', '.') }}</strong><small>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Proporção atendida' }}</small></div>
         </section>
+        @endunless
     @else
         <section class="metric-strip legislative-metrics">
             <article><span><i data-lucide="file-text" aria-hidden="true"></i></span><div><small>Propostas</small><strong>{{ $summary['total'] }}</strong></div></article>
