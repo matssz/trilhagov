@@ -14,4 +14,12 @@ class MarketingPageTest extends TestCase
             ->assertSee('Acessar demonstração')
             ->assertSee('Feito para municípios que não têm estrutura própria de tecnologia.');
     }
+
+    public function test_commercial_page_has_direct_public_url(): void
+    {
+        $this->get(route('marketing.home'))
+            ->assertOk()
+            ->assertSee('Acessar demonstração')
+            ->assertSee('Demonstração pronta');
+    }
 }

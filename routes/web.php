@@ -72,6 +72,8 @@ Route::get('/', function () {
         : redirect()->route('municipalities.select');
 });
 
+Route::view('/comercial', 'marketing.home')->name('marketing.home');
+
 Route::get('/convites/{token}', [InvitationAcceptanceController::class, 'show'])->name('invitations.show');
 Route::post('/convites/{token}', [InvitationAcceptanceController::class, 'accept'])->name('invitations.accept')->block(10, 10);
 Route::post('/convites/{token}/trocar-conta', [InvitationAcceptanceController::class, 'switchAccount'])->name('invitations.switch-account')->block(10, 10);
