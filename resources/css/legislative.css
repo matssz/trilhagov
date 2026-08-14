@@ -5791,7 +5791,76 @@
 }
 
 .executive-triage-strip {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .8rem;
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(174, 194, 214, .74);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff, #f7fbff);
+}
+
+.executive-triage-strip a {
+    min-height: 82px;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.legislative-executive-board .executive-flow-lane li {
+    align-items: start;
+}
+
+.legislative-executive-board .executive-flow-lane a {
+    width: fit-content;
+    min-width: 176px;
+    max-width: 100%;
+}
+
+.legislative-executive-board .executive-next-decisions {
+    display: grid;
+    grid-template-columns: minmax(240px, .4fr) minmax(0, 1fr);
+    gap: .8rem;
+    padding: 1rem;
+    border: 1px solid rgba(174, 194, 214, .74);
+    border-radius: 18px;
+    background: #f7fbff;
+}
+
+.legislative-executive-board .executive-next-decisions header,
+.legislative-executive-board .executive-next-decisions > div {
+    border: 1px solid rgba(174, 194, 214, .72);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.legislative-executive-board .executive-next-decisions header {
+    padding: 1rem;
+}
+
+.legislative-executive-board .executive-next-decisions > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .7rem;
+    padding: .8rem;
+}
+
+.legislative-executive-board .executive-next-decisions a,
+.legislative-executive-board .executive-next-decisions p {
+    min-height: 92px;
+    border: 1px solid rgba(198, 211, 223, .72);
+    border-radius: 12px;
+    background: #f9fcff;
+}
+
+.legislative-executive-board .executive-next-decisions p {
+    grid-column: 1 / -1;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: #596b80;
+    font-weight: 850;
+    text-align: center;
 }
 
 .legislative-board-grid {
@@ -5827,6 +5896,15 @@
     .councilor-stage-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .legislative-executive-board .executive-next-decisions {
+        grid-template-columns: 1fr;
+    }
+
+    .legislative-executive-board .executive-next-decisions > div,
+    .legislative-executive-board .executive-triage-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -5834,6 +5912,11 @@
     .legislative-councilor-home .councilor-timeline,
     .legislative-councilor-home .councilor-action-summary,
     .councilor-stage-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .legislative-executive-board .executive-next-decisions > div,
+    .legislative-executive-board .executive-triage-strip {
         grid-template-columns: 1fr;
     }
 
