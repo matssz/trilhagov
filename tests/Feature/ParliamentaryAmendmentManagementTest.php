@@ -80,7 +80,7 @@ class ParliamentaryAmendmentManagementTest extends TestCase
                 'transferegov_code' => '123456',
             ]))
             ->assertSessionHasErrors([
-                'government_sphere' => 'Esta esfera ainda nÃ£o estÃ¡ habilitada para este municÃ­pio. Ative o parÃ¢metro em Normas municipais.',
+                'government_sphere' => 'Esta esfera ainda não está habilitada para este município. Ative o parâmetro em Normas municipais.',
             ]);
 
         $municipality->update(['federal_amendments_enabled' => true]);

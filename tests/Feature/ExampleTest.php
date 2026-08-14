@@ -14,7 +14,7 @@ class ExampleTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Gestão municipal de emendas')
+            ->assertSee('O caminho mais claro entre Câmara, Prefeitura, execução e prestação de contas.')
             ->assertSee('Acessar demonstração');
     }
 
