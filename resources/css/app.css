@@ -13359,3 +13359,224 @@ a:focus-visible {
             inset 0 1px 0 #fff;
     }
 }
+
+/* Commercial emergency contrast layer: keep the landing bold, readable and never washed out. */
+.has-public-layout {
+    background:
+        radial-gradient(circle at 12% 8%, rgba(0, 112, 204, .26), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(223, 169, 36, .24), transparent 24%),
+        linear-gradient(135deg, #07182b 0%, #0b2744 42%, #eaf4fb 42.2%, #f7fbff 100%) !important;
+}
+
+.commercial-page,
+.commercial-page * {
+    text-shadow: none;
+}
+
+.commercial-page .commercial-hero,
+.commercial-page .commercial-section,
+.commercial-page .commercial-showcase-band,
+.commercial-page .commercial-sp-map-section,
+.commercial-page .commercial-cta,
+.commercial-page .commercial-product-stage,
+.commercial-page .commercial-proof-strip article,
+.commercial-page .commercial-impact-strip article,
+.commercial-page .commercial-decision-grid article,
+.commercial-page .commercial-pipeline-track article,
+.commercial-page .commercial-showcase-grid article,
+.commercial-page .commercial-market-list {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.commercial-page .commercial-nav {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 55, 104, .26) !important;
+    box-shadow: 0 22px 56px rgba(0, 18, 38, .24) !important;
+}
+
+.commercial-page .commercial-nav a {
+    color: #061b34 !important;
+}
+
+.commercial-page .commercial-nav .commercial-nav-cta {
+    background: #004f91 !important;
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-hero {
+    background:
+        radial-gradient(circle at 82% 16%, rgba(31, 149, 224, .32), transparent 28%),
+        radial-gradient(circle at 68% 82%, rgba(213, 163, 42, .24), transparent 24%),
+        linear-gradient(135deg, #061b34 0%, #0a3359 58%, #0c5d93 100%) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 48px 110px rgba(0, 18, 38, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .18) !important;
+}
+
+.commercial-page .commercial-hero h1 {
+    color: #ffffff !important;
+    letter-spacing: 0;
+}
+
+.commercial-page .commercial-hero p {
+    color: #e7f3fb !important;
+}
+
+.commercial-page .commercial-hero .commercial-kicker,
+.commercial-page .commercial-sp-map-section .commercial-kicker,
+.commercial-page .commercial-cta .commercial-kicker {
+    background: rgba(255, 255, 255, .96) !important;
+    color: #004f91 !important;
+}
+
+.commercial-page .commercial-trust-row span {
+    background: rgba(255, 255, 255, .12) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-trust-row strong {
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-section,
+.commercial-page .commercial-showcase-band {
+    background: #ffffff !important;
+    color: #061b34 !important;
+    box-shadow:
+        0 30px 72px rgba(0, 18, 38, .18),
+        inset 0 1px 0 #ffffff !important;
+}
+
+.commercial-page .commercial-section h2,
+.commercial-page .commercial-showcase-band h2,
+.commercial-page .commercial-sp-map-copy h2 {
+    color: #061b34 !important;
+}
+
+.commercial-page .commercial-section p,
+.commercial-page .commercial-showcase-band p,
+.commercial-page .commercial-proof-strip span,
+.commercial-page .commercial-decision-grid p,
+.commercial-page .commercial-pipeline-track p,
+.commercial-page .commercial-showcase-grid p {
+    color: #26394d !important;
+}
+
+.commercial-page .commercial-product-stage,
+.commercial-page .commercial-command-row article,
+.commercial-page .commercial-work-card,
+.commercial-page .commercial-proof-strip article,
+.commercial-page .commercial-impact-strip article,
+.commercial-page .commercial-decision-grid article,
+.commercial-page .commercial-pipeline-track article,
+.commercial-page .commercial-showcase-grid article,
+.commercial-page .commercial-market-list {
+    background: #ffffff !important;
+    border-color: rgba(0, 62, 120, .32) !important;
+    color: #061b34 !important;
+    box-shadow:
+        0 24px 56px rgba(0, 18, 38, .18),
+        inset 0 1px 0 #ffffff !important;
+}
+
+.commercial-page .commercial-product-stage strong,
+.commercial-page .commercial-command-row strong,
+.commercial-page .commercial-work-card strong,
+.commercial-page .commercial-proof-strip strong,
+.commercial-page .commercial-impact-strip strong,
+.commercial-page .commercial-decision-grid strong,
+.commercial-page .commercial-pipeline-track strong,
+.commercial-page .commercial-showcase-grid strong,
+.commercial-page .commercial-market-list span {
+    color: #061b34 !important;
+}
+
+.commercial-page .commercial-product-stage small,
+.commercial-page .commercial-command-row small,
+.commercial-page .commercial-work-card small,
+.commercial-page .commercial-decision-grid span,
+.commercial-page .commercial-pipeline-track span {
+    color: #31475f !important;
+}
+
+.commercial-page .commercial-command-row svg,
+.commercial-page .commercial-work-card > svg,
+.commercial-page .commercial-proof-strip svg,
+.commercial-page .commercial-showcase-grid svg {
+    color: #004f91 !important;
+    background: #e2f2ff !important;
+}
+
+.commercial-page .btn-primary,
+.commercial-page .commercial-cta .btn-primary,
+.commercial-page .commercial-hero-actions .btn-primary {
+    background: #005da8 !important;
+    border-color: #005da8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 18px 40px rgba(0, 58, 112, .34) !important;
+}
+
+.commercial-page .btn-outline-primary,
+.commercial-page .commercial-hero-actions .btn-outline-primary {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #06335f !important;
+}
+
+.commercial-page .commercial-sp-map-section {
+    background:
+        radial-gradient(circle at 76% 46%, rgba(45, 164, 235, .36), transparent 34%),
+        radial-gradient(circle at 20% 12%, rgba(223, 169, 36, .28), transparent 26%),
+        linear-gradient(135deg, #041326 0%, #07345c 54%, #075f96 100%) !important;
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-sp-map-copy h2,
+.commercial-page .commercial-sp-map-copy p,
+.commercial-page .commercial-sp-map-list strong,
+.commercial-page .commercial-sp-map-list span {
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-sp-map-list article {
+    background: rgba(255, 255, 255, .16) !important;
+    border-color: rgba(255, 255, 255, .32) !important;
+}
+
+.commercial-page .commercial-sp-map-card {
+    background:
+        radial-gradient(circle at 50% 44%, rgba(149, 216, 255, .42), transparent 50%),
+        linear-gradient(145deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .08)) !important;
+    border-color: rgba(255, 255, 255, .36) !important;
+}
+
+.commercial-page .sp-map-labels text:last-child {
+    fill: #ffffff !important;
+}
+
+.commercial-page .commercial-cta {
+    background:
+        radial-gradient(circle at 18% 12%, rgba(0, 121, 214, .34), transparent 30%),
+        linear-gradient(135deg, #020f20 0%, #07345f 58%, #005da8 100%) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, .22) !important;
+    box-shadow: 0 34px 86px rgba(0, 18, 38, .32) !important;
+}
+
+.commercial-page .commercial-cta h2,
+.commercial-page .commercial-cta p {
+    color: #ffffff !important;
+}
+
+.commercial-page .commercial-cta .btn-primary {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #062a4f !important;
+}
+
+.commercial-page .commercial-cta .btn-primary svg {
+    color: #062a4f !important;
+}
