@@ -1135,15 +1135,40 @@ const initCommercialShowcase = () => {
 
     gsap.utils.toArray('.sp-map-points circle').forEach((point, index) => {
         gsap.to(point, {
-            scale: 1.65,
+            scale: 1.9,
             transformOrigin: '50% 50%',
-            opacity: 0.42,
-            duration: 1.35 + (index % 3) * 0.18,
+            opacity: 0.58,
+            duration: 1.05 + (index % 3) * 0.16,
             repeat: -1,
             yoyo: true,
             ease: 'sine.inOut',
             delay: index * 0.08,
         });
+    });
+
+    gsap.to('.sp-map-shape', {
+        scale: 1.012,
+        transformOrigin: '50% 50%',
+        duration: 4.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+    });
+
+    gsap.to('.sp-map-city', {
+        y: -4,
+        duration: 2.4,
+        repeat: -1,
+        yoyo: true,
+        stagger: 0.12,
+        ease: 'sine.inOut',
+    });
+
+    gsap.to('.sp-map-road, .sp-map-river', {
+        strokeDashoffset: -120,
+        duration: 5.8,
+        repeat: -1,
+        ease: 'none',
     });
 };
 

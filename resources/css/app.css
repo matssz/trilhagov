@@ -13055,3 +13055,307 @@ a:focus-visible {
         min-height: 300px;
     }
 }
+
+/* Commercial high-contrast pass: stronger cards, visible CTAs and livelier map. */
+.has-public-layout {
+    background:
+        radial-gradient(circle at 18% 8%, rgba(31, 101, 164, .16), transparent 30%),
+        radial-gradient(circle at 86% 20%, rgba(213, 163, 42, .14), transparent 28%),
+        linear-gradient(135deg, #f7fbff 0%, #eaf3fb 46%, #dcebf6 100%);
+}
+
+.commercial-page {
+    --commercial-ink: #021225;
+    --commercial-blue: #064b86;
+    --commercial-blue-strong: #003b73;
+    --commercial-sky: #d8efff;
+    --commercial-gold: #c89418;
+    --commercial-muted: #2d4258;
+}
+
+.commercial-nav {
+    border-color: rgba(8, 55, 99, .24);
+    background: rgba(255, 255, 255, .97);
+    box-shadow:
+        0 18px 44px rgba(2, 18, 37, .16),
+        inset 0 1px 0 rgba(255, 255, 255, .95);
+}
+
+.commercial-nav a {
+    color: #102c48;
+}
+
+.commercial-nav a:not(.commercial-nav-cta):hover {
+    background: #e3f3ff;
+    color: #003b73;
+}
+
+.commercial-nav .commercial-nav-cta,
+.commercial-page .btn-primary {
+    border-color: rgba(255, 255, 255, .18);
+    background:
+        linear-gradient(135deg, #032447 0%, #075b9f 62%, #0a75c6 100%);
+    color: #fff;
+    box-shadow:
+        0 18px 36px rgba(3, 36, 71, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .24);
+}
+
+.commercial-page .btn-outline-primary {
+    border-color: rgba(3, 54, 104, .48);
+    background: #ffffff;
+    color: #033668;
+    box-shadow: 0 14px 30px rgba(3, 31, 62, .1);
+}
+
+.commercial-hero,
+.commercial-section,
+.commercial-showcase-band,
+.commercial-sp-map-section,
+.commercial-cta {
+    border: 1px solid rgba(7, 63, 115, .22);
+}
+
+.commercial-hero {
+    background:
+        radial-gradient(circle at 76% 12%, rgba(6, 75, 134, .18), transparent 28%),
+        linear-gradient(120deg, rgba(255, 255, 255, 1) 0%, rgba(232, 244, 252, .98) 46%, rgba(203, 225, 240, .96) 100%);
+    box-shadow:
+        0 42px 100px rgba(2, 18, 37, .2),
+        inset 0 1px 0 #fff;
+}
+
+.commercial-hero::before {
+    opacity: .42;
+}
+
+.commercial-hero h1,
+.commercial-section h2,
+.commercial-sp-map-copy h2,
+.commercial-showcase-band h2,
+.commercial-cta h2 {
+    color: #021225;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .62);
+}
+
+.commercial-hero p,
+.commercial-section p,
+.commercial-showcase-band p,
+.commercial-sp-map-copy p,
+.commercial-proof-strip span,
+.commercial-decision-grid p,
+.commercial-pipeline-track p,
+.commercial-showcase-grid p {
+    color: #24374d;
+    font-weight: 780;
+}
+
+.commercial-kicker {
+    border-color: rgba(7, 63, 115, .24);
+    background: #ffffff;
+    color: #064b86;
+    box-shadow: 0 12px 26px rgba(2, 18, 37, .12);
+}
+
+.commercial-product-stage,
+.commercial-command-row article,
+.commercial-work-card,
+.commercial-proof-strip article,
+.commercial-decision-grid article,
+.commercial-pipeline-track article,
+.commercial-showcase-grid article,
+.commercial-impact-strip article,
+.commercial-market-list {
+    border-color: rgba(7, 63, 115, .24);
+    background:
+        linear-gradient(145deg, #ffffff 0%, #f2f8fd 62%, #e5f2fb 100%);
+    box-shadow:
+        0 20px 48px rgba(2, 18, 37, .14),
+        inset 0 1px 0 rgba(255, 255, 255, .98);
+}
+
+.commercial-proof-strip article,
+.commercial-decision-grid article,
+.commercial-pipeline-track article,
+.commercial-showcase-grid article,
+.commercial-impact-strip article {
+    border-top: 4px solid #075b9f;
+}
+
+.commercial-proof-strip article:nth-child(2n),
+.commercial-decision-grid article:nth-child(2n),
+.commercial-pipeline-track article:nth-child(2n),
+.commercial-showcase-grid article:nth-child(2n),
+.commercial-impact-strip article:nth-child(2n) {
+    border-top-color: #c89418;
+}
+
+.commercial-proof-strip svg,
+.commercial-showcase-grid svg,
+.commercial-command-row svg,
+.commercial-work-card > svg {
+    color: #064b86;
+    background:
+        linear-gradient(145deg, #ffffff, #dff1ff);
+    box-shadow:
+        0 10px 22px rgba(7, 63, 115, .14),
+        inset 0 1px 0 #fff;
+}
+
+.commercial-proof-strip strong,
+.commercial-decision-grid strong,
+.commercial-impact-strip strong,
+.commercial-pipeline-track strong,
+.commercial-showcase-grid strong,
+.commercial-command-row strong,
+.commercial-work-card strong {
+    color: #021225;
+}
+
+.commercial-section {
+    background:
+        radial-gradient(circle at 100% 0%, rgba(7, 91, 159, .12), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #eef7fd 100%);
+}
+
+.commercial-sp-map-section {
+    background:
+        radial-gradient(circle at 78% 42%, rgba(67, 160, 220, .28), transparent 35%),
+        radial-gradient(circle at 24% 12%, rgba(213, 163, 42, .2), transparent 30%),
+        linear-gradient(135deg, #021225 0%, #07355f 52%, #0b5b8d 100%);
+}
+
+.commercial-sp-map-list article {
+    border-color: rgba(255, 255, 255, .26);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .07));
+    box-shadow:
+        0 16px 34px rgba(0, 0, 0, .18),
+        inset 0 1px 0 rgba(255, 255, 255, .24);
+}
+
+.commercial-sp-map-card {
+    border-color: rgba(255, 255, 255, .28);
+    background:
+        radial-gradient(circle at 50% 45%, rgba(129, 202, 242, .34), transparent 48%),
+        radial-gradient(circle at 80% 20%, rgba(213, 163, 42, .22), transparent 28%),
+        linear-gradient(145deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .06));
+}
+
+.commercial-sp-map-card::after {
+    position: absolute;
+    inset: -35%;
+    pointer-events: none;
+    background: conic-gradient(from 0deg, transparent 0 72%, rgba(255, 255, 255, .24) 78%, transparent 86% 100%);
+    content: "";
+    animation: commercial-map-sweep 9s linear infinite;
+}
+
+.commercial-sp-map-card svg {
+    position: relative;
+    z-index: 1;
+}
+
+.sp-map-shadow {
+    fill: rgba(0, 0, 0, .32);
+}
+
+.sp-map-shape {
+    stroke: rgba(255, 255, 255, .92);
+    stroke-width: 6;
+    filter:
+        drop-shadow(0 28px 44px rgba(0, 0, 0, .36))
+        drop-shadow(0 0 22px rgba(132, 202, 242, .34));
+}
+
+.sp-map-coast {
+    stroke: rgba(2, 18, 37, .42);
+    stroke-width: 4;
+}
+
+.sp-map-river {
+    stroke: rgba(0, 92, 168, .74);
+    stroke-width: 6;
+    animation: commercial-map-dash 5.5s linear infinite;
+}
+
+.sp-map-road {
+    stroke: rgba(2, 18, 37, .36);
+    stroke-width: 3;
+    animation: commercial-map-dash 7s linear infinite reverse;
+}
+
+.sp-map-city circle {
+    fill: #f4c33d;
+    stroke: #ffffff;
+    stroke-width: 5;
+    filter:
+        drop-shadow(0 0 9px rgba(244, 195, 61, .95))
+        drop-shadow(0 0 22px rgba(244, 195, 61, .45));
+}
+
+.sp-map-city text {
+    fill: #021225;
+    stroke: rgba(255, 255, 255, .98);
+    stroke-width: 7;
+}
+
+.sp-map-labels text:first-child {
+    fill: rgba(255, 255, 255, .2);
+}
+
+.sp-map-labels text:last-child {
+    fill: rgba(255, 255, 255, .86);
+}
+
+@keyframes commercial-map-dash {
+    to {
+        stroke-dashoffset: -120;
+    }
+}
+
+@keyframes commercial-map-sweep {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commercial-sp-map-card::after,
+    .sp-map-river,
+    .sp-map-road {
+        animation: none;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .commercial-page .btn-primary:hover,
+    .commercial-nav .commercial-nav-cta:hover {
+        background:
+            linear-gradient(135deg, #021225 0%, #064b86 58%, #0b79ce 100%);
+        box-shadow:
+            0 22px 44px rgba(3, 36, 71, .34),
+            inset 0 1px 0 rgba(255, 255, 255, .28);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .commercial-page .btn-outline-primary:hover {
+        background: #e6f4ff;
+        color: #021225;
+        transform: translateY(-2px);
+    }
+
+    .commercial-proof-strip article:hover,
+    .commercial-decision-grid article:hover,
+    .commercial-pipeline-track article:hover,
+    .commercial-showcase-grid article:hover,
+    .commercial-impact-strip article:hover {
+        background:
+            linear-gradient(145deg, #ffffff 0%, #e8f5ff 100%);
+        border-color: rgba(7, 91, 159, .46);
+        box-shadow:
+            0 28px 68px rgba(2, 18, 37, .2),
+            inset 0 1px 0 #fff;
+    }
+}
