@@ -83,6 +83,7 @@ import {
     Paperclip,
     Pencil,
     Play,
+    PlayCircle,
     PencilLine,
     RefreshCw,
     Radar,
@@ -116,6 +117,7 @@ import {
     UserRoundCheck,
     Users,
     UsersRound,
+    Wallet,
     WalletCards,
     Waypoints,
     Webhook,
@@ -230,6 +232,7 @@ createIcons({
         Paperclip,
         Pencil,
         Play,
+        PlayCircle,
         PencilLine,
         RefreshCw,
         Radar,
@@ -263,6 +266,7 @@ createIcons({
         UserRoundCheck,
         Users,
         UsersRound,
+        Wallet,
         WalletCards,
         Waypoints,
         Webhook,
@@ -981,3 +985,80 @@ document.addEventListener('submit', (event) => {
         }
     });
 });
+
+const initProgressiveMotion = () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion) {
+        return;
+    }
+
+    const selectors = [
+        '.content-panel',
+        '.metric-card',
+        '.dashboard-card',
+        '.commercial-hero-copy',
+        '.commercial-product-stage',
+        '.commercial-proof-strip article',
+        '.commercial-section',
+        '.commercial-pipeline-track article',
+        '.commercial-market-list',
+        '.commercial-cta',
+        '.municipal-command-panel',
+        '.import-command-panel',
+        '.defense-command-panel',
+        '.profile-trails-panel',
+        '.municipal-parameters-panel',
+        '.municipal-health-grid article',
+        '.profile-trail-grid article',
+        '.parameter-module-grid article',
+        '.executive-command-panel',
+        '.executive-command-cards article',
+        '.executive-flow-lane li',
+        '.executive-next-decisions a',
+        '.legislative-board-column',
+        '.councilor-mandate-panel',
+        '.councilor-simple-checklist',
+        '.accountability-guide',
+        '.accountability-command-card',
+        '.accountability-action-card',
+    ];
+
+    const targets = Array.from(document.querySelectorAll(selectors.join(',')))
+        .filter((element) => element instanceof HTMLElement && element.dataset.motionReveal !== 'ready');
+
+    targets.forEach((element, index) => {
+        element.dataset.motionReveal = 'ready';
+        element.classList.add('motion-reveal', `motion-delay-${index % 6}`);
+    });
+
+    if (!('IntersectionObserver' in window)) {
+        targets.forEach((element) => element.classList.add('motion-visible'));
+
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+                return;
+            }
+
+            entry.target.classList.add('motion-visible');
+            observer.unobserve(entry.target);
+        });
+    }, {
+        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.12,
+    });
+
+    window.requestAnimationFrame(() => {
+        targets.forEach((element) => observer.observe(element));
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProgressiveMotion, { once: true });
+} else {
+    initProgressiveMotion();
+}

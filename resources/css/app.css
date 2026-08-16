@@ -12073,3 +12073,186 @@ a:focus-visible {
         min-width: 0;
     }
 }
+
+/* Motion/UI polish inspired by Uiverse surfaces and Motion.dev-style scroll reveal. */
+.motion-reveal {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(.985);
+    filter: saturate(.94);
+    transition:
+        opacity .54s cubic-bezier(.22, 1, .36, 1),
+        transform .54s cubic-bezier(.22, 1, .36, 1),
+        filter .54s cubic-bezier(.22, 1, .36, 1);
+    will-change: opacity, transform;
+}
+
+.motion-reveal.motion-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: saturate(1);
+}
+
+.motion-delay-1 { transition-delay: .045s; }
+.motion-delay-2 { transition-delay: .09s; }
+.motion-delay-3 { transition-delay: .135s; }
+.motion-delay-4 { transition-delay: .18s; }
+.motion-delay-5 { transition-delay: .225s; }
+
+.content-panel,
+.metric-card,
+.commercial-product-stage,
+.commercial-proof-strip article,
+.commercial-section,
+.commercial-market-list,
+.commercial-cta,
+.municipal-command-panel,
+.import-command-panel,
+.defense-command-panel,
+.profile-trails-panel,
+.municipal-parameters-panel,
+.municipal-health-grid article,
+.profile-trail-grid article,
+.parameter-module-grid article,
+.executive-command-panel,
+.executive-command-cards article,
+.executive-flow-lane li,
+.executive-next-decisions a,
+.legislative-board-column,
+.councilor-mandate-panel,
+.councilor-simple-checklist,
+.accountability-guide,
+.accountability-command-card,
+.accountability-action-card {
+    position: relative;
+    transition:
+        border-color var(--interaction-speed) var(--interaction-ease),
+        box-shadow var(--interaction-speed) var(--interaction-ease),
+        transform var(--interaction-speed) var(--interaction-ease),
+        background-color var(--interaction-speed) var(--interaction-ease);
+}
+
+.content-panel::after,
+.metric-card::after,
+.commercial-product-stage::after,
+.commercial-proof-strip article::after,
+.commercial-section::after,
+.municipal-command-panel::after,
+.import-command-panel::after,
+.defense-command-panel::after,
+.profile-trails-panel::after,
+.municipal-parameters-panel::after,
+.legislative-board-column::after,
+.accountability-guide::after {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+        linear-gradient(115deg, rgba(255, 255, 255, .52), transparent 34%, rgba(67, 122, 166, .075) 74%, transparent);
+    opacity: 0;
+    transition: opacity var(--interaction-speed) var(--interaction-ease);
+    content: "";
+}
+
+.commercial-product-stage,
+.commercial-section,
+.commercial-proof-strip article,
+.municipal-command-panel,
+.import-command-panel,
+.defense-command-panel,
+.profile-trails-panel,
+.municipal-parameters-panel,
+.accountability-guide {
+    overflow: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .content-panel:hover,
+    .metric-card:hover,
+    .commercial-product-stage:hover,
+    .commercial-proof-strip article:hover,
+    .commercial-section:hover,
+    .commercial-market-list:hover,
+    .municipal-health-grid article:hover,
+    .profile-trail-grid article:hover,
+    .parameter-module-grid article:hover,
+    .executive-command-cards article:hover,
+    .executive-flow-lane li:hover,
+    .executive-next-decisions a:hover,
+    .legislative-board-column:hover,
+    .accountability-command-card:hover,
+    .accountability-action-card:hover {
+        border-color: rgba(18, 63, 112, .24);
+        box-shadow: var(--elevation-2);
+        transform: translateY(-2px);
+    }
+
+    .content-panel:hover::after,
+    .metric-card:hover::after,
+    .commercial-product-stage:hover::after,
+    .commercial-proof-strip article:hover::after,
+    .commercial-section:hover::after,
+    .municipal-command-panel:hover::after,
+    .import-command-panel:hover::after,
+    .defense-command-panel:hover::after,
+    .profile-trails-panel:hover::after,
+    .municipal-parameters-panel:hover::after,
+    .legislative-board-column:hover::after,
+    .accountability-guide:hover::after {
+        opacity: 1;
+    }
+}
+
+.commercial-hero-copy.motion-reveal {
+    transform: translate3d(-10px, 14px, 0) scale(.99);
+}
+
+.commercial-hero-copy.motion-visible {
+    transform: translate3d(0, 0, 0) scale(1);
+}
+
+.commercial-product-stage.motion-reveal {
+    transform: translate3d(12px, 18px, 0) scale(.985);
+}
+
+.commercial-product-stage.motion-visible {
+    transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .motion-reveal,
+    .motion-reveal.motion-visible {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
+    }
+
+    .content-panel,
+    .metric-card,
+    .commercial-product-stage,
+    .commercial-proof-strip article,
+    .commercial-section,
+    .commercial-market-list,
+    .commercial-cta,
+    .municipal-command-panel,
+    .import-command-panel,
+    .defense-command-panel,
+    .profile-trails-panel,
+    .municipal-parameters-panel,
+    .municipal-health-grid article,
+    .profile-trail-grid article,
+    .parameter-module-grid article,
+    .executive-command-panel,
+    .executive-command-cards article,
+    .executive-flow-lane li,
+    .executive-next-decisions a,
+    .legislative-board-column,
+    .councilor-mandate-panel,
+    .councilor-simple-checklist,
+    .accountability-guide,
+    .accountability-command-card,
+    .accountability-action-card {
+        transition: none;
+    }
+}
