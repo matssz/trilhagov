@@ -10,9 +10,9 @@ class MarketingPageTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Controle simples para Câmara, Prefeitura e prestação de contas.')
-            ->assertSee('Entrar na demonstração')
-            ->assertSee('Construído para cidades que precisam operar bem sem montar uma equipe de software.');
+            ->assertSee('Emendas municipais sem planilha, sem retrabalho e sem apagar incêndio.')
+            ->assertSee('Entrar na demo')
+            ->assertSee('Feito para municípios que não têm estrutura própria de tecnologia.');
     }
 
     public function test_commercial_page_has_direct_public_url(): void

@@ -17,6 +17,7 @@
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
         "chart.js": "^4.5.1",
+        "gsap": "^3.15.0",
         "lucide": "^0.468.0"
     }
 }

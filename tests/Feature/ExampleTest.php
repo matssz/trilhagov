@@ -10,8 +10,8 @@ class ExampleTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Controle simples para Câmara, Prefeitura e prestação de contas.')
-            ->assertSee('Entrar na demonstração');
+            ->assertSee('Emendas municipais sem planilha, sem retrabalho e sem apagar incêndio.')
+            ->assertSee('Entrar na demo');
     }
 
     public function test_not_found_page_uses_human_message_and_correct_status(): void

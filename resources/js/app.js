@@ -1,5 +1,7 @@
 import './bootstrap';
 import 'bootstrap';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
     Activity,
     AlertCircle,
@@ -144,6 +146,8 @@ import {
     Zap,
     createIcons,
 } from 'lucide';
+
+gsap.registerPlugin(ScrollTrigger);
 
 createIcons({
     icons: {
@@ -1032,33 +1036,117 @@ const initProgressiveMotion = () => {
         element.classList.add('motion-reveal', `motion-delay-${index % 6}`);
     });
 
-    if (!('IntersectionObserver' in window)) {
-        targets.forEach((element) => element.classList.add('motion-visible'));
+    gsap.set(targets, {
+        autoAlpha: 0,
+        y: 42,
+        scale: 0.965,
+        filter: 'blur(5px) saturate(0.9)',
+    });
 
+    ScrollTrigger.batch(targets, {
+        start: 'top 88%',
+        once: true,
+        onEnter: (batch) => {
+            batch.forEach((element) => element.classList.add('motion-visible'));
+            gsap.to(batch, {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px) saturate(1)',
+                duration: 0.82,
+                stagger: 0.075,
+                ease: 'power3.out',
+                overwrite: true,
+            });
+        },
+    });
+};
+
+const initCommercialShowcase = () => {
+    const page = document.querySelector('.commercial-page');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!(page instanceof HTMLElement) || reduceMotion) {
         return;
     }
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-                return;
-            }
+    gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .from('.commercial-nav a', {
+            autoAlpha: 0,
+            y: -18,
+            stagger: 0.06,
+            duration: 0.62,
+        })
+        .from('.commercial-hero-copy > *', {
+            autoAlpha: 0,
+            y: 36,
+            stagger: 0.095,
+            duration: 0.78,
+        }, '-=.25')
+        .from('.commercial-product-stage', {
+            autoAlpha: 0,
+            x: 46,
+            rotateY: -7,
+            scale: 0.94,
+            duration: 0.9,
+        }, '-=.52')
+        .from('.commercial-command-row article, .commercial-mini-flow span', {
+            autoAlpha: 0,
+            y: 18,
+            stagger: 0.045,
+            duration: 0.5,
+        }, '-=.45');
 
-            entry.target.classList.add('motion-visible');
-            observer.unobserve(entry.target);
-        });
-    }, {
-        rootMargin: '0px 0px -8% 0px',
-        threshold: 0.12,
+    gsap.to('.commercial-product-stage', {
+        yPercent: -5,
+        rotateX: 1.4,
+        ease: 'none',
+        scrollTrigger: {
+            trigger: '.commercial-hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+        },
     });
 
-    window.requestAnimationFrame(() => {
-        targets.forEach((element) => observer.observe(element));
+    gsap.utils.toArray('.commercial-pipeline-track article').forEach((card, index) => {
+        gsap.fromTo(card, {
+            y: 54,
+            autoAlpha: 0,
+            scale: 0.92,
+        }, {
+            y: 0,
+            autoAlpha: 1,
+            scale: 1,
+            duration: 0.72,
+            ease: 'back.out(1.4)',
+            scrollTrigger: {
+                trigger: card,
+                start: 'top 86%',
+                toggleActions: 'play none none reverse',
+            },
+            delay: (index % 3) * 0.06,
+        });
+    });
+
+    gsap.utils.toArray('[data-commercial-float]').forEach((element, index) => {
+        gsap.to(element, {
+            y: index % 2 === 0 ? -14 : 14,
+            x: index % 2 === 0 ? 8 : -8,
+            duration: 2.8 + index * 0.24,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+        });
     });
 };
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initProgressiveMotion, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+        initProgressiveMotion();
+        initCommercialShowcase();
+    }, { once: true });
 } else {
     initProgressiveMotion();
+    initCommercialShowcase();
 }
