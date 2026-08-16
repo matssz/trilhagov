@@ -13581,6 +13581,66 @@ a:focus-visible {
     color: #062a4f !important;
 }
 
+/* Commercial product mockup contrast: keep preview cards readable inside the dark hero. */
+.commercial-page .commercial-product-shell main header small,
+.commercial-page .commercial-product-shell main header strong,
+.commercial-page .commercial-product-shell main header span,
+.commercial-page .commercial-command-row article small,
+.commercial-page .commercial-command-row article strong,
+.commercial-page .commercial-mini-flow span,
+.commercial-page .commercial-work-card small,
+.commercial-page .commercial-work-card strong,
+.commercial-page .commercial-work-card p {
+    position: relative;
+    z-index: 2;
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.commercial-page .commercial-product-shell main header small {
+    color: #2d4a66 !important;
+}
+
+.commercial-page .commercial-product-shell main header strong {
+    color: #061b34 !important;
+}
+
+.commercial-page .commercial-command-row article {
+    background:
+        linear-gradient(145deg, #ffffff 0%, #f4faff 100%) !important;
+}
+
+.commercial-page .commercial-command-row article::after,
+.commercial-page .commercial-work-card::after {
+    z-index: 0;
+    opacity: .18 !important;
+}
+
+.commercial-page .commercial-command-row article small {
+    color: #35516c !important;
+}
+
+.commercial-page .commercial-command-row article strong {
+    color: #021225 !important;
+}
+
+.commercial-page .commercial-mini-flow span {
+    border-color: rgba(7, 63, 115, .22) !important;
+    background: #ffffff !important;
+    color: #073f73 !important;
+    box-shadow: 0 10px 24px rgba(7, 63, 115, .1);
+}
+
+.commercial-page .commercial-mini-flow span.is-done {
+    border-color: rgba(18, 132, 92, .35) !important;
+    background: #e9fff5 !important;
+    color: #075c3f !important;
+}
+
+.commercial-page .commercial-product-stage .commercial-work-card {
+    background: #ffffff !important;
+}
+
 /* Legislative proposal tracking shortcuts. */
 .legislative-process-steps a {
     text-decoration: none;
