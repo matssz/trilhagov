@@ -188,6 +188,58 @@
             </div>
         </section>
 
+        <section class="commercial-sp-map-section" aria-label="Mapa de oportunidade em São Paulo">
+            <div class="commercial-sp-map-copy">
+                <span class="commercial-kicker">
+                    <i data-lucide="map-pin-check" aria-hidden="true"></i>
+                    Oportunidade em São Paulo
+                </span>
+                <h2>Muitos municípios ainda operam emendas com planilhas, mensagens e memória da equipe.</h2>
+                <p>
+                    A vitrine mostra a oportunidade de implantação: cidades pequenas e médias que precisam
+                    dar previsibilidade à Câmara, ao Executivo e ao controle interno sem montar uma estrutura
+                    própria de tecnologia.
+                </p>
+                <div class="commercial-sp-map-list">
+                    <article>
+                        <strong>645</strong>
+                        <span>municípios no estado</span>
+                    </article>
+                    <article>
+                        <strong>Prioridade</strong>
+                        <span>municípios sem fluxo digital consolidado</span>
+                    </article>
+                    <article>
+                        <strong>Piloto</strong>
+                        <span>implantação guiada por exercício e Câmara</span>
+                    </article>
+                </div>
+            </div>
+
+            <div class="commercial-sp-map-card" data-sp-map>
+                <svg viewBox="0 0 640 430" role="img" aria-label="Mapa estilizado do estado de São Paulo com pontos de municípios sem sistema">
+                    <path class="sp-map-shape" d="M112 235 L138 178 L204 142 L252 94 L318 88 L383 116 L441 112 L500 148 L540 198 L520 252 L552 297 L492 326 L446 372 L370 358 L306 386 L244 356 L176 360 L124 319 L86 274 Z" />
+                    <path class="sp-map-river" d="M148 263 C210 225 252 248 306 219 C355 194 394 198 456 164" />
+                    <g class="sp-map-points">
+                        <circle cx="188" cy="214" r="7" />
+                        <circle cx="244" cy="170" r="6" />
+                        <circle cx="302" cy="138" r="7" />
+                        <circle cx="362" cy="176" r="6" />
+                        <circle cx="430" cy="154" r="7" />
+                        <circle cx="482" cy="208" r="6" />
+                        <circle cx="426" cy="276" r="7" />
+                        <circle cx="350" cy="314" r="6" />
+                        <circle cx="276" cy="288" r="7" />
+                        <circle cx="192" cy="316" r="6" />
+                    </g>
+                    <g class="sp-map-labels">
+                        <text x="302" y="232">SP</text>
+                        <text x="254" y="410">Municípios-alvo para piloto</text>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
         <section class="commercial-section commercial-pipeline" id="fluxo">
             <div class="commercial-section-heading">
                 <span class="commercial-kicker">

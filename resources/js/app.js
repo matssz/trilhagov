@@ -1005,6 +1005,9 @@ const initProgressiveMotion = () => {
         '.commercial-product-stage',
         '.commercial-proof-strip article',
         '.commercial-section',
+        '.commercial-sp-map-section',
+        '.commercial-sp-map-card',
+        '.commercial-sp-map-list article',
         '.commercial-pipeline-track article',
         '.commercial-market-list',
         '.commercial-cta',
@@ -1137,6 +1140,19 @@ const initCommercialShowcase = () => {
             repeat: -1,
             yoyo: true,
             ease: 'sine.inOut',
+        });
+    });
+
+    gsap.utils.toArray('.sp-map-points circle').forEach((point, index) => {
+        gsap.to(point, {
+            scale: 1.65,
+            transformOrigin: '50% 50%',
+            opacity: 0.42,
+            duration: 1.35 + (index % 3) * 0.18,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+            delay: index * 0.08,
         });
     });
 };

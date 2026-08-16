@@ -12709,3 +12709,247 @@ a:focus-visible {
         font-size: clamp(2.45rem, 14vw, 4rem);
     }
 }
+
+/* Commercial refinements: darker premium tone, non-sticky nav and local SP opportunity map. */
+.commercial-page {
+    --commercial-ink: #031327;
+    --commercial-blue: #073f73;
+    --commercial-steel: #23364a;
+    --commercial-muted: #40536a;
+    --commercial-map: #0d4d83;
+    color: var(--commercial-ink);
+}
+
+.commercial-nav {
+    position: relative;
+    top: auto;
+    margin-bottom: .75rem;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 14px 34px rgba(3, 19, 39, .12);
+}
+
+.commercial-nav a {
+    color: #253d56;
+    font-weight: 950;
+}
+
+.commercial-hero,
+.commercial-section,
+.commercial-showcase-band,
+.commercial-sp-map-section,
+.commercial-impact-strip article,
+.commercial-proof-strip article,
+.commercial-pipeline-track article,
+.commercial-showcase-grid article {
+    border-color: rgba(93, 123, 151, .48);
+}
+
+.commercial-hero h1,
+.commercial-section h2,
+.commercial-showcase-band h2,
+.commercial-sp-map-copy h2,
+.commercial-cta h2 {
+    color: var(--commercial-ink);
+    font-weight: 950;
+    text-wrap: balance;
+}
+
+.commercial-hero p,
+.commercial-section p,
+.commercial-showcase-band p,
+.commercial-sp-map-copy p,
+.commercial-proof-strip span,
+.commercial-decision-grid p,
+.commercial-pipeline-track p,
+.commercial-showcase-grid p {
+    color: var(--commercial-muted);
+    font-weight: 760;
+}
+
+.commercial-kicker {
+    color: var(--commercial-blue);
+    background: rgba(255, 255, 255, .9);
+}
+
+.commercial-section {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .97), rgba(226, 239, 248, .88));
+}
+
+.commercial-sp-map-section {
+    display: grid;
+    grid-template-columns: minmax(0, .86fr) minmax(420px, 1.14fr);
+    gap: clamp(1.2rem, 4vw, 3rem);
+    align-items: center;
+    min-height: 480px;
+    padding: clamp(1.35rem, 3.4vw, 2.8rem);
+    border: 1px solid rgba(93, 123, 151, .48);
+    border-radius: 30px;
+    background:
+        linear-gradient(135deg, rgba(3, 19, 39, .98), rgba(8, 48, 86, .94) 58%, rgba(19, 83, 117, .88)),
+        linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px);
+    background-size: auto, 42px 42px, 42px 42px;
+    box-shadow: 0 34px 90px rgba(3, 19, 39, .22);
+    overflow: hidden;
+}
+
+.commercial-sp-map-copy h2 {
+    max-width: 620px;
+    margin: .8rem 0 .8rem;
+    color: #ffffff;
+    font-size: clamp(1.85rem, 3.6vw, 3.65rem);
+    line-height: .98;
+}
+
+.commercial-sp-map-copy p {
+    max-width: 620px;
+    color: rgba(226, 239, 248, .82);
+}
+
+.commercial-sp-map-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin-top: 1.25rem;
+}
+
+.commercial-sp-map-list article {
+    min-height: 112px;
+    padding: .9rem;
+    border: 1px solid rgba(211, 227, 239, .18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+    backdrop-filter: blur(10px);
+}
+
+.commercial-sp-map-list strong,
+.commercial-sp-map-list span {
+    display: block;
+}
+
+.commercial-sp-map-list strong {
+    color: #ffffff;
+    font-size: 1.18rem;
+    font-weight: 950;
+}
+
+.commercial-sp-map-list span {
+    margin-top: .35rem;
+    color: rgba(226, 239, 248, .76);
+    font-size: .78rem;
+    font-weight: 820;
+    line-height: 1.35;
+}
+
+.commercial-sp-map-card {
+    position: relative;
+    min-height: 390px;
+    border: 1px solid rgba(211, 227, 239, .24);
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 50% 45%, rgba(88, 172, 220, .25), transparent 52%),
+        rgba(255, 255, 255, .08);
+    box-shadow:
+        0 26px 70px rgba(0, 0, 0, .22),
+        inset 0 1px 0 rgba(255, 255, 255, .16);
+    overflow: hidden;
+}
+
+.commercial-sp-map-card svg {
+    width: 100%;
+    height: 100%;
+    min-height: 390px;
+}
+
+.sp-map-shape {
+    fill: rgba(218, 236, 248, .92);
+    stroke: rgba(255, 255, 255, .78);
+    stroke-width: 5;
+    filter: drop-shadow(0 24px 42px rgba(0, 0, 0, .28));
+}
+
+.sp-map-river {
+    fill: none;
+    stroke: rgba(7, 63, 115, .34);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 10 12;
+}
+
+.sp-map-points circle {
+    fill: #d5a32a;
+    stroke: #ffffff;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 14px rgba(213, 163, 42, .72));
+}
+
+.sp-map-labels text:first-child {
+    fill: rgba(3, 19, 39, .16);
+    font-size: 86px;
+    font-weight: 950;
+    text-anchor: middle;
+}
+
+.sp-map-labels text:last-child {
+    fill: rgba(255, 255, 255, .7);
+    font-size: 18px;
+    font-weight: 900;
+    text-anchor: middle;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .commercial-proof-strip article:hover,
+    .commercial-decision-grid article:hover,
+    .commercial-pipeline-track article:hover,
+    .commercial-showcase-grid article:hover,
+    .commercial-impact-strip article:hover,
+    .metric-card:hover,
+    .municipal-health-grid article:hover,
+    .profile-trail-grid article:hover,
+    .parameter-module-grid article:hover,
+    .executive-command-cards article:hover,
+    .legislative-board-column:hover,
+    .accountability-command-card:hover {
+        transform: none;
+        border-color: rgba(7, 63, 115, .4);
+        box-shadow:
+            0 24px 58px rgba(3, 19, 39, .16),
+            inset 0 1px 0 rgba(255, 255, 255, .86);
+    }
+
+    .commercial-proof-strip article:hover,
+    .commercial-decision-grid article:hover,
+    .commercial-pipeline-track article:hover,
+    .commercial-showcase-grid article:hover,
+    .commercial-impact-strip article:hover {
+        background: linear-gradient(145deg, #ffffff, #eef7ff);
+    }
+}
+
+@media (max-width: 1040px) {
+    .commercial-sp-map-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .commercial-nav {
+        position: static;
+    }
+
+    .commercial-sp-map-section {
+        min-height: 0;
+        border-radius: 22px;
+    }
+
+    .commercial-sp-map-list {
+        grid-template-columns: 1fr;
+    }
+
+    .commercial-sp-map-card,
+    .commercial-sp-map-card svg {
+        min-height: 300px;
+    }
+}
