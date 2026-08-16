@@ -2,7 +2,8 @@
     $workspaceLayout = auth()->check()
         && ! request()->routeIs('municipalities.*')
         && ! request()->routeIs('invitations.*')
-        && ! request()->routeIs('transparency.*');
+        && ! request()->routeIs('transparency.*')
+        && ! request()->routeIs('marketing.*');
     $activeMunicipality = $workspaceLayout ? request()->attributes->get('active_municipality') : null;
     $activeRole = $workspaceLayout
         ? ($activeMunicipality?->pivot?->role ?? auth()->user()->roleForMunicipality((int) session('active_municipality_id')))

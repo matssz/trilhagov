@@ -58,14 +58,6 @@
                     <em>trilhagov.onrender.com</em>
                 </div>
                 <div class="commercial-product-shell">
-                    <aside>
-                        <strong>Trilha<span>Gov</span></strong>
-                        <small>Portal de Emendas</small>
-                        <b class="is-active"><i data-lucide="layout-dashboard" aria-hidden="true"></i>Painel</b>
-                        <b><i data-lucide="landmark" aria-hidden="true"></i>Legislativo</b>
-                        <b><i data-lucide="wallet-cards" aria-hidden="true"></i>Execução</b>
-                        <b><i data-lucide="shield-check" aria-hidden="true"></i>Controle</b>
-                    </aside>
                     <main>
                         <header>
                             <div>
@@ -218,8 +210,24 @@
 
             <div class="commercial-sp-map-card" data-sp-map>
                 <svg viewBox="0 0 640 430" role="img" aria-label="Mapa estilizado do estado de São Paulo com pontos de municípios sem sistema">
-                    <path class="sp-map-shape" d="M112 235 L138 178 L204 142 L252 94 L318 88 L383 116 L441 112 L500 148 L540 198 L520 252 L552 297 L492 326 L446 372 L370 358 L306 386 L244 356 L176 360 L124 319 L86 274 Z" />
-                    <path class="sp-map-river" d="M148 263 C210 225 252 248 306 219 C355 194 394 198 456 164" />
+                    <defs>
+                        <linearGradient id="spMapLand" x1="120" x2="540" y1="80" y2="370" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#f8fcff" />
+                            <stop offset="0.55" stop-color="#d7ecf9" />
+                            <stop offset="1" stop-color="#b7d8ec" />
+                        </linearGradient>
+                        <radialGradient id="spMapGlow" cx="50%" cy="48%" r="58%">
+                            <stop offset="0" stop-color="#ffffff" stop-opacity=".72" />
+                            <stop offset="1" stop-color="#7ab2d4" stop-opacity=".06" />
+                        </radialGradient>
+                    </defs>
+                    <path class="sp-map-shadow" d="M82 260 C98 224 112 195 135 166 C160 136 186 120 218 106 C248 92 282 70 324 76 C358 81 381 105 415 104 C448 103 482 114 514 142 C545 169 560 199 546 230 C535 255 561 277 546 301 C530 327 486 328 462 352 C436 378 394 372 362 360 C329 348 304 384 262 372 C226 362 206 337 164 343 C130 348 96 324 82 292 C77 281 75 270 82 260 Z" />
+                    <path class="sp-map-shape" d="M92 246 C105 211 122 182 148 153 C177 121 210 107 244 96 C276 85 303 65 339 77 C365 85 383 108 414 108 C453 107 489 120 520 150 C549 178 558 205 543 232 C532 252 557 273 544 296 C529 324 489 325 463 350 C437 376 397 374 363 360 C329 346 307 380 267 371 C228 362 211 334 168 342 C133 348 99 324 87 291 C80 273 83 258 92 246 Z" />
+                    <path class="sp-map-coast" d="M463 350 C437 376 397 374 363 360 C329 346 307 380 267 371 C228 362 211 334 168 342" />
+                    <path class="sp-map-river" d="M137 258 C199 219 252 249 303 219 C352 190 393 198 461 160" />
+                    <path class="sp-map-road" d="M164 181 C221 181 269 194 320 217 C377 242 423 248 509 232" />
+                    <path class="sp-map-road" d="M200 324 C246 282 289 265 350 263 C405 261 454 282 526 294" />
+                    <path class="sp-map-road" d="M249 104 C278 157 280 210 267 371" />
                     <g class="sp-map-points">
                         <g class="sp-map-city" transform="translate(184 214)">
                             <title>Guapiara - município demonstrativo</title>

@@ -12744,6 +12744,17 @@ a:focus-visible {
     border-color: rgba(93, 123, 151, .48);
 }
 
+.commercial-page .commercial-hero,
+.commercial-page .commercial-section,
+.commercial-page .commercial-proof-strip article,
+.commercial-page .commercial-impact-strip article,
+.commercial-page .commercial-showcase-band,
+.commercial-page .commercial-showcase-grid article,
+.commercial-page .commercial-pipeline-track article {
+    opacity: 1;
+    filter: none;
+}
+
 .commercial-hero h1,
 .commercial-section h2,
 .commercial-showcase-band h2,
@@ -12752,6 +12763,11 @@ a:focus-visible {
     color: var(--commercial-ink);
     font-weight: 950;
     text-wrap: balance;
+}
+
+.commercial-problem h2 {
+    color: #031327;
+    text-shadow: none;
 }
 
 .commercial-hero p,
@@ -12766,6 +12782,20 @@ a:focus-visible {
     font-weight: 760;
 }
 
+.commercial-problem p,
+.commercial-decision-grid p,
+.commercial-proof-strip span {
+    color: #24384f;
+}
+
+.commercial-decision-grid strong,
+.commercial-proof-strip strong,
+.commercial-impact-strip strong,
+.commercial-pipeline-track strong,
+.commercial-showcase-grid strong {
+    color: #061b34;
+}
+
 .commercial-kicker {
     color: var(--commercial-blue);
     background: rgba(255, 255, 255, .9);
@@ -12773,7 +12803,10 @@ a:focus-visible {
 
 .commercial-section {
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, .97), rgba(226, 239, 248, .88));
+        linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(218, 234, 245, .96));
+    box-shadow:
+        0 26px 70px rgba(3, 19, 39, .16),
+        inset 0 1px 0 rgba(255, 255, 255, .9);
 }
 
 .commercial-sp-map-section {
@@ -12857,6 +12890,17 @@ a:focus-visible {
     overflow: hidden;
 }
 
+.commercial-sp-map-card::before {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, .055) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, .055) 1px, transparent 1px);
+    background-size: 36px 36px;
+    content: "";
+}
+
 .commercial-sp-map-card svg {
     width: 100%;
     height: 100%;
@@ -12875,19 +12919,41 @@ a:focus-visible {
     padding: clamp(1.1rem, 2.6vw, 1.8rem);
 }
 
+.sp-map-shadow {
+    fill: rgba(0, 0, 0, .22);
+    transform: translate(10px, 14px);
+    filter: blur(8px);
+}
+
 .sp-map-shape {
-    fill: rgba(218, 236, 248, .92);
+    fill: url("#spMapLand");
     stroke: rgba(255, 255, 255, .78);
     stroke-width: 5;
     filter: drop-shadow(0 24px 42px rgba(0, 0, 0, .28));
 }
 
+.sp-map-shape + .sp-map-coast,
+.sp-map-coast {
+    fill: none;
+    stroke: rgba(3, 19, 39, .28);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
 .sp-map-river {
     fill: none;
-    stroke: rgba(7, 63, 115, .34);
+    stroke: rgba(7, 63, 115, .42);
     stroke-width: 5;
     stroke-linecap: round;
     stroke-dasharray: 10 12;
+}
+
+.sp-map-road {
+    fill: none;
+    stroke: rgba(3, 19, 39, .18);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 5 8;
 }
 
 .sp-map-city {
@@ -12904,10 +12970,10 @@ a:focus-visible {
 .sp-map-city text {
     paint-order: stroke;
     fill: #031327;
-    stroke: rgba(255, 255, 255, .88);
-    stroke-width: 5;
+    stroke: rgba(255, 255, 255, .95);
+    stroke-width: 6;
     stroke-linejoin: round;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 950;
     letter-spacing: 0;
 }
@@ -12922,7 +12988,7 @@ a:focus-visible {
 }
 
 .sp-map-labels text:first-child {
-    fill: rgba(3, 19, 39, .16);
+    fill: rgba(3, 19, 39, .2);
     font-size: 86px;
     font-weight: 950;
     text-anchor: middle;
