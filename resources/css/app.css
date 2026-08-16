@@ -13580,3 +13580,54 @@ a:focus-visible {
 .commercial-page .commercial-cta .btn-primary svg {
     color: #062a4f !important;
 }
+
+/* Legislative proposal tracking shortcuts. */
+.legislative-process-steps a {
+    text-decoration: none;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+.legislative-process-steps a b {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    width: fit-content;
+    margin-top: .65rem;
+    padding: .38rem .55rem;
+    border: 1px solid rgba(7, 63, 115, .2);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #073f73;
+    font-size: .72rem;
+    font-style: normal;
+    font-weight: 950;
+    line-height: 1;
+    box-shadow: 0 8px 18px rgba(7, 63, 115, .08);
+}
+
+.legislative-process-steps a b svg {
+    width: 13px;
+    height: 13px;
+}
+
+.legislative-process-steps a.is-current b {
+    border-color: rgba(7, 63, 115, .34);
+    background: #073f73;
+    color: #ffffff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .legislative-process-steps a:hover {
+        border-color: rgba(7, 63, 115, .42);
+        background: #f4faff;
+        box-shadow: 0 18px 42px rgba(7, 63, 115, .14);
+    }
+
+    .legislative-process-steps a:hover b {
+        background: #073f73;
+        color: #ffffff;
+    }
+}

@@ -113,15 +113,77 @@
             $proposal->status === App\Models\LegislativeProposal::STATUS_RESERVED && $paid <= 0 => 6,
             default => 7,
         };
+        $canOpenExecutiveAmendment = $amendment
+            && ! in_array($role, [App\Models\User::ROLE_COUNCILOR, App\Models\User::ROLE_LEGISLATIVE_REVIEWER], true);
+        $executiveOverviewHref = $canOpenExecutiveAmendment ? route('emendas.show', $amendment) : '#acompanhamento-executivo';
+        $workPlanHref = $canOpenExecutiveAmendment ? route('emendas.work-plan', $amendment) : '#acompanhamento-executivo';
+        $executionHref = $canOpenExecutiveAmendment ? route('emendas.execution', $amendment) : '#acompanhamento-executivo';
+        $accountabilityHref = $canOpenExecutiveAmendment ? route('emendas.accountability', $amendment) : '#acompanhamento-executivo';
         $trackingSteps = [
-            ['title' => 'Proposta salva', 'owner' => 'Vereador', 'description' => 'Pedido criado ou ajustado antes do envio.', 'date' => $proposal->created_at, 'href' => '#editor-proposta'],
-            ['title' => 'Conferência da Câmara', 'owner' => 'Câmara', 'description' => 'Análise mínima de objeto, valor, saúde e beneficiário.', 'date' => $proposal->submitted_at, 'href' => '#conferencia-legislativa'],
-            ['title' => 'Protocolo ao Executivo', 'owner' => 'Câmara', 'description' => 'Encaminhamento formal para a Prefeitura.', 'date' => $proposal->reviewed_at, 'href' => '#protocolo-executivo'],
-            ['title' => 'Recebimento municipal', 'owner' => 'Executivo', 'description' => 'Abertura do processo administrativo.', 'date' => $proposal->sent_at, 'href' => '#recebimento-executivo'],
-            ['title' => 'Reserva orçamentária', 'owner' => 'Executivo', 'description' => 'Confirmação de dotação para executar.', 'date' => $proposal->received_at, 'href' => '#reserva-orcamentaria'],
-            ['title' => 'Plano de trabalho', 'owner' => 'Executivo', 'description' => 'Planejamento técnico e cronograma.', 'date' => $amendment?->municipalWorkPlan?->created_at, 'href' => '#acompanhamento-executivo'],
-            ['title' => 'Execução', 'owner' => 'Prefeitura', 'description' => 'Entrega física e liquidação acompanhadas.', 'date' => $executionDate, 'href' => '#acompanhamento-executivo'],
-            ['title' => 'Pagamento', 'owner' => 'Prefeitura', 'description' => 'Pagamento registrado e prestação de contas.', 'date' => $paymentDate, 'href' => '#acompanhamento-executivo'],
+            [
+                'title' => 'Proposta salva',
+                'owner' => 'Vereador',
+                'description' => 'Pedido criado ou ajustado antes do envio.',
+                'date' => $proposal->created_at,
+                'href' => $canEdit ? '#editor-proposta' : '#historico-proposta',
+                'action' => $canEdit ? 'Editar' : 'Ver histórico',
+            ],
+            [
+                'title' => 'Conferência da Câmara',
+                'owner' => 'Câmara',
+                'description' => 'Análise mínima de objeto, valor, saúde e beneficiário.',
+                'date' => $proposal->submitted_at,
+                'href' => $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED ? '#conferencia-legislativa' : '#historico-proposta',
+                'action' => $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_SUBMITTED ? 'Analisar' : 'Ver histórico',
+            ],
+            [
+                'title' => 'Protocolo ao Executivo',
+                'owner' => 'Câmara',
+                'description' => 'Encaminhamento formal para a Prefeitura.',
+                'date' => $proposal->reviewed_at,
+                'href' => $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED ? '#protocolo-executivo' : '#historico-proposta',
+                'action' => $canReview && $proposal->status === App\Models\LegislativeProposal::STATUS_APPROVED ? 'Protocolar' : 'Ver protocolo',
+            ],
+            [
+                'title' => 'Recebimento municipal',
+                'owner' => 'Executivo',
+                'description' => 'Abertura do processo administrativo.',
+                'date' => $proposal->sent_at,
+                'href' => $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT ? '#recebimento-executivo' : $executiveOverviewHref,
+                'action' => $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_SENT ? 'Receber' : 'Abrir executivo',
+            ],
+            [
+                'title' => 'Reserva orçamentária',
+                'owner' => 'Executivo',
+                'description' => 'Confirmação de dotação para executar.',
+                'date' => $proposal->received_at,
+                'href' => $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED ? '#reserva-orcamentaria' : $executiveOverviewHref,
+                'action' => $canReceive && $proposal->status === App\Models\LegislativeProposal::STATUS_RECEIVED ? 'Reservar' : 'Abrir executivo',
+            ],
+            [
+                'title' => 'Plano de trabalho',
+                'owner' => 'Executivo',
+                'description' => 'Planejamento técnico e cronograma.',
+                'date' => $amendment?->municipalWorkPlan?->created_at,
+                'href' => $workPlanHref,
+                'action' => $canOpenExecutiveAmendment ? 'Abrir plano' : 'Ver andamento',
+            ],
+            [
+                'title' => 'Execução',
+                'owner' => 'Prefeitura',
+                'description' => 'Entrega física e liquidação acompanhadas.',
+                'date' => $executionDate,
+                'href' => $executionHref,
+                'action' => $canOpenExecutiveAmendment ? 'Abrir execução' : 'Ver andamento',
+            ],
+            [
+                'title' => 'Pagamento',
+                'owner' => 'Prefeitura',
+                'description' => 'Pagamento registrado e prestação de contas.',
+                'date' => $paymentDate,
+                'href' => $accountabilityHref,
+                'action' => $canOpenExecutiveAmendment ? 'Abrir prestação' : 'Ver andamento',
+            ],
         ];
         $councilorFinalCards = $amendment ? [
             [
@@ -276,6 +338,7 @@
                         <strong>{{ $step['title'] }}</strong>
                         <p>{{ $step['description'] }}</p>
                         <em>{{ $date ? $date->format('d/m/Y H:i') : ($state === 'current' ? 'Parado há '.$proposal->updated_at->diffForHumans(null, true) : 'Aguardando etapa anterior') }}</em>
+                        <b>{{ $step['action'] }} <i data-lucide="arrow-up-right" aria-hidden="true"></i></b>
                     </div>
                 </a>
             @endforeach
