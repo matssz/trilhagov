@@ -221,20 +221,50 @@
                     <path class="sp-map-shape" d="M112 235 L138 178 L204 142 L252 94 L318 88 L383 116 L441 112 L500 148 L540 198 L520 252 L552 297 L492 326 L446 372 L370 358 L306 386 L244 356 L176 360 L124 319 L86 274 Z" />
                     <path class="sp-map-river" d="M148 263 C210 225 252 248 306 219 C355 194 394 198 456 164" />
                     <g class="sp-map-points">
-                        <circle cx="188" cy="214" r="7" />
-                        <circle cx="244" cy="170" r="6" />
-                        <circle cx="302" cy="138" r="7" />
-                        <circle cx="362" cy="176" r="6" />
-                        <circle cx="430" cy="154" r="7" />
-                        <circle cx="482" cy="208" r="6" />
-                        <circle cx="426" cy="276" r="7" />
-                        <circle cx="350" cy="314" r="6" />
-                        <circle cx="276" cy="288" r="7" />
-                        <circle cx="192" cy="316" r="6" />
+                        <g class="sp-map-city" transform="translate(184 214)">
+                            <title>Guapiara - município demonstrativo</title>
+                            <circle r="7" />
+                            <text x="13" y="5">Guapiara</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(230 177)">
+                            <title>Itapetininga - município-alvo</title>
+                            <circle r="6" />
+                            <text x="-86" y="-10">Itapetininga</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(300 138)">
+                            <title>Bauru - município-alvo</title>
+                            <circle r="7" />
+                            <text x="13" y="-7">Bauru</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(380 176)">
+                            <title>Campinas - município-alvo</title>
+                            <circle r="6" />
+                            <text x="13" y="5">Campinas</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(442 154)">
+                            <title>Ribeirão Preto - município-alvo</title>
+                            <circle r="7" />
+                            <text x="13" y="-6">Ribeirão Preto</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(484 214)">
+                            <title>Franca - município-alvo</title>
+                            <circle r="6" />
+                            <text x="13" y="5">Franca</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(430 286)">
+                            <title>Registro - município-alvo</title>
+                            <circle r="7" />
+                            <text x="13" y="5">Registro</text>
+                        </g>
+                        <g class="sp-map-city" transform="translate(282 304)">
+                            <title>Presidente Prudente - município-alvo</title>
+                            <circle r="7" />
+                            <text x="-146" y="24">Pres. Prudente</text>
+                        </g>
                     </g>
                     <g class="sp-map-labels">
                         <text x="302" y="232">SP</text>
-                        <text x="254" y="410">Municípios-alvo para piloto</text>
+                        <text x="260" y="410">Marcadores exemplificam municípios-alvo para piloto</text>
                     </g>
                 </svg>
             </div>
