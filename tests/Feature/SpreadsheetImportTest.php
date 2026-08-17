@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 use Tests\TestCase;
 
 class SpreadsheetImportTest extends TestCase
@@ -94,6 +96,34 @@ class SpreadsheetImportTest extends TestCase
             'modelo municipal simplificado',
             ParliamentaryAmendment::where('reference', 'CAM-2026-001')->firstOrFail()->notes,
         );
+    }
+
+    public function test_xlsx_file_is_previewed_with_the_same_validation_flow(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $token = $this->sessionToken($municipality, "spreadsheet-preview-{$municipality->id}");
+
+        $response = $this->actingAs($manager)->post(route('spreadsheet-imports.preview'), [
+            '_submission_token' => $token,
+            'spreadsheet' => $this->xlsxUpload([
+                $this->validRow([
+                    'Identificacao da emenda' => 'EM-XLSX-001',
+                    'Valor previsto' => 75000,
+                    'Data da indicacao' => '20/04/2026',
+                ]),
+            ]),
+        ]);
+
+        $batch = AmendmentImportBatch::firstOrFail();
+        $response->assertRedirect(route('spreadsheet-imports.show', $batch));
+        $this->assertSame('controle.xlsx', $batch->original_name);
+        $this->assertSame(1, $batch->valid_rows);
+
+        $row = $batch->rows()->firstOrFail();
+        $this->assertSame(AmendmentImportRow::STATUS_VALID, $row->status);
+        $this->assertSame('EM-XLSX-001', $row->normalized_data['reference']);
+        $this->assertSame('75000.00', $row->normalized_data['expected_amount']);
+        $this->assertSame('2026-04-20', $row->normalized_data['indicated_at']);
     }
 
     public function test_preview_classifies_valid_duplicate_and_invalid_rows(): void
@@ -365,6 +395,31 @@ class SpreadsheetImportTest extends TestCase
         fclose($stream);
 
         return $contents ?: '';
+    }
+
+    /** @param array<int, array<string, mixed>> $rows */
+    private function xlsxUpload(array $rows, string $name = 'controle.xlsx'): UploadedFile
+    {
+        $headers = array_keys($this->validRow());
+        $path = tempnam(sys_get_temp_dir(), 'trilhagov-xlsx-');
+        $xlsxPath = $path.'.xlsx';
+        rename($path, $xlsxPath);
+
+        $writer = new Writer;
+        $writer->openToFile($xlsxPath);
+        $writer->addRow(Row::fromValues($headers));
+        foreach ($rows as $row) {
+            $writer->addRow(Row::fromValues(array_map(fn (string $header) => $row[$header] ?? '', $headers)));
+        }
+        $writer->close();
+
+        return new UploadedFile(
+            $xlsxPath,
+            $name,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            null,
+            true,
+        );
     }
 
     /** @return array<string, string> */

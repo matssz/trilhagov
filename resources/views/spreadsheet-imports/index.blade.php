@@ -17,7 +17,7 @@
 
     <section class="import-status-band">
         <span><i data-lucide="file-spreadsheet" aria-hidden="true"></i></span>
-        <div><strong>Até 500 linhas por lote</strong><small>CSV com vírgula ou ponto e vírgula · máximo de 2 MB</small></div>
+        <div><strong>Até 500 linhas por lote</strong><small>CSV ou Excel (.xlsx) · máximo de 2 MB</small></div>
         <p>Registros existentes são sinalizados e nunca sobrescritos.</p>
     </section>
 
@@ -52,8 +52,8 @@
             @csrf
             <input name="_submission_token" type="hidden" value="{{ $submissionToken }}">
             <label class="import-file-field">
-                <span>Planilha CSV</span>
-                <input class="form-control @error('spreadsheet') is-invalid @enderror" name="spreadsheet" type="file" accept=".csv,text/csv" required>
+                <span>Planilha CSV ou Excel</span>
+                <input class="form-control @error('spreadsheet') is-invalid @enderror" name="spreadsheet" type="file" accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
                 @error('spreadsheet')<small class="invalid-feedback">{{ $message }}</small>@enderror
             </label>
             <button class="btn btn-primary" type="submit"><i data-lucide="scan-search" aria-hidden="true"></i>Conferir planilha</button>

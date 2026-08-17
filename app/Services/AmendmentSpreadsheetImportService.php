@@ -7,6 +7,8 @@ use App\Models\AmendmentImportRow;
 use App\Models\Municipality;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
+use DateInterval;
+use DateTimeInterface;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use Throwable;
 
 class AmendmentSpreadsheetImportService
 {
@@ -99,8 +103,7 @@ class AmendmentSpreadsheetImportService
             ]);
         }
 
-        $contents = $this->toUtf8($contents);
-        $parsedRows = $this->parse($contents);
+        $parsedRows = $this->parseUploadedFile($file, $contents);
         if ($parsedRows === []) {
             throw ValidationException::withMessages([
                 'spreadsheet' => 'A planilha não possui linhas de dados para conferir.',
@@ -345,7 +348,22 @@ class AmendmentSpreadsheetImportService
     }
 
     /** @return array<int, array{row_number: int, data: array<string, string|null>}> */
-    private function parse(string $contents): array
+    private function parseUploadedFile(UploadedFile $file, string $contents): array
+    {
+        if ($this->isXlsxFile($file)) {
+            return $this->parseXlsx($file);
+        }
+
+        return $this->parseCsv($this->toUtf8($contents));
+    }
+
+    private function isXlsxFile(UploadedFile $file): bool
+    {
+        return strtolower($file->getClientOriginalExtension()) === 'xlsx'
+            || $file->getMimeType() === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
+
+    private function parseCsv(string $contents): array
     {
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, $contents);
@@ -359,29 +377,10 @@ class AmendmentSpreadsheetImportService
             throw ValidationException::withMessages(['spreadsheet' => 'Não foi possível identificar o cabeçalho da planilha.']);
         }
 
-        $columnMap = [];
-        foreach ($headers as $index => $header) {
-            $field = $this->fieldForHeader((string) $header);
-            if ($field !== null && ! in_array($field, $columnMap, true)) {
-                $columnMap[$index] = $field;
-            }
-        }
-
-        $missing = array_diff(self::COMPLETE_REQUIRED_COLUMNS, $columnMap);
-        $isSimplifiedMunicipal = $missing !== []
-            && array_diff(self::REQUIRED_COLUMNS, $columnMap) === [];
-        if ($missing !== []) {
-            if ($isSimplifiedMunicipal) {
-                $missing = [];
-            }
-        }
-
+        [$columnMap, $isSimplifiedMunicipal, $missing] = $this->mapColumns($headers);
         if ($missing !== []) {
             fclose($stream);
-            $labels = array_map(fn (string $field) => self::TEMPLATE_HEADERS[$field], $missing);
-            throw ValidationException::withMessages([
-                'spreadsheet' => 'Colunas obrigatórias ausentes: '.implode(', ', $labels).'. Baixe o modelo para conferir o formato.',
-            ]);
+            $this->throwMissingColumns($missing);
         }
 
         $rows = [];
@@ -405,6 +404,135 @@ class AmendmentSpreadsheetImportService
         fclose($stream);
 
         return $rows;
+    }
+
+    private function parseXlsx(UploadedFile $file): array
+    {
+        $reader = new XlsxReader;
+        $opened = false;
+
+        try {
+            $reader->open($file->getRealPath());
+            $opened = true;
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                $rowNumber = 0;
+                $columnMap = [];
+                $isSimplifiedMunicipal = false;
+                $rows = [];
+
+                foreach ($sheet->getRowIterator() as $row) {
+                    $rowNumber++;
+                    $values = array_map(
+                        fn ($value) => $this->spreadsheetValueToString($value),
+                        $row->toArray(),
+                    );
+
+                    if ($rowNumber === 1) {
+                        [$columnMap, $isSimplifiedMunicipal, $missing] = $this->mapColumns($values);
+                        if ($missing !== []) {
+                            $this->throwMissingColumns($missing);
+                        }
+
+                        continue;
+                    }
+
+                    if ($this->isBlankRow($values)) {
+                        continue;
+                    }
+
+                    $data = [];
+                    foreach ($columnMap as $index => $field) {
+                        $value = $values[$index] ?? null;
+                        $data[$field] = is_string($value) ? trim($value) : null;
+                    }
+                    if ($isSimplifiedMunicipal) {
+                        $data['_import_mode'] = 'municipal_simplified';
+                    }
+                    $rows[] = ['row_number' => $rowNumber, 'data' => $data];
+                }
+
+                $reader->close();
+
+                return $rows;
+            }
+        } catch (ValidationException $exception) {
+            if ($opened) {
+                $reader->close();
+            }
+
+            throw $exception;
+        } catch (Throwable) {
+            if ($opened) {
+                $reader->close();
+            }
+
+            throw ValidationException::withMessages([
+                'spreadsheet' => 'Não foi possível ler o arquivo Excel. Envie um .xlsx válido ou use o modelo CSV.',
+            ]);
+        }
+
+        if ($opened) {
+            $reader->close();
+        }
+
+        throw ValidationException::withMessages(['spreadsheet' => 'Não foi possível identificar o cabeçalho da planilha.']);
+    }
+
+    /**
+     * @param  array<int, mixed>  $headers
+     * @return array{array<int, string>, bool, array<int, string>}
+     */
+    private function mapColumns(array $headers): array
+    {
+        $columnMap = [];
+        foreach ($headers as $index => $header) {
+            $field = $this->fieldForHeader((string) $header);
+            if ($field !== null && ! in_array($field, $columnMap, true)) {
+                $columnMap[(int) $index] = $field;
+            }
+        }
+
+        $missing = array_values(array_diff(self::COMPLETE_REQUIRED_COLUMNS, $columnMap));
+        $isSimplifiedMunicipal = $missing !== []
+            && array_diff(self::REQUIRED_COLUMNS, $columnMap) === [];
+
+        return [$columnMap, $isSimplifiedMunicipal, $isSimplifiedMunicipal ? [] : $missing];
+    }
+
+    /** @param array<int, string> $missing */
+    private function throwMissingColumns(array $missing): never
+    {
+        $labels = array_map(fn (string $field) => self::TEMPLATE_HEADERS[$field], $missing);
+
+        throw ValidationException::withMessages([
+            'spreadsheet' => 'Colunas obrigatórias ausentes: '.implode(', ', $labels).'. Baixe o modelo para conferir o formato.',
+        ]);
+    }
+
+    private function spreadsheetValueToString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format('d/m/Y');
+        }
+
+        if ($value instanceof DateInterval) {
+            return $value->format('%d');
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_float($value)) {
+            return rtrim(rtrim(sprintf('%.10F', $value), '0'), '.');
+        }
+
+        return (string) $value;
     }
 
     private function toUtf8(string $contents): string
@@ -720,7 +848,7 @@ class AmendmentSpreadsheetImportService
                 if ($parsed !== false && $parsed->format($format) === $date) {
                     return $parsed->format('Y-m-d');
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // The validator will provide the user-facing error below.
             }
         }

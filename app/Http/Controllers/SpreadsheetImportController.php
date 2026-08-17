@@ -60,11 +60,11 @@ class SpreadsheetImportController extends Controller
         $municipality = $currentMunicipality->get($request);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
-            'spreadsheet' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+            'spreadsheet' => ['required', 'file', 'mimes:csv,txt,xlsx', 'max:2048'],
         ], [
             'spreadsheet.required' => 'Selecione a planilha que será conferida.',
             'spreadsheet.file' => 'O arquivo enviado não pôde ser lido.',
-            'spreadsheet.mimes' => 'Envie um arquivo CSV. Baixe o modelo em caso de dúvida.',
+            'spreadsheet.mimes' => 'Envie um arquivo CSV ou Excel (.xlsx). Baixe o modelo em caso de dúvida.',
             'spreadsheet.max' => 'A planilha deve ter no máximo 2 MB.',
         ]);
 
