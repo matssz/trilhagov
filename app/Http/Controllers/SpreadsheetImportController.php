@@ -41,11 +41,29 @@ class SpreadsheetImportController extends Controller
         ]);
     }
 
+    public function templateXlsx(AmendmentSpreadsheetImportService $importService): Response
+    {
+        return response($importService->templateXlsxContents(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="modelo-importacao-emendas.xlsx"',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
     public function simplifiedTemplate(AmendmentSpreadsheetImportService $importService): Response
     {
         return response($importService->simplifiedMunicipalTemplateContents(), 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="modelo-municipal-simplificado.csv"',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
+    public function simplifiedTemplateXlsx(AmendmentSpreadsheetImportService $importService): Response
+    {
+        return response($importService->simplifiedMunicipalTemplateXlsxContents(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="modelo-municipal-simplificado.xlsx"',
             'Cache-Control' => 'no-store, private',
         ]);
     }

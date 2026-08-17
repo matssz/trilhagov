@@ -10,8 +10,8 @@
             <p>{{ $municipality->name }} · conferência antes de gravar</p>
         </div>
         <div class="import-heading-actions">
-            <a class="btn btn-primary" href="{{ route('spreadsheet-imports.template.simplified') }}"><i data-lucide="download" aria-hidden="true"></i>Modelo simplificado</a>
-            <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.template') }}"><i data-lucide="file-down" aria-hidden="true"></i>Modelo completo</a>
+            <a class="btn btn-primary" href="{{ route('spreadsheet-imports.template.simplified.xlsx') }}"><i data-lucide="download" aria-hidden="true"></i>Simplificado Excel</a>
+            <a class="btn btn-outline-primary" href="{{ route('spreadsheet-imports.template.xlsx') }}"><i data-lucide="file-down" aria-hidden="true"></i>Completo Excel</a>
         </div>
     </header>
 
@@ -29,7 +29,10 @@
                 <strong>Modelo municipal simplificado</strong>
                 <p>Use quando a Câmara ou o gestor só tem autor, objeto, secretaria, valor e data. O TrilhaGov completa esfera municipal, execução direta, prazos e indício de saúde.</p>
             </div>
-            <a href="{{ route('spreadsheet-imports.template.simplified') }}">Baixar</a>
+            <div class="import-model-actions">
+                <a href="{{ route('spreadsheet-imports.template.simplified.xlsx') }}">Excel</a>
+                <a href="{{ route('spreadsheet-imports.template.simplified') }}">CSV</a>
+            </div>
         </article>
         <article>
             <span><i data-lucide="settings-2" aria-hidden="true"></i></span>
@@ -38,7 +41,10 @@
                 <strong>Modelo completo</strong>
                 <p>Use quando o município já possui processo, rastreabilidade, códigos contábeis, prazos e situação de execução para cada emenda.</p>
             </div>
-            <a href="{{ route('spreadsheet-imports.template') }}">Baixar</a>
+            <div class="import-model-actions">
+                <a href="{{ route('spreadsheet-imports.template.xlsx') }}">Excel</a>
+                <a href="{{ route('spreadsheet-imports.template') }}">CSV</a>
+            </div>
         </article>
     </section>
 

@@ -28,7 +28,9 @@ class SpreadsheetImportTest extends TestCase
             ->get(route('spreadsheet-imports.index'))
             ->assertOk()
             ->assertSee('Importar planilha')
-            ->assertSee('Modelo simplificado')
+            ->assertSee('Simplificado Excel')
+            ->assertSee('Completo Excel')
+            ->assertSee('Modelo municipal simplificado')
             ->assertSee('Modelo completo');
 
         $response = $this->get(route('spreadsheet-imports.template'));
@@ -44,6 +46,18 @@ class SpreadsheetImportTest extends TestCase
             ->assertDownload('modelo-municipal-simplificado.csv');
         $this->assertStringContainsString('Secretaria responsável', (string) $simplified->getContent());
         $this->assertStringNotContainsString('Codigo Transferegov', (string) $simplified->getContent());
+
+        $xlsx = $this->get(route('spreadsheet-imports.template.xlsx'));
+        $xlsx->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->assertDownload('modelo-importacao-emendas.xlsx');
+        $this->assertStringStartsWith('PK', (string) $xlsx->getContent());
+
+        $simplifiedXlsx = $this->get(route('spreadsheet-imports.template.simplified.xlsx'));
+        $simplifiedXlsx->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->assertDownload('modelo-municipal-simplificado.xlsx');
+        $this->assertStringStartsWith('PK', (string) $simplifiedXlsx->getContent());
     }
 
     public function test_simplified_municipal_csv_is_auto_completed_before_import(): void

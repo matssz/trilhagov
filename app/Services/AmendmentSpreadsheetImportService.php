@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use OpenSpout\Common\Entity\Row;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
 use Throwable;
 
 class AmendmentSpreadsheetImportService
@@ -297,14 +299,7 @@ class AmendmentSpreadsheetImportService
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, "\xEF\xBB\xBF");
         fputcsv($stream, array_values(self::TEMPLATE_HEADERS), ';');
-        fputcsv($stream, [
-            'EM-2026-001', '2026', 'Municipal', 'Individual', 'Execução direta pelo município',
-            'Vereadora Maria Silva', 'PSD', 'Reforma da unidade básica de saúde', 'Investimento',
-            'Secretaria Municipal de Saúde', 'Município de Exemplo', '', '', 'PROC-001/2026',
-            'Execução direta com códigos', '', '08', '100.0000', '001', 'R$ 500.000,00', '',
-            'Identificada', '', '', '15/03/2026', '', '30/04/2026', '', '31/12/2026', '31/12/2026', '',
-            '31/03/2027', '', 'Exemplo: substitua esta linha pelos dados do município.',
-        ], ';');
+        fputcsv($stream, $this->completeTemplateExampleRow(), ';');
         rewind($stream);
         $contents = stream_get_contents($stream);
         fclose($stream);
@@ -312,11 +307,52 @@ class AmendmentSpreadsheetImportService
         return $contents ?: '';
     }
 
+    public function templateXlsxContents(): string
+    {
+        return $this->xlsxContents([
+            array_values(self::TEMPLATE_HEADERS),
+            $this->completeTemplateExampleRow(),
+        ]);
+    }
+
     public function simplifiedMunicipalTemplateContents(): string
     {
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, "\xEF\xBB\xBF");
-        fputcsv($stream, [
+        fputcsv($stream, $this->simplifiedTemplateHeaders(), ';');
+        fputcsv($stream, $this->simplifiedTemplateExampleRow(), ';');
+        rewind($stream);
+        $contents = stream_get_contents($stream);
+        fclose($stream);
+
+        return $contents ?: '';
+    }
+
+    public function simplifiedMunicipalTemplateXlsxContents(): string
+    {
+        return $this->xlsxContents([
+            $this->simplifiedTemplateHeaders(),
+            $this->simplifiedTemplateExampleRow(),
+        ]);
+    }
+
+    /** @return array<int, string> */
+    private function completeTemplateExampleRow(): array
+    {
+        return [
+            'EM-2026-001', '2026', 'Municipal', 'Individual', 'Execução direta pelo município',
+            'Vereadora Maria Silva', 'PSD', 'Reforma da unidade básica de saúde', 'Investimento',
+            'Secretaria Municipal de Saúde', 'Município de Exemplo', '', '', 'PROC-001/2026',
+            'Execução direta com códigos', '', '08', '100.0000', '001', 'R$ 500.000,00', '',
+            'Identificada', '', '', '15/03/2026', '', '30/04/2026', '', '31/12/2026', '31/12/2026', '',
+            '31/03/2027', '', 'Exemplo: substitua esta linha pelos dados do município.',
+        ];
+    }
+
+    /** @return array<int, string> */
+    private function simplifiedTemplateHeaders(): array
+    {
+        return [
             'Identificação da emenda',
             'Exercício',
             'Autor',
@@ -327,8 +363,13 @@ class AmendmentSpreadsheetImportService
             'Valor previsto',
             'Data da indicação',
             'Observações',
-        ], ';');
-        fputcsv($stream, [
+        ];
+    }
+
+    /** @return array<int, string> */
+    private function simplifiedTemplateExampleRow(): array
+    {
+        return [
             'CAM-2026-001',
             '2026',
             'Vereadora Ana Lima',
@@ -339,12 +380,30 @@ class AmendmentSpreadsheetImportService
             'R$ 80.000,00',
             '15/03/2026',
             'Linha simplificada: o TrilhaGov completa esfera municipal, execução direta, prazos e sinalização de saúde.',
-        ], ';');
-        rewind($stream);
-        $contents = stream_get_contents($stream);
-        fclose($stream);
+        ];
+    }
 
-        return $contents ?: '';
+    /** @param array<int, array<int, string>> $rows */
+    private function xlsxContents(array $rows): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'trilhagov-modelo-');
+        $xlsxPath = $path.'.xlsx';
+        rename($path, $xlsxPath);
+
+        try {
+            $writer = new XlsxWriter;
+            $writer->openToFile($xlsxPath);
+            foreach ($rows as $row) {
+                $writer->addRow(Row::fromValues($row));
+            }
+            $writer->close();
+
+            return file_get_contents($xlsxPath) ?: '';
+        } finally {
+            if (file_exists($xlsxPath)) {
+                unlink($xlsxPath);
+            }
+        }
     }
 
     /** @return array<int, array{row_number: int, data: array<string, string|null>}> */

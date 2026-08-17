@@ -112,6 +112,12 @@
     line-height: 1.35;
 }
 
+.import-model-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
 .import-model-grid a {
     display: inline-grid;
     min-height: 30px;
@@ -446,7 +452,8 @@
     .import-status-band { grid-template-columns: 40px minmax(0, 1fr); }
     .import-status-band p { grid-column: 1 / -1; padding-top: .6rem; border-top: 1px solid rgba(255, 255, 255, .12); }
     .import-model-grid article { grid-template-columns: 40px minmax(0, 1fr); }
-    .import-model-grid a { grid-column: 1 / -1; }
+    .import-model-actions { grid-column: 1 / -1; flex-direction: row; }
+    .import-model-actions a { flex: 1; }
     .import-upload-band form { grid-template-columns: minmax(0, 1fr); }
     .import-upload-band form .btn { width: 100%; }
     .import-confirm-band { grid-template-columns: minmax(0, 1fr); }
