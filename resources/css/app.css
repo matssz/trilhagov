@@ -12766,6 +12766,8 @@ a:focus-visible {
 }
 
 .commercial-problem h2 {
+    position: relative;
+    z-index: 1;
     color: #031327;
     text-shadow: none;
 }
@@ -13365,7 +13367,7 @@ a:focus-visible {
     background:
         radial-gradient(circle at 12% 8%, rgba(0, 112, 204, .26), transparent 28%),
         radial-gradient(circle at 86% 12%, rgba(223, 169, 36, .24), transparent 24%),
-        linear-gradient(135deg, #07182b 0%, #0b2744 42%, #eaf4fb 42.2%, #f7fbff 100%) !important;
+        linear-gradient(135deg, #07182b 0%, #0b2744 70vh, #eaf4fb 70.2vh, #f7fbff 100%) !important;
 }
 
 .commercial-page,
