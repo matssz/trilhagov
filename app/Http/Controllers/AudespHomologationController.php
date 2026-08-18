@@ -70,7 +70,7 @@ class AudespHomologationController extends Controller
         $this->ensureAudespScope($municipality);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
-            'fiscal_year' => ['required', 'integer', Rule::in([2026])],
+            'fiscal_year' => ['required', 'integer', Rule::in(config('services.audesp.homologated_fiscal_years'))],
             'reference_month' => ['required', 'integer', 'between:1,14'],
             'source_system' => ['required', 'string', 'min:2', 'max:120'],
             'source_version' => ['nullable', 'string', 'max:80'],
@@ -84,7 +84,9 @@ class AudespHomologationController extends Controller
             'source_file' => ['required', File::types(['xml', 'csv', 'txt'])->max('5mb')],
             'notes' => ['nullable', 'string', 'max:2000'],
         ], [
-            'fiscal_year.in' => 'Este módulo está homologado somente para o XSD 2026_A. Um novo exercício exigirá a publicação e a validação do schema correspondente.',
+            'fiscal_year.in' => 'Este módulo está homologado somente para o(s) exercício(s) '
+                .implode(', ', config('services.audesp.homologated_fiscal_years'))
+                .' (XSD '.AudespAmendmentRegistration::SCHEMA_VERSION.'). Um novo exercício exigirá a publicação e a validação do schema correspondente.',
             'source_file.required' => 'Selecione o XML Audesp ou o CSV financeiro exportado pelo Siafic.',
             'source_file.mimes' => 'O arquivo do lote deve estar em XML ou CSV.',
         ]);
@@ -530,7 +532,7 @@ class AudespHomologationController extends Controller
     /** @return array<string, mixed> */
     private function realValidationPlan(Municipality $municipality): array
     {
-        $year = 2026;
+        $year = max(config('services.audesp.homologated_fiscal_years'));
         $registrations = $municipality->audespAmendmentRegistrations()
             ->where('amendment_year', $year)
             ->count();

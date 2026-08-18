@@ -235,6 +235,7 @@ class GuapiaraDemoSeeder extends Seeder
                 'received_at' => now()->subDays(6),
             ])->save();
             $this->completedExecutionAndAccountability($municipality, $completedAmendment, $manager, $executive);
+            $this->audespReconciliationSample($municipality, $profile, $manager, $executive);
 
             $this->command?->info('Base demonstrativa de Guapiara criada/atualizada.');
             $this->command?->table(
@@ -663,6 +664,130 @@ class GuapiaraDemoSeeder extends Seeder
             'prestacao-contas-em-gua-2027-004.txt',
             "Demonstracao TrilhaGov - Guapiara\nEmenda: {$amendment->reference}\nObjeto: {$amendment->object}\nValor: R$ 72.000,00\nStatus: prestacao aprovada.\n",
             'Documento demonstrativo de prestacao aprovada.',
+        );
+    }
+
+    /**
+     * Emenda demonstrativa isolada no exercício 2026, com empenho, liquidação, pagamento e
+     * cadastro Audesp completos, para permitir testar a homologação mensal (que só aceita
+     * fiscal_year 2026) sem alterar nenhuma das emendas de apresentação de 2027.
+     */
+    private function audespReconciliationSample(
+        Municipality $municipality,
+        MunicipalRegulatoryProfile $profile,
+        User $manager,
+        User $executive,
+    ): void {
+        $amendment = ParliamentaryAmendment::firstOrNew(['municipality_id' => $municipality->id, 'reference' => 'EM-GUA-2026-001']);
+        $amendment->forceFill([
+            'created_by' => $manager->id,
+            'municipal_regulatory_profile_id' => $profile->id,
+            'fiscal_year' => 2026,
+            'government_sphere' => 'municipal',
+            'authorship_type' => 'individual',
+            'transfer_type' => 'direct_execution',
+            'author_name' => 'Emenda Demonstrativa Audesp',
+            'author_party' => null,
+            'object' => 'Reforma e aquisição de equipamentos para a UBS Centro.',
+            'indicated_for_health' => true,
+            'expense_destination' => 'investment',
+            'responsible_department' => 'Secretaria Municipal de Saúde',
+            'beneficiary_location' => 'UBS Centro - Guapiara/SP',
+            'responsible_user_id' => $executive->id,
+            'legal_instrument' => 'Lei Orgânica Municipal e LOA 2026',
+            'administrative_process' => 'PM-GUA-2026-001',
+            'bank_tracking_type' => 'municipal_direct_codes',
+            'funding_source_code' => '08',
+            'application_code_fixed' => '301',
+            'application_code_variable' => '0001',
+            'expected_amount' => 60000,
+            'received_amount' => 60000,
+            'status' => ParliamentaryAmendment::STATUS_EXECUTING,
+            'indicated_at' => '2026-01-15',
+            'received_at' => '2026-02-05',
+            'communication_deadline' => '2026-02-15',
+            'communication_completed_at' => '2026-02-10',
+            'execution_deadline' => '2026-08-30',
+            'application_deadline' => '2026-09-30',
+            'accountability_deadline' => '2026-10-30',
+            'notes' => 'Emenda demonstrativa 2026 dedicada a validar a conciliação financeira mensal do Audesp.',
+        ])->save();
+
+        $stage = ExecutionStage::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'title' => 'Reforma e equipamentos da UBS Centro']);
+        $stage->forceFill([
+            'municipality_id' => $municipality->id,
+            'responsible_user_id' => $executive->id,
+            'created_by' => $manager->id,
+            'description' => 'Reforma e aquisição de equipamentos usada como base real da homologação Audesp.',
+            'status' => ExecutionStage::STATUS_IN_PROGRESS,
+            'progress_percentage' => 70,
+            'planned_amount' => 60000,
+            'planned_start_at' => '2026-03-01',
+            'planned_end_at' => '2026-06-30',
+            'completed_at' => null,
+            'sort_order' => 10,
+        ])->save();
+
+        $commitment = FinancialCommitment::firstOrNew(['parliamentary_amendment_id' => $amendment->id, 'commitment_number' => 'EMP-GUA-2026-001']);
+        $commitment->forceFill([
+            'municipality_id' => $municipality->id,
+            'execution_stage_id' => $stage->id,
+            'created_by' => $manager->id,
+            'supplier_name' => 'Fornecedor Demonstrativo de Equipamentos de Saúde',
+            'supplier_document' => '00.000.000/0004-00',
+            'procurement_process' => 'DISP-GUA-2026-001',
+            'object_description' => $amendment->object,
+            'committed_amount' => 60000,
+            'committed_at' => '2026-03-10',
+            'status' => FinancialCommitment::STATUS_ACTIVE,
+        ])->save();
+
+        $liquidation = $commitment->liquidations()->firstOrNew(['liquidation_reference' => 'LIQ-GUA-2026-001']);
+        $liquidation->forceFill([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'created_by' => $manager->id,
+            'amount' => 45000,
+            'liquidated_at' => '2026-03-25',
+            'supporting_document' => 'NF DEMO 2026-001',
+            'acceptance_reference' => 'TR DEMO 2026-001',
+            'notes' => 'Liquidação demonstrativa parcial para a homologação Audesp.',
+        ])->save();
+
+        $payment = $commitment->payments()->firstOrNew(['payment_reference' => 'PAG-GUA-2026-001']);
+        $payment->forceFill([
+            'municipality_id' => $municipality->id,
+            'parliamentary_amendment_id' => $amendment->id,
+            'financial_liquidation_id' => $liquidation->id,
+            'created_by' => $manager->id,
+            'amount' => 45000,
+            'paid_at' => '2026-03-28',
+            'notes' => 'Pagamento demonstrativo parcial para a homologação Audesp.',
+        ])->save();
+
+        DB::table('audesp_amendment_registrations')->updateOrInsert(
+            ['municipality_id' => $municipality->id, 'parliamentary_amendment_id' => $amendment->id],
+            [
+                'created_by' => $manager->id,
+                'scope' => 'M',
+                'amendment_type' => 1,
+                'legal_basis' => 'Lei',
+                'proponent_name' => 'Emenda Demonstrativa Audesp',
+                'amendment_number' => '001',
+                'amendment_year' => 2026,
+                'object' => $amendment->object,
+                'purpose' => 'Ampliar a capacidade de atendimento da UBS Centro com reforma e novos equipamentos.',
+                'government_function' => '10',
+                'government_subfunctions' => json_encode(['301']),
+                'destination' => 'I',
+                'bank_account_opened' => false,
+                'application_code' => '8010001',
+                'prior_balance_reclassified' => false,
+                'prepared_at' => now(),
+                'preview_count' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         );
     }
 

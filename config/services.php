@@ -44,4 +44,14 @@ return [
         'token' => env('SCHEDULER_TOKEN'),
     ],
 
+    'audesp' => [
+        // Exercícios para os quais o XSD atual (AudespAmendmentRegistration::SCHEMA_VERSION)
+        // está homologado. Quando o TCESP publicar um novo schema, ajuste esta variável de
+        // ambiente (lista separada por vírgula) em vez de alterar código.
+        'homologated_fiscal_years' => array_values(array_filter(array_map(
+            fn (string $year): int => (int) trim($year),
+            explode(',', (string) env('AUDESP_HOMOLOGATED_FISCAL_YEARS', '2026')),
+        ))),
+    ],
+
 ];
