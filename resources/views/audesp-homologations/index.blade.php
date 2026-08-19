@@ -88,6 +88,47 @@
         </div>
     </section>
 
+    <section class="content-panel mb-4" id="cadastro-em-lote">
+        <div class="content-panel-header homologation-panel-header">
+            <div class="d-flex align-items-center gap-2"><i data-lucide="layers" aria-hidden="true"></i><h2 class="h5 mb-0">Cadastro Audesp em lote</h2></div>
+            <span class="small text-secondary">Uma emenda por linha · nunca sobrescreve cadastro existente</span>
+        </div>
+        <div class="p-3">
+            <p class="text-secondary small mb-3">Cadastre o código de aplicação e os dados Audesp de várias emendas de uma vez, em vez de abrir uma por uma. Baixe o modelo, preencha usando a referência da emenda já cadastrada no TrilhaGov e envie para conferência antes de gravar.</p>
+            <a class="btn btn-outline-secondary mb-3" href="{{ route('audesp-registration-imports.template') }}"><i data-lucide="file-down" aria-hidden="true"></i>Baixar modelo CSV</a>
+            @if ($canEdit)
+                <form class="homologation-upload-form" method="POST" action="{{ route('audesp-registration-imports.preview') }}" enctype="multipart/form-data" novalidate>
+                    @csrf
+                    <input name="_submission_token" type="hidden" value="{{ $registrationImportToken }}">
+                    <div class="span-2">
+                        <label class="form-label" for="registration_spreadsheet">Planilha de cadastros Audesp <span class="required-mark">*</span></label>
+                        <input class="form-control @error('spreadsheet') is-invalid @enderror" id="registration_spreadsheet" name="spreadsheet" type="file" accept=".csv,.txt,text/csv,text/plain" required>
+                        @error('spreadsheet')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i data-lucide="scan-search" aria-hidden="true"></i>Conferir planilha</button>
+                </form>
+            @endif
+            @if ($registrationImportBatches->isNotEmpty())
+                <div class="homologation-table-wrap mt-3">
+                    <table class="homologation-table">
+                        <thead><tr><th>Arquivo</th><th>Responsável</th><th>Resultado</th><th>Registrado em</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach ($registrationImportBatches as $registrationBatch)
+                                <tr>
+                                    <td><strong>{{ $registrationBatch->original_name }}</strong><small>Lote #{{ $registrationBatch->id }}</small></td>
+                                    <td>{{ $registrationBatch->user->name }}</td>
+                                    <td>{{ $registrationBatch->status === 'completed' ? $registrationBatch->imported_rows.' importado(s)' : 'Aguardando confirmação' }}</td>
+                                    <td>{{ $registrationBatch->created_at->format('d/m/Y H:i') }}</td>
+                                    <td><a class="icon-button" href="{{ route('audesp-registration-imports.show', $registrationBatch) }}" title="Abrir lote" aria-label="Abrir lote"><i data-lucide="arrow-right" aria-hidden="true"></i></a></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </section>
+
     @if ($canEdit)
         <section class="content-panel mb-4" id="novo-lote">
             <div class="content-panel-header homologation-panel-header">

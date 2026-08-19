@@ -54,6 +54,14 @@ class AudespHomologationController extends Controller
             'rejectedBatches' => $canEdit
                 ? $municipality->audespHomologationBatches()->where('status', AudespHomologationBatch::STATUS_REJECTED)->latest()->limit(20)->get()
                 : collect(),
+            'registrationImportBatches' => $municipality->audespRegistrationImportBatches()
+                ->with('user:id,name')
+                ->latest('created_at')
+                ->limit(5)
+                ->get(),
+            'registrationImportToken' => $canEdit
+                ? $formSubmission->issue($request, "audesp-registration-import-preview-{$municipality->id}")
+                : null,
         ]);
     }
 

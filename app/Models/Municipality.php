@@ -231,6 +231,11 @@ class Municipality extends Model
         return $this->hasMany(AudespHomologationBatch::class);
     }
 
+    public function audespRegistrationImportBatches(): HasMany
+    {
+        return $this->hasMany(AudespRegistrationImportBatch::class);
+    }
+
     public function audespHomologationItems(): HasMany
     {
         return $this->hasMany(AudespHomologationItem::class);

@@ -11,6 +11,7 @@ use App\Http\Controllers\AmendmentExecutionController;
 use App\Http\Controllers\AmendmentRemappingController;
 use App\Http\Controllers\AudespHomologationController;
 use App\Http\Controllers\AudespRegistrationController;
+use App\Http\Controllers\AudespRegistrationImportController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\MfaChallengeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -45,8 +46,8 @@ use App\Http\Controllers\MunicipalWorkPlanController;
 use App\Http\Controllers\MunicipalWorkPlanPdfController;
 use App\Http\Controllers\MunicipalWorkPlanStageController;
 use App\Http\Controllers\NotificationCenterController;
-use App\Http\Controllers\OfficialDocumentVerificationController;
 use App\Http\Controllers\OccurrenceCenterController;
+use App\Http\Controllers\OfficialDocumentVerificationController;
 use App\Http\Controllers\ParliamentaryAmendmentController;
 use App\Http\Controllers\PublicTransparencyController;
 use App\Http\Controllers\RefreshApplicationStateController;
@@ -152,6 +153,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
             Route::get('/audesp/homologacoes/{batch}/arquivo', [AudespHomologationController::class, 'source'])->name('audesp-homologations.source');
             Route::get('/audesp/homologacoes/{batch}/conferencia.csv', [AudespHomologationController::class, 'report'])->name('audesp-homologations.report');
             Route::get('/audesp/homologacoes/{batch}/eventos/{event}/evidencia', [AudespHomologationController::class, 'evidence'])->name('audesp-homologations.evidence');
+            Route::get('/audesp/cadastros/modelo.csv', [AudespRegistrationImportController::class, 'template'])->name('audesp-registration-imports.template');
+            Route::get('/audesp/cadastros/{batch}', [AudespRegistrationImportController::class, 'show'])->name('audesp-registration-imports.show');
         });
         Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
         Route::get('/conformidade-municipal-tcesp', MunicipalTcespAdherenceController::class)->name('municipal-tcesp-adherence.index');
@@ -316,6 +319,8 @@ Route::middleware(['auth', 'municipality'])->group(function () {
             Route::post('/audesp/homologacoes/{batch}/reconferir', [AudespHomologationController::class, 'recheck'])->name('audesp-homologations.recheck')->block(20, 10);
             Route::post('/audesp/homologacoes/{batch}/transmissao', [AudespHomologationController::class, 'recordSubmission'])->name('audesp-homologations.submission')->block(20, 10);
             Route::post('/audesp/homologacoes/{batch}/retorno', [AudespHomologationController::class, 'recordReturn'])->name('audesp-homologations.return')->block(20, 10);
+            Route::post('/audesp/cadastros/pre-visualizar', [AudespRegistrationImportController::class, 'preview'])->name('audesp-registration-imports.preview')->block(20, 20);
+            Route::post('/audesp/cadastros/{batch}/confirmar', [AudespRegistrationImportController::class, 'confirm'])->name('audesp-registration-imports.confirm')->block(20, 20);
         });
         Route::middleware('municipality.module:spreadsheet_import')->group(function () {
             Route::get('/importacoes/planilhas', [SpreadsheetImportController::class, 'index'])->name('spreadsheet-imports.index');
