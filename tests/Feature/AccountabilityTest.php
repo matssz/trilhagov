@@ -75,6 +75,8 @@ class AccountabilityTest extends TestCase
             ->assertSee('Conferir checklist')
             ->assertSee('Conciliar saldo')
             ->assertSee('Enviar prestação')
+            ->assertSee('Perfil gestor')
+            ->assertSee('Sua decisão agora é fechar as pendências')
             ->assertSee('Abrir processo')
             ->assertSee('Pre-conferir')
             ->assertSee('Conciliar saldo')
@@ -168,6 +170,8 @@ class AccountabilityTest extends TestCase
             ->withSession(['active_municipality_id' => $municipality->id])
             ->get(route('emendas.accountability', $amendment))
             ->assertOk()
+            ->assertSee('Modo consulta')
+            ->assertSee('Acompanhe o fechamento sem editar')
             ->assertDontSee('Iniciar processo');
         $this->post(route('emendas.accountability.store', $amendment), [])->assertForbidden();
         $this->post(route('emendas.accountability.prepare', $amendment), [])->assertForbidden();

@@ -55,6 +55,41 @@
             <a class="btn btn-primary" href="{{ $guide['next']['href'] }}">{{ $guide['next']['label'] }}</a>
         </div>
 
+        <div class="work-plan-command-board" aria-label="Mesa operacional do Plano de Trabalho">
+            <div class="work-plan-command-heading">
+                <div>
+                    <p class="page-kicker mb-1">Mesa do Plano</p>
+                    <strong>Decida executor, entrega, cronograma e envio técnico em uma visão</strong>
+                </div>
+                <small>Atalhos seguem a ordem real do Executivo antes da execução.</small>
+            </div>
+            <div class="work-plan-command-grid">
+                @foreach ($guide['command'] as $action)
+                    <a class="work-plan-command-card tone-{{ $action['tone'] }}" href="{{ $action['href'] }}">
+                        <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                        <small>{{ $action['label'] }}</small>
+                        <strong>{{ $action['metric'] }}</strong>
+                        <p>{{ $action['description'] }}</p>
+                        <em><i data-lucide="arrow-right" aria-hidden="true"></i>{{ $action['cta'] }}</em>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="work-plan-profile-card tone-{{ $guide['profile']['tone'] }}" aria-label="Orientação por perfil">
+            <span><i data-lucide="{{ $guide['profile']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <small>{{ $guide['profile']['label'] }}</small>
+                <strong>{{ $guide['profile']['title'] }}</strong>
+                <p>{{ $guide['profile']['description'] }}</p>
+            </div>
+            <dl>
+                @foreach ($guide['profile']['items'] as $item)
+                    <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                @endforeach
+            </dl>
+        </div>
+
         <div class="work-plan-guide-steps">
             @foreach ($guide['steps'] as $step)
                 <div class="{{ $step['done'] ? 'is-done' : '' }}">

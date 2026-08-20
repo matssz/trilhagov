@@ -68,7 +68,7 @@ class AccountabilityService
     }
 
     /** @return array<string, mixed> */
-    public function guide(ParliamentaryAmendment $amendment, ?AccountabilityProcess $process, ?array $readiness): array
+    public function guide(ParliamentaryAmendment $amendment, ?AccountabilityProcess $process, ?array $readiness, ?string $role = null): array
     {
         $financial = $process ? $this->financialSummary($amendment, $process) : $this->financialSummary($amendment);
         $physicalPercentage = $amendment->physicalExecutionPercentage();
@@ -224,6 +224,7 @@ class AccountabilityService
 
         return [
             'next' => $next,
+            'profile' => $this->profileGuidance($role, $process, $ready),
             'command' => [
                 [
                     'icon' => 'wand-sparkles',
@@ -417,6 +418,52 @@ class AccountabilityService
                         : ($ready ? 'PDF executivo e pacote de auditoria prontos para apresentação.' : 'Finalize os bloqueios para gerar uma entrega completa.'),
                     'done' => $process?->approved_at !== null || $ready,
                 ],
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function profileGuidance(?string $role, ?AccountabilityProcess $process, bool $ready): array
+    {
+        $role ??= User::ROLE_VIEWER;
+
+        $copy = match ($role) {
+            User::ROLE_MANAGER => [
+                'label' => 'Perfil gestor',
+                'title' => $ready ? 'Sua decisão agora é protocolar e arquivar' : 'Sua decisão agora é fechar as pendências',
+                'description' => 'Use a pré-conferência, concilie saldo e registre protocolo quando o processo estiver completo.',
+                'icon' => 'shield-check',
+                'tone' => 'primary',
+            ],
+            User::ROLE_EDITOR => [
+                'label' => 'Perfil operacional',
+                'title' => 'Prepare a prestação para decisão final',
+                'description' => 'Atualize checklist, diligências, pagamentos e evidências para o gestor protocolar.',
+                'icon' => 'clipboard-pen',
+                'tone' => 'warning',
+            ],
+            User::ROLE_AUDITOR => [
+                'label' => 'Modo auditoria',
+                'title' => 'Consulta orientada por evidências',
+                'description' => 'Confira protocolo, checklist, dossiê, conciliação e linha do tempo sem alterar registros.',
+                'icon' => 'search-check',
+                'tone' => 'neutral',
+            ],
+            default => [
+                'label' => 'Modo consulta',
+                'title' => 'Acompanhe o fechamento sem editar',
+                'description' => 'A tela mostra pendências, documentos, diligências e status de envio para leitura.',
+                'icon' => 'eye',
+                'tone' => 'neutral',
+            ],
+        };
+
+        return [
+            ...$copy,
+            'items' => [
+                ['label' => 'Pode editar', 'value' => in_array($role, [User::ROLE_MANAGER, User::ROLE_EDITOR], true) ? 'Sim' : 'Não'],
+                ['label' => 'Processo', 'value' => $process ? $process->statusLabel() : 'Não iniciado'],
+                ['label' => 'Próxima decisão', 'value' => $ready ? 'Protocolo final' : 'Resolver pendências'],
             ],
         ];
     }

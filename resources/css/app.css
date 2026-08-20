@@ -6068,6 +6068,74 @@ svg {
 .accountability-readiness-facts span { color: var(--muted); font-size: .72rem; }
 .accountability-readiness-facts strong { color: var(--navy-900); overflow-wrap: anywhere; }
 
+.accountability-profile-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) minmax(260px, .75fr);
+    gap: .85rem;
+    align-items: center;
+    padding: .9rem;
+    border: 1px solid #cad9e6;
+    border-left: 4px solid var(--navy-800);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.accountability-profile-card.tone-warning { border-left-color: var(--gold-500); }
+.accountability-profile-card.tone-neutral { border-left-color: #8a96a8; }
+
+.accountability-profile-card > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--navy-100);
+    color: var(--navy-800);
+}
+
+.accountability-profile-card > span svg { width: 21px; height: 21px; }
+.accountability-profile-card small {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.accountability-profile-card strong {
+    display: block;
+    color: var(--navy-900);
+    font-size: .98rem;
+}
+
+.accountability-profile-card p {
+    margin: .15rem 0 0;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.accountability-profile-card dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+    margin: 0;
+}
+
+.accountability-profile-card dl > div {
+    min-width: 0;
+    padding: .55rem;
+    border: 1px solid #d7e2ec;
+    border-radius: 6px;
+    background: #f8fbfd;
+}
+
+.accountability-profile-card dt,
+.accountability-profile-card dd {
+    margin: 0;
+}
+
+.accountability-profile-card dt { color: var(--muted); font-size: .68rem; }
+.accountability-profile-card dd { color: var(--navy-900); font-weight: 850; }
+
 .accountability-flow-lane {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -6819,6 +6887,14 @@ button.accountability-action-card {
         grid-column: 1 / -1;
     }
 
+    .accountability-profile-card {
+        grid-template-columns: 42px minmax(0, 1fr);
+    }
+
+    .accountability-profile-card dl {
+        grid-column: 1 / -1;
+    }
+
     .accountability-flow-lane {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -6867,6 +6943,14 @@ button.accountability-action-card {
 
     .accountability-readiness,
     .accountability-flow-lane {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-profile-card {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-profile-card dl {
         grid-template-columns: 1fr;
     }
 

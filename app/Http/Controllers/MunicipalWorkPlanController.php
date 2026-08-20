@@ -35,7 +35,8 @@ class MunicipalWorkPlanController extends Controller
 
         $plan = $amendment->municipalWorkPlan;
         $canEdit = $request->user()->canEditMunicipality($amendment->municipality_id);
-        $canReview = $request->user()->roleForMunicipality($amendment->municipality_id) === 'manager';
+        $role = $request->user()->roleForMunicipality($amendment->municipality_id);
+        $canReview = $role === 'manager';
         $readiness = $plan ? $workPlanService->readiness($plan, $amendment) : null;
 
         return view('amendments.work-plan', [
@@ -45,7 +46,7 @@ class MunicipalWorkPlanController extends Controller
             'canReview' => $canReview,
             'draftSuggestion' => $workPlanService->suggestedDraft($amendment),
             'readiness' => $readiness,
-            'guide' => $workPlanService->guide($amendment, $plan, $readiness),
+            'guide' => $workPlanService->guide($amendment, $plan, $readiness, $role),
             'beneficiaryTypes' => MunicipalWorkPlan::beneficiaryTypes(),
             'engineeringStatuses' => MunicipalWorkPlan::engineeringStatuses(),
             'pcaStatuses' => MunicipalWorkPlan::pcaStatuses(),

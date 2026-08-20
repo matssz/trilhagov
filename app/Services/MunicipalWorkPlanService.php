@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\MunicipalWorkPlan;
 use App\Models\ParliamentaryAmendment;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -81,7 +82,7 @@ class MunicipalWorkPlanService
     }
 
     /** @return array<string, mixed> */
-    public function guide(ParliamentaryAmendment $amendment, ?MunicipalWorkPlan $plan, ?array $readiness): array
+    public function guide(ParliamentaryAmendment $amendment, ?MunicipalWorkPlan $plan, ?array $readiness, ?string $role = null): array
     {
         if (! $plan) {
             return [
@@ -96,6 +97,8 @@ class MunicipalWorkPlanService
                 'documents' => $this->requiredDocuments($amendment, null),
                 'risks' => ['O Executivo ainda não iniciou o Plano de Trabalho desta emenda.'],
                 'responsibles' => $this->responsibles($amendment, 'Gestor municipal'),
+                'command' => $this->commandCards($amendment, null, null),
+                'profile' => $this->profileGuidance($role, null),
             ];
         }
 
@@ -153,6 +156,8 @@ class MunicipalWorkPlanService
             'documents' => $this->requiredDocuments($amendment, $plan),
             'risks' => $this->guideRisks($amendment, $plan, $readiness ?? []),
             'responsibles' => $this->responsibles($amendment, $next['title']),
+            'command' => $this->commandCards($amendment, $plan, $readiness),
+            'profile' => $this->profileGuidance($role, $plan),
         ];
     }
 
@@ -285,6 +290,122 @@ class MunicipalWorkPlanService
             ['label' => 'Unidade executora', 'value' => $amendment->responsible_department ?: 'A confirmar pelo gestor'],
             ['label' => 'Responsável operacional', 'value' => $amendment->responsibleUser?->name ?: 'Não definido'],
             ['label' => 'Próxima ação', 'value' => $nextOwner],
+        ];
+    }
+
+    /** @return array<int, array<string, string>> */
+    private function commandCards(ParliamentaryAmendment $amendment, ?MunicipalWorkPlan $plan, ?array $readiness): array
+    {
+        $plannedAmount = (float) ($readiness['planned_amount'] ?? 0);
+        $difference = (float) ($readiness['difference'] ?? $amendment->expected_amount);
+        $ready = (bool) ($readiness['ready'] ?? false);
+        $status = $plan?->status;
+        $hasSchedule = $plan !== null && $plan->stages->isNotEmpty();
+
+        return [
+            [
+                'icon' => 'building-2',
+                'label' => 'Executor',
+                'metric' => $plan?->beneficiary_name ?: ($amendment->responsible_department ?: 'A definir'),
+                'description' => $plan ? 'Confirme quem executa e quem responde pelo objeto.' : 'O plano guiado usa a secretaria da emenda como ponto de partida.',
+                'href' => $plan ? '#dados-plano' : '#iniciar-plano',
+                'cta' => $plan ? 'Revisar executor' : 'Iniciar plano',
+                'tone' => filled($plan?->beneficiary_name) ? 'success' : 'warning',
+            ],
+            [
+                'icon' => 'target',
+                'label' => 'Entrega',
+                'metric' => $plan?->physical_target ? Str::limit($plan->physical_target, 48) : 'Meta pendente',
+                'description' => 'Defina a entrega verificável usada na execução e na prestação.',
+                'href' => $plan ? '#dados-plano' : '#iniciar-plano',
+                'cta' => 'Ver metas',
+                'tone' => filled($plan?->physical_target) ? 'success' : 'warning',
+            ],
+            [
+                'icon' => 'calendar-range',
+                'label' => 'Cronograma',
+                'metric' => $hasSchedule ? 'R$ '.number_format($plannedAmount, 2, ',', '.') : 'Sem etapa',
+                'description' => abs($difference) < 0.01 && $hasSchedule
+                    ? 'Etapas fecham com o valor reservado para a emenda.'
+                    : 'As etapas precisam fechar exatamente com o valor previsto.',
+                'href' => $plan ? '#cronograma' : '#iniciar-plano',
+                'cta' => $hasSchedule ? 'Revisar etapas' : 'Criar etapa',
+                'tone' => abs($difference) < 0.01 && $hasSchedule ? 'success' : 'danger',
+            ],
+            [
+                'icon' => 'badge-check',
+                'label' => 'Análise',
+                'metric' => $plan ? $plan->statusLabel() : 'Não iniciado',
+                'description' => $ready
+                    ? 'O plano está apto para parecer ou para seguir à execução.'
+                    : 'Resolva os bloqueios antes de enviar para admissibilidade.',
+                'href' => $plan === null
+                    ? '#iniciar-plano'
+                    : ($status === MunicipalWorkPlan::STATUS_APPROVED
+                    ? route('emendas.execution', $amendment)
+                    : ($status === MunicipalWorkPlan::STATUS_UNDER_REVIEW ? '#parecer' : '#enviar-analise')),
+                'cta' => $plan === null
+                    ? 'Iniciar plano'
+                    : ($status === MunicipalWorkPlan::STATUS_APPROVED
+                    ? 'Abrir execução'
+                    : ($status === MunicipalWorkPlan::STATUS_UNDER_REVIEW ? 'Ver parecer' : 'Enviar plano')),
+                'tone' => $ready || $status === MunicipalWorkPlan::STATUS_APPROVED ? 'success' : 'warning',
+            ],
+            [
+                'icon' => 'archive',
+                'label' => 'Depois do plano',
+                'metric' => $status === MunicipalWorkPlan::STATUS_APPROVED ? 'Liberado' : 'Aguardando',
+                'description' => 'Plano aprovado libera execução, documentos e prestação final no mesmo fluxo.',
+                'href' => $status === MunicipalWorkPlan::STATUS_APPROVED ? route('emendas.execution', $amendment) : '#assistente-plano',
+                'cta' => $status === MunicipalWorkPlan::STATUS_APPROVED ? 'Executar' : 'Ver trilha',
+                'tone' => $status === MunicipalWorkPlan::STATUS_APPROVED ? 'primary' : 'neutral',
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function profileGuidance(?string $role, ?MunicipalWorkPlan $plan): array
+    {
+        $role ??= User::ROLE_VIEWER;
+
+        $copy = match ($role) {
+            User::ROLE_MANAGER => [
+                'label' => 'Perfil gestor',
+                'title' => $plan?->status === MunicipalWorkPlan::STATUS_UNDER_REVIEW ? 'Sua decisão agora é emitir o parecer' : 'Sua decisão agora é liberar o plano',
+                'description' => 'Complete campos, resolva bloqueios e envie para parecer antes da execução.',
+                'icon' => 'shield-check',
+                'tone' => 'primary',
+            ],
+            User::ROLE_EDITOR => [
+                'label' => 'Perfil operacional',
+                'title' => 'Prepare o plano para o gestor decidir',
+                'description' => 'Revise executor, metas, valores e cronograma. O gestor conclui a admissibilidade.',
+                'icon' => 'clipboard-pen',
+                'tone' => 'warning',
+            ],
+            User::ROLE_AUDITOR => [
+                'label' => 'Modo auditoria',
+                'title' => 'Consulta com foco em evidências',
+                'description' => 'Acompanhe riscos, documentos, pareceres e trilha sem alterar registros.',
+                'icon' => 'search-check',
+                'tone' => 'neutral',
+            ],
+            default => [
+                'label' => 'Modo consulta',
+                'title' => 'Acompanhe sem alterar dados',
+                'description' => 'Esta visão mostra o estado do plano, pendências e histórico para leitura.',
+                'icon' => 'eye',
+                'tone' => 'neutral',
+            ],
+        };
+
+        return [
+            ...$copy,
+            'items' => [
+                ['label' => 'Pode editar', 'value' => in_array($role, [User::ROLE_MANAGER, User::ROLE_EDITOR], true) && ($plan?->isEditable() ?? true) ? 'Sim' : 'Não'],
+                ['label' => 'Pode parecer', 'value' => $role === User::ROLE_MANAGER && $plan?->status === MunicipalWorkPlan::STATUS_UNDER_REVIEW ? 'Sim' : 'Não'],
+                ['label' => 'Próxima área', 'value' => $plan?->status === MunicipalWorkPlan::STATUS_APPROVED ? 'Execução' : 'Plano de trabalho'],
+            ],
         ];
     }
 

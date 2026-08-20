@@ -86,6 +86,20 @@
             </div>
         </div>
 
+        <div class="accountability-profile-card tone-{{ $accountabilityGuide['profile']['tone'] }}" aria-label="Orientação por perfil na prestação">
+            <span><i data-lucide="{{ $accountabilityGuide['profile']['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <small>{{ $accountabilityGuide['profile']['label'] }}</small>
+                <strong>{{ $accountabilityGuide['profile']['title'] }}</strong>
+                <p>{{ $accountabilityGuide['profile']['description'] }}</p>
+            </div>
+            <dl>
+                @foreach ($accountabilityGuide['profile']['items'] as $item)
+                    <div><dt>{{ $item['label'] }}</dt><dd>{{ $item['value'] }}</dd></div>
+                @endforeach
+            </dl>
+        </div>
+
         <div class="accountability-command-board" aria-label="Mesa simples da prestação">
             <div class="accountability-command-heading">
                 <div>

@@ -53,6 +53,12 @@ class MunicipalWorkPlanTest extends TestCase
         $this->get(route('emendas.work-plan', $amendment))
             ->assertOk()
             ->assertSee('Plano de Trabalho municipal')
+            ->assertSee('Mesa do Plano')
+            ->assertSee('Decida executor, entrega, cronograma e envio técnico em uma visão')
+            ->assertSee('Perfil gestor')
+            ->assertSee('Sua decisão agora é liberar o plano')
+            ->assertSee('Executor')
+            ->assertSee('Cronograma')
             ->assertSee('Cronograma e valor')
             ->assertSee('Riscos antes da execução')
             ->assertSee('Plano simplificado a partir da emenda')
@@ -225,6 +231,8 @@ class MunicipalWorkPlanTest extends TestCase
             ->get(route('emendas.work-plan', $amendment))
             ->assertOk()
             ->assertSee('Plano de trabalho')
+            ->assertSee('Modo consulta')
+            ->assertSee('Acompanhe sem alterar dados')
             ->assertDontSee('Salvar plano');
 
         $this->get(route('emendas.work-plan.pdf', $amendment))

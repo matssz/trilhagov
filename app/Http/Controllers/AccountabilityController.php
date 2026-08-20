@@ -45,6 +45,7 @@ class AccountabilityController extends Controller
             ->findOrFail($emenda);
         $process = $amendment->accountabilityProcess;
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
+        $role = $request->user()->roleForMunicipality($municipality->id);
         $readiness = $process !== null
             ? $accountabilityService->readiness($amendment, $process)
             : null;
@@ -61,7 +62,7 @@ class AccountabilityController extends Controller
             'requirementCategories' => AccountabilityRequirement::categories(),
             'requirementStatuses' => AccountabilityRequirement::statuses(),
             'readiness' => $readiness,
-            'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness),
+            'accountabilityGuide' => $accountabilityService->guide($amendment, $process, $readiness, $role),
             'protocolSuggestion' => 'PC-'.$amendment->reference.'-'.now()->format('Ymd'),
             'prepareToken' => $canEdit
                 ? $formSubmission->issue($request, "accountability-prepare-{$amendment->id}")
