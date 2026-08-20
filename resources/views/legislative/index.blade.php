@@ -305,10 +305,18 @@
                             <p>{{ $group['description'] }}</p>
                             <div class="councilor-stage-items">
                                 @forelse($group['items'] as $item)
+                                    @php($nextStep = $item->getAttribute('councilor_next_step'))
                                     <a href="{{ $item->councilor_action_url }}">
                                         <span>{{ $item->reference }} · {{ $item->statusLabel() }}</span>
                                         <strong>{{ $item->object }}</strong>
                                         <small>{{ $item->updated_at->diffForHumans() }}</small>
+                                        @if($nextStep)
+                                            <span class="councilor-stage-next is-{{ $nextStep['tone'] ?? 'muted' }}">
+                                                <i data-lucide="{{ $nextStep['icon'] ?? 'route' }}" aria-hidden="true"></i>
+                                                <b>{{ $nextStep['owner'] ?? 'Sistema' }}</b>
+                                                <em>{{ $nextStep['title'] }}</em>
+                                            </span>
+                                        @endif
                                     </a>
                                 @empty
                                     <div>{{ $group['empty'] }}</div>
@@ -561,11 +569,20 @@
                         </div>
                         <div class="legislative-board-items">
                             @forelse ($column['items'] as $item)
-                                <a href="{{ $item->executive_board_url }}">
+                                @php($nextStep = $item->getAttribute('executive_next_step'))
+                                <a href="{{ $nextStep['href'] ?? $item->executive_board_url }}">
                                     <span>{{ $item->reference }}</span>
                                     <strong>{{ $item->object }}</strong>
                                     <small>{{ $item->author_name }} · R$ {{ number_format((float) $item->estimated_amount, 2, ',', '.') }}</small>
                                     <em>{{ $column['action'] }} <b>{{ $item->updated_at->diffForHumans() }}</b></em>
+                                    @if($nextStep)
+                                        <span class="legislative-board-next is-{{ $nextStep['tone'] ?? 'muted' }}">
+                                            <i data-lucide="{{ $nextStep['icon'] ?? 'route' }}" aria-hidden="true"></i>
+                                            <b>Próximo automático</b>
+                                            <strong>{{ $nextStep['title'] }}</strong>
+                                            <small>{{ $nextStep['description'] }}</small>
+                                        </span>
+                                    @endif
                                 </a>
                             @empty
                                 <div class="legislative-board-empty">{{ $column['empty'] }}</div>

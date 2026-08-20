@@ -1084,6 +1084,60 @@
     -webkit-line-clamp: 2;
 }
 
+.councilor-stage-next {
+    display: grid !important;
+    grid-template-columns: 18px minmax(48px, max-content) 1fr;
+    gap: 6px;
+    align-items: center;
+    margin-top: 5px;
+    padding: 7px 8px;
+    border: 1px solid #cfe0ef;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #f8fbff 0%, #edf6ff 100%);
+    color: var(--navy-900) !important;
+}
+
+.councilor-stage-next svg {
+    width: 14px;
+    height: 14px;
+    color: #0f5ea8;
+}
+
+.councilor-stage-next b,
+.councilor-stage-next em {
+    overflow: hidden;
+    font-size: .62rem;
+    font-style: normal;
+    font-weight: 900;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.councilor-stage-next b {
+    color: #55708b;
+    text-transform: uppercase;
+}
+
+.councilor-stage-next em {
+    color: var(--navy-950);
+}
+
+.councilor-stage-next.is-warning {
+    border-color: #f2d28c;
+    background: #fff8e8;
+}
+
+.councilor-stage-next.is-success {
+    border-color: #b7e4cf;
+    background: #effaf5;
+}
+
+.councilor-stage-next.is-danger {
+    border-color: #f0b4b4;
+    background: #fff1f1;
+}
+
 .councilor-stage-items > div {
     align-content: center;
     color: var(--muted);
@@ -2659,6 +2713,56 @@
     color: var(--muted);
     font-size: .64rem;
     font-weight: 750;
+}
+
+.legislative-board-next {
+    display: grid !important;
+    grid-template-columns: 22px 1fr;
+    gap: 2px 8px;
+    align-items: center;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid #cfe0ef;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 100%);
+}
+
+.legislative-board-next svg {
+    grid-row: span 3;
+    width: 16px;
+    height: 16px;
+    color: #0f5ea8;
+}
+
+.legislative-board-next b,
+.legislative-board-next strong,
+.legislative-board-next small {
+    overflow: hidden;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+}
+
+.legislative-board-next b {
+    color: #55708b;
+    font-size: .6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.legislative-board-next strong {
+    display: block !important;
+    color: var(--navy-950) !important;
+    font-size: .72rem !important;
+    -webkit-line-clamp: 1 !important;
+}
+
+.legislative-board-next small {
+    display: -webkit-box !important;
+    color: #51677f !important;
+    font-size: .64rem !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .legislative-board-more {

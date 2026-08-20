@@ -297,11 +297,10 @@ class LegislativeProposalController extends Controller
                 'count' => $items->count(),
                 'amount' => (float) $items->sum('estimated_amount'),
                 'items' => $items->take(3)->map(function (LegislativeProposal $proposal): LegislativeProposal {
-                    $proposal->setAttribute('councilor_action_url', route('legislative.show', $proposal).match ($proposal->status) {
-                        LegislativeProposal::STATUS_DRAFT, LegislativeProposal::STATUS_RETURNED => '#editor-proposta',
-                        LegislativeProposal::STATUS_SENT, LegislativeProposal::STATUS_RECEIVED, LegislativeProposal::STATUS_RESERVED => '#acompanhamento-executivo',
-                        default => '#historico-proposta',
-                    });
+                    $nextStep = $this->proposalNextStep($proposal, 'councilor');
+
+                    $proposal->setAttribute('councilor_next_step', $nextStep);
+                    $proposal->setAttribute('councilor_action_url', $nextStep['href']);
 
                     return $proposal;
                 })->values(),
@@ -399,7 +398,10 @@ class LegislativeProposalController extends Controller
                 ->whereIn('status', $column['statuses'])
                 ->take(5)
                 ->map(function (LegislativeProposal $proposal) use ($column): LegislativeProposal {
+                    $nextStep = $this->proposalNextStep($proposal, 'executive');
+
                     $proposal->setAttribute('executive_board_url', route('legislative.show', $proposal).$column['fragment']);
+                    $proposal->setAttribute('executive_next_step', $nextStep);
 
                     return $proposal;
                 })
@@ -588,6 +590,212 @@ class LegislativeProposalController extends Controller
     private function proposalAgeDays(LegislativeProposal $proposal): int
     {
         return (int) floor($proposal->updated_at->diffInHours(now()) / 24);
+    }
+
+    /**
+     * @return array{title: string, description: string, href: string, label: string, owner: string, icon: string, tone: string}
+     */
+    private function proposalNextStep(LegislativeProposal $proposal, string $audience): array
+    {
+        $showUrl = route('legislative.show', $proposal);
+        $isCouncilor = $audience === 'councilor';
+
+        if ($isCouncilor) {
+            return match ($proposal->status) {
+                LegislativeProposal::STATUS_DRAFT => [
+                    'title' => 'Terminar e enviar',
+                    'description' => 'A proposta ainda está com você. Revise valor, destino e justificativa para mandar à Câmara.',
+                    'href' => $showUrl.'#editor-proposta',
+                    'label' => 'Editar proposta',
+                    'owner' => 'Vereador',
+                    'icon' => 'pencil-line',
+                    'tone' => 'warning',
+                ],
+                LegislativeProposal::STATUS_RETURNED => [
+                    'title' => 'Corrigir devolução',
+                    'description' => 'A Câmara devolveu para ajuste. Abra a proposta, corrija os pontos e reenvie.',
+                    'href' => $showUrl.'#editor-proposta',
+                    'label' => 'Corrigir agora',
+                    'owner' => 'Vereador',
+                    'icon' => 'undo-2',
+                    'tone' => 'warning',
+                ],
+                LegislativeProposal::STATUS_SUBMITTED => [
+                    'title' => 'Em conferência na Câmara',
+                    'description' => 'A proposta já saiu da sua mão e aguarda a checagem legislativa mínima.',
+                    'href' => $showUrl.'#historico-proposta',
+                    'label' => 'Ver histórico',
+                    'owner' => 'Câmara',
+                    'icon' => 'landmark',
+                    'tone' => 'info',
+                ],
+                LegislativeProposal::STATUS_APPROVED => [
+                    'title' => 'Aguardando protocolo',
+                    'description' => 'A Câmara aprovou a conferência e precisa encaminhar oficialmente ao Executivo.',
+                    'href' => $showUrl.'#historico-proposta',
+                    'label' => 'Ver protocolo',
+                    'owner' => 'Câmara',
+                    'icon' => 'send',
+                    'tone' => 'info',
+                ],
+                LegislativeProposal::STATUS_SENT => [
+                    'title' => 'Aguardando recebimento',
+                    'description' => 'O Executivo precisa abrir o processo municipal para iniciar a reserva orçamentária.',
+                    'href' => $showUrl.'#acompanhamento-executivo',
+                    'label' => 'Acompanhar',
+                    'owner' => 'Executivo',
+                    'icon' => 'inbox',
+                    'tone' => 'primary',
+                ],
+                LegislativeProposal::STATUS_RECEIVED => [
+                    'title' => 'Aguardando reserva',
+                    'description' => 'A Prefeitura recebeu a proposta e deve confirmar dotação para executar.',
+                    'href' => $showUrl.'#acompanhamento-executivo',
+                    'label' => 'Ver Executivo',
+                    'owner' => 'Executivo',
+                    'icon' => 'wallet-cards',
+                    'tone' => 'primary',
+                ],
+                LegislativeProposal::STATUS_RESERVED => [
+                    'title' => 'No fluxo de execução',
+                    'description' => 'A reserva foi registrada. Acompanhe plano, entrega, pagamento e prestação de contas.',
+                    'href' => $showUrl.'#acompanhamento-executivo',
+                    'label' => 'Ver andamento',
+                    'owner' => 'Prefeitura',
+                    'icon' => 'route',
+                    'tone' => 'success',
+                ],
+                LegislativeProposal::STATUS_REJECTED => [
+                    'title' => 'Encerrada na análise',
+                    'description' => 'Consulte a fundamentação registrada pela Câmara para entender a decisão.',
+                    'href' => $showUrl.'#historico-proposta',
+                    'label' => 'Ver decisão',
+                    'owner' => 'Câmara',
+                    'icon' => 'circle-x',
+                    'tone' => 'danger',
+                ],
+                default => [
+                    'title' => 'Acompanhar andamento',
+                    'description' => 'Abra a proposta para consultar a situação atual e o histórico.',
+                    'href' => $showUrl.'#historico-proposta',
+                    'label' => 'Ver histórico',
+                    'owner' => 'Sistema',
+                    'icon' => 'eye',
+                    'tone' => 'muted',
+                ],
+            };
+        }
+
+        if ($proposal->status === LegislativeProposal::STATUS_RESERVED && $proposal->amendment) {
+            $amendment = $proposal->amendment;
+
+            return match ($amendment->status) {
+                ParliamentaryAmendment::STATUS_PLAN_PENDING => [
+                    'title' => 'Abrir plano de trabalho',
+                    'description' => 'A reserva já existe. O próximo passo é planejar cronograma, entrega e responsáveis.',
+                    'href' => route('emendas.work-plan', $amendment),
+                    'label' => 'Abrir plano',
+                    'owner' => 'Executivo',
+                    'icon' => 'clipboard-list',
+                    'tone' => 'budget',
+                ],
+                ParliamentaryAmendment::STATUS_EXECUTING,
+                ParliamentaryAmendment::STATUS_RESOURCE_RECEIVED,
+                ParliamentaryAmendment::STATUS_APPROVED => [
+                    'title' => 'Acompanhar execução',
+                    'description' => 'Registre entrega física, empenhos, liquidações e pagamentos.',
+                    'href' => route('emendas.execution', $amendment),
+                    'label' => 'Abrir execução',
+                    'owner' => 'Prefeitura',
+                    'icon' => 'gauge',
+                    'tone' => 'execution',
+                ],
+                ParliamentaryAmendment::STATUS_ACCOUNTABILITY_PENDING => [
+                    'title' => 'Fechar prestação',
+                    'description' => 'Consolide documentos, pagamentos, evidências e decisão final.',
+                    'href' => route('emendas.accountability', $amendment),
+                    'label' => 'Prestar contas',
+                    'owner' => 'Prefeitura',
+                    'icon' => 'archive',
+                    'tone' => 'success',
+                ],
+                ParliamentaryAmendment::STATUS_COMPLETED => [
+                    'title' => 'Baixar dossiê final',
+                    'description' => 'O fluxo está concluído. Use o pacote final para auditoria, Câmara ou Controle Interno.',
+                    'href' => route('emendas.accountability.dossier.pdf', $amendment),
+                    'label' => 'Ver dossiê',
+                    'owner' => 'Controle',
+                    'icon' => 'package-check',
+                    'tone' => 'success',
+                ],
+                default => [
+                    'title' => 'Abrir fluxo executivo',
+                    'description' => 'Continue pela emenda executiva vinculada à proposta legislativa.',
+                    'href' => route('emendas.show', $amendment),
+                    'label' => 'Abrir emenda',
+                    'owner' => 'Executivo',
+                    'icon' => 'file-text',
+                    'tone' => 'primary',
+                ],
+            };
+        }
+
+        return match ($proposal->status) {
+            LegislativeProposal::STATUS_SUBMITTED => [
+                'title' => 'Conferir requisitos da Câmara',
+                'description' => 'Valide objeto, valor, saúde, beneficiário e compatibilidade antes do protocolo.',
+                'href' => $showUrl.'#conferencia-legislativa',
+                'label' => 'Conferir',
+                'owner' => 'Câmara',
+                'icon' => 'badge-check',
+                'tone' => 'review',
+            ],
+            LegislativeProposal::STATUS_APPROVED => [
+                'title' => 'Protocolar ao Executivo',
+                'description' => 'Registre o protocolo da Câmara e envie formalmente à Prefeitura.',
+                'href' => $showUrl.'#protocolo-executivo',
+                'label' => 'Protocolar',
+                'owner' => 'Câmara',
+                'icon' => 'send',
+                'tone' => 'review',
+            ],
+            LegislativeProposal::STATUS_SENT => [
+                'title' => 'Receber como processo',
+                'description' => 'Abra o processo administrativo municipal e vincule a secretaria responsável.',
+                'href' => $showUrl.'#recebimento-executivo',
+                'label' => 'Receber',
+                'owner' => 'Executivo',
+                'icon' => 'inbox',
+                'tone' => 'receive',
+            ],
+            LegislativeProposal::STATUS_RECEIVED => [
+                'title' => 'Registrar reserva orçamentária',
+                'description' => 'Confirme dotação e valor para liberar o plano de trabalho automaticamente.',
+                'href' => $showUrl.'#reserva-orcamentaria',
+                'label' => 'Reservar',
+                'owner' => 'Executivo',
+                'icon' => 'wallet-cards',
+                'tone' => 'budget',
+            ],
+            LegislativeProposal::STATUS_RESERVED => [
+                'title' => 'Abrir acompanhamento executivo',
+                'description' => 'A proposta já tem reserva. Continue pelo plano, execução e prestação de contas.',
+                'href' => $showUrl.'#acompanhamento-executivo',
+                'label' => 'Acompanhar',
+                'owner' => 'Prefeitura',
+                'icon' => 'route',
+                'tone' => 'execution',
+            ],
+            default => [
+                'title' => 'Consultar histórico',
+                'description' => 'Sem ação executiva imediata. Consulte eventos, documentos e decisão registrada.',
+                'href' => $showUrl.'#historico-proposta',
+                'label' => 'Ver histórico',
+                'owner' => 'Sistema',
+                'icon' => 'eye',
+                'tone' => 'muted',
+            ],
+        };
     }
 
     public function create(
