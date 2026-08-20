@@ -9,11 +9,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    private const MAX_ATTEMPTS = 5;
+
+    private const DECAY_SECONDS = 60;
+
     public function create(): View
     {
         return view('auth.login');
@@ -26,11 +32,25 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $throttleKey = $this->throttleKey($request);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            throw ValidationException::withMessages([
+                'email' => "Muitas tentativas de login. Tente novamente em {$seconds} segundos.",
+            ]);
+        }
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
+
             throw ValidationException::withMessages([
                 'email' => 'E-mail ou senha inválidos.',
             ]);
         }
+
+        RateLimiter::clear($throttleKey);
 
         $request->session()->regenerate();
         $request->session()->forget('active_municipality_id');
@@ -84,5 +104,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    private function throttleKey(Request $request): string
+    {
+        return Str::transliterate(Str::lower((string) $request->input('email'))).'|'.$request->ip();
     }
 }

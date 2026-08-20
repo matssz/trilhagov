@@ -151,6 +151,53 @@ class AuthenticationTest extends TestCase
         $this->assertNull($user->fresh()->mfa_code_hash);
     }
 
+    public function test_login_is_rate_limited_after_too_many_failed_attempts(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+        $municipality = Municipality::factory()->create();
+        $municipality->users()->attach($user, ['role' => 'manager']);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('login'), [
+                'email' => $user->email,
+                'password' => 'senha-errada',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
+    public function test_mfa_verification_is_rate_limited_after_too_many_failed_attempts(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create([
+            'password' => 'senha-segura',
+            'mfa_enabled' => true,
+        ]);
+        $municipality = Municipality::factory()->create();
+        $municipality->users()->attach($user, ['role' => 'manager']);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertRedirect(route('mfa.challenge'));
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('mfa.verify'), ['code' => '000000'])
+                ->assertSessionHasErrors('code');
+        }
+
+        $this->post(route('mfa.verify'), ['code' => '123456'])
+            ->assertSessionHasErrors('code');
+
+        $this->assertGuest();
+    }
+
     public function test_user_without_complete_municipality_cannot_login(): void
     {
         $user = User::factory()->create(['password' => 'senha-segura']);
