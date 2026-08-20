@@ -1,0 +1,85 @@
+name: Backup do banco
+
+# Faz um pg_dump do schema da aplicacao no Supabase, compacta e envia para
+# backups/ no mesmo bucket S3 usado pelos documentos. Mantem 30 dias e apaga
+# o restante a cada execucao.
+#
+# Restaurar: baixe o .sql.gz do bucket, rode `gunzip` e depois
+# `psql "$DB_URL" -f arquivo.sql`.
+
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verificar segredos
+        id: check
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "::notice::Backup aguardando os segredos DB_URL e AWS_* no GitHub Actions."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gerar dump e enviar para o storage
+        if: steps.check.outputs.ready == 'true'
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_SCHEMA: ${{ secrets.DB_SCHEMA }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        run: |
+          set -euo pipefail
+          schema="${DB_SCHEMA:-trilhagov}"
+          filename="trilhagov-$(date -u +%Y%m%d-%H%M%S).sql.gz"
+
+          docker run --rm postgres:17-bookworm \
+            pg_dump "$DB_URL" --schema="$schema" --no-owner --no-privileges --format=plain \
+            | gzip -9 > "$filename"
+
+          if [ ! -s "$filename" ]; then
+            echo "::error::Dump vazio, abortando envio."
+            exit 1
+          fi
+
+          aws s3 cp "$filename" "s3://${AWS_BUCKET}/backups/${filename}" --endpoint-url "$AWS_ENDPOINT"
+          rm -f "$filename"
+
+      - name: Remover backups com mais de 30 dias
+        if: steps.check.outputs.ready == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d '30 days ago' +%Y%m%d)
+
+          aws s3api list-objects-v2 \
+            --bucket "$AWS_BUCKET" \
+            --prefix backups/trilhagov- \
+            --endpoint-url "$AWS_ENDPOINT" \
+            --query 'Contents[].Key' \
+            --output text \
+          | tr '\t' '\n' \
+          | while read -r key; do
+              [ -z "$key" ] && continue
+              file_date=$(basename "$key" | sed -E 's/^trilhagov-([0-9]{8})-.*/\1/')
+              if [[ "$file_date" =~ ^[0-9]{8}$ ]] && [ "$file_date" -lt "$cutoff" ]; then
+                aws s3 rm "s3://${AWS_BUCKET}/${key}" --endpoint-url "$AWS_ENDPOINT"
+              fi
+            done

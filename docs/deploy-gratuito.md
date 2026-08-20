@@ -92,6 +92,31 @@ somente o token e possui limite de requisicoes.
 6. Envie um convite de teste para um e-mail controlado por voce.
 7. Reinicie o servico no Render e confirme que login, dados e documento continuam.
 
+## 7. Backup automatico do banco
+
+O workflow `.github/workflows/backup.yml` roda um `pg_dump` do schema
+`trilhagov` todo dia as 06:30 UTC, compacta o resultado e envia para
+`backups/` no mesmo bucket S3 do Storage. Backups com mais de 30 dias sao
+removidos automaticamente a cada execucao.
+
+No GitHub, cadastre os mesmos segredos ja usados no Render:
+
+| Segredo | Valor |
+| --- | --- |
+| `DB_URL` | O mesmo Session Pooler do Supabase cadastrado no Render |
+| `AWS_ACCESS_KEY_ID` | O mesmo Access Key ID do Storage S3 |
+| `AWS_SECRET_ACCESS_KEY` | O mesmo Secret Access Key do Storage S3 |
+| `AWS_DEFAULT_REGION` | A mesma regiao do Storage S3 |
+| `AWS_ENDPOINT` | O mesmo endpoint direto do Storage S3 |
+| `AWS_BUCKET` | `trilhagov-documents` |
+
+Sem esses segredos, o workflow roda e nao faz nada, como o Agendador. Depois
+de cadastrar, rode manualmente em **Actions > Backup do banco > Run
+workflow** para validar antes de confiar na execucao diaria.
+
+Para restaurar: baixe o `.sql.gz` do bucket, descompacte com `gunzip` e
+aplique com `psql "$DB_URL" -f arquivo.sql`.
+
 ## Limites gratuitos
 
 - O Render adormece depois de 15 minutos sem trafego e a primeira abertura pode
