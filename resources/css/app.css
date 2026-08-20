@@ -13839,6 +13839,14 @@ a:focus-visible {
     padding-top: clamp(2rem, 5vw, 3.2rem) !important;
 }
 
+/* Kills a leftover decorative diagonal white sheen from an older version of
+   this page (.commercial-hero::before, background layer added ~v3). At full
+   opacity against the dark hero it washed out the left half of the copy and
+   made the whole section read as "apagada" -- not part of this redesign. */
+.commercial-page .commercial-hero::before {
+    display: none !important;
+}
+
 .commercial-page .commercial-hero .commercial-kicker {
     background: rgba(255, 255, 255, .08) !important;
     border: 1px solid rgba(255, 255, 255, .22) !important;
@@ -14185,6 +14193,73 @@ a:focus-visible {
     .sp-map-route {
         animation: none;
     }
+}
+
+.sp-map-city-secondary circle {
+    r: 3.4;
+    fill: rgba(255, 255, 255, .82);
+    stroke: rgba(12, 79, 136, .55);
+    stroke-width: 2;
+    filter: none;
+}
+
+.sp-map-city-secondary text {
+    font-size: .58rem;
+    fill: rgba(2, 18, 37, .68);
+    stroke: rgba(255, 255, 255, .9);
+    stroke-width: 4;
+    font-weight: 650;
+}
+
+/* ---- modern cards: elevation, accent bar, hover lift ---- */
+
+.commercial-page .commercial-decision-grid article,
+.commercial-page .commercial-showcase-grid article,
+.commercial-page .commercial-pipeline-track article {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(10, 37, 64, .04), 0 14px 30px rgba(10, 37, 64, .07) !important;
+    transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s cubic-bezier(.22, 1, .36, 1), border-color .3s ease;
+}
+
+.commercial-page .commercial-decision-grid article::before,
+.commercial-page .commercial-showcase-grid article::before,
+.commercial-page .commercial-pipeline-track article::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--commercial-gold, #c9932f), rgba(201, 147, 47, 0));
+    opacity: 0;
+    transform: scaleX(.4);
+    transform-origin: left;
+    transition: opacity .3s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .commercial-page .commercial-decision-grid article:hover,
+    .commercial-page .commercial-showcase-grid article:hover,
+    .commercial-page .commercial-pipeline-track article:hover {
+        transform: translateY(-6px) !important;
+        box-shadow: 0 2px 4px rgba(10, 37, 64, .06), 0 26px 48px rgba(10, 37, 64, .14) !important;
+        border-color: rgba(201, 147, 47, .38) !important;
+    }
+
+    .commercial-page .commercial-decision-grid article:hover::before,
+    .commercial-page .commercial-showcase-grid article:hover::before,
+    .commercial-page .commercial-pipeline-track article:hover::before {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+
+    .commercial-page .commercial-showcase-grid article:hover > svg {
+        background: var(--commercial-gold, #c9932f);
+        color: #241905;
+    }
+}
+
+.commercial-page .commercial-showcase-grid article > svg {
+    transition: background-color .3s ease, color .3s ease;
 }
 
 /* ---- responsive tightening ---- */

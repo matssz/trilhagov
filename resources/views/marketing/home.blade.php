@@ -267,6 +267,38 @@
                             <text x="12" y="16">Registro</text>
                         </g>
                     </g>
+                    <g class="sp-map-points sp-map-city-secondary">
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(395.74 291.75)">
+                            <title>Sorocaba</title>
+                            <circle />
+                            <text x="9" y="4">Sorocaba</text>
+                        </g>
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(272.73 105.43)">
+                            <title>São José do Rio Preto</title>
+                            <circle />
+                            <text x="-9" y="-8" text-anchor="end">S. J. Rio Preto</text>
+                        </g>
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(143.96 196.46)">
+                            <title>Presidente Prudente</title>
+                            <circle />
+                            <text x="9" y="4">Pres. Prudente</text>
+                        </g>
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(236.28 202.8)">
+                            <title>Marília</title>
+                            <circle />
+                            <text x="9" y="15">Marília</text>
+                        </g>
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(205.11 132.97)">
+                            <title>Araçatuba</title>
+                            <circle />
+                            <text x="-9" y="-8" text-anchor="end">Araçatuba</text>
+                        </g>
+                        <g class="sp-map-city sp-map-city-secondary" transform="translate(467.3 323.56)">
+                            <title>Santos</title>
+                            <circle />
+                            <text x="9" y="4">Santos</text>
+                        </g>
+                    </g>
                 </svg>
             </div>
         </section>

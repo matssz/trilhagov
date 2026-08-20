@@ -1078,6 +1078,39 @@ const initCommercialNavScroll = (nav) => {
     }, { passive: true });
 };
 
+const initCommercialClickSound = (page) => {
+    let audioCtx = null;
+
+    const playTick = () => {
+        try {
+            audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const now = audioCtx.currentTime;
+            const oscillator = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, now);
+            oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.08);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.045, now + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+            oscillator.connect(gain);
+            gain.connect(audioCtx.destination);
+            oscillator.start(now);
+            oscillator.stop(now + 0.12);
+        } catch {
+            // Web Audio unavailable or blocked; the click still works silently.
+        }
+    };
+
+    page.querySelectorAll('.commercial-hero-actions .btn-primary, .commercial-nav-cta, .commercial-cta .btn-primary').forEach((button) => {
+        button.addEventListener('click', playTick);
+    });
+};
+
 const initCommercialShowcase = () => {
     const page = document.querySelector('.commercial-page');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1085,6 +1118,8 @@ const initCommercialShowcase = () => {
     if (!(page instanceof HTMLElement)) {
         return;
     }
+
+    initCommercialClickSound(page);
 
     const nav = page.querySelector('[data-commercial-nav]');
     if (nav instanceof HTMLElement) {
@@ -1153,21 +1188,23 @@ const initCommercialShowcase = () => {
         });
     });
 
-    gsap.utils.toArray('.commercial-showcase-grid article').forEach((card, index) => {
+    gsap.utils.toArray('.commercial-decision-grid article, .commercial-showcase-grid article').forEach((card, index) => {
         gsap.fromTo(card, {
-            y: 36,
+            y: 40,
             autoAlpha: 0,
+            scale: 0.94,
         }, {
             y: 0,
             autoAlpha: 1,
-            duration: 0.65,
-            ease: 'power3.out',
+            scale: 1,
+            duration: 0.68,
+            ease: 'back.out(1.5)',
             scrollTrigger: {
                 trigger: card,
                 start: 'top 88%',
                 toggleActions: 'play none none reverse',
             },
-            delay: (index % 3) * 0.06,
+            delay: (index % 4) * 0.06,
         });
     });
 
