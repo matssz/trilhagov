@@ -74,7 +74,7 @@ class LegislativeProposalController extends Controller
             ? null
             : $this->executiveBoard($boardQuery->latest('id')->get(), $year);
         $executiveDesk = $executiveBoard
-            ? $this->executiveDesk($executiveBoard, $request, $formSubmission)
+            ? $this->executiveDesk($executiveBoard, $request, $formSubmission, $profile, $role)
             : null;
 
         return view('legislative.index', [
@@ -427,8 +427,12 @@ class LegislativeProposalController extends Controller
      * @param  array<int, array<string, mixed>>  $board
      * @return array<string, mixed>
      */
-    private function executiveDesk(array $board, Request $request, FormSubmission $formSubmission): array
+    private function executiveDesk(array $board, Request $request, FormSubmission $formSubmission, ?MunicipalRegulatoryProfile $profile, string $role): array
     {
+        $exerciseLockedUrl = $role === User::ROLE_MANAGER
+            ? route('municipal-onboarding.index')
+            : route('municipal-rules.index');
+        $exerciseLocked = $profile === null;
         $actionable = collect($board)->whereIn('key', ['review', 'receive', 'budget']);
         $total = (int) $actionable->sum('count');
         $amount = (float) $actionable->sum('amount');
@@ -663,29 +667,29 @@ class LegislativeProposalController extends Controller
                 [
                     'label' => 'Câmara envia',
                     'description' => 'Proposta aprovada chega protocolada.',
-                    'action' => (int) $review['count'] > 0 ? 'Ir para conferência' : 'Ver conferência',
-                    'url' => $review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url'],
+                    'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $review['count'] > 0 ? 'Ir para conferência' : 'Ver conferência'),
+                    'url' => $exerciseLocked ? $exerciseLockedUrl : ($review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url']),
                     'count' => (int) $review['count'],
                 ],
                 [
                     'label' => 'Executivo recebe',
                     'description' => 'Sistema sugere processo e secretaria.',
-                    'action' => (int) $receive['count'] > 0 ? 'Receber agora' : 'Ver recebimento',
-                    'url' => $receive['items']->first()?->getAttribute('executive_board_url') ?? $receive['filter_url'],
+                    'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $receive['count'] > 0 ? 'Receber agora' : 'Ver recebimento'),
+                    'url' => $exerciseLocked ? $exerciseLockedUrl : ($receive['items']->first()?->getAttribute('executive_board_url') ?? $receive['filter_url']),
                     'count' => (int) $receive['count'],
                 ],
                 [
                     'label' => 'Reserva orçamentária',
                     'description' => 'Valor integral e dotação ficam registrados.',
-                    'action' => (int) $budget['count'] > 0 ? 'Reservar agora' : 'Ver reserva',
-                    'url' => $budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url'],
+                    'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $budget['count'] > 0 ? 'Reservar agora' : 'Ver reserva'),
+                    'url' => $exerciseLocked ? $exerciseLockedUrl : ($budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url']),
                     'count' => (int) $budget['count'],
                 ],
                 [
                     'label' => 'Plano e execução',
                     'description' => 'Central cria pendências para entregar e prestar contas.',
-                    'action' => (int) $executionColumn['count'] > 0 ? 'Acompanhar' : 'Ver execução',
-                    'url' => $executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url'],
+                    'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $executionColumn['count'] > 0 ? 'Acompanhar' : 'Ver execução'),
+                    'url' => $exerciseLocked ? $exerciseLockedUrl : ($executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url']),
                     'count' => (int) $executionColumn['count'],
                 ],
             ],

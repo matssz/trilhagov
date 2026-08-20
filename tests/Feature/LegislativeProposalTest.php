@@ -859,6 +859,22 @@ class LegislativeProposalTest extends TestCase
             ->assertDontSee('Reservar agora');
     }
 
+    public function test_locked_exercise_command_shortcuts_send_manager_to_onboarding(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => now()->year + 1]))
+            ->assertOk()
+            ->assertSee('Configuração de '.(now()->year + 1).' não ativada')
+            ->assertSee('Comando municipal')
+            ->assertSee('Ativar exercício')
+            ->assertSee(route('municipal-onboarding.index'), false)
+            ->assertDontSee('Ver recebimento')
+            ->assertDontSee('Receber agora');
+    }
+
     public function test_executive_queue_filters_by_author_department_and_health_scope(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
