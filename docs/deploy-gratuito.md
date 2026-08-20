@@ -117,6 +117,20 @@ workflow** para validar antes de confiar na execucao diaria.
 Para restaurar: baixe o `.sql.gz` do bucket, descompacte com `gunzip` e
 aplique com `psql "$DB_URL" -f arquivo.sql`.
 
+## 8. Checar Actions sem confundir oscilacao com falha
+
+Quando o terminal local mostrar `TLS handshake timeout` ou `Connection was
+reset` ao consultar o GitHub, isso normalmente indica oscilacao de rede/API,
+nao falha no commit nem no Render. Para conferir com retentativas:
+
+```powershell
+.\scripts\check-github-actions.ps1
+```
+
+O script tenta consultar as ultimas execucoes mais de uma vez, usa a API REST
+como alternativa quando o `gh` falha, mostra a tabela com status e falha
+somente quando uma Action termina com erro real.
+
 ## Limites gratuitos
 
 - O Render adormece depois de 15 minutos sem trafego e a primeira abertura pode
