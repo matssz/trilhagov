@@ -841,6 +841,24 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('#reserva-orcamentaria');
     }
 
+    public function test_empty_executive_command_uses_queue_labels_instead_of_immediate_actions(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $this->profile($municipality, $manager);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('legislative.index', ['year' => now()->year + 1]))
+            ->assertOk()
+            ->assertSee('Comando municipal')
+            ->assertSee('Ver conferência')
+            ->assertSee('Ver recebimento')
+            ->assertSee('Ver reserva')
+            ->assertSee('Ver execução')
+            ->assertDontSee('Receber agora')
+            ->assertDontSee('Reservar agora');
+    }
+
     public function test_executive_queue_filters_by_author_department_and_health_scope(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
