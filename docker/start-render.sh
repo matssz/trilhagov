@@ -15,7 +15,8 @@ php artisan route:clear --no-interaction
 php artisan config:clear --no-interaction
 
 if [ "${TRILHAGOV_SEED_DEMO:-false}" = "true" ]; then
-    php artisan trilhagov:demo-guapiara --force --no-interaction
+    php artisan trilhagov:demo-guapiara --force --no-interaction \
+        || echo "Aviso: seed de demonstracao falhou, prosseguindo sem interromper o boot." >&2
 fi
 
 php artisan optimize
