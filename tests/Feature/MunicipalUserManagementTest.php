@@ -10,8 +10,8 @@ use App\Models\MunicipalRegulatoryProfile;
 use App\Models\User;
 use App\Notifications\MunicipalityInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -247,6 +247,63 @@ class MunicipalUserManagementTest extends TestCase
         ]);
         $this->assertSame($targetMunicipality->id, session('active_municipality_id'));
         $this->assertNotNull($invitation->fresh()->accepted_at);
+    }
+
+    public function test_authenticated_user_cannot_accept_invitation_belonging_to_a_different_email(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        [$otherUser] = $this->memberWithMunicipality(User::ROLE_VIEWER);
+        [, $newUserToken] = $this->invitation($municipality, $manager, 'nova@municipio.test', User::ROLE_AUDITOR);
+        [$existingUserInvitation, $existingUserToken] = $this->invitation($municipality, $manager, $otherUser->email, User::ROLE_EDITOR);
+
+        $this->actingAs($otherUser)
+            ->withSession(['active_municipality_id' => $otherUser->municipalities()->first()->id])
+            ->post(route('invitations.accept', $newUserToken))
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('users', 2);
+
+        [$anotherManager] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->actingAs($anotherManager)
+            ->withSession(['active_municipality_id' => $anotherManager->municipalities()->first()->id])
+            ->post(route('invitations.accept', $existingUserToken))
+            ->assertForbidden();
+
+        $this->assertNull($existingUserInvitation->fresh()->accepted_at);
+    }
+
+    public function test_guest_is_redirected_to_login_when_invitation_belongs_to_existing_account(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        [$existingUser] = $this->memberWithMunicipality(User::ROLE_VIEWER);
+        [, $token] = $this->invitation($municipality, $manager, $existingUser->email, User::ROLE_EDITOR);
+
+        $this->get(route('invitations.show', $token))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('status', 'Entre com o e-mail convidado para continuar.');
+
+        $this->assertGuest();
+    }
+
+    public function test_new_user_invitation_acceptance_requires_valid_registration_data(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        [$invitation, $token] = $this->invitation($municipality, $manager, 'nova@municipio.test', User::ROLE_AUDITOR);
+
+        $this->post(route('invitations.accept', $token), [
+            'password' => 'senha-segura',
+            'password_confirmation' => 'senha-segura',
+        ])->assertSessionHasErrors('name');
+
+        $this->post(route('invitations.accept', $token), [
+            'name' => 'Nova Auditora',
+            'password' => '123',
+            'password_confirmation' => '123',
+        ])->assertSessionHasErrors('password');
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 1);
+        $this->assertNull($invitation->fresh()->accepted_at);
     }
 
     public function test_expired_and_revoked_invitations_cannot_be_used(): void
