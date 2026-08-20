@@ -5,6 +5,9 @@ on:
     - cron: '7 * * * *'
   workflow_dispatch:
 
+permissions:
+  actions: write
+
 jobs:
   process:
     runs-on: ubuntu-latest
@@ -14,6 +17,7 @@ jobs:
         env:
           RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
           SCHEDULER_TOKEN: ${{ secrets.SCHEDULER_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$RENDER_APP_URL" ] || [ -z "$SCHEDULER_TOKEN" ]; then
             echo "::notice::Agendador aguardando os segredos do ambiente gratuito."
@@ -37,14 +41,31 @@ jobs:
 
           if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
             echo "Agendador processado com sucesso."
+            gh variable set SCHEDULER_CONSECUTIVE_FAILURES --body "0" --repo "$GITHUB_REPOSITORY" || true
             exit 0
           fi
 
+          # Um 502/503/504/000 isolado costuma ser o Render acordando do sono do
+          # plano gratuito (ja toleramos isso com os retries acima). Mas se persistir
+          # por execucoes seguidas (uma por hora), deixa de ser cold start e vira
+          # indisponibilidade real — foi assim que a queda de 20/08 ficou sem alerta
+          # por quase 1h. A partir da 2a ocorrencia consecutiva, falha alto.
           if [ "$status" = "502" ] || [ "$status" = "503" ] || [ "$status" = "504" ] || [ "$status" = "000" ]; then
-            echo "::notice::Render free indisponivel ou acordando agora. O proximo agendamento tentara novamente. HTTP $status."
+            failures="$(gh variable get SCHEDULER_CONSECUTIVE_FAILURES --repo "$GITHUB_REPOSITORY" 2>/dev/null || echo 0)"
+            failures="${failures:-0}"
+            failures=$((failures + 1))
+            gh variable set SCHEDULER_CONSECUTIVE_FAILURES --body "$failures" --repo "$GITHUB_REPOSITORY" || true
+
+            if [ "$failures" -ge 2 ]; then
+              echo "::error::Render indisponivel ha $failures execucoes seguidas (HTTP $status). Ja passou do cold start esperado, provavel indisponibilidade real."
+              exit 1
+            fi
+
+            echo "::notice::Render free indisponivel ou acordando agora (ocorrencia $failures). HTTP $status."
             exit 0
           fi
 
+          gh variable set SCHEDULER_CONSECUTIVE_FAILURES --body "0" --repo "$GITHUB_REPOSITORY" || true
           echo "::error::Agendador falhou com HTTP $status."
           cat /tmp/scheduler-response.txt || true
           exit 1
