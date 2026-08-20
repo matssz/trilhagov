@@ -390,6 +390,44 @@
                     <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
                 </div>
             </div>
+            @if($executiveDesk['cockpit'] ?? null)
+                @php($cockpit = $executiveDesk['cockpit'])
+                <div class="executive-decision-cockpit is-{{ $cockpit['tone'] ?? 'clear' }}" aria-label="Prioridade inteligente do Executivo">
+                    <article class="executive-decision-primary">
+                        <span><i data-lucide="{{ $cockpit['icon'] ?? 'route' }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>{{ $cockpit['kicker'] }}</small>
+                            <h3>{{ $cockpit['title'] }}</h3>
+                            <p>{{ $cockpit['description'] }}</p>
+                            @if($cockpit['proposal'])
+                                <dl>
+                                    <div><dt>Proposta</dt><dd>{{ $cockpit['proposal']->reference }}</dd></div>
+                                    <div><dt>Autor</dt><dd>{{ $cockpit['proposal']->author_name }}</dd></div>
+                                    <div><dt>Valor</dt><dd>R$ {{ number_format((float) $cockpit['amount'], 2, ',', '.') }}</dd></div>
+                                    <div><dt>Tempo</dt><dd>{{ $cockpit['age'] }} dia(s)</dd></div>
+                                </dl>
+                            @endif
+                        </div>
+                        <a class="btn btn-primary" href="{{ $cockpit['url'] }}">
+                            <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $cockpit['label'] }}
+                        </a>
+                    </article>
+                    <div class="executive-automation-cards">
+                        @foreach($executiveDesk['automation_cards'] as $card)
+                            <a class="is-{{ $card['tone'] }}" href="{{ $card['url'] }}">
+                                <span><i data-lucide="{{ $card['icon'] }}" aria-hidden="true"></i></span>
+                                <div>
+                                    <small>{{ $card['title'] }}</small>
+                                    <strong>{{ $card['count'] }} item(ns)</strong>
+                                    <p>{{ $card['status'] }}</p>
+                                    <em>R$ {{ number_format((float) $card['amount'], 2, ',', '.') }}</em>
+                                </div>
+                                <b>{{ $card['label'] }}</b>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             <div class="executive-command-panel" aria-label="Painel de comando do Executivo">
                 <div class="executive-command-summary">
                     <div>

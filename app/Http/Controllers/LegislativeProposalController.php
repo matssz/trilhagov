@@ -470,15 +470,18 @@ class LegislativeProposalController extends Controller
         $receive = collect($board)->firstWhere('key', 'receive');
         $budget = collect($board)->firstWhere('key', 'budget');
         $executionColumn = collect($board)->firstWhere('key', 'execution');
+        $firstPriority = $quickActions->first();
         $stageShortcuts = collect($executionColumn['items'] ?? [])
             ->filter(fn (LegislativeProposal $proposal): bool => $proposal->amendment !== null)
             ->take(4)
             ->map(function (LegislativeProposal $proposal): array {
                 $amendment = $proposal->amendment;
+                $nextStep = $proposal->getAttribute('executive_next_step') ?? $this->proposalNextStep($proposal, 'executive');
 
                 return [
                     'proposal' => $proposal,
                     'amendment' => $amendment,
+                    'next_step' => $nextStep,
                     'amount' => (float) ($proposal->budget_reserved_amount ?: $proposal->estimated_amount),
                     'links' => [
                         ['label' => 'Abrir emenda', 'icon' => 'file-text', 'href' => route('emendas.show', $amendment)],
@@ -490,6 +493,106 @@ class LegislativeProposalController extends Controller
                 ];
             })
             ->values();
+        $executionPriority = $stageShortcuts->first();
+        $cockpit = $firstPriority
+            ? [
+                'tone' => $firstPriority['late'] ? 'danger' : $firstPriority['column']['tone'],
+                'icon' => $firstPriority['late'] ? 'timer-reset' : $firstPriority['column']['icon'],
+                'kicker' => $firstPriority['late'] ? 'Atraso operacional' : 'Próxima decisão sugerida',
+                'title' => match ($firstPriority['column']['key']) {
+                    'review' => 'Conferir a proposta da Câmara',
+                    'receive' => 'Receber protocolo no Executivo',
+                    'budget' => 'Registrar reserva orçamentária',
+                    default => 'Abrir acompanhamento',
+                },
+                'description' => match ($firstPriority['column']['key']) {
+                    'review' => 'A proposta precisa de validação legislativa antes de virar protocolo formal.',
+                    'receive' => 'O protocolo já chegou da Câmara e precisa virar processo administrativo municipal.',
+                    'budget' => 'O processo foi recebido; falta confirmar dotação para liberar plano e execução.',
+                    default => 'Há uma emenda reservada aguardando continuidade operacional.',
+                },
+                'proposal' => $firstPriority['proposal'],
+                'amount' => (float) $firstPriority['proposal']->estimated_amount,
+                'age' => $firstPriority['age'],
+                'url' => $firstPriority['url'],
+                'label' => match ($firstPriority['column']['key']) {
+                    'receive' => 'Receber agora',
+                    'budget' => 'Reservar agora',
+                    'review' => 'Conferir agora',
+                    default => 'Abrir agora',
+                },
+            ]
+            : ($executionPriority
+                ? [
+                    'tone' => $executionPriority['next_step']['tone'] ?? 'execution',
+                    'icon' => $executionPriority['next_step']['icon'] ?? 'route',
+                    'kicker' => 'Continuidade executiva',
+                    'title' => $executionPriority['next_step']['title'],
+                    'description' => $executionPriority['next_step']['description'],
+                    'proposal' => $executionPriority['proposal'],
+                    'amount' => (float) $executionPriority['amount'],
+                    'age' => $this->proposalAgeDays($executionPriority['proposal']),
+                    'url' => $executionPriority['next_step']['href'],
+                    'label' => $executionPriority['next_step']['label'],
+                ]
+                : [
+                    'tone' => 'clear',
+                    'icon' => 'circle-check',
+                    'kicker' => 'Mesa em dia',
+                    'title' => 'Nenhuma decisão crítica agora',
+                    'description' => 'As filas principais estão sem pendência. Acompanhe novas entradas da Câmara e atualizações de execução.',
+                    'proposal' => null,
+                    'amount' => 0.0,
+                    'age' => 0,
+                    'url' => route('legislative.index', ['year' => $request->query('year')]),
+                    'label' => 'Atualizar mesa',
+                ]);
+        $automationCards = collect([
+            [
+                'key' => 'review',
+                'title' => 'Conferência',
+                'icon' => 'badge-check',
+                'count' => (int) $review['count'],
+                'amount' => (float) $review['amount'],
+                'status' => (int) $review['count'] > 0 ? 'Precisa de decisão da Câmara' : 'Sem conferência pendente',
+                'url' => $review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url'],
+                'label' => (int) $review['count'] > 0 ? 'Conferir' : 'Ver fila',
+                'tone' => 'review',
+            ],
+            [
+                'key' => 'receive',
+                'title' => 'Recebimento',
+                'icon' => 'inbox',
+                'count' => (int) $receive['count'],
+                'amount' => (float) $receive['amount'],
+                'status' => (int) $receive['count'] > 0 ? 'Protocolos aguardando processo' : 'Nada para receber',
+                'url' => $receive['items']->first()?->getAttribute('executive_board_url') ?? $receive['filter_url'],
+                'label' => (int) $receive['count'] > 0 ? 'Receber' : 'Ver fila',
+                'tone' => 'receive',
+            ],
+            [
+                'key' => 'budget',
+                'title' => 'Reserva',
+                'icon' => 'wallet-cards',
+                'count' => (int) $budget['count'],
+                'amount' => (float) $budget['amount'],
+                'status' => (int) $budget['count'] > 0 ? 'Dotação precisa ser confirmada' : 'Sem reserva pendente',
+                'url' => $budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url'],
+                'label' => (int) $budget['count'] > 0 ? 'Reservar' : 'Ver fila',
+                'tone' => 'budget',
+            ],
+            [
+                'key' => 'execution',
+                'title' => 'Execução',
+                'icon' => 'route',
+                'count' => (int) $executionColumn['count'],
+                'amount' => (float) $executionColumn['amount'],
+                'status' => (int) $executionColumn['count'] > 0 ? 'Plano, entrega ou prestação em aberto' : 'Sem execução aberta',
+                'url' => $executionPriority['next_step']['href'] ?? ($executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url']),
+                'label' => (int) $executionColumn['count'] > 0 ? 'Continuar' : 'Ver fila',
+                'tone' => 'execution',
+            ],
+        ]);
 
         return [
             'total' => $total,
@@ -504,6 +607,8 @@ class LegislativeProposalController extends Controller
             'stale_count' => (int) $actionable->sum('stale_count'),
             'quick_actions' => $quickActions,
             'stage_shortcuts' => $stageShortcuts,
+            'cockpit' => $cockpit,
+            'automation_cards' => $automationCards,
             'next_decisions' => $quickActions->take(3)->map(fn (array $action): array => [
                 'proposal' => $action['proposal'],
                 'column' => $action['column'],

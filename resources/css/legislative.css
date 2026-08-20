@@ -1748,6 +1748,237 @@
     color: var(--danger);
 }
 
+.executive-decision-cockpit {
+    display: grid;
+    grid-template-columns: minmax(340px, 1.1fr) minmax(420px, 1.4fr);
+    gap: 14px;
+    margin: 14px;
+}
+
+.executive-decision-primary,
+.executive-automation-cards a {
+    border: 1px solid rgba(9, 58, 103, .14);
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
+    box-shadow: 0 16px 34px rgba(9, 58, 103, .08);
+}
+
+.executive-decision-primary {
+    position: relative;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: 14px;
+    min-width: 0;
+    padding: 18px;
+    overflow: hidden;
+}
+
+.executive-decision-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--navy-900), #2c7ba6);
+}
+
+.executive-decision-cockpit.is-danger .executive-decision-primary::before {
+    background: linear-gradient(90deg, #b42318, #f97316);
+}
+
+.executive-decision-cockpit.is-budget .executive-decision-primary::before {
+    background: linear-gradient(90deg, #a16207, #eab308);
+}
+
+.executive-decision-cockpit.is-clear .executive-decision-primary::before {
+    background: linear-gradient(90deg, #047857, #34d399);
+}
+
+.executive-decision-primary > span {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border: 1px solid #c9dced;
+    border-radius: 12px;
+    background: #eef7ff;
+    color: var(--navy-900);
+}
+
+.executive-decision-primary svg {
+    width: 21px;
+    height: 21px;
+}
+
+.executive-decision-primary small,
+.executive-decision-primary h3,
+.executive-decision-primary p,
+.executive-decision-primary dt,
+.executive-decision-primary dd {
+    margin: 0;
+}
+
+.executive-decision-primary small {
+    color: #0f5ea8;
+    font-size: .68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.executive-decision-primary h3 {
+    margin-top: 3px;
+    color: var(--navy-950);
+    font-size: 1.15rem;
+    font-weight: 950;
+}
+
+.executive-decision-primary p {
+    max-width: 680px;
+    margin-top: 5px;
+    color: #53687f;
+    font-size: .8rem;
+    line-height: 1.45;
+}
+
+.executive-decision-primary dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.executive-decision-primary dl div {
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid #dbe7f1;
+    border-radius: 9px;
+    background: #f9fcff;
+}
+
+.executive-decision-primary dt {
+    color: #6a7d91;
+    font-size: .62rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.executive-decision-primary dd {
+    overflow: hidden;
+    margin-top: 2px;
+    color: var(--navy-950);
+    font-size: .72rem;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.executive-decision-primary .btn {
+    align-self: center;
+    white-space: nowrap;
+}
+
+.executive-automation-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.executive-automation-cards a {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+    padding: 12px;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.executive-automation-cards a:hover {
+    border-color: rgba(9, 58, 103, .28);
+    box-shadow: 0 18px 36px rgba(9, 58, 103, .12);
+    transform: translateY(-1px);
+}
+
+.executive-automation-cards a > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid #c7d8e6;
+    border-radius: 10px;
+    background: #eef6fb;
+    color: var(--navy-850);
+}
+
+.executive-automation-cards svg {
+    width: 17px;
+    height: 17px;
+}
+
+.executive-automation-cards small,
+.executive-automation-cards strong,
+.executive-automation-cards p,
+.executive-automation-cards em,
+.executive-automation-cards b {
+    display: block;
+    margin: 0;
+}
+
+.executive-automation-cards small {
+    color: #6a7d91;
+    font-size: .63rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.executive-automation-cards strong {
+    margin-top: 2px;
+    color: var(--navy-950);
+    font-size: .86rem;
+    font-weight: 950;
+}
+
+.executive-automation-cards p {
+    overflow: hidden;
+    margin-top: 2px;
+    color: #53687f;
+    font-size: .68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.executive-automation-cards em {
+    margin-top: 3px;
+    color: #0f5ea8;
+    font-size: .67rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.executive-automation-cards b {
+    padding: 7px 9px;
+    border: 1px solid #c9dced;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--navy-900);
+    font-size: .66rem;
+    font-weight: 950;
+    white-space: nowrap;
+}
+
+.executive-automation-cards a.is-budget > span {
+    border-color: rgba(214, 159, 37, .42);
+    background: #fff8e6;
+    color: #8a6409;
+}
+
+.executive-automation-cards a.is-execution > span {
+    border-color: rgba(83, 112, 255, .26);
+    background: #eef2ff;
+    color: #3140a5;
+}
+
 .executive-command-panel {
     display: grid;
     gap: 16px;
@@ -6136,6 +6367,10 @@
         grid-template-columns: 1fr;
     }
 
+    .executive-decision-cockpit {
+        grid-template-columns: 1fr;
+    }
+
     .legislative-executive-board .executive-next-decisions > div,
     .legislative-executive-board .executive-triage-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6151,8 +6386,22 @@
     }
 
     .legislative-executive-board .executive-next-decisions > div,
+    .executive-automation-cards,
     .legislative-executive-board .executive-triage-strip {
         grid-template-columns: 1fr;
+    }
+
+    .executive-decision-primary {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .executive-decision-primary .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .executive-decision-primary dl {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .legislative-councilor-home .councilor-next-action {
