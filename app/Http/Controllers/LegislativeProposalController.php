@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LegislativeProposal;
 use App\Models\MunicipalInstitution;
 use App\Models\Municipality;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\AuditTrail;
@@ -17,6 +18,7 @@ use App\Services\MunicipalTransparencyTrail;
 use App\Services\MunicipalWorkItemService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -108,14 +110,14 @@ class LegislativeProposalController extends Controller
     }
 
     /**
-     * @param array<string, mixed>|null $quota
+     * @param  array<string, mixed>|null  $quota
      * @return array<string, mixed>
      */
     private function councilorGuide(
         Municipality $municipality,
         int $userId,
         int $year,
-        ?\App\Models\MunicipalRegulatoryProfile $profile,
+        ?MunicipalRegulatoryProfile $profile,
         ?array $quota,
     ): array {
         $statusBase = $municipality->legislativeProposals()
@@ -235,7 +237,7 @@ class LegislativeProposalController extends Controller
     }
 
     /**
-     * @param array<string, mixed>|null $guide
+     * @param  array<string, mixed>|null  $guide
      * @return array<string, mixed>
      */
     private function councilorProposalGroups(
@@ -337,10 +339,10 @@ class LegislativeProposalController extends Controller
     }
 
     /**
-     * @param \Illuminate\Support\Collection<int, LegislativeProposal> $proposals
+     * @param  Collection<int, LegislativeProposal>  $proposals
      * @return array<int, array<string, mixed>>
      */
-    private function executiveBoard(\Illuminate\Support\Collection $proposals, int $year): array
+    private function executiveBoard(Collection $proposals, int $year): array
     {
         return collect([
             [
@@ -420,7 +422,7 @@ class LegislativeProposalController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $board
+     * @param  array<int, array<string, mixed>>  $board
      * @return array<string, mixed>
      */
     private function executiveDesk(array $board, Request $request, FormSubmission $formSubmission): array
@@ -466,6 +468,26 @@ class LegislativeProposalController extends Controller
         $receive = collect($board)->firstWhere('key', 'receive');
         $budget = collect($board)->firstWhere('key', 'budget');
         $executionColumn = collect($board)->firstWhere('key', 'execution');
+        $stageShortcuts = collect($executionColumn['items'] ?? [])
+            ->filter(fn (LegislativeProposal $proposal): bool => $proposal->amendment !== null)
+            ->take(4)
+            ->map(function (LegislativeProposal $proposal): array {
+                $amendment = $proposal->amendment;
+
+                return [
+                    'proposal' => $proposal,
+                    'amendment' => $amendment,
+                    'amount' => (float) ($proposal->budget_reserved_amount ?: $proposal->estimated_amount),
+                    'links' => [
+                        ['label' => 'Abrir emenda', 'icon' => 'file-text', 'href' => route('emendas.show', $amendment)],
+                        ['label' => 'Plano', 'icon' => 'clipboard-list', 'href' => route('emendas.work-plan', $amendment)],
+                        ['label' => 'Execução', 'icon' => 'gauge', 'href' => route('emendas.execution', $amendment)],
+                        ['label' => 'Prestação', 'icon' => 'archive', 'href' => route('emendas.accountability', $amendment)],
+                        ['label' => 'Dossiê', 'icon' => 'package-check', 'href' => route('emendas.accountability.dossier.pdf', $amendment)],
+                    ],
+                ];
+            })
+            ->values();
 
         return [
             'total' => $total,
@@ -479,6 +501,7 @@ class LegislativeProposalController extends Controller
             'stale' => $staleItems,
             'stale_count' => (int) $actionable->sum('stale_count'),
             'quick_actions' => $quickActions,
+            'stage_shortcuts' => $stageShortcuts,
             'next_decisions' => $quickActions->take(3)->map(fn (array $action): array => [
                 'proposal' => $action['proposal'],
                 'column' => $action['column'],
@@ -1088,7 +1111,7 @@ class LegislativeProposalController extends Controller
         ];
     }
 
-    /** @return array<string, \Illuminate\Support\Collection<int, MunicipalInstitution>> */
+    /** @return array<string, Collection<int, MunicipalInstitution>> */
     private function institutionSuggestions(Municipality $municipality): array
     {
         $institutions = $municipality->institutions()

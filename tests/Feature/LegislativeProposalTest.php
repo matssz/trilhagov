@@ -750,6 +750,28 @@ class LegislativeProposalTest extends TestCase
             'received_by' => $manager->id,
             'received_at' => now(),
         ]);
+        $amendment = ParliamentaryAmendment::factory()->for($municipality)->for($manager, 'creator')->create([
+            'municipal_regulatory_profile_id' => $profile->id,
+            'reference' => 'LEG-2027-EXEC',
+            'fiscal_year' => 2027,
+            'government_sphere' => 'municipal',
+            'transfer_type' => 'direct_execution',
+            'author_name' => 'Vereador Atalho',
+            'author_party' => 'PSD',
+            'object' => 'Modernizacao do centro de atendimento municipal.',
+            'status' => ParliamentaryAmendment::STATUS_PLAN_PENDING,
+            'expected_amount' => 125000,
+        ]);
+        $this->proposal($municipality, $profile, $councilor, [
+            'status' => LegislativeProposal::STATUS_RESERVED,
+            'reference' => 'LEG-2027-EXEC',
+            'object' => 'Modernizacao do centro de atendimento municipal.',
+            'estimated_amount' => 125000,
+            'budget_reserved_amount' => 125000,
+            'budget_reservation_number' => 'RES-2027-EXEC',
+            'budget_reserved_at' => now()->toDateString(),
+            'parliamentary_amendment_id' => $amendment->id,
+        ]);
 
         $this->actingAs($manager)
             ->withSession(['active_municipality_id' => $municipality->id])
@@ -768,6 +790,16 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Ordem sugerida pelo prazo')
             ->assertSee('3 decisões mais importantes')
             ->assertSee('Atalhos para o gestor resolver o que destrava Câmara, reserva e execução')
+            ->assertSee('Continuar fluxo executivo')
+            ->assertSee('Abrir emenda')
+            ->assertSee('Plano')
+            ->assertSee('Execução')
+            ->assertSee('Prestação')
+            ->assertSee('Dossiê')
+            ->assertSee('Modernizacao do centro de atendimento municipal')
+            ->assertSee(route('emendas.work-plan', $amendment))
+            ->assertSee(route('emendas.execution', $amendment))
+            ->assertSee(route('emendas.accountability', $amendment))
             ->assertSee('Receber como processo municipal')
             ->assertSee('Confirmar reserva orçamentária')
             ->assertSee('prioridade(s)')
@@ -781,6 +813,7 @@ class LegislativeProposalTest extends TestCase
             ->assertSee('Triagem rápida do Legislativo')
             ->assertSee('1 em Receber no Executivo')
             ->assertSee('1 em Reservar or')
+            ->assertSee('1 em Acompanhar execu')
             ->assertSee('1 atrasada(s)')
             ->assertSee('4 dia(s)')
             ->assertSee('Filtrar')

@@ -420,6 +420,35 @@
                         </li>
                     @endforeach
                 </ol>
+                @if (($executiveDesk['stage_shortcuts'] ?? collect())->isNotEmpty())
+                    <div class="executive-stage-shortcuts" aria-label="Atalhos diretos do fluxo executivo">
+                        <header>
+                            <span><i data-lucide="workflow" aria-hidden="true"></i></span>
+                            <div>
+                                <strong>Continuar fluxo executivo</strong>
+                                <small>Abra direto a emenda, o plano, a execução, a prestação ou o dossiê final.</small>
+                            </div>
+                        </header>
+                        <div>
+                            @foreach($executiveDesk['stage_shortcuts'] as $shortcut)
+                                <article>
+                                    <div>
+                                        <small>{{ $shortcut['proposal']->reference }} · {{ $shortcut['proposal']->author_name }}</small>
+                                        <strong>{{ $shortcut['proposal']->object }}</strong>
+                                        <em>Reserva R$ {{ number_format($shortcut['amount'], 2, ',', '.') }} · {{ $shortcut['amendment']->statusLabel() }}</em>
+                                    </div>
+                                    <nav aria-label="Atalhos de {{ $shortcut['proposal']->reference }}">
+                                        @foreach($shortcut['links'] as $link)
+                                            <a href="{{ $link['href'] }}">
+                                                <i data-lucide="{{ $link['icon'] }}" aria-hidden="true"></i>{{ $link['label'] }}
+                                            </a>
+                                        @endforeach
+                                    </nav>
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 <div class="executive-next-decisions" aria-label="Decisões executivas priorizadas">
                     <header>
                         <span><i data-lucide="list-checks" aria-hidden="true"></i></span>
