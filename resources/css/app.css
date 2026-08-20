@@ -13363,12 +13363,23 @@ a:focus-visible {
     }
 }
 
-/* Commercial emergency contrast layer: keep the landing bold, readable and never washed out. */
+/* Commercial emergency contrast layer: keep the landing bold, readable and never washed out.
+   All three layers are explicitly sized to one viewport height and pinned to the top,
+   rather than stretched across the whole (very tall, narrow) body box. Two bugs came
+   from skipping that: (1) a percentage radius on `circle` resolves against the
+   "farthest-corner" distance of the *whole* box, so on a page this long it used to
+   balloon into a several-hundred-px glow bleeding into the nav; (2) at 135deg, the
+   gradient line length is dominated by the document's total height, so a "70vh" color
+   stop landed at a steep diagonal that cut across the very top of the viewport instead
+   of staying confined to the hero. Sizing every layer to 100% 100vh sidesteps both --
+   the gradient math now runs inside a normally-proportioned box, and everything below
+   that first screen falls through to the plain fallback color. */
 .has-public-layout {
     background:
-        radial-gradient(circle at 12% 8%, rgba(0, 112, 204, .26), transparent 28%),
-        radial-gradient(circle at 86% 12%, rgba(223, 169, 36, .24), transparent 24%),
-        linear-gradient(135deg, #07182b 0%, #0b2744 70vh, #eaf4fb 70.2vh, #f7fbff 100%) !important;
+        radial-gradient(circle 360px at 10% 70px, rgba(0, 112, 204, .26), transparent) top / 100% 100vh no-repeat,
+        radial-gradient(circle 320px at 88% 90px, rgba(223, 169, 36, .24), transparent) top / 100% 100vh no-repeat,
+        linear-gradient(135deg, #07182b 0%, #0b2744 70%, #eaf4fb 96%, #f7fbff 100%) top / 100% 100vh no-repeat,
+        #f7fbff !important;
 }
 
 .commercial-page,
@@ -13737,10 +13748,14 @@ a:focus-visible {
     align-items: center;
     justify-content: space-between;
     gap: clamp(1rem, 3vw, 2.4rem);
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    backdrop-filter: none;
     padding: 1.15rem clamp(1.25rem, 4vw, 3rem);
     position: sticky;
     top: 0;
@@ -13760,15 +13775,20 @@ a:focus-visible {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
+    padding: 5px;
     border-radius: 10px;
-    background: #0a2540;
-    color: #f7f3ea;
-    font-family: var(--commercial-display-font);
-    font-weight: 650;
-    font-size: 1.05rem;
-    transition: background-color .35s ease;
+    background: #f7f3ea;
+    box-shadow: 0 2px 6px rgba(10, 37, 64, .18);
+    transition: background-color .35s ease, box-shadow .35s ease;
+}
+
+.commercial-page .commercial-nav-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .commercial-page .commercial-nav-wordmark {
@@ -14218,7 +14238,7 @@ a:focus-visible {
 .commercial-page .commercial-pipeline-track article {
     position: relative;
     overflow: hidden;
-    box-shadow: 0 1px 2px rgba(10, 37, 64, .04), 0 14px 30px rgba(10, 37, 64, .07) !important;
+    box-shadow: 0 1px 2px rgba(10, 37, 64, .05) !important;
     transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s cubic-bezier(.22, 1, .36, 1), border-color .3s ease;
 }
 

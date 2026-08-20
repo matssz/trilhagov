@@ -6,7 +6,7 @@
     <section class="commercial-page" aria-label="TrilhaGov">
         <div class="commercial-nav" data-commercial-nav>
             <a class="commercial-nav-brand" href="#" aria-label="TrilhaGov">
-                <span class="commercial-nav-logo">T</span>
+                <span class="commercial-nav-logo"><img src="{{ asset('images/trilhagov-symbol.svg') }}" alt=""></span>
                 <span class="commercial-nav-wordmark">TrilhaGov</span>
             </a>
             <div class="commercial-nav-links">
