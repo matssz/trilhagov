@@ -14238,8 +14238,22 @@ a:focus-visible {
 .commercial-page .commercial-pipeline-track article {
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 1px 2px rgba(10, 37, 64, .05) !important;
     transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s cubic-bezier(.22, 1, .36, 1), border-color .3s ease;
+}
+
+/* Titles wrap to one or two lines depending on the copy, which otherwise
+   starts each card's description at a different height and reads as
+   misaligned across the row. Pinning the title to a fixed two-line slot
+   keeps every description starting on the same baseline. */
+.commercial-page .commercial-decision-grid article strong,
+.commercial-page .commercial-showcase-grid article strong,
+.commercial-page .commercial-pipeline-track article strong {
+    display: block;
+    min-height: 2.6em;
+    line-height: 1.3;
 }
 
 .commercial-page .commercial-decision-grid article::before,

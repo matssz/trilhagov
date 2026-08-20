@@ -1081,33 +1081,37 @@ const initCommercialNavScroll = (nav) => {
 const initCommercialClickSound = (page) => {
     let audioCtx = null;
 
-    const playTick = () => {
+    const playTick = (frequencyStart = 880, frequencyEnd = 520, peakGain = 0.13) => {
         try {
             audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            const start = () => {
+                const now = audioCtx.currentTime;
+                const oscillator = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequencyStart, now);
+                oscillator.frequency.exponentialRampToValueAtTime(frequencyEnd, now + 0.09);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.012);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+                oscillator.connect(gain);
+                gain.connect(audioCtx.destination);
+                oscillator.start(now);
+                oscillator.stop(now + 0.15);
+            };
 
-            const now = audioCtx.currentTime;
-            const oscillator = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, now);
-            oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.08);
-            gain.gain.setValueAtTime(0.0001, now);
-            gain.gain.exponentialRampToValueAtTime(0.045, now + 0.012);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
-            oscillator.connect(gain);
-            gain.connect(audioCtx.destination);
-            oscillator.start(now);
-            oscillator.stop(now + 0.12);
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(start);
+            } else {
+                start();
+            }
         } catch {
             // Web Audio unavailable or blocked; the click still works silently.
         }
     };
 
-    page.querySelectorAll('.commercial-hero-actions .btn-primary, .commercial-nav-cta, .commercial-cta .btn-primary').forEach((button) => {
-        button.addEventListener('click', playTick);
+    page.querySelectorAll('.commercial-hero-actions .btn, .commercial-nav-cta, .commercial-cta .btn').forEach((button) => {
+        button.addEventListener('click', () => playTick(880, 520, 0.13));
     });
 };
 
