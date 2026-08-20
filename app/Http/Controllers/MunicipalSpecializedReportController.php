@@ -52,12 +52,12 @@ class MunicipalSpecializedReportController extends Controller
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
             'report_type' => ['required', Rule::in(array_keys(MunicipalSpecializedReport::types()))],
-            'fiscal_year' => ['required', 'integer', Rule::in([2026])],
+            'fiscal_year' => ['required', 'integer', Rule::in(config('services.municipal_reports.homologated_fiscal_years'))],
             'reference_month' => ['required', 'integer', 'between:1,12'],
             'difference_threshold' => ['nullable', 'integer', 'between:5,100'],
         ], [
             'report_type.in' => 'Selecione um modelo de relatório disponível.',
-            'fiscal_year.in' => 'A metodologia atual foi validada para o exercício de 2026.',
+            'fiscal_year.in' => 'A metodologia atual foi validada para o(s) exercício(s) de '.implode(', ', config('services.municipal_reports.homologated_fiscal_years')).'.',
             'reference_month.between' => 'Informe uma competência entre 01 e 12.',
             'difference_threshold.between' => 'A tolerância deve ficar entre 5 e 100 pontos percentuais.',
         ]);

@@ -54,10 +54,10 @@ class MunicipalGovernanceReportController extends Controller
         $this->ensureScope($municipality);
         $validated = $request->validate([
             '_submission_token' => ['required', 'string'],
-            'fiscal_year' => ['required', 'integer', Rule::in([2026])],
+            'fiscal_year' => ['required', 'integer', Rule::in(config('services.municipal_reports.homologated_fiscal_years'))],
             'reference_month' => ['required', 'integer', 'between:1,12'],
         ], [
-            'fiscal_year.in' => 'A metodologia atual foi validada para o exercício de 2026. A abertura de outro exercício exige revisão da base normativa.',
+            'fiscal_year.in' => 'A metodologia atual foi validada para o(s) exercício(s) de '.implode(', ', config('services.municipal_reports.homologated_fiscal_years')).'. A abertura de outro exercício exige revisão da base normativa.',
             'reference_month.between' => 'Informe uma competência mensal entre 01 e 12.',
         ]);
 

@@ -54,4 +54,15 @@ return [
         ))),
     ],
 
+    'municipal_reports' => [
+        // Exercícios para os quais a metodologia atual de Relatórios de Governança e
+        // Relatórios Especializados foi validada. Independente do parâmetro do Audesp
+        // acima -- são revisões de metodologia distintas, mesmo coincidindo no valor hoje.
+        // Ajuste via variável de ambiente (lista separada por vírgula) em vez de código.
+        'homologated_fiscal_years' => array_values(array_filter(array_map(
+            fn (string $year): int => (int) trim($year),
+            explode(',', (string) env('MUNICIPAL_REPORTS_HOMOLOGATED_FISCAL_YEARS', '2026')),
+        ))),
+    ],
+
 ];
