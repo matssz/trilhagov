@@ -14,7 +14,7 @@ class MarketingPageTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Emendas municipais sem planilha, sem retrabalho e sem apagar incêndio.')
+            ->assertSee('Emendas do início ao fim, sem retrabalho')
             ->assertSee('Entrar na demo')
             ->assertSee('Feito para municípios que não têm estrutura própria de tecnologia.');
     }
@@ -23,7 +23,7 @@ class MarketingPageTest extends TestCase
     {
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('Acessar demo')
+            ->assertSee('Entrar na demo')
             ->assertSee('Apresente o fluxo completo em poucos minutos.');
     }
 
@@ -34,7 +34,7 @@ class MarketingPageTest extends TestCase
         $this->actingAs($user)
             ->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('Acessar demo')
+            ->assertSee('Entrar na demo')
             ->assertDontSee('app-sidebar', false);
     }
 }

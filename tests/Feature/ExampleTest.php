@@ -10,7 +10,7 @@ class ExampleTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Emendas municipais sem planilha, sem retrabalho e sem apagar incêndio.')
+            ->assertSee('Emendas do início ao fim, sem retrabalho')
             ->assertSee('Entrar na demo');
     }
 

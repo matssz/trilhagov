@@ -1055,19 +1055,51 @@ const initProgressiveMotion = () => {
     });
 };
 
+const initCommercialNavScroll = (nav) => {
+    const threshold = 24;
+    let ticking = false;
+    let isScrolled = false;
+
+    const applyState = () => {
+        const shouldBeScrolled = window.scrollY > threshold;
+        if (shouldBeScrolled !== isScrolled) {
+            isScrolled = shouldBeScrolled;
+            nav.classList.toggle('is-scrolled', isScrolled);
+        }
+        ticking = false;
+    };
+
+    applyState();
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(applyState);
+            ticking = true;
+        }
+    }, { passive: true });
+};
+
 const initCommercialShowcase = () => {
     const page = document.querySelector('.commercial-page');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (!(page instanceof HTMLElement) || reduceMotion) {
+    if (!(page instanceof HTMLElement)) {
+        return;
+    }
+
+    const nav = page.querySelector('[data-commercial-nav]');
+    if (nav instanceof HTMLElement) {
+        initCommercialNavScroll(nav);
+    }
+
+    if (reduceMotion) {
         return;
     }
 
     gsap.timeline({ defaults: { ease: 'power3.out' } })
-        .from('.commercial-nav a', {
+        .from('.commercial-nav-brand, .commercial-nav-links a, .commercial-nav-cta', {
             autoAlpha: 0,
             y: -18,
-            stagger: 0.06,
+            stagger: 0.05,
             duration: 0.62,
         })
         .from('.commercial-hero-copy > *', {
@@ -1078,22 +1110,21 @@ const initCommercialShowcase = () => {
         }, '-=.25')
         .from('.commercial-product-stage', {
             autoAlpha: 0,
-            x: 46,
-            rotateY: -7,
-            scale: 0.94,
+            y: 32,
+            scale: 0.96,
             duration: 0.9,
         }, '-=.52')
-        .from('.commercial-command-row article, .commercial-mini-flow span', {
+        .from('.commercial-stage-stats article, .commercial-stage-pills span', {
             autoAlpha: 0,
-            y: 18,
+            y: 14,
             stagger: 0.045,
             duration: 0.5,
         }, '-=.45');
 
     gsap.to('.commercial-product-stage', {
-        yPercent: -5,
-        rotateX: 1.4,
+        yPercent: -4,
         ease: 'none',
+        force3D: true,
         scrollTrigger: {
             trigger: '.commercial-hero',
             start: 'top top',
@@ -1122,54 +1153,57 @@ const initCommercialShowcase = () => {
         });
     });
 
-    gsap.utils.toArray('[data-commercial-float]').forEach((element, index) => {
-        gsap.to(element, {
-            y: index % 2 === 0 ? -14 : 14,
-            x: index % 2 === 0 ? 8 : -8,
-            duration: 2.8 + index * 0.24,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
+    gsap.utils.toArray('.commercial-showcase-grid article').forEach((card, index) => {
+        gsap.fromTo(card, {
+            y: 36,
+            autoAlpha: 0,
+        }, {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.65,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: card,
+                start: 'top 88%',
+                toggleActions: 'play none none reverse',
+            },
+            delay: (index % 3) * 0.06,
         });
     });
 
-    gsap.utils.toArray('.sp-map-points circle').forEach((point, index) => {
-        gsap.to(point, {
-            scale: 1.9,
+    const mapCard = document.querySelector('[data-sp-map]');
+    if (mapCard instanceof HTMLElement) {
+        gsap.utils.toArray('.sp-map-points circle').forEach((point, index) => {
+            gsap.to(point, {
+                scale: 1.7,
+                transformOrigin: '50% 50%',
+                opacity: 0.6,
+                duration: 1.05 + (index % 3) * 0.16,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut',
+                delay: index * 0.08,
+                force3D: true,
+            });
+        });
+
+        gsap.to('.sp-map-route', {
+            strokeDashoffset: -240,
+            duration: 6.5,
+            repeat: -1,
+            ease: 'none',
+        });
+
+        gsap.to('.sp-map-shape', {
+            scale: 1.008,
             transformOrigin: '50% 50%',
-            opacity: 0.58,
-            duration: 1.05 + (index % 3) * 0.16,
+            duration: 5,
             repeat: -1,
             yoyo: true,
             ease: 'sine.inOut',
-            delay: index * 0.08,
+            force3D: true,
         });
-    });
-
-    gsap.to('.sp-map-shape', {
-        scale: 1.012,
-        transformOrigin: '50% 50%',
-        duration: 4.8,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-    });
-
-    gsap.to('.sp-map-city', {
-        y: -4,
-        duration: 2.4,
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.12,
-        ease: 'sine.inOut',
-    });
-
-    gsap.to('.sp-map-road, .sp-map-river', {
-        strokeDashoffset: -120,
-        duration: 5.8,
-        repeat: -1,
-        ease: 'none',
-    });
+    }
 };
 
 if (document.readyState === 'loading') {
