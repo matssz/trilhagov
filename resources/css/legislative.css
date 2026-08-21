@@ -7055,3 +7055,211 @@
     grid-column: 1 / -1;
     display: grid;
 }
+
+/* Final usability pass: the councilor and executive start from one decision surface. */
+.councilor-focus-board,
+.executive-decision-brief {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .9rem;
+    width: 100%;
+}
+
+.executive-decision-brief {
+    grid-template-columns: minmax(280px, 1.25fr) repeat(2, minmax(220px, 1fr));
+    margin: 0 0 1rem;
+}
+
+.councilor-focus-board article,
+.executive-decision-brief article {
+    position: relative;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .8rem;
+    min-height: 168px;
+    overflow: hidden;
+    padding: 1rem;
+    border: 1px solid rgba(162, 184, 206, .82);
+    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .99) 0%, rgba(245, 250, 253, .96) 100%);
+    box-shadow: 0 18px 34px rgba(7, 31, 61, .08);
+}
+
+.councilor-focus-board article::before,
+.executive-decision-brief article::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--navy-900), #2d6fa8);
+}
+
+.councilor-focus-board article.is-primary,
+.executive-decision-brief article.is-primary {
+    border-color: rgba(14, 63, 112, .32);
+    background: radial-gradient(circle at 100% 0%, rgba(46, 111, 168, .13), transparent 34%), linear-gradient(145deg, #fff 0%, #eef7ff 100%);
+}
+
+.councilor-focus-board article.needs-health,
+.executive-decision-brief article.is-warning {
+    border-color: rgba(198, 137, 22, .36);
+    background: radial-gradient(circle at 100% 0%, rgba(212, 166, 55, .16), transparent 36%), linear-gradient(145deg, #fff 0%, #fff9e9 100%);
+}
+
+.executive-decision-brief article.is-danger {
+    border-color: rgba(180, 35, 24, .3);
+    background: radial-gradient(circle at 100% 0%, rgba(220, 38, 38, .13), transparent 36%), linear-gradient(145deg, #fff 0%, #fff3f1 100%);
+}
+
+.councilor-focus-board article.is-ok,
+.executive-decision-brief article.is-clear {
+    border-color: rgba(5, 128, 93, .24);
+    background: radial-gradient(circle at 100% 0%, rgba(16, 185, 129, .12), transparent 36%), linear-gradient(145deg, #fff 0%, #f0fdf7 100%);
+}
+
+.councilor-focus-board article > span,
+.executive-decision-brief article > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid rgba(166, 190, 212, .95);
+    border-radius: 14px;
+    background: #eef7ff;
+    color: var(--navy-900);
+}
+
+.councilor-focus-board article.is-primary > span,
+.executive-decision-brief article.is-primary > span {
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.councilor-focus-board small,
+.councilor-focus-board strong,
+.councilor-focus-board p,
+.executive-decision-brief small,
+.executive-decision-brief strong,
+.executive-decision-brief p {
+    margin: 0;
+}
+
+.councilor-focus-board small,
+.executive-decision-brief small {
+    color: #0f5ea8;
+    font-size: .67rem;
+    font-weight: 950;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.councilor-focus-board strong,
+.executive-decision-brief strong {
+    display: block;
+    margin-top: .2rem;
+    color: var(--navy-950);
+    font-size: .98rem;
+    line-height: 1.18;
+}
+
+.councilor-focus-board p,
+.executive-decision-brief p {
+    margin-top: .38rem;
+    color: #4e637b;
+    font-size: .76rem;
+    line-height: 1.42;
+}
+
+.councilor-focus-board a,
+.councilor-focus-board em,
+.executive-decision-brief a {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: .44rem .76rem;
+    border: 1px solid #bcd1e4;
+    border-radius: 11px;
+    background: #fff;
+    color: var(--navy-900);
+    font-size: .72rem;
+    font-style: normal;
+    font-weight: 950;
+    text-decoration: none;
+}
+
+.councilor-focus-board a:hover,
+.executive-decision-brief a:hover {
+    border-color: rgba(18, 63, 112, .44);
+    background: #f3f8fd;
+}
+
+.legislative-councilor-home .councilor-operating-strip,
+.legislative-councilor-home .councilor-home-progress,
+.legislative-councilor-home .councilor-plain-cards,
+.legislative-councilor-home .councilor-simple-checklist,
+.legislative-councilor-home .councilor-decision-strip,
+.legislative-councilor-home .councilor-home-steps,
+.legislative-councilor-home .councilor-simple-guide {
+    display: none;
+}
+
+.legislative-councilor-home .councilor-decision-hub {
+    opacity: .92;
+}
+
+.legislative-councilor-home .councilor-mandate-panel {
+    margin-top: .15rem;
+}
+
+.legislative-councilor-home .councilor-mandate-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.legislative-councilor-home .councilor-action-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.legislative-councilor-home .councilor-next-action {
+    grid-column: 1 / -1;
+}
+
+.executive-decision-brief + .legislative-executive-desk {
+    margin-top: 0;
+}
+
+.legislative-executive-board .executive-decision-cockpit {
+    border-radius: 22px;
+}
+
+.legislative-executive-board .executive-action-queue {
+    border-color: rgba(18, 63, 112, .22);
+    background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(243, 248, 252, .96));
+}
+
+@media (max-width: 1180px) {
+    .councilor-focus-board,
+    .executive-decision-brief,
+    .legislative-councilor-home .councilor-mandate-grid,
+    .legislative-councilor-home .councilor-action-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .councilor-focus-board,
+    .executive-decision-brief,
+    .legislative-councilor-home .councilor-mandate-grid,
+    .legislative-councilor-home .councilor-action-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .councilor-focus-board article,
+    .executive-decision-brief article {
+        min-height: auto;
+    }
+}

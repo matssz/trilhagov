@@ -56,6 +56,48 @@
                     @endif
                     <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
                 </div>
+                <div class="councilor-focus-board" aria-label="Central simples do vereador">
+                    <article class="{{ ($councilorGuide['canCreate'] ?? false) ? 'is-primary' : 'is-locked' }}">
+                        <span><i data-lucide="{{ ($councilorGuide['canCreate'] ?? false) ? 'sparkles' : 'lock-keyhole' }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>O que fazer agora</small>
+                            <strong>{{ $councilorGuide['nextTitle'] ?? 'Acompanhar portal' }}</strong>
+                            <p>{{ $councilorGuide['nextText'] ?? 'Veja saldo, saúde e etapa das propostas sem abrir vários módulos.' }}</p>
+                        </div>
+                        @if ($councilorGuide['canCreate'] ?? false)
+                            <a href="{{ $councilorGuide['recommendedProposal']['url'] ?? route('legislative.create', ['year' => $year]) }}">Criar com orientação</a>
+                        @else
+                            <em>Aguardando gestor</em>
+                        @endif
+                    </article>
+                    <article>
+                        <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Saldo disponível</small>
+                            <strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong>
+                            <p>Valor livre para novas propostas dentro da cota individual do exercício.</p>
+                        </div>
+                        <a href="#explicacao-cota">Entender saldo</a>
+                    </article>
+                    <article class="{{ ($quota['health_gap'] ?? 0) > 0 ? 'needs-health' : 'is-ok' }}">
+                        <span><i data-lucide="heart-pulse" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Saúde automática</small>
+                            <strong>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Faltam R$ '.number_format($quota['health_gap'], 2, ',', '.') : 'Reserva atendida' }}</strong>
+                            <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Priorize saúde para evitar devolução na conferência.' : 'A norma municipal já está respeitada para sua carteira.' }}</p>
+                        </div>
+                        <a href="{{ $councilorGroups['next_url'] ?? '#acompanhamento-vereador' }}">Ver andamento</a>
+                    </article>
+                    <article>
+                        <span><i data-lucide="route" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Acompanhamento</small>
+                            <strong>{{ $councilorGroups['total_count'] ?? 0 }} proposta(s)</strong>
+                            <p>Veja se cada pedido está com você, Câmara, Executivo, execução ou prestação.</p>
+                        </div>
+                        <a href="#acompanhamento-vereador">Abrir esteira</a>
+                    </article>
+                </div>
                 <div class="councilor-decision-hub" aria-label="Ações essenciais do vereador">
                     <article class="{{ ($councilorGuide['canCreate'] ?? false) ? 'is-primary' : 'is-locked' }}">
                         <span><i data-lucide="{{ ($councilorGuide['canCreate'] ?? false) ? 'plus' : 'lock-keyhole' }}" aria-hidden="true"></i></span>
@@ -461,6 +503,36 @@
                     </div>
                 </div>
             @endif
+            @php($hasQuickActions = ($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
+            <div class="executive-decision-brief" aria-label="Resumo decisório do Executivo">
+                <article class="is-primary">
+                    <span><i data-lucide="{{ $cockpit['icon'] ?? 'route' }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Decisão agora</small>
+                        <strong>{{ $cockpit['title'] ?? 'Atualizar mesa' }}</strong>
+                        <p>{{ $cockpit['description'] ?? 'Abra a fila operacional para conferir o próximo movimento.' }}</p>
+                    </div>
+                    <a href="{{ $cockpit['url'] ?? '#kanban-executivo' }}">{{ $cockpit['label'] ?? 'Abrir' }}</a>
+                </article>
+                <article class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : (($executiveDesk['total'] ?? 0) > 0 ? 'is-warning' : 'is-clear') }}">
+                    <span><i data-lucide="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'timer-reset' : 'shield-check' }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Condição para avançar</small>
+                        <strong>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? ($executiveDesk['stale_count'].' fora do prazo') : (($executiveDesk['total'] ?? 0).' ação(ões) pendente(s)') }}</strong>
+                        <p>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'Resolva primeiro o item vencido para reduzir risco operacional.' : 'Recebimento, reserva e execução seguem a fila do Executivo.' }}</p>
+                    </div>
+                    <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">Ver fila</a>
+                </article>
+                <article>
+                    <span><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Atalho certo</small>
+                        <strong>{{ $hasQuickActions ? 'Fila rápida habilitada' : 'Kanban disponível' }}</strong>
+                        <p>{{ $hasQuickActions ? 'Use os botões da fila para receber ou reservar sem redigitar campos já conhecidos.' : 'Sem pendência imediata; acompanhe as etapas e filtros do portal.' }}</p>
+                    </div>
+                    <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">{{ $hasQuickActions ? 'Abrir fila rápida' : 'Ver etapas' }}</a>
+                </article>
+            </div>
             <div class="legislative-executive-desk">
                 <div class="executive-desk-focus {{ $executiveDesk['focus_class'] ?? '' }}">
                     <span><i data-lucide="{{ $executiveDesk['focus_icon'] ?? 'alert-circle' }}" aria-hidden="true"></i></span>
