@@ -90,6 +90,6 @@ class RegisteredUserController extends Controller
         $request->session()->regenerate();
         $currentMunicipality->activate($request, $municipality);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('municipal-onboarding.index');
     }
 }

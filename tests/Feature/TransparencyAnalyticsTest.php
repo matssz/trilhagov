@@ -7,6 +7,7 @@ use App\Models\ExecutionStage;
 use App\Models\FinancialCommitment;
 use App\Models\LegislativeProposal;
 use App\Models\Municipality;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\IntegrityAlertService;
@@ -90,9 +91,25 @@ class TransparencyAnalyticsTest extends TestCase
             ->assertSee('Revisar emendas');
     }
 
+    public function test_dashboard_prioritizes_activating_exercise_over_false_all_clear(): void
+    {
+        [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Painel do prefeito e gestor')
+            ->assertSee('Ativar o exercício do município')
+            ->assertSee(route('municipal-onboarding.index'), false)
+            ->assertSee('Ativar agora')
+            ->assertDontSee('Operação sob controle');
+    }
+
     public function test_dashboard_shows_mayor_briefing(): void
     {
         [$manager, $municipality] = $this->memberWithMunicipality(User::ROLE_MANAGER);
+        $this->activeProfile($municipality, $manager);
         $this->proposal($municipality, $manager, [
             'reference' => 'LEG-PREF-001',
             'status' => LegislativeProposal::STATUS_SENT,
@@ -345,6 +362,41 @@ class TransparencyAnalyticsTest extends TestCase
             ->for($municipality)
             ->for($user, 'creator')
             ->create($attributes);
+    }
+
+    private function activeProfile(Municipality $municipality, User $manager): MunicipalRegulatoryProfile
+    {
+        return $municipality->regulatoryProfiles()->create([
+            'created_by' => $manager->id,
+            'updated_by' => $manager->id,
+            'activated_by' => $manager->id,
+            'audesp_responsible_user_id' => $manager->id,
+            'fiscal_year' => 2026,
+            'version' => 1,
+            'status' => MunicipalRegulatoryProfile::STATUS_ACTIVE,
+            'regime_status' => MunicipalRegulatoryProfile::REGIME_INSTITUTED,
+            'previous_year_rcl' => 200000000,
+            'individual_limit_percentage' => 1.55,
+            'councilor_seats' => 13,
+            'health_reserve_percentage' => 50,
+            'health_reserve_method' => 'per_councilor',
+            'amendments_per_councilor_limit' => 20,
+            'minimum_amendment_amount' => 1,
+            'generic_amendments_prohibited' => true,
+            'prior_technical_review_required' => true,
+            'work_plan_required' => true,
+            'pca_check_required' => true,
+            'impediment_notice_days' => 30,
+            'impediment_correction_days' => 30,
+            'publication_business_days' => 5,
+            'document_retention_years' => 10,
+            'bank_traceability_rule' => 'direct_execution_traceability',
+            'audesp_registration_status' => 'ready',
+            'legal_review_responsible' => 'Procuradoria Municipal',
+            'legal_review_reference' => 'Parecer 001/2026',
+            'legal_reviewed_at' => today(),
+            'activated_at' => now(),
+        ]);
     }
 
     private function proposal(Municipality $municipality, User $user, array $attributes = []): LegislativeProposal

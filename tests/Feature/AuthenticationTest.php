@@ -29,7 +29,7 @@ class AuthenticationTest extends TestCase
             'ibge_code' => '3550308',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('municipal-onboarding.index'));
         $this->assertAuthenticated();
         $this->assertDatabaseHas('municipalities', [
             'name' => 'Municipio de Exemplo',

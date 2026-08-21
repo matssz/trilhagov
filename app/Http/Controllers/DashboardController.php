@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccountabilityProcess;
+use App\Models\LegislativeProposal;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\MunicipalWorkItem;
 use App\Models\ParliamentaryAmendment;
 use App\Models\User;
-use App\Models\AccountabilityProcess;
-use App\Models\LegislativeProposal;
 use App\Services\AmendmentAnalyticsService;
 use App\Services\CurrentMunicipality;
 use App\Services\FormSubmission;
@@ -46,13 +46,18 @@ class DashboardController extends Controller
 
         $isManager = $request->user()->roleForMunicipality($municipality->id) === 'manager';
         $canEdit = $request->user()->canEditMunicipality($municipality->id);
+        $activeProfile = $municipality->regulatoryProfiles()
+            ->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)
+            ->latest('fiscal_year')
+            ->latest('version')
+            ->first();
 
         return view('dashboard', [
             'municipality' => $municipality,
             'analytics' => $analytics,
-            'municipalHealth' => $this->municipalHealth($municipality, $isManager, $canEdit),
+            'municipalHealth' => $this->municipalHealth($municipality, $isManager, $canEdit, $activeProfile),
             'executiveCycle' => $this->executiveCycle($municipality, $amendments),
-            'mayorBriefing' => $this->mayorBriefing($municipality, $analytics, $amendments),
+            'mayorBriefing' => $this->mayorBriefing($municipality, $analytics, $amendments, $activeProfile, $isManager),
             'filters' => $filters,
             'years' => $options['years'],
             'departments' => $options['departments'],
@@ -69,7 +74,7 @@ class DashboardController extends Controller
     }
 
     /** @param Collection<int, ParliamentaryAmendment> $amendments @return array<string, mixed> */
-    private function mayorBriefing($municipality, array $analytics, Collection $amendments): array
+    private function mayorBriefing($municipality, array $analytics, Collection $amendments, ?MunicipalRegulatoryProfile $activeProfile, bool $isManager): array
     {
         $summary = $analytics['summary'];
         $openProposals = $municipality->legislativeProposals()
@@ -86,11 +91,6 @@ class DashboardController extends Controller
         $healthExpected = (float) $amendments
             ->filter(fn (ParliamentaryAmendment $amendment) => $amendment->indicated_for_health === true || $amendment->municipalWorkPlan?->health_related === true)
             ->sum('expected_amount');
-        $activeProfile = $municipality->regulatoryProfiles()
-            ->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)
-            ->latest('fiscal_year')
-            ->latest('version')
-            ->first();
         $healthRequired = $activeProfile && (float) $summary['expected'] > 0
             ? (float) $summary['expected'] * (float) $activeProfile->health_reserve_percentage / 100
             : null;
@@ -105,6 +105,14 @@ class DashboardController extends Controller
             ->count();
 
         $decision = match (true) {
+            ! $activeProfile && $isManager => [
+                'tone' => 'warning',
+                'icon' => 'rocket',
+                'title' => 'Ativar o exercício do município',
+                'description' => 'Sem exercício ativo, a Câmara, o Executivo e os atalhos operacionais ficam bloqueados.',
+                'route' => route('municipal-onboarding.index'),
+                'action' => 'Ativar agora',
+            ],
             $summary['overdue'] > 0 || $overdueWork > 0 => [
                 'tone' => 'danger',
                 'icon' => 'timer-reset',
@@ -313,13 +321,8 @@ class DashboardController extends Controller
     }
 
     /** @return array{score: int, tone: string, title: string, subtitle: string, checks: array<int, array{label: string, value: string, ok: bool, icon: string, route: string, action: string}>} */
-    private function municipalHealth($municipality, bool $isManager, bool $canEdit): array
+    private function municipalHealth($municipality, bool $isManager, bool $canEdit, ?MunicipalRegulatoryProfile $activeProfile): array
     {
-        $activeProfile = $municipality->regulatoryProfiles()
-            ->where('status', MunicipalRegulatoryProfile::STATUS_ACTIVE)
-            ->latest('fiscal_year')
-            ->latest('version')
-            ->first();
         $hasCouncil = $municipality->users()
             ->wherePivotIn('role', [User::ROLE_COUNCILOR, User::ROLE_LEGISLATIVE_REVIEWER])
             ->exists();
@@ -337,7 +340,7 @@ class DashboardController extends Controller
                 'value' => $activeProfile ? "{$activeProfile->fiscal_year} liberado" : 'Pendente',
                 'ok' => $activeProfile !== null,
                 'icon' => 'landmark',
-                'route' => route('municipal-rules.index'),
+                'route' => ! $activeProfile && $isManager ? route('municipal-onboarding.index') : route('municipal-rules.index'),
                 'action' => $activeProfile ? 'Ver normas' : 'Ativar exercício',
             ],
             [
