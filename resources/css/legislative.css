@@ -7507,7 +7507,9 @@
     justify-items: center;
     column-gap: .45rem;
     padding: .62rem .66rem;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
 }
 
 .legislative-executive-board .executive-flow-lane a svg {
