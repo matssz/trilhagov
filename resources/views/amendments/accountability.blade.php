@@ -449,6 +449,30 @@
             <div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="{{ route('emendas.accountability.dossier.pdf', $amendment) }}"><i data-lucide="file-text" aria-hidden="true"></i>PDF executivo</a><a class="btn btn-primary" href="{{ route('emendas.accountability.dossier.package', $amendment) }}"><i data-lucide="package-check" aria-hidden="true"></i>Pacote com anexos</a></div>
         </section>
 
+        <section class="accountability-final-command tone-{{ $accountabilityGuide['finalCommand']['tone'] }}" aria-label="Comando final da prestação de contas">
+            <div class="accountability-final-command-main">
+                <span><i data-lucide="{{ $accountabilityGuide['finalCommand']['primary']['icon'] }}" aria-hidden="true"></i></span>
+                <div>
+                    <p class="page-kicker mb-1">Comando final</p>
+                    <h2 class="h5 mb-1">{{ $accountabilityGuide['finalCommand']['title'] }}</h2>
+                    <p>{{ $accountabilityGuide['finalCommand']['description'] }}</p>
+                </div>
+                <a class="btn btn-primary" href="{{ $accountabilityGuide['finalCommand']['primary']['href'] }}">
+                    <i data-lucide="{{ $accountabilityGuide['finalCommand']['primary']['icon'] }}" aria-hidden="true"></i>{{ $accountabilityGuide['finalCommand']['primary']['label'] }}
+                </a>
+            </div>
+            <div class="accountability-final-command-facts">
+                @foreach ($accountabilityGuide['finalCommand']['facts'] as $fact)
+                    <article><small>{{ $fact['label'] }}</small><strong>{{ $fact['value'] }}</strong></article>
+                @endforeach
+            </div>
+            <div class="accountability-final-command-actions">
+                @foreach ($accountabilityGuide['finalCommand']['secondary'] as $action)
+                    <a href="{{ $action['href'] }}"><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i>{{ $action['label'] }}</a>
+                @endforeach
+            </div>
+        </section>
+
         <section class="accountability-final-package mb-4" id="prestacao-final">
             <div class="accountability-final-copy">
                 <span><i data-lucide="{{ $accountabilityGuide['finalPackage']['ready'] ? 'badge-check' : 'loader-circle' }}" aria-hidden="true"></i>Fechamento final</span>

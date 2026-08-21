@@ -22,9 +22,25 @@
         <div class="legislative-notice is-warning"><i data-lucide="triangle-alert" aria-hidden="true"></i><div><strong>Cota individual provisória</strong><p>Informe o número de vereadores na configuração municipal para dividir corretamente o teto global da Câmara.</p></div></div>
     @endif
 
+    <nav class="legislative-quick-nav" aria-label="Atalhos do Portal Legislativo">
+        <a href="#{{ $role === App\Models\User::ROLE_COUNCILOR ? 'resumo-vereador' : ($executiveBoard ? 'mesa-executivo' : 'minhas-propostas') }}">
+            <i data-lucide="{{ $role === App\Models\User::ROLE_COUNCILOR ? 'wallet-cards' : 'layout-dashboard' }}" aria-hidden="true"></i>
+            <span>{{ $role === App\Models\User::ROLE_COUNCILOR ? 'Meu resumo' : ($executiveBoard ? 'Mesa do Executivo' : 'Resumo') }}</span>
+        </a>
+        @if ($role === App\Models\User::ROLE_COUNCILOR)
+            <a href="#acompanhamento-vereador"><i data-lucide="route" aria-hidden="true"></i><span>Acompanhamento</span></a>
+            <a href="#explicacao-cota"><i data-lucide="info" aria-hidden="true"></i><span>Entender cota</span></a>
+        @elseif ($executiveBoard)
+            <a href="#fila-executivo"><i data-lucide="list-checks" aria-hidden="true"></i><span>Fila rápida</span></a>
+            <a href="#kanban-executivo"><i data-lucide="columns-3" aria-hidden="true"></i><span>Etapas</span></a>
+        @endif
+        <a href="#filtros-legislativo"><i data-lucide="list-filter" aria-hidden="true"></i><span>Filtros</span></a>
+        <a href="#minhas-propostas"><i data-lucide="search" aria-hidden="true"></i><span>Lista</span></a>
+    </nav>
+
     @if ($quota)
         @if ($role === App\Models\User::ROLE_COUNCILOR)
-            <section class="legislative-councilor-home">
+            <section class="legislative-councilor-home" id="resumo-vereador">
                 <div class="councilor-home-main">
                     <span class="page-kicker">Minha cota</span>
                     <h2>{{ $quota['remaining'] === null ? 'Cota em configuração' : 'R$ '.number_format($quota['remaining'], 2, ',', '.').' disponíveis' }}</h2>
@@ -279,7 +295,7 @@
                 </div>
             </section>
 
-            <section class="councilor-workspace" aria-label="Painel do vereador">
+            <section class="councilor-workspace" id="acompanhamento-vereador" aria-label="Painel do vereador">
                 <div class="councilor-workspace-header">
                     <div>
                         <span class="page-kicker">Meu acompanhamento</span>
@@ -361,7 +377,7 @@
     @endif
 
     @if ($executiveBoard)
-        <section class="content-panel legislative-executive-board">
+        <section class="content-panel legislative-executive-board" id="mesa-executivo">
             <div class="content-panel-header">
                 <div>
                     <p class="panel-kicker">Mesa do Executivo</p>
@@ -517,7 +533,7 @@
                 </div>
             </div>
             @if (($executiveDesk['quick_actions'] ?? collect())->isNotEmpty())
-                <div class="executive-action-queue" aria-label="Fila rápida do Executivo">
+                <div class="executive-action-queue" id="fila-executivo" aria-label="Fila rápida do Executivo">
                     <header>
                         <div>
                             <strong>Fila rápida de atendimento</strong>
@@ -588,7 +604,7 @@
                     </a>
                 @endforeach
             </div>
-            <div class="legislative-board-grid">
+            <div class="legislative-board-grid" id="kanban-executivo">
                 @foreach ($executiveBoard as $column)
                     <article class="legislative-board-column is-{{ $column['tone'] }}">
                         <header>
@@ -635,7 +651,7 @@
         </section>
     @endif
 
-    <form class="legislative-filters" method="GET">
+    <form class="legislative-filters" id="filtros-legislativo" method="GET">
         <label><span>Exercício</span><select class="form-select" name="year">@foreach(collect([$year, ...$activeYears])->unique()->sortDesc() as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}{{ in_array($availableYear, $activeYears, true) ? ' · ativo' : ' · sem regra ativa' }}</option>@endforeach</select></label>
         <label><span>Situação</span><select class="form-select" name="status"><option value="">Todas</option>@foreach($statuses as $value => $label)<option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>@endforeach</select></label>
         @if($executiveBoard)

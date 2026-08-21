@@ -419,6 +419,36 @@ class AccountabilityService
                     'done' => $process?->approved_at !== null || $ready,
                 ],
             ],
+            'finalCommand' => [
+                'tone' => $process?->approved_at
+                    ? 'success'
+                    : ($ready ? 'primary' : 'warning'),
+                'title' => $process?->approved_at
+                    ? 'Prestação encerrada para consulta'
+                    : ($ready ? 'Pronta para protocolo e arquivo' : 'Fechamento ainda precisa de decisão'),
+                'description' => $process?->approved_at
+                    ? 'O pacote final permanece disponível para auditoria, Câmara e controle interno.'
+                    : ($ready
+                        ? 'Registre o protocolo, baixe o pacote e arquive a prestação quando houver aprovação final.'
+                        : 'Use a próxima ação sugerida para destravar checklist, execução, evidências ou saldo.'),
+                'primary' => [
+                    'icon' => $process?->approved_at ? 'package-check' : ($ready ? 'send' : $next['icon']),
+                    'label' => $process?->approved_at ? 'Baixar pacote' : ($ready ? 'Protocolar agora' : $next['label']),
+                    'href' => $process?->approved_at ? '#dossie-prestacao' : ($ready ? '#envio-prestacao' : $next['href']),
+                ],
+                'secondary' => collect([
+                    ['icon' => 'file-text', 'label' => 'PDF executivo', 'href' => '#dossie-prestacao', 'enabled' => $hasProcess],
+                    ['icon' => 'package-check', 'label' => 'Pacote de anexos', 'href' => '#dossie-prestacao', 'enabled' => $hasProcess],
+                    ['icon' => 'route', 'label' => 'Execução', 'href' => route('emendas.execution', $amendment), 'enabled' => true],
+                    ['icon' => 'list-checks', 'label' => 'Checklist', 'href' => $hasProcess ? '#requirements' : '#iniciar-prestacao', 'enabled' => true],
+                ])->filter(fn (array $action) => $action['enabled'])->values()->all(),
+                'facts' => [
+                    ['label' => 'Protocolo', 'value' => $protocolLabel],
+                    ['label' => 'Dossiê', 'value' => $hasProcess ? 'Disponível' : 'Aguardando'],
+                    ['label' => 'Evidências', 'value' => $evidenceCount.' vinculada(s)'],
+                    ['label' => 'Saldo', 'value' => 'R$ '.number_format($financial['unreconciled'], 2, ',', '.')],
+                ],
+            ],
         ];
     }
 
