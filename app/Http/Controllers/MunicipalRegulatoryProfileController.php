@@ -16,8 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class MunicipalRegulatoryProfileController extends Controller
@@ -201,30 +206,66 @@ class MunicipalRegulatoryProfileController extends Controller
             'effective_from' => ['nullable', 'date'],
             'effective_until' => ['nullable', 'date', 'after_or_equal:effective_from'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'document' => ['nullable', File::types(['pdf', 'doc', 'docx'])->max('10mb')],
         ]);
 
         if (! $formSubmission->consume($request, "municipal-rules-instrument-{$rules->id}")) {
             return back()->with('warning', 'Este instrumento já foi processado.');
         }
 
-        $appliedDefaults = [];
-        DB::transaction(function () use ($request, $municipality, $rules, $validated, $organicLawAutomation, $auditTrail, &$appliedDefaults): void {
-            $instrument = $rules->instruments()->create([
-                ...Arr::except($validated, '_submission_token'),
-                'municipality_id' => $municipality->id,
-                'created_by' => $request->user()->id,
-            ]);
-            if ($instrument->type === 'organic_law') {
-                $appliedDefaults = $organicLawAutomation->applyTo($rules);
+        $fileAttributes = [];
+        $storagePath = null;
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $extension = $file->extension() ?: strtolower($file->getClientOriginalExtension());
+            $storagePath = Storage::putFileAs("normative-instruments/{$municipality->id}/{$rules->id}", $file, Str::uuid().'.'.$extension);
+
+            if (! $storagePath) {
+                throw ValidationException::withMessages([
+                    'document' => 'Não foi possível armazenar o arquivo. Tente novamente.',
+                ]);
             }
-            $auditTrail->recordMunicipalityOperation($request, $municipality, 'municipal_instrument_created', [
-                'profile_id' => $rules->id,
-                'normative_instrument' => $instrument->title,
-                'instrument_type' => $instrument->type,
-                'reference' => $instrument->reference,
-                'organic_law_defaults_applied' => array_keys($appliedDefaults),
-            ]);
-        });
+
+            $fileAttributes = [
+                'uploaded_by' => $request->user()->id,
+                'original_name' => Str::of(basename($file->getClientOriginalName()))
+                    ->replaceMatches('/[\x00-\x1F\x7F]/u', '')
+                    ->limit(255, '')
+                    ->toString(),
+                'storage_path' => $storagePath,
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'size_bytes' => $file->getSize(),
+            ];
+        }
+
+        $appliedDefaults = [];
+        try {
+            DB::transaction(function () use ($request, $municipality, $rules, $validated, $fileAttributes, $organicLawAutomation, $auditTrail, &$appliedDefaults): void {
+                $instrument = $rules->instruments()->create([
+                    ...Arr::except($validated, ['_submission_token', 'document']),
+                    ...$fileAttributes,
+                    'municipality_id' => $municipality->id,
+                    'created_by' => $request->user()->id,
+                ]);
+                if ($instrument->type === 'organic_law') {
+                    $appliedDefaults = $organicLawAutomation->applyTo($rules);
+                }
+                $auditTrail->recordMunicipalityOperation($request, $municipality, 'municipal_instrument_created', [
+                    'profile_id' => $rules->id,
+                    'normative_instrument' => $instrument->title,
+                    'instrument_type' => $instrument->type,
+                    'reference' => $instrument->reference,
+                    'organic_law_defaults_applied' => array_keys($appliedDefaults),
+                    'document_attached' => $instrument->hasFile(),
+                ]);
+            });
+        } catch (Throwable $exception) {
+            if ($storagePath) {
+                Storage::delete($storagePath);
+            }
+
+            throw $exception;
+        }
 
         if ($validated['type'] === 'organic_law' && $appliedDefaults !== []) {
             return back()->with('status', 'Lei Organica vinculada. Parametros-padrao aplicados automaticamente; informe apenas RCL e cadeiras se ainda estiverem pendentes.');
@@ -255,6 +296,25 @@ class MunicipalRegulatoryProfileController extends Controller
         });
 
         return back()->with('status', 'Instrumento removido da revisão em preparação.');
+    }
+
+    public function downloadInstrument(
+        Request $request,
+        int $profile,
+        int $instrument,
+        CurrentMunicipality $currentMunicipality,
+    ): StreamedResponse {
+        $municipality = $currentMunicipality->get($request);
+        $rules = $municipality->regulatoryProfiles()->findOrFail($profile);
+        $norm = $rules->instruments()->where('municipality_id', $municipality->id)->findOrFail($instrument);
+
+        abort_unless($norm->hasFile() && Storage::exists($norm->storage_path), 404);
+
+        return Storage::download(
+            $norm->storage_path,
+            $norm->original_name,
+            ['Content-Type' => $norm->mime_type],
+        );
     }
 
     public function activate(

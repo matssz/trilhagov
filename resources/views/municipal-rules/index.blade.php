@@ -182,6 +182,9 @@
                                 <strong>{{ $instrument->title }}</strong>
                                 <span>{{ $instrument->reference }}{{ $instrument->enacted_at ? ' · '.$instrument->enacted_at->format('d/m/Y') : '' }}</span>
                             </div>
+                            @if ($instrument->hasFile())
+                                <a class="icon-button" href="{{ route('municipal-rules.instruments.download', [$profile, $instrument]) }}" title="Baixar documento ({{ $instrument->formattedSize() }})" aria-label="Baixar documento"><i data-lucide="file-down" aria-hidden="true"></i></a>
+                            @endif
                             @if ($instrument->url)<a class="icon-button" href="{{ $instrument->url }}" target="_blank" rel="noopener noreferrer" title="Abrir fonte" aria-label="Abrir fonte"><i data-lucide="external-link" aria-hidden="true"></i></a>@endif
                             @if ($canManage && $profile->isDraft())
                                 <form method="POST" action="{{ route('municipal-rules.instruments.destroy', [$profile, $instrument]) }}" onsubmit="return confirm('Remover este instrumento da revisão?')">
@@ -195,16 +198,17 @@
             @endif
 
             @if ($canManage && $profile->isDraft())
-                <details class="instrument-create" @if($errors->hasAny(['type', 'title', 'reference', 'url', 'enacted_at', 'effective_from', 'effective_until'])) open @endif>
+                <details class="instrument-create" @if($errors->hasAny(['type', 'title', 'reference', 'url', 'document', 'enacted_at', 'effective_from', 'effective_until'])) open @endif>
                     <summary><i data-lucide="plus" aria-hidden="true"></i>Adicionar instrumento</summary>
-                    <form method="POST" action="{{ route('municipal-rules.instruments.store', $profile) }}" data-prevent-double-submit>
+                    <form method="POST" action="{{ route('municipal-rules.instruments.store', $profile) }}" enctype="multipart/form-data" data-prevent-double-submit>
                         @csrf
                         <input type="hidden" name="_submission_token" value="{{ $instrumentToken }}">
                         <label><span>Tipo <b>*</b></span><select class="form-select" name="type" required><option value="">Selecione</option>@foreach(App\Models\MunicipalNormativeInstrument::types() as $value => $label)<option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>@endforeach</select></label>
                         <label><span>Título <b>*</b></span><input class="form-control" name="title" value="{{ old('title') }}" maxlength="255" required></label>
                         <label><span>Número ou referência <b>*</b></span><input class="form-control" name="reference" value="{{ old('reference') }}" maxlength="180" required></label>
                         <label><span>Data do ato</span><input class="form-control" name="enacted_at" type="date" value="{{ old('enacted_at') }}"></label>
-                        <label class="span-2"><span>Fonte oficial</span><input class="form-control" name="url" type="url" value="{{ old('url') }}" placeholder="https://..."></label>
+                        <label class="span-2"><span>Fonte oficial (link)</span><input class="form-control" name="url" type="url" value="{{ old('url') }}" placeholder="https://..."></label>
+                        <label class="span-2"><span>Arquivo do documento (PDF, DOC ou DOCX, até 10 MB)</span><input class="form-control" name="document" type="file" accept=".pdf,.doc,.docx"></label>
                         <label><span>Início da vigência</span><input class="form-control" name="effective_from" type="date" value="{{ old('effective_from') }}"></label>
                         <label><span>Fim da vigência</span><input class="form-control" name="effective_until" type="date" value="{{ old('effective_until') }}"></label>
                         <label class="span-2"><span>Observações</span><textarea class="form-control" name="notes" rows="2" maxlength="2000">{{ old('notes') }}</textarea></label>

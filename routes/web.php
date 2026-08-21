@@ -157,6 +157,7 @@ Route::middleware(['auth', 'municipality'])->group(function () {
             Route::get('/audesp/cadastros/{batch}', [AudespRegistrationImportController::class, 'show'])->name('audesp-registration-imports.show');
         });
         Route::get('/configuracoes/normas-municipais', [MunicipalRegulatoryProfileController::class, 'index'])->name('municipal-rules.index');
+        Route::get('/configuracoes/normas-municipais/{profile}/instrumentos/{instrument}/documento', [MunicipalRegulatoryProfileController::class, 'downloadInstrument'])->name('municipal-rules.instruments.download');
         Route::get('/conformidade-municipal-tcesp', MunicipalTcespAdherenceController::class)->name('municipal-tcesp-adherence.index');
     });
     Route::get('/notificacoes', [NotificationCenterController::class, 'index'])->name('notifications.index');

@@ -10,12 +10,18 @@ class MunicipalNormativeInstrument extends Model
     protected $fillable = [
         'municipality_id', 'municipal_regulatory_profile_id', 'created_by',
         'type', 'title', 'reference', 'url', 'enacted_at', 'effective_from',
-        'effective_until', 'notes',
+        'effective_until', 'notes', 'uploaded_by', 'original_name',
+        'storage_path', 'mime_type', 'size_bytes',
     ];
 
     protected function casts(): array
     {
-        return ['enacted_at' => 'date', 'effective_from' => 'date', 'effective_until' => 'date'];
+        return [
+            'enacted_at' => 'date',
+            'effective_from' => 'date',
+            'effective_until' => 'date',
+            'size_bytes' => 'integer',
+        ];
     }
 
     public static function types(): array
@@ -47,8 +53,31 @@ class MunicipalNormativeInstrument extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function uploader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
     public function typeLabel(): string
     {
         return self::types()[$this->type] ?? $this->type;
+    }
+
+    public function hasFile(): bool
+    {
+        return filled($this->storage_path);
+    }
+
+    public function formattedSize(): string
+    {
+        if ($this->size_bytes === null) {
+            return '';
+        }
+
+        if ($this->size_bytes < 1024 * 1024) {
+            return number_format(max(1, (int) ceil($this->size_bytes / 1024)), 0, ',', '.').' KB';
+        }
+
+        return number_format($this->size_bytes / (1024 * 1024), 1, ',', '.').' MB';
     }
 }

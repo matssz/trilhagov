@@ -9,6 +9,8 @@ use App\Models\ParliamentaryAmendment;
 use App\Models\User;
 use App\Services\LegislativeProposalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use LogicException;
 use Tests\TestCase;
@@ -161,6 +163,88 @@ class MunicipalRegulatoryProfileTest extends TestCase
         $this->assertSame('50.0000', $profile->health_reserve_percentage);
         $this->assertSame('per_councilor', $profile->health_reserve_method);
         $this->assertTrue($profile->generic_amendments_prohibited);
+    }
+
+    public function test_manager_can_attach_a_document_to_a_normative_instrument(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $token = $this->submissionSession($municipality, "municipal-rules-instrument-{$profile->id}");
+
+        $this->actingAs($manager)->post(route('municipal-rules.instruments.store', $profile), [
+            '_submission_token' => $token,
+            'type' => 'organic_law',
+            'title' => 'Lei Organica Municipal',
+            'reference' => 'LOM/2026',
+            'document' => UploadedFile::fake()->create('lei-organica.pdf', 200, 'application/pdf'),
+        ])->assertSessionHas('status');
+
+        $instrument = MunicipalNormativeInstrument::firstOrFail();
+        $this->assertTrue($instrument->hasFile());
+        $this->assertSame($manager->id, $instrument->uploaded_by);
+        $this->assertSame('lei-organica.pdf', $instrument->original_name);
+        Storage::disk('local')->assertExists($instrument->storage_path);
+        $this->assertDatabaseHas('audit_logs', [
+            'municipality_id' => $municipality->id,
+            'user_id' => $manager->id,
+            'action' => 'municipal_instrument_created',
+        ]);
+
+        $this->get(route('municipal-rules.instruments.download', [$profile, $instrument]))
+            ->assertOk()
+            ->assertDownload('lei-organica.pdf');
+    }
+
+    public function test_normative_instrument_document_is_rejected_when_unsafe_or_too_large(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        $profile = $this->profile($municipality, $manager);
+        $token = $this->submissionSession($municipality, "municipal-rules-instrument-{$profile->id}");
+
+        $this->actingAs($manager)->post(route('municipal-rules.instruments.store', $profile), [
+            '_submission_token' => $token,
+            'type' => 'other',
+            'title' => 'Documento inseguro',
+            'reference' => 'X/2026',
+            'document' => UploadedFile::fake()->create('programa.exe', 20, 'application/x-msdownload'),
+        ])->assertSessionHasErrors('document');
+
+        $this->post(route('municipal-rules.instruments.store', $profile), [
+            '_submission_token' => $token,
+            'type' => 'other',
+            'title' => 'Documento grande',
+            'reference' => 'X/2026',
+            'document' => UploadedFile::fake()->create('grande.pdf', 11000, 'application/pdf'),
+        ])->assertSessionHasErrors('document');
+
+        $this->assertDatabaseCount('municipal_normative_instruments', 0);
+    }
+
+    public function test_normative_instrument_document_from_another_municipality_cannot_be_downloaded(): void
+    {
+        Storage::fake('local');
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+        [$otherManager, $otherMunicipality] = $this->member(User::ROLE_MANAGER);
+        $otherProfile = $this->profile($otherMunicipality, $otherManager);
+        $otherInstrument = $otherProfile->instruments()->create([
+            'municipality_id' => $otherMunicipality->id,
+            'created_by' => $otherManager->id,
+            'type' => 'organic_law',
+            'title' => 'Lei Organica de outro municipio',
+            'reference' => 'LOM/2026',
+            'uploaded_by' => $otherManager->id,
+            'original_name' => 'lei-organica.pdf',
+            'storage_path' => Storage::disk('local')->putFileAs('normative-instruments/test', UploadedFile::fake()->create('lei-organica.pdf', 50, 'application/pdf'), 'lei-organica.pdf'),
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 51200,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-rules.instruments.download', [$otherProfile, $otherInstrument]))
+            ->assertNotFound();
     }
 
     public function test_manager_can_activate_a_complete_review_and_it_becomes_immutable(): void

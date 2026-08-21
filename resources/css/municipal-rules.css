@@ -75,7 +75,7 @@
 .rules-clear svg { width: 18px; }
 
 .instrument-list { border-top: 1px solid var(--line-soft); }
-.instrument-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto auto; align-items: center; gap: .75rem; padding: .8rem .2rem; border-bottom: 1px solid var(--line-soft); }
+.instrument-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto auto auto; align-items: center; gap: .75rem; padding: .8rem .2rem; border-bottom: 1px solid var(--line-soft); }
 .instrument-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 5px; background: var(--navy-100); color: var(--navy-800); }
 .instrument-icon svg { width: 17px; }
 .instrument-row > div { display: grid; min-width: 0; }
