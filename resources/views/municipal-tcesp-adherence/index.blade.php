@@ -101,9 +101,7 @@
                         <div>
                             <strong>{{ $action['title'] }}</strong>
                             <p>{{ $action['description'] }}</p>
-                            @if ($action['route'])
-                                <a href="{{ $action['route'] }}">{{ $action['label'] }}</a>
-                            @endif
+                            <a href="{{ $action['route'] }}">{{ $action['label'] }}</a>
                         </div>
                     </div>
                 @empty

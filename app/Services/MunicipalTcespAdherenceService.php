@@ -6,6 +6,7 @@ use App\Models\AmendmentComplianceReview;
 use App\Models\Municipality;
 use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class MunicipalTcespAdherenceService
@@ -71,7 +72,7 @@ class MunicipalTcespAdherenceService
             ->values();
     }
 
-    /** @return \Illuminate\Database\Eloquent\Builder<ParliamentaryAmendment> */
+    /** @return Builder<ParliamentaryAmendment> */
     private function tcespAmendments(Municipality $municipality, int $year)
     {
         return $municipality->amendments()
@@ -159,10 +160,10 @@ class MunicipalTcespAdherenceService
     }
 
     /**
-     * @param Collection<int, ParliamentaryAmendment> $amendments
-     * @param Collection<int, array<string, mixed>> $matrix
-     * @param array<string, mixed>|null $diagnostic
-     * @return array<int, array{title: string, description: string, route: string|null, label: string, icon: string}>
+     * @param  Collection<int, ParliamentaryAmendment>  $amendments
+     * @param  Collection<int, array<string, mixed>>  $matrix
+     * @param  array<string, mixed>|null  $diagnostic
+     * @return array<int, array{title: string, description: string, route: string, label: string, icon: string}>
      */
     private function nextActions(
         Municipality $municipality,
@@ -197,6 +198,9 @@ class MunicipalTcespAdherenceService
         }
 
         if (($summary['critical_open'] ?? 0) > 0 || ($summary['pending'] ?? 0) > 0) {
+            // critical_open/pending only turn positive once at least one amendment exists
+            // (portfolioMatrix zeroes every rule when the exercise has none), so $amendments
+            // is guaranteed non-empty here.
             $rule = $matrix
                 ->first(fn (array $item) => $item['critical'] && $item['open'] > 0)
                 ?? $matrix->first(fn (array $item) => $item['open'] > 0);
@@ -207,7 +211,7 @@ class MunicipalTcespAdherenceService
                 'description' => $rule
                     ? "Comece por {$rule['code']} - {$rule['title']}."
                     : 'Complete as evidências de conformidade das emendas municipais.',
-                'route' => $amendment ? route('emendas.compliance', $amendment) : null,
+                'route' => route('emendas.compliance', $amendment),
                 'label' => 'Abrir matriz',
                 'icon' => 'clipboard-check',
             ];

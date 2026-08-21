@@ -51,6 +51,8 @@ class MunicipalTcespAdherenceTest extends TestCase
             ->assertSee('ORC-01')
             ->assertSee('Objeto preciso e não genérico')
             ->assertSee('Revisar itens pendentes do manual')
+            ->assertSee('Abrir matriz')
+            ->assertSee(route('emendas.compliance', $amendment), false)
             ->assertSee($amendment->reference);
     }
 
