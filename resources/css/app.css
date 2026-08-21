@@ -8116,6 +8116,140 @@ button.accountability-action-card {
     }
 }
 
+/* Accountability decision rail: visible next action before detailed checklist. */
+.accountability-decision-rail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .8rem;
+}
+
+.accountability-decision-rail article {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: .75rem;
+    min-height: 150px;
+    padding: .95rem;
+    border: 1px solid #ccdcea;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 12px 24px rgba(8, 35, 64, .06);
+}
+
+.accountability-decision-rail article.is-primary {
+    border-color: rgba(9, 58, 103, .28);
+    background: linear-gradient(145deg, #ffffff, #eef7ff);
+}
+
+.accountability-decision-rail article.is-ok {
+    border-color: rgba(4, 120, 87, .26);
+    background: linear-gradient(145deg, #ffffff, #effcf7);
+}
+
+.accountability-decision-rail article.tone-danger {
+    border-color: rgba(180, 35, 24, .25);
+    background: linear-gradient(145deg, #ffffff, #fff7f7);
+}
+
+.accountability-decision-rail article.tone-warning {
+    border-color: rgba(176, 120, 7, .28);
+    background: linear-gradient(145deg, #ffffff, #fffbeb);
+}
+
+.accountability-decision-rail article > span {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid #c5d8e9;
+    border-radius: 11px;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.accountability-decision-rail article.is-primary > span {
+    background: var(--navy-800);
+    color: #fff;
+}
+
+.accountability-decision-rail article.tone-danger > span {
+    background: #fff1f0;
+    color: var(--danger);
+}
+
+.accountability-decision-rail article.tone-warning > span {
+    background: #fff7db;
+    color: var(--warning);
+}
+
+.accountability-decision-rail small,
+.accountability-decision-rail strong,
+.accountability-decision-rail p {
+    margin: 0;
+}
+
+.accountability-decision-rail small {
+    color: #0f5ea8;
+    font-size: .66rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.accountability-decision-rail strong {
+    display: block;
+    margin-top: .15rem;
+    color: var(--navy-950);
+    line-height: 1.2;
+}
+
+.accountability-decision-rail p {
+    margin-top: .35rem;
+    color: var(--muted);
+    font-size: .75rem;
+    line-height: 1.35;
+}
+
+.accountability-decision-rail a,
+.accountability-disabled-action {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    padding: .38rem .72rem;
+    border: 1px solid #bed2e4;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--navy-800);
+    font-size: .72rem;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.accountability-disabled-action {
+    border-color: #d6e2ec;
+    background: #f4f8fb;
+    color: #6b7a8b;
+    cursor: not-allowed;
+}
+
+.accountability-decision-rail a:hover {
+    border-color: var(--navy-700);
+    background: #f4f9fd;
+}
+
+@media (max-width: 1050px) {
+    .accountability-decision-rail {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .accountability-decision-rail article {
+        min-height: auto;
+    }
+}
+
 /* Critical screens polish: municipal command, onboarding, councilor portal and accountability. */
 .work-heading,
 .onboarding-heading,

@@ -670,3 +670,104 @@
     .admissibility-criteria > div { grid-template-columns: 1fr; }
     .admissibility-history-criteria { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Decision-first rail for the work plan assistant. */
+.work-plan-decision-rail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .8rem;
+}
+
+.work-plan-decision-rail article {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: .75rem;
+    min-height: 150px;
+    padding: .95rem;
+    border: 1px solid #c7d8e8;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 12px 24px rgba(8, 35, 64, .06);
+}
+
+.work-plan-decision-rail article.is-primary {
+    border-color: rgba(9, 58, 103, .28);
+    background: linear-gradient(145deg, #ffffff, #eef7ff);
+}
+
+.work-plan-decision-rail article > span {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid #c5d8e9;
+    border-radius: 11px;
+    background: #eef6fb;
+    color: var(--navy-800);
+}
+
+.work-plan-decision-rail article.is-primary > span {
+    background: var(--navy-800);
+    color: #fff;
+}
+
+.work-plan-decision-rail small,
+.work-plan-decision-rail strong,
+.work-plan-decision-rail p {
+    margin: 0;
+}
+
+.work-plan-decision-rail small {
+    color: #0f5ea8;
+    font-size: .66rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.work-plan-decision-rail strong {
+    display: block;
+    margin-top: .15rem;
+    color: var(--navy-900);
+    line-height: 1.2;
+}
+
+.work-plan-decision-rail p {
+    margin-top: .35rem;
+    color: var(--muted);
+    font-size: .75rem;
+    line-height: 1.35;
+}
+
+.work-plan-decision-rail a {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    padding: .38rem .72rem;
+    border: 1px solid #bed2e4;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--navy-800);
+    font-size: .72rem;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.work-plan-decision-rail a:hover {
+    border-color: var(--navy-700);
+    background: #f4f9fd;
+}
+
+@media (max-width: 1050px) {
+    .work-plan-decision-rail {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .work-plan-decision-rail article {
+        min-height: auto;
+    }
+}

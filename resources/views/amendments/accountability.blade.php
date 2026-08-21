@@ -70,6 +70,47 @@
             @endif
         </div>
 
+        <div class="accountability-decision-rail" aria-label="Atalhos de decisão da prestação de contas">
+            <article class="is-primary">
+                <span><i data-lucide="{{ $accountabilityGuide['next']['icon'] }}" aria-hidden="true"></i></span>
+                <div>
+                    <small>Próxima decisão</small>
+                    <strong>{{ $accountabilityGuide['next']['title'] }}</strong>
+                    <p>{{ $accountabilityGuide['next']['description'] }}</p>
+                </div>
+                @if (! $canEdit && ! $process)
+                    <span class="accountability-disabled-action">Aguardando gestor</span>
+                @else
+                    <a href="{{ $accountabilityGuide['next']['href'] }}">{{ $accountabilityGuide['next']['label'] }}</a>
+                @endif
+            </article>
+            @forelse($accountabilityGuide['blockerActions']->take(2) as $action)
+                <article class="tone-{{ $action['tone'] }}">
+                    <span><i data-lucide="{{ $action['icon'] }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Bloqueio</small>
+                        <strong>{{ $action['title'] }}</strong>
+                        <p>{{ $action['description'] }}</p>
+                    </div>
+                    @if (! $canEdit && $action['href'] === '#iniciar-prestacao')
+                        <span class="accountability-disabled-action">Aguardando gestor</span>
+                    @else
+                        <a href="{{ $action['href'] }}">{{ $action['label'] }}</a>
+                    @endif
+                </article>
+            @empty
+                <article class="is-ok">
+                    <span><i data-lucide="badge-check" aria-hidden="true"></i></span>
+                    <div>
+                        <small>Sem bloqueio crítico</small>
+                        <strong>Fluxo pronto para conferência</strong>
+                        <p>Use protocolo, dossiê e arquivamento conforme a situação da prestação.</p>
+                    </div>
+                    <a href="#dossie-prestacao">Ver dossiê</a>
+                </article>
+            @endforelse
+        </div>
+
         <div class="accountability-readiness tone-{{ $accountabilityGuide['closing']['tone'] }}">
             <div class="accountability-readiness-score">
                 <strong>{{ $accountabilityGuide['closing']['score'] }}%</strong>

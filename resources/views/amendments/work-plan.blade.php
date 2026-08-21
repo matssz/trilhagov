@@ -55,6 +55,36 @@
             <a class="btn btn-primary" href="{{ $guide['next']['href'] }}">{{ $guide['next']['label'] }}</a>
         </div>
 
+        <div class="work-plan-decision-rail" aria-label="Atalhos de decisão do Plano de Trabalho">
+            <article class="is-primary">
+                <span><i data-lucide="{{ $guide['next']['icon'] }}" aria-hidden="true"></i></span>
+                <div>
+                    <small>Próxima decisão</small>
+                    <strong>{{ $guide['next']['title'] }}</strong>
+                    <p>{{ $guide['next']['description'] }}</p>
+                </div>
+                <a href="{{ $guide['next']['href'] }}">{{ $guide['next']['label'] }}</a>
+            </article>
+            <article>
+                <span><i data-lucide="target" aria-hidden="true"></i></span>
+                <div>
+                    <small>Dados essenciais</small>
+                    <strong>Executor, objeto e metas</strong>
+                    <p>Revise primeiro o que define quem executa e qual entrega será medida.</p>
+                </div>
+                <a href="{{ $plan ? '#dados-plano' : '#iniciar-plano' }}">Revisar dados</a>
+            </article>
+            <article>
+                <span><i data-lucide="calendar-range" aria-hidden="true"></i></span>
+                <div>
+                    <small>Cronograma</small>
+                    <strong>{{ $plan && $plan->stages->isNotEmpty() ? 'Etapas cadastradas' : 'Etapa pendente' }}</strong>
+                    <p>O total das etapas precisa fechar com o valor reservado da emenda.</p>
+                </div>
+                <a href="{{ $plan ? '#cronograma' : '#iniciar-plano' }}">Ver cronograma</a>
+            </article>
+        </div>
+
         <div class="work-plan-command-board" aria-label="Mesa operacional do Plano de Trabalho">
             <div class="work-plan-command-heading">
                 <div>

@@ -56,6 +56,39 @@
                     @endif
                     <a class="btn btn-outline-primary" href="#minhas-propostas"><i data-lucide="list-checks" aria-hidden="true"></i>Ver propostas</a>
                 </div>
+                <div class="councilor-decision-hub" aria-label="Ações essenciais do vereador">
+                    <article class="{{ ($councilorGuide['canCreate'] ?? false) ? 'is-primary' : 'is-locked' }}">
+                        <span><i data-lucide="{{ ($councilorGuide['canCreate'] ?? false) ? 'plus' : 'lock-keyhole' }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>1. Criar pedido</small>
+                            <strong>{{ ($councilorGuide['canCreate'] ?? false) ? 'Proposta liberada' : 'Aguardando norma ativa' }}</strong>
+                            <p>O vereador informa objeto, valor e destino. O sistema confere cota e saúde antes do envio.</p>
+                        </div>
+                        @if ($councilorGuide['canCreate'] ?? false)
+                            <a href="{{ route('legislative.create', ['year' => $year]) }}">Criar agora</a>
+                        @else
+                            <em>Gestor precisa liberar</em>
+                        @endif
+                    </article>
+                    <article>
+                        <span><i data-lucide="route" aria-hidden="true"></i></span>
+                        <div>
+                            <small>2. Acompanhar andamento</small>
+                            <strong>{{ $councilorGroups['next_label'] ?? 'Ver propostas' }}</strong>
+                            <p>Mostra se a proposta está com o vereador, Câmara, Executivo, execução ou prestação.</p>
+                        </div>
+                        <a href="{{ $councilorGroups['next_url'] ?? '#acompanhamento-vereador' }}">Abrir etapa</a>
+                    </article>
+                    <article class="{{ ($quota['health_gap'] ?? 0) > 0 ? 'needs-health' : 'is-ok' }}">
+                        <span><i data-lucide="wallet-cards" aria-hidden="true"></i></span>
+                        <div>
+                            <small>3. Entender saldo</small>
+                            <strong>{{ $quota['remaining'] === null ? 'A configurar' : 'R$ '.number_format($quota['remaining'], 2, ',', '.') }}</strong>
+                            <p>{{ ($quota['health_gap'] ?? 0) > 0 ? 'Ainda falta reservar saúde na carteira.' : 'Saldo e reserva mínima estão calculados pela norma.' }}</p>
+                        </div>
+                        <a href="#explicacao-cota">Ver explicação</a>
+                    </article>
+                </div>
                 <div class="councilor-operating-strip" aria-label="Ações principais do vereador">
                     <article>
                         <span>1</span>
@@ -390,22 +423,6 @@
                     </a>
                 @endif
             </div>
-            <div class="legislative-executive-desk">
-                <div class="executive-desk-focus {{ $executiveDesk['focus_class'] ?? '' }}">
-                    <span><i data-lucide="{{ $executiveDesk['focus_icon'] ?? 'alert-circle' }}" aria-hidden="true"></i></span>
-                    <div>
-                        <small>{{ $executiveDesk['focus_kicker'] ?? 'Foco recomendado agora' }}</small>
-                        <strong>{{ $executiveDesk['focus_title'] ?? 'Revisar fila' }}</strong>
-                        <p>{{ $executiveDesk['focus_text'] ?? 'Abra a fila abaixo para tratar os itens pendentes.' }}</p>
-                    </div>
-                </div>
-                <div class="executive-desk-metrics">
-                    <div><span>Ações pendentes</span><strong>{{ $executiveDesk['total'] ?? 0 }}</strong></div>
-                    <div><span>Valor sob decisão</span><strong>R$ {{ number_format($executiveDesk['amount'] ?? 0, 2, ',', '.') }}</strong></div>
-                    <div><span>Em execução aberta</span><strong>{{ $executiveDesk['done'] ?? 0 }}</strong></div>
-                    <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
-                </div>
-            </div>
             @if($executiveDesk['cockpit'] ?? null)
                 @php($cockpit = $executiveDesk['cockpit'])
                 <div class="executive-decision-cockpit is-{{ $cockpit['tone'] ?? 'clear' }}" aria-label="Prioridade inteligente do Executivo">
@@ -444,15 +461,31 @@
                     </div>
                 </div>
             @endif
+            <div class="legislative-executive-desk">
+                <div class="executive-desk-focus {{ $executiveDesk['focus_class'] ?? '' }}">
+                    <span><i data-lucide="{{ $executiveDesk['focus_icon'] ?? 'alert-circle' }}" aria-hidden="true"></i></span>
+                    <div>
+                        <small>{{ $executiveDesk['focus_kicker'] ?? 'Foco recomendado agora' }}</small>
+                        <strong>{{ $executiveDesk['focus_title'] ?? 'Revisar fila' }}</strong>
+                        <p>{{ $executiveDesk['focus_text'] ?? 'Abra a fila abaixo para tratar os itens pendentes.' }}</p>
+                    </div>
+                </div>
+                <div class="executive-desk-metrics">
+                    <div><span>Ações pendentes</span><strong>{{ $executiveDesk['total'] ?? 0 }}</strong></div>
+                    <div><span>Valor sob decisão</span><strong>R$ {{ number_format($executiveDesk['amount'] ?? 0, 2, ',', '.') }}</strong></div>
+                    <div><span>Em execução aberta</span><strong>{{ $executiveDesk['done'] ?? 0 }}</strong></div>
+                    <div class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : '' }}"><span>Fora do prazo</span><strong>{{ $executiveDesk['stale_count'] ?? 0 }}</strong></div>
+                </div>
+            </div>
             <div class="executive-command-panel" aria-label="Painel de comando do Executivo">
                 <div class="executive-command-summary">
                     <div>
-                        <p class="panel-kicker">Comando municipal</p>
-                        <h3>O que o gestor precisa decidir agora</h3>
-                        <p>Receba propostas da Câmara, confirme reserva e libere plano, execução e prestação de contas sem sair desta mesa.</p>
+                        <p class="panel-kicker">Fluxo operacional</p>
+                        <h3>Depois da prioridade, acompanhe por etapa</h3>
+                        <p>Use os quatro passos abaixo para conferir se algo parou na Câmara, no recebimento, na reserva ou na execução.</p>
                     </div>
                     @if ($executiveDesk['focus_url'] ?? null)
-                        <a class="btn btn-outline-primary" href="{{ $executiveDesk['focus_url'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Executar foco</a>
+                        <a class="btn btn-outline-primary" href="{{ $executiveDesk['focus_url'] }}"><i data-lucide="arrow-right" aria-hidden="true"></i>Voltar ao foco</a>
                     @endif
                 </div>
                 <div class="executive-command-cards">

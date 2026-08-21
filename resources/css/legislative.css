@@ -5315,6 +5315,141 @@
     }
 }
 
+/* Decision-first UX: one clear action before detailed operational boards. */
+.councilor-decision-hub {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.councilor-decision-hub article {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: .8rem;
+    min-height: 154px;
+    padding: 1rem;
+    border: 1px solid rgba(174, 194, 214, .78);
+    border-radius: 18px;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(247, 251, 254, .94));
+    box-shadow: 0 16px 32px rgba(7, 31, 61, .07);
+}
+
+.councilor-decision-hub article > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #c7daea;
+    border-radius: 13px;
+    background: #eef7ff;
+    color: var(--navy-900);
+}
+
+.councilor-decision-hub article.is-primary > span {
+    background: var(--navy-900);
+    color: #fff;
+}
+
+.councilor-decision-hub article.needs-health > span {
+    border-color: #b7ead7;
+    background: #ecfff7;
+    color: #047857;
+}
+
+.councilor-decision-hub article.is-locked > span {
+    background: #f1f5f9;
+    color: #66768a;
+}
+
+.councilor-decision-hub small,
+.councilor-decision-hub strong,
+.councilor-decision-hub p,
+.councilor-decision-hub a,
+.councilor-decision-hub em {
+    margin: 0;
+}
+
+.councilor-decision-hub small {
+    color: #0f5ea8;
+    font-size: .66rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.councilor-decision-hub strong {
+    display: block;
+    margin-top: .2rem;
+    color: var(--navy-950);
+    font-size: .98rem;
+    line-height: 1.2;
+}
+
+.councilor-decision-hub p {
+    margin-top: .35rem;
+    color: #52667d;
+    font-size: .76rem;
+    line-height: 1.38;
+}
+
+.councilor-decision-hub a,
+.councilor-decision-hub em {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: .4rem .7rem;
+    border: 1px solid #bfd3e7;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy-900);
+    font-size: .72rem;
+    font-style: normal;
+    font-weight: 950;
+    text-decoration: none;
+}
+
+.councilor-decision-hub a:hover {
+    border-color: var(--navy-800);
+    background: #f3f8fd;
+}
+
+.legislative-executive-board > .executive-decision-cockpit {
+    margin: 0 0 1rem;
+}
+
+.legislative-executive-board > .legislative-executive-desk {
+    margin-bottom: 1rem;
+}
+
+.legislative-executive-board .executive-command-panel {
+    border-style: dashed;
+}
+
+.legislative-executive-board .executive-command-summary {
+    background: linear-gradient(145deg, #ffffff, #f8fbfe);
+}
+
+.legislative-executive-board .executive-command-summary .panel-kicker {
+    color: #64748b;
+}
+
+@media (max-width: 1180px) {
+    .councilor-decision-hub {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .councilor-decision-hub article {
+        grid-template-columns: 38px minmax(0, 1fr);
+        min-height: auto;
+    }
+}
+
 /* Portal UX pass: compact navigation, clearer spacing and more stable shortcut cards. */
 .legislative-quick-nav {
     display: flex;
@@ -6893,4 +7028,30 @@
     .legislative-board-column {
         min-height: 0;
     }
+}
+
+/* Final decision-first overrides for the Legislative Portal. */
+.legislative-executive-board > .executive-decision-cockpit {
+    margin: 0 0 1rem;
+}
+
+.legislative-executive-board > .legislative-executive-desk {
+    margin-bottom: 1rem;
+}
+
+.legislative-executive-board .executive-command-panel {
+    border-style: dashed;
+}
+
+.legislative-executive-board .executive-command-summary {
+    background: linear-gradient(145deg, #ffffff, #f8fbfe);
+}
+
+.legislative-executive-board .executive-command-summary .panel-kicker {
+    color: #64748b;
+}
+
+.legislative-councilor-home .councilor-decision-hub {
+    grid-column: 1 / -1;
+    display: grid;
 }
