@@ -1081,7 +1081,7 @@ const initCommercialNavScroll = (nav) => {
 const initCommercialClickSound = (page) => {
     let audioCtx = null;
 
-    const playTick = (frequencyStart = 880, frequencyEnd = 520, peakGain = 0.13) => {
+    const playTone = (frequencyStart, frequencyEnd, peakGain, duration) => {
         try {
             audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
             const start = () => {
@@ -1090,14 +1090,14 @@ const initCommercialClickSound = (page) => {
                 const gain = audioCtx.createGain();
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(frequencyStart, now);
-                oscillator.frequency.exponentialRampToValueAtTime(frequencyEnd, now + 0.09);
+                oscillator.frequency.exponentialRampToValueAtTime(frequencyEnd, now + duration * 0.6);
                 gain.gain.setValueAtTime(0.0001, now);
-                gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.012);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+                gain.gain.exponentialRampToValueAtTime(peakGain, now + Math.min(0.012, duration * 0.2));
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
                 oscillator.connect(gain);
                 gain.connect(audioCtx.destination);
                 oscillator.start(now);
-                oscillator.stop(now + 0.15);
+                oscillator.stop(now + duration + 0.02);
             };
 
             if (audioCtx.state === 'suspended') {
@@ -1106,13 +1106,20 @@ const initCommercialClickSound = (page) => {
                 start();
             }
         } catch {
-            // Web Audio unavailable or blocked; the click still works silently.
+            // Web Audio unavailable or blocked; interactions still work silently.
         }
     };
 
-    page.querySelectorAll('.commercial-hero-actions .btn, .commercial-nav-cta, .commercial-cta .btn').forEach((button) => {
-        button.addEventListener('click', () => playTick(880, 520, 0.13));
-    });
+    // Confirm tone: real actions (navigation, CTAs).
+    const playClick = () => playTone(880, 520, 0.13, 0.14);
+    // Blip: hovering a card/option, purely ambient, never implies an action happened.
+    const playHover = () => playTone(1180, 1320, 0.045, 0.07);
+
+    page.querySelectorAll('.commercial-hero-actions .btn, .commercial-nav-cta, .commercial-cta .btn, .commercial-nav-links a')
+        .forEach((el) => el.addEventListener('click', playClick));
+
+    page.querySelectorAll('.commercial-nav-links a, .commercial-decision-grid article, .commercial-showcase-grid article, .commercial-pipeline-track article, .sp-map-city')
+        .forEach((el) => el.addEventListener('mouseenter', playHover));
 };
 
 const initCommercialShowcase = () => {
@@ -1226,13 +1233,6 @@ const initCommercialShowcase = () => {
                 delay: index * 0.08,
                 force3D: true,
             });
-        });
-
-        gsap.to('.sp-map-route', {
-            strokeDashoffset: -240,
-            duration: 6.5,
-            repeat: -1,
-            ease: 'none',
         });
 
         gsap.to('.sp-map-shape', {
