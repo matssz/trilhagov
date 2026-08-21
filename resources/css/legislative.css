@@ -7468,3 +7468,77 @@
         justify-self: start;
     }
 }
+
+/* Executive flow stability: keep shortcut buttons readable at narrow desktop widths. */
+.legislative-executive-board .executive-command-panel {
+    container-type: inline-size;
+}
+
+.legislative-executive-board .executive-command-cards,
+.legislative-executive-board .executive-flow-lane {
+    grid-template-columns: repeat(4, minmax(188px, 1fr));
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+}
+
+.legislative-executive-board .executive-command-cards article,
+.legislative-executive-board .executive-flow-lane li {
+    min-width: 188px;
+}
+
+.legislative-executive-board .executive-flow-lane li {
+    align-content: start;
+    min-height: 146px;
+}
+
+.legislative-executive-board .executive-flow-lane li > div {
+    display: grid;
+    min-width: 0;
+}
+
+.legislative-executive-board .executive-flow-lane a {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) 22px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    align-items: center;
+    justify-items: center;
+    column-gap: .45rem;
+    padding: .62rem .66rem;
+    white-space: nowrap;
+}
+
+.legislative-executive-board .executive-flow-lane a svg {
+    justify-self: start;
+}
+
+.legislative-executive-board .executive-flow-lane a em {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    justify-self: end;
+    box-shadow: none;
+}
+
+@container (max-width: 900px) {
+    .legislative-executive-board .executive-command-cards,
+    .legislative-executive-board .executive-flow-lane {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        overflow-x: visible;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .legislative-executive-board .executive-command-cards,
+    .legislative-executive-board .executive-flow-lane {
+        grid-template-columns: 1fr;
+        overflow-x: visible;
+    }
+
+    .legislative-executive-board .executive-command-cards article,
+    .legislative-executive-board .executive-flow-lane li {
+        min-width: 0;
+    }
+}
