@@ -889,16 +889,24 @@ class LegislativeProposalTest extends TestCase
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
 
-        $this->actingAs($manager)
+        $response = $this->actingAs($manager)
             ->withSession(['active_municipality_id' => $municipality->id])
-            ->get(route('legislative.index', ['year' => now()->year + 1]))
-            ->assertOk()
+            ->get(route('legislative.index', ['year' => now()->year + 1]));
+
+        $response->assertOk()
             ->assertSee('Configuração de '.(now()->year + 1).' não ativada')
             ->assertSee('Fluxo operacional')
             ->assertSee('Ativar exercício')
             ->assertSee(route('municipal-onboarding.index'), false)
             ->assertDontSee('Ver recebimento')
             ->assertDontSee('Receber agora');
+
+        // The 4 "Ativar exercício" shortcuts must not carry a queue-count badge:
+        // with no exercise active there is nothing to count, so the badge only
+        // added visual noise and, combined with the longer label, overflowed
+        // the button on the flow lane.
+        $this->assertSame(4, substr_count($response->getContent(), 'Ativar exercício'));
+        $this->assertStringNotContainsString('<em>0</em>', $response->getContent());
     }
 
     public function test_executive_queue_filters_by_author_department_and_health_scope(): void

@@ -11957,9 +11957,12 @@ a:focus-visible {
 
 .executive-flow-lane a {
     width: fit-content;
+    max-width: 100%;
     margin-top: .75rem;
     border-color: rgba(19, 81, 180, .28);
     background: #ffffff;
+    white-space: normal;
+    text-align: center;
 }
 
 .executive-next-decisions {

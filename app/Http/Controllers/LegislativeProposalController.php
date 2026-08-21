@@ -670,6 +670,7 @@ class LegislativeProposalController extends Controller
                     'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $review['count'] > 0 ? 'Ir para conferência' : 'Ver conferência'),
                     'url' => $exerciseLocked ? $exerciseLockedUrl : ($review['items']->first()?->getAttribute('executive_board_url') ?? $review['filter_url']),
                     'count' => (int) $review['count'],
+                    'locked' => $exerciseLocked,
                 ],
                 [
                     'label' => 'Executivo recebe',
@@ -677,6 +678,7 @@ class LegislativeProposalController extends Controller
                     'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $receive['count'] > 0 ? 'Receber agora' : 'Ver recebimento'),
                     'url' => $exerciseLocked ? $exerciseLockedUrl : ($receive['items']->first()?->getAttribute('executive_board_url') ?? $receive['filter_url']),
                     'count' => (int) $receive['count'],
+                    'locked' => $exerciseLocked,
                 ],
                 [
                     'label' => 'Reserva orçamentária',
@@ -684,6 +686,7 @@ class LegislativeProposalController extends Controller
                     'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $budget['count'] > 0 ? 'Reservar agora' : 'Ver reserva'),
                     'url' => $exerciseLocked ? $exerciseLockedUrl : ($budget['items']->first()?->getAttribute('executive_board_url') ?? $budget['filter_url']),
                     'count' => (int) $budget['count'],
+                    'locked' => $exerciseLocked,
                 ],
                 [
                     'label' => 'Plano e execução',
@@ -691,6 +694,7 @@ class LegislativeProposalController extends Controller
                     'action' => $exerciseLocked ? 'Ativar exercício' : ((int) $executionColumn['count'] > 0 ? 'Acompanhar' : 'Ver execução'),
                     'url' => $exerciseLocked ? $exerciseLockedUrl : ($executionColumn['items']->first()?->getAttribute('executive_board_url') ?? $executionColumn['filter_url']),
                     'count' => (int) $executionColumn['count'],
+                    'locked' => $exerciseLocked,
                 ],
             ],
         ];

@@ -581,7 +581,9 @@
                                 <small>{{ $step['description'] }}</small>
                                 <a href="{{ $step['url'] }}">
                                     <i data-lucide="arrow-right" aria-hidden="true"></i>{{ $step['action'] }}
-                                    <em>{{ $step['count'] }}</em>
+                                    @unless ($step['locked'] ?? false)
+                                        <em>{{ $step['count'] }}</em>
+                                    @endunless
                                 </a>
                             </div>
                         </li>
