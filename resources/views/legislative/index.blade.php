@@ -514,24 +514,45 @@
                     </div>
                     <a href="{{ $cockpit['url'] ?? '#kanban-executivo' }}">{{ $cockpit['label'] ?? 'Abrir' }}</a>
                 </article>
-                <article class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : (($executiveDesk['total'] ?? 0) > 0 ? 'is-warning' : 'is-clear') }}">
-                    <span><i data-lucide="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'timer-reset' : 'shield-check' }}" aria-hidden="true"></i></span>
-                    <div>
-                        <small>Condição para avançar</small>
-                        <strong>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? ($executiveDesk['stale_count'].' fora do prazo') : (($executiveDesk['total'] ?? 0).' ação(ões) pendente(s)') }}</strong>
-                        <p>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'Resolva primeiro o item vencido para reduzir risco operacional.' : 'Recebimento, reserva e execução seguem a fila do Executivo.' }}</p>
-                    </div>
-                    <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">Ver fila</a>
-                </article>
-                <article>
-                    <span><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></span>
-                    <div>
-                        <small>Atalho certo</small>
-                        <strong>{{ $hasQuickActions ? 'Fila rápida habilitada' : 'Kanban disponível' }}</strong>
-                        <p>{{ $hasQuickActions ? 'Use os botões da fila para receber ou reservar sem redigitar campos já conhecidos.' : 'Sem pendência imediata; acompanhe as etapas e filtros do portal.' }}</p>
-                    </div>
-                    <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">{{ $hasQuickActions ? 'Abrir fila rápida' : 'Ver etapas' }}</a>
-                </article>
+                @if ($executiveDesk['locked'] ?? false)
+                    <article class="is-warning">
+                        <span><i data-lucide="lock" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Condição para avançar</small>
+                            <strong>Exercício não ativado</strong>
+                            <p>Recebimento, reserva e execução só liberam depois que o exercício for ativado.</p>
+                        </div>
+                        <a href="{{ $executiveDesk['locked_url'] }}">Ativar exercício</a>
+                    </article>
+                    <article class="is-warning">
+                        <span><i data-lucide="lock" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Atalho certo</small>
+                            <strong>Fila indisponível</strong>
+                            <p>A fila rápida e o kanban abrem assim que houver exercício ativo com propostas.</p>
+                        </div>
+                        <a href="{{ $executiveDesk['locked_url'] }}">Ativar exercício</a>
+                    </article>
+                @else
+                    <article class="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'is-danger' : (($executiveDesk['total'] ?? 0) > 0 ? 'is-warning' : 'is-clear') }}">
+                        <span><i data-lucide="{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'timer-reset' : 'shield-check' }}" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Condição para avançar</small>
+                            <strong>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? ($executiveDesk['stale_count'].' fora do prazo') : (($executiveDesk['total'] ?? 0).' ação(ões) pendente(s)') }}</strong>
+                            <p>{{ ($executiveDesk['stale_count'] ?? 0) > 0 ? 'Resolva primeiro o item vencido para reduzir risco operacional.' : 'Recebimento, reserva e execução seguem a fila do Executivo.' }}</p>
+                        </div>
+                        <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">Ver fila</a>
+                    </article>
+                    <article>
+                        <span><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></span>
+                        <div>
+                            <small>Atalho certo</small>
+                            <strong>{{ $hasQuickActions ? 'Fila rápida habilitada' : 'Kanban disponível' }}</strong>
+                            <p>{{ $hasQuickActions ? 'Use os botões da fila para receber ou reservar sem redigitar campos já conhecidos.' : 'Sem pendência imediata; acompanhe as etapas e filtros do portal.' }}</p>
+                        </div>
+                        <a href="{{ $hasQuickActions ? '#fila-executivo' : '#kanban-executivo' }}">{{ $hasQuickActions ? 'Abrir fila rápida' : 'Ver etapas' }}</a>
+                    </article>
+                @endif
             </div>
             <div class="legislative-executive-desk">
                 <div class="executive-desk-focus {{ $executiveDesk['focus_class'] ?? '' }}">

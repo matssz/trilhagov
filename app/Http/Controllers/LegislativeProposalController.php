@@ -498,7 +498,20 @@ class LegislativeProposalController extends Controller
             })
             ->values();
         $executionPriority = $stageShortcuts->first();
-        $cockpit = $firstPriority
+        $cockpit = $exerciseLocked
+            ? [
+                'tone' => 'attention',
+                'icon' => 'rocket',
+                'kicker' => 'Configuração pendente',
+                'title' => 'Ativar o exercício do município',
+                'description' => 'Sem exercício ativo, a Câmara e o Executivo ficam bloqueados. Ative para liberar as filas.',
+                'proposal' => null,
+                'amount' => 0.0,
+                'age' => 0,
+                'url' => $exerciseLockedUrl,
+                'label' => 'Ativar agora',
+            ]
+            : ($firstPriority
             ? [
                 'tone' => $firstPriority['late'] ? 'danger' : $firstPriority['column']['tone'],
                 'icon' => $firstPriority['late'] ? 'timer-reset' : $firstPriority['column']['icon'],
@@ -550,7 +563,7 @@ class LegislativeProposalController extends Controller
                     'age' => 0,
                     'url' => route('legislative.index', ['year' => $request->query('year')]),
                     'label' => 'Atualizar mesa',
-                ]);
+                ]));
         $automationCards = collect([
             [
                 'key' => 'review',
@@ -626,13 +639,15 @@ class LegislativeProposalController extends Controller
                     default => 'Abrir acompanhamento',
                 },
             ])->values(),
+            'locked' => $exerciseLocked,
+            'locked_url' => $exerciseLockedUrl,
             'focus_item' => $focusItem,
             'focus_url' => $focusItem ? route('legislative.show', $focusItem).$focus['fragment'] : null,
-            'focus_class' => $total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : ''),
-            'focus_icon' => $total === 0 ? 'circle-check' : ($focus['icon'] ?? 'alert-circle'),
-            'focus_kicker' => $total === 0 ? 'Sem gargalo operacional' : 'Foco recomendado agora',
-            'focus_title' => $total === 0 ? 'Nenhuma proposta aguardando ação do Executivo' : ($focus['title'] ?? 'Revisar fila'),
-            'focus_text' => $total === 0 ? 'As propostas ativas estão sem pendência imediata de decisão, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.'),
+            'focus_class' => $exerciseLocked ? 'is-danger' : ($total === 0 ? 'is-clear' : ($staleItems->isNotEmpty() ? 'is-danger' : '')),
+            'focus_icon' => $exerciseLocked ? 'rocket' : ($total === 0 ? 'circle-check' : ($focus['icon'] ?? 'alert-circle')),
+            'focus_kicker' => $exerciseLocked ? 'Configuração pendente' : ($total === 0 ? 'Sem gargalo operacional' : 'Foco recomendado agora'),
+            'focus_title' => $exerciseLocked ? 'Ative o exercício para liberar o Executivo' : ($total === 0 ? 'Nenhuma proposta aguardando ação do Executivo' : ($focus['title'] ?? 'Revisar fila')),
+            'focus_text' => $exerciseLocked ? 'Sem exercício ativo, nada chega até o Executivo. Ative para começar a receber propostas da Câmara.' : ($total === 0 ? 'As propostas ativas estão sem pendência imediata de decisão, recebimento ou reserva.' : ($focus['description'] ?? 'Abra a fila abaixo para tratar os itens pendentes.')),
             'command_cards' => [
                 [
                     'icon' => 'inbox',

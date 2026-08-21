@@ -221,6 +221,7 @@ class LegislativeProposalTest extends TestCase
             ->assertOk()
             ->assertSee('Sem saldo')
             ->assertSee('Saldo individual esgotado')
+            ->assertSee('Gestor precisa liberar')
             ->assertSee('Aguardando liberação')
             ->assertSee('Ações principais do vereador')
             ->assertSee('Indicar pedido')
@@ -901,12 +902,29 @@ class LegislativeProposalTest extends TestCase
             ->assertDontSee('Ver recebimento')
             ->assertDontSee('Receber agora');
 
-        // The 4 "Ativar exercício" shortcuts must not carry a queue-count badge:
+        // The 4 flow-lane shortcuts ("Câmara envia", "Executivo recebe", "Reserva
+        // orçamentária", "Plano e execução") must not carry a queue-count badge:
         // with no exercise active there is nothing to count, so the badge only
         // added visual noise and, combined with the longer label, overflowed
-        // the button on the flow lane.
-        $this->assertSame(4, substr_count($response->getContent(), 'Ativar exercício'));
-        $this->assertStringNotContainsString('<em>0</em>', $response->getContent());
+        // the button.
+        $content = $response->getContent();
+        $laneStart = strpos($content, 'executive-flow-lane');
+        $laneEnd = strpos($content, '</ol>', $laneStart);
+        $lane = substr($content, $laneStart, $laneEnd - $laneStart);
+        $this->assertSame(4, substr_count($lane, 'Ativar exercício'));
+        $this->assertStringNotContainsString('<em>0</em>', $lane);
+
+        // Every other decision widget on the same page must reflect the locked
+        // state too, instead of a false "all clear" derived from zero counts
+        // that are zero only because nothing can exist without an exercise.
+        $response->assertSee('Ativar o exercício do município')
+            ->assertSee('Ative o exercício para liberar o Executivo')
+            ->assertSee('Exercício não ativado')
+            ->assertSee('Fila indisponível')
+            ->assertDontSee('Mesa em dia')
+            ->assertDontSee('Nenhuma decisão crítica agora')
+            ->assertDontSee('Sem gargalo operacional')
+            ->assertDontSee('Nenhuma proposta aguardando ação do Executivo');
     }
 
     public function test_executive_queue_filters_by_author_department_and_health_scope(): void

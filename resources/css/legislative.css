@@ -7365,7 +7365,9 @@
 .legislative-councilor-home .councilor-decision-hub em {
     grid-column: auto;
     align-self: center;
-    white-space: nowrap;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
 }
 
 .legislative-councilor-home .councilor-mandate-panel {
