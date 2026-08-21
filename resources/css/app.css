@@ -11899,7 +11899,8 @@ a:focus-visible {
 }
 
 .municipal-health-grid a,
-.profile-trail-grid article > a {
+.profile-trail-grid article > a,
+.defense-facts article > a {
     grid-column: 2;
     display: inline-flex;
     width: fit-content;
@@ -11916,6 +11917,11 @@ a:focus-visible {
     font-size: .74rem;
     font-weight: 900;
     text-decoration: none;
+}
+
+.defense-facts article > a:hover {
+    background: var(--navy-50);
+    border-color: var(--navy-700);
 }
 
 .municipal-ops-grid {

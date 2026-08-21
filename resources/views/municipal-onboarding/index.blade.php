@@ -127,6 +127,7 @@
                         <small>{{ $item['label'] }}</small>
                         <strong>{{ $item['value'] }}</strong>
                         <p>{{ $item['hint'] }}</p>
+                        <a href="{{ $item['route'] }}">{{ $item['action'] }}</a>
                     </article>
                 @endforeach
             </div>

@@ -163,6 +163,32 @@ class MunicipalOnboardingTest extends TestCase
         ]);
     }
 
+    public function test_defense_facts_link_to_where_the_evidence_actually_lives(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-onboarding.index'))
+            ->assertOk()
+            ->assertSee(route('security-privacy.index'), false)
+            ->assertSee(route('official-documents.index'), false)
+            ->assertSee(route('governance-reports.index'), false);
+    }
+
+    public function test_late_work_tile_links_to_overdue_queue_not_generic_active(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+
+        $response = $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-onboarding.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('work-center.index', ['queue' => 'overdue']), false);
+        $response->assertDontSee(route('work-center.index', ['status' => 'active']), false);
+    }
+
     public function test_manager_invites_councilor_from_onboarding(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);

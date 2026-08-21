@@ -39,6 +39,9 @@
             <i data-lucide="landmark" aria-hidden="true"></i>
             <h2>Nenhum exercício configurado</h2>
             <p>O gestor municipal pode iniciar o primeiro levantamento normativo.</p>
+            @if ($canManage)
+                <p>Use o campo <strong>"Novo exercício"</strong> no topo desta página para ativar o primeiro exercício. Módulos como importação de planilha, cotas e reserva de saúde só ficam disponíveis depois dessa ativação.</p>
+            @endif
         </section>
     @else
         <section class="rules-overview">

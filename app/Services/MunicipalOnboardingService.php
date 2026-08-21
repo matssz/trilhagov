@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Municipality;
-use App\Models\MunicipalityInvitation;
-use App\Models\MunicipalRegulatoryProfile;
 use App\Models\AuditLog;
 use App\Models\IntegrityAlert;
 use App\Models\LegislativeProposal;
+use App\Models\Municipality;
+use App\Models\MunicipalityInvitation;
+use App\Models\MunicipalRegulatoryProfile;
 use App\Models\ParliamentaryAmendment;
 use App\Models\SupportOccurrence;
 use App\Models\User;
@@ -272,7 +272,7 @@ class MunicipalOnboardingService
                     'hint' => $lateWork > 0 ? 'Há ações atrasadas.' : 'Sem atrasos na Central.',
                     'icon' => 'timer-reset',
                     'tone' => $lateWork > 0 ? 'blocked' : 'ready',
-                    'route' => route('work-center.index', ['status' => 'active']),
+                    'route' => route('work-center.index', ['queue' => 'overdue']),
                     'action' => 'Ver prazos',
                 ],
                 [
@@ -404,10 +404,10 @@ class MunicipalOnboardingService
             'score' => min(100, ($auditCount > 0 ? 25 : 0) + ($documents > 0 ? 25 : 0) + ($officialDocuments > 0 ? 20 : 0) + ($reports > 0 ? 15 : 0) + ($municipality->document_checklist_enabled ? 15 : 0)),
             'latest_audit' => $latestAudit,
             'items' => [
-                ['label' => 'Trilhas de auditoria', 'value' => (string) $auditCount, 'hint' => 'Quem fez, quando, IP e antes/depois.'],
-                ['label' => 'Documentos anexados', 'value' => (string) $documents, 'hint' => 'Arquivos privados vinculados às emendas.'],
-                ['label' => 'Comunicações oficiais', 'value' => (string) $officialDocuments, 'hint' => 'Ofícios, pareceres e protocolos municipais.'],
-                ['label' => 'Relatórios emitidos', 'value' => (string) $reports, 'hint' => 'Governança, divergências e saúde.'],
+                ['label' => 'Trilhas de auditoria', 'value' => (string) $auditCount, 'hint' => 'Quem fez, quando, IP e antes/depois.', 'route' => route('security-privacy.index'), 'action' => 'Ver trilha'],
+                ['label' => 'Documentos anexados', 'value' => (string) $documents, 'hint' => 'Arquivos privados vinculados às emendas.', 'route' => route('security-privacy.index'), 'action' => 'Ver inventário'],
+                ['label' => 'Comunicações oficiais', 'value' => (string) $officialDocuments, 'hint' => 'Ofícios, pareceres e protocolos municipais.', 'route' => route('official-documents.index'), 'action' => 'Ver comunicações'],
+                ['label' => 'Relatórios emitidos', 'value' => (string) $reports, 'hint' => 'Governança, divergências e saúde.', 'route' => route('governance-reports.index'), 'action' => 'Ver relatórios'],
             ],
             'route' => route('security-privacy.index'),
             'action' => 'Ver LGPD e defesa',

@@ -35,6 +35,31 @@ class MunicipalRegulatoryProfileTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_empty_rules_page_guides_manager_to_activate_first_exercise(): void
+    {
+        [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
+
+        $this->actingAs($manager)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-rules.index'))
+            ->assertOk()
+            ->assertSee('Nenhum exercício configurado')
+            ->assertSee('Novo exercício')
+            ->assertSee('Módulos como importação de planilha');
+    }
+
+    public function test_empty_rules_page_does_not_show_activation_hint_to_non_manager(): void
+    {
+        [$editor, $municipality] = $this->member(User::ROLE_EDITOR);
+
+        $this->actingAs($editor)
+            ->withSession(['active_municipality_id' => $municipality->id])
+            ->get(route('municipal-rules.index'))
+            ->assertOk()
+            ->assertSee('Nenhum exercício configurado')
+            ->assertDontSee('Módulos como importação de planilha');
+    }
+
     public function test_legacy_profile_values_do_not_break_municipal_rules_page(): void
     {
         [$manager, $municipality] = $this->member(User::ROLE_MANAGER);
